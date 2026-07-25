@@ -481,23 +481,27 @@ function computeBuffStatBonuses(
   if (dragonologyLv) b.int_ += Math.floor((dragonologyLv + 1) / 2);
   const owlLv = (masteryLevels.AC_OWL as number) || 0;
   if (owlLv) b.dex += owlLv;
-  // Active self-buff stat bonuses (mirror of statusCalculator.js lines 55-87)
-  if (activeSc.SC_SHOUT) b.str_ += 4;
-  const njNenLv = (activeSc.SC_NJ_NEN as number) || 0;
-  if (njNenLv) { b.str_ += njNenLv; b.int_ += njNenLv; }
-  if (activeSc.SC_GS_ACCURACY) { b.agi += 4; b.dex += 4; }
-  // Active / party buff bonuses
-  const blessingLv = (supportBuffs.SC_BLESSING as number) || 0;
-  if (blessingLv > 0) { b.str_ += blessingLv; b.int_ += blessingLv; b.dex += blessingLv; }
-  const incAgiLv = (supportBuffs.SC_INC_AGI as number) || 0;
-  if (incAgiLv > 0) { b.agi += 2 + incAgiLv; }
-  if (supportBuffs.SC_GLORIA) { b.luk += 30; }
+  // Improve Concentration (SC_CONCENTRATION): +% of AGI/DEX. In statusCalculator.js
+  // it runs on base + job + gear + the passives above (SN never-died flatAll, AC_OWL),
+  // BEFORE Blessing / Increase AGI / GS Accuracy — so it must NOT scale those. Compute
+  // it here, before those buffs are added; otherwise it wrongly inflates them (e.g.
+  // Blessing showing +11 DEX instead of +10). preTotals excludes cards, per the engine.
   const concLv = (activeSc.SC_CONCENTRATION as number) || 0;
   if (concLv > 0) {
     const pct = (2 + concLv) / 100;
     b.agi += Math.floor((preTotals.agi + b.agi) * pct);
     b.dex += Math.floor((preTotals.dex + b.dex) * pct);
   }
+  // Buffs applied AFTER Concentration (not scaled by it) — order per statusCalculator.js.
+  if (activeSc.SC_SHOUT) b.str_ += 4;
+  const njNenLv = (activeSc.SC_NJ_NEN as number) || 0;
+  if (njNenLv) { b.str_ += njNenLv; b.int_ += njNenLv; }
+  if (activeSc.SC_GS_ACCURACY) { b.agi += 4; b.dex += 4; }
+  const blessingLv = (supportBuffs.SC_BLESSING as number) || 0;
+  if (blessingLv > 0) { b.str_ += blessingLv; b.int_ += blessingLv; b.dex += blessingLv; }
+  const incAgiLv = (supportBuffs.SC_INC_AGI as number) || 0;
+  if (incAgiLv > 0) { b.agi += 2 + incAgiLv; }
+  if (supportBuffs.SC_GLORIA) { b.luk += 30; }
   // Clan stat bonuses
   const clanBonus = CLAN_STAT_BONUSES[clan] || {};
   for (const [k, v] of Object.entries(clanBonus)) {
