@@ -220,6 +220,19 @@
     "refineable": false,
     "script": "bonus bAllStats,1; bonus2 bSubEle,Ele_Holy,7;"
   },
+  "81012": {
+    "type": "IT_ARMOR",
+    "loc": [
+      "EQP_ACC"
+    ],
+    "slots": 0,
+    "aegis_name": "Rust-Worn_Apparatus",
+    "name": "Rust-Worn Apparatus",
+    "job": [11, 4012, 17, 4018],
+    "equip_level": 52,
+    "refineable": false,
+    "script": "bonus bInt,1; bonus bFlee2,2;"
+  },
   "1327": {
     "type": "IT_WEAPON",
     "loc": [
