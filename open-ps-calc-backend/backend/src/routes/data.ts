@@ -3,6 +3,8 @@ import { loader } from "../engine/dataLoader";
 import { getProfile } from "../engine/serverProfiles";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { importJaludev } = require("../engine/jaludevImport");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { TRAP_SKILL_NAMES } = require("../engine/calculators/battlePipeline");
 
 const router = Router();
 
@@ -234,7 +236,15 @@ router.get("/skills", (req: Request, res: Response) => {
       if (NON_PS_SKILL_PREFIXES.has(name.split("_")[0])) return false;
       // HT_POWER is an internal Hercules id, not a real player skill.
       if (name === "HT_POWER") return false;
+      // Hunter damage traps (Land Mine, Blast Mine, Freezing Trap, Claymore Trap)
+      // are typed "Misc" and have no weapon/magic ratio — the engine computes them
+      // through its own trap branch (INT/DEX formula) when HT_TRAP_PS_FORMULA is set.
+      // Treat them as computable so all four show in the picker, not just the one
+      // that used to carry a stand-in ratio.
+      const isTrap =
+        profile.mechanic_flags.has("HT_TRAP_PS_FORMULA") && TRAP_SKILL_NAMES.has(name);
       const computable =
+        isTrap ||
         Object.prototype.hasOwnProperty.call(wr, name) ||
         Object.prototype.hasOwnProperty.call(mr, name);
       // Pure support skills carry the NoDamage flag. Hide them from a *damage*

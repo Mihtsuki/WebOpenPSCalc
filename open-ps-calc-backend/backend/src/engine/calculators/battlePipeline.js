@@ -1756,4 +1756,4 @@ class BattlePipeline {
   }
 }
 
-module.exports = { BattlePipeline, resolveIsRanged, BF_MAGIC_RATIOS };
+module.exports = { BattlePipeline, resolveIsRanged, BF_MAGIC_RATIOS, TRAP_SKILL_NAMES };

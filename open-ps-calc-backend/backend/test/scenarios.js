@@ -238,6 +238,22 @@ const scenarios = [
     target: 1002,
   },
 
+  // --- Hunter traps (INT/DEX formula, bypasses DEF, elemental) ----------------------------
+  {
+    // Blast Mine (Wind) vs Poring (Water) — trap damage scales with INT+DEX.
+    name: "hunter-blast-mine-lv5",
+    build: { job_id: 11, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 30, vit: 1, int: 99, dex: 90, luk: 1 }, equipped: { right_hand: 1707 } },
+    skill: { name: "HT_BLASTMINE", level: 5 },
+    target: 1002,
+  },
+  {
+    // Claymore Trap (Fire) vs Ghoul (Undead) — different element + divisor.
+    name: "hunter-claymore-trap-lv5",
+    build: { job_id: 11, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 30, vit: 1, int: 99, dex: 90, luk: 1 }, equipped: { right_hand: 1707 } },
+    skill: { name: "HT_CLAYMORETRAP", level: 5 },
+    target: 1036,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

@@ -1946,6 +1946,88 @@
    }
   }
  },
+ "hunter-blast-mine-lv5": {
+  "status": {
+   "str": 5,
+   "agi": 36,
+   "vit": 3,
+   "int_": 103,
+   "dex": 100,
+   "luk": 5,
+   "batk": 202,
+   "max_hp": 4881,
+   "max_sp": 824,
+   "aspd": 154.6,
+   "cri": 26,
+   "hit": 199,
+   "flee": 135,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 299,
+   "matk_max": 503
+  },
+  "result": {
+   "dps": 59200,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 100,
+   "normal": {
+    "min": 5920,
+    "max": 5920,
+    "avg": 5920,
+    "steps": [
+     "Trap Base",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "hunter-claymore-trap-lv5": {
+  "status": {
+   "str": 5,
+   "agi": 36,
+   "vit": 3,
+   "int_": 103,
+   "dex": 100,
+   "luk": 5,
+   "batk": 202,
+   "max_hp": 4881,
+   "max_sp": 824,
+   "aspd": 154.6,
+   "cri": 26,
+   "hit": 199,
+   "flee": 135,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 299,
+   "matk_max": 503
+  },
+  "result": {
+   "dps": 32610,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 100,
+   "normal": {
+    "min": 3261,
+    "max": 3261,
+    "avg": 3261,
+    "steps": [
+     "Trap Base",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "incoming-banshee-physical": {
   "status": {
    "str": 67,

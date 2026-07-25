@@ -303,7 +303,6 @@ const PS_BF_WEAPON_RATIOS = {
   PS_RG_QUICKSTEP: () => 10,
   PS_PR_HOLYSTRIKE: (lv, tgt, ctx) => 101 + (ctx ? ctx.base_str : 0) + (ctx ? ctx.base_level : 0),
   AM_DEMONSTRATION: (lv) => 200 + 40 * lv,
-  HT_FREEZINGTRAP: (lv) => 25 + 25 * lv,
   // PS: while a song/dance is active ("performing"), these gain a flat +100
   // percentage points → Lv1 300%, Lv5 400% (wiki.payonstories.com). Toggled
   // via skill_params.PS_PERFORMING_active (calculate.ts target_mods.performing).
