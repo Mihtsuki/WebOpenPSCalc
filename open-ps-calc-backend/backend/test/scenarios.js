@@ -254,6 +254,14 @@ const scenarios = [
     target: 1036,
   },
 
+  // --- Reflect Shield (own branch; dps_valid:false — reflects damage taken) ---------------
+  {
+    name: "crusader-reflect-shield-lv5",
+    build: { job_id: 14, base_level: 99, job_level: 50, base_stats: { str: 60, agi: 1, vit: 80, int: 40, dex: 40, luk: 1 }, equipped: { right_hand: 1104 } },
+    skill: { name: "CR_REFLECTSHIELD", level: 5 },
+    target: 1002,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

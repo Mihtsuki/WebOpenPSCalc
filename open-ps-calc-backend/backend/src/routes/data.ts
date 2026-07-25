@@ -243,8 +243,14 @@ router.get("/skills", (req: Request, res: Response) => {
       // that used to carry a stand-in ratio.
       const isTrap =
         profile.mechanic_flags.has("HT_TRAP_PS_FORMULA") && TRAP_SKILL_NAMES.has(name);
+      // Reflect Shield (CR_REFLECTSHIELD) has its own pipeline branch on every
+      // profile but is typed Misc with no ratio, so it would otherwise be dropped
+      // (like the traps were). Its DPS isn't calculable — it reflects damage taken —
+      // but the per-hit reflected damage is a real, selectable output.
+      const isReflect = name === "CR_REFLECTSHIELD";
       const computable =
         isTrap ||
+        isReflect ||
         Object.prototype.hasOwnProperty.call(wr, name) ||
         Object.prototype.hasOwnProperty.call(mr, name);
       // Pure support skills carry the NoDamage flag. Hide them from a *damage*

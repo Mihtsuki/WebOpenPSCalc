@@ -2028,6 +2028,47 @@
    }
   }
  },
+ "crusader-reflect-shield-lv5": {
+  "status": {
+   "str": 67,
+   "agi": 3,
+   "vit": 87,
+   "int_": 46,
+   "dex": 43,
+   "luk": 6,
+   "batk": 112,
+   "max_hp": 11550,
+   "max_sp": 693,
+   "aspd": 152.7,
+   "cri": 30,
+   "hit": 142,
+   "flee": 102,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 82,
+   "matk_max": 127
+  },
+  "result": {
+   "dps": 0,
+   "dps_valid": false,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 473,
+   "normal": {
+    "min": 43,
+    "max": 43,
+    "avg": 43,
+    "steps": [
+     "Reflect Shield Base",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "incoming-banshee-physical": {
   "status": {
    "str": 67,
