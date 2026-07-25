@@ -220,7 +220,7 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     note: "Melee auto-attacker: 99 INT/AGI with Auto Spell (Hindsight) active — rank 1 (Soul Strike) here; switch ranks in the Buffs panel. Equip a book/staff and check the Auto Spell breakdown in results." },
   // Archer tree
   { label: "Hunter — Double Strafe (DS)", job_id: 11, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 90, vit: 20, int: 30, dex: 90, luk: 1 },
+    base_stats: { str: 1, agi: 90, vit: 1, int: 30, dex: 99, luk: 1 },
     skill: { id: 46, level: 10, label: "Double Strafe", max_level: 10 },
     wiki: "https://wiki.payonstories.com/Hunter",
     note: "AGI + DEX single-target build (wiki: AGI 90+, DEX 90+). Equip a bow and elemental arrows (Ammo slot); Double Strafe is preselected." },
@@ -279,7 +279,7 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     wiki: "https://wiki.payonstories.com/Gunslinger",
     note: "DEX-primary Desperado (wiki: max DEX, mid INT for SP, rest VIT). Equip a revolver; Desperado is preselected." },
   { label: "Ninja — Throwing (DEX)", job_id: 25, base_level: 99, job_level: 70,
-    base_stats: { str: 90, agi: 1, vit: 20, int: 40, dex: 90, luk: 1 },
+    base_stats: { str: 90, agi: 1, vit: 1, int: 50, dex: 90, luk: 1 },
     skill: { id: 525, level: 5, label: "Throw Huuma Shuriken", max_level: 5 },
     wiki: "https://wiki.payonstories.com/Ninja",
     note: "STR/DEX throwing build — Huuma throwing is a physical hit, so STR is primary (wiki: STR 90+, DEX 90+). Equip a huuma shuriken; Throw Huuma Shuriken is preselected." },
