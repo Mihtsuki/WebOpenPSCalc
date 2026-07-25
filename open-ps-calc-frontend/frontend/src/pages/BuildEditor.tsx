@@ -203,10 +203,10 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     note: "Grand Cross (preselected) sums ATK + MATK, so INT is co-primary (wiki: INT 90+). Equip a spear or sword + shield; check the recoil panel." },
   // Mage tree
   { label: "Wizard — PvE (DEX)", job_id: 9, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 1, vit: 33, int: 99, dex: 90, luk: 1 },
+    base_stats: { str: 1, agi: 1, vit: 9, int: 99, dex: 99, luk: 1 },
     skill: { id: 89, level: 10, label: "Storm Gust", max_level: 10 },
     wiki: "https://wiki.payonstories.com/Wizard",
-    note: "Max INT/DEX nuker (wiki: INT 99, DEX 99) with a staff. Storm Gust is preselected — check its cast breakpoints." },
+    note: "Max INT/DEX nuker (wiki: INT 99, DEX 99) with a staff — the two 99s use nearly the whole point budget, so only ~9 is left over (VIT). Storm Gust is preselected — check its cast breakpoints." },
   { label: "Sage — Bolter", job_id: 16, base_level: 99, job_level: 50,
     base_stats: { str: 1, agi: 1, vit: 40, int: 99, dex: 80, luk: 1 },
     skill: { id: 19, level: 10, label: "Fire Bolt", max_level: 10 },
