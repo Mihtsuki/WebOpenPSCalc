@@ -172,10 +172,12 @@ const DEFAULT_BUILD: BuildData = {
 
 // Starter build templates. Stat spreads are taken from each class's ==Builds==
 // section on wiki.payonstories.com (each links to its class page) — matched to the
-// same-named build there and placed within the wiki's recommended stat ranges. They
-// set job / level / stats (+ a buff or two where the build needs it, e.g. Hindsight)
-// — gear and main skill are left for the player to pick (see each note). A starting
-// point to tweak, not a finished build.
+// same-named build there, placed within the wiki's recommended stat ranges, AND
+// kept inside the base-99 status-point budget (1273 pts; getStatPointsAtLevel).
+// Note two stats at 99 already cost 1256, leaving room for only ~9 more elsewhere —
+// so builds with a 99 cap their other stats accordingly. They set job / level /
+// stats (+ a buff or two where the build needs it, e.g. Hindsight) — gear and main
+// skill are left for the player to pick (see each note). A starting point to tweak.
 type BuildTemplate = {
   label: string;
   job_id: number;
@@ -201,7 +203,7 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     note: "Grand Cross (preselected) sums ATK + MATK, so INT is co-primary (wiki: INT 90+). Equip a spear or sword + shield; check the recoil panel." },
   // Mage tree
   { label: "Wizard — PvE (DEX)", job_id: 9, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 1, vit: 20, int: 99, dex: 99, luk: 1 },
+    base_stats: { str: 1, agi: 1, vit: 33, int: 99, dex: 90, luk: 1 },
     skill: { id: 89, level: 10, label: "Storm Gust", max_level: 10 },
     wiki: "https://wiki.payonstories.com/Wizard",
     note: "Max INT/DEX nuker (wiki: INT 99, DEX 99) with a staff. Storm Gust is preselected — check its cast breakpoints." },
@@ -211,24 +213,24 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     wiki: "https://wiki.payonstories.com/Sage",
     note: "INT/DEX bolter (wiki: INT 99, DEX 80+). Fire Bolt is preselected; equip a book/staff." },
   { label: "Sage — Hindsight (Auto Spell)", job_id: 16, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 90, vit: 1, int: 99, dex: 9, luk: 1 },
+    base_stats: { str: 1, agi: 90, vit: 1, int: 99, dex: 30, luk: 1 },
     skill: { id: 0, level: 1, label: "Normal Attack", max_level: 10 },
     support_buffs: { auto_spell_lv: 1 },
     wiki: "https://wiki.payonstories.com/Sage",
     note: "Melee auto-attacker: 99 INT/AGI with Auto Spell (Hindsight) active — rank 1 (Soul Strike) here; switch ranks in the Buffs panel. Equip a book/staff and check the Auto Spell breakdown in results." },
   // Archer tree
   { label: "Hunter — Double Strafe (DS)", job_id: 11, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 90, vit: 1, int: 9, dex: 90, luk: 1 },
+    base_stats: { str: 1, agi: 90, vit: 20, int: 30, dex: 90, luk: 1 },
     skill: { id: 46, level: 10, label: "Double Strafe", max_level: 10 },
     wiki: "https://wiki.payonstories.com/Hunter",
     note: "AGI + DEX single-target build (wiki: AGI 90+, DEX 90+). Equip a bow and elemental arrows (Ammo slot); Double Strafe is preselected." },
   { label: "Bard — Musical Strike", job_id: 19, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 60, vit: 24, int: 40, dex: 90, luk: 1 },
+    base_stats: { str: 1, agi: 90, vit: 24, int: 40, dex: 90, luk: 1 },
     skill: { id: 316, level: 5, label: "Musical Strike", max_level: 5 },
     wiki: "https://wiki.payonstories.com/Bard",
     note: "DEX/AGI performer. Equip an instrument + arrows; Musical Strike is preselected (toggle Performing in Target)." },
   { label: "Dancer — Throw Arrow", job_id: 20, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 60, vit: 24, int: 40, dex: 90, luk: 1 },
+    base_stats: { str: 1, agi: 90, vit: 24, int: 40, dex: 90, luk: 1 },
     skill: { id: 324, level: 5, label: "Throw Arrow", max_level: 5 },
     wiki: "https://wiki.payonstories.com/Dancer",
     note: "DEX/AGI performer. Equip a whip + arrows; Throw Arrow is preselected (toggle Performing in Target)." },
@@ -239,7 +241,7 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     wiki: "https://wiki.payonstories.com/Priest",
     note: "INT/DEX caster for Undead/Demon hunting. Magnus Exorcismus is preselected; equip a book/staff." },
   { label: "Monk — Asura", job_id: 15, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 1, vit: 1, int: 80, dex: 50, luk: 1 },
+    base_stats: { str: 90, agi: 1, vit: 1, int: 80, dex: 60, luk: 1 },
     skill: { id: 271, level: 5, label: "Asura Strike", max_level: 5 },
     wiki: "https://wiki.payonstories.com/Monk",
     note: "Asura Monk (wiki: STR 90+, INT 70–90, DEX 40–60) — high INT because Asura scales with SP. Add spirit spheres in Buffs and a knuckle; Asura Strike is preselected." },
@@ -250,7 +252,7 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     wiki: "https://wiki.payonstories.com/Blacksmith",
     note: "STR/AGI Battle Smith (wiki AGI build: STR 80+, AGI 90+, DEX 17–30). Max your weapon mastery in Passive skills; Mammonite is preselected." },
   { label: "Alchemist — Acid Demonstration (SAD)", job_id: 18, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 60, vit: 1, int: 1, dex: 60, luk: 1 },
+    base_stats: { str: 90, agi: 60, vit: 1, int: 1, dex: 80, luk: 1 },
     skill: { id: 490, level: 10, label: "Acid Demonstration", max_level: 10 },
     wiki: "https://wiki.payonstories.com/Alchemist",
     note: "SAD build (wiki: STR 90+, AGI 60+, DEX 60+) — STR/DEX with plant + Acid Terror spam, strong under Bragi. Acid Demonstration is preselected; works through DEF." },
@@ -261,7 +263,7 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     wiki: "https://wiki.payonstories.com/Assassin",
     note: "PvE Sonic Blow (wiki: STR 90+, INT 42–90, LUK 50–80) — LUK/INT crit-hybrid for consistent damage and SP to spam. Equip a katar and ATK cards; Sonic Blow is preselected." },
   { label: "Rogue — Back Stab", job_id: 17, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 70, vit: 1, int: 45, dex: 30, luk: 1 },
+    base_stats: { str: 90, agi: 70, vit: 1, int: 60, dex: 30, luk: 1 },
     skill: { id: 212, level: 10, label: "Back Stab", max_level: 10 },
     wiki: "https://wiki.payonstories.com/Rogue",
     note: "STR/AGI Back Stab build (wiki: STR 90+, AGI 70+, INT 30–60, DEX 20–40). Equip a dagger; Back Stab is preselected." },
@@ -272,12 +274,12 @@ const BUILD_TEMPLATES: BuildTemplate[] = [
     wiki: "https://wiki.payonstories.com/Super_Novice",
     note: "STR/AGI auto-attacker. Equip a dagger, 1H sword, or mace; add Fury / never-died in Buffs." },
   { label: "Gunslinger — Desperado", job_id: 24, base_level: 99, job_level: 70,
-    base_stats: { str: 1, agi: 1, vit: 40, int: 40, dex: 99, luk: 1 },
+    base_stats: { str: 1, agi: 1, vit: 70, int: 60, dex: 99, luk: 1 },
     skill: { id: 516, level: 10, label: "Desperado", max_level: 10 },
     wiki: "https://wiki.payonstories.com/Gunslinger",
     note: "DEX-primary Desperado (wiki: max DEX, mid INT for SP, rest VIT). Equip a revolver; Desperado is preselected." },
   { label: "Ninja — Throwing (DEX)", job_id: 25, base_level: 99, job_level: 70,
-    base_stats: { str: 90, agi: 1, vit: 1, int: 20, dex: 90, luk: 1 },
+    base_stats: { str: 90, agi: 1, vit: 20, int: 40, dex: 90, luk: 1 },
     skill: { id: 525, level: 5, label: "Throw Huuma Shuriken", max_level: 5 },
     wiki: "https://wiki.payonstories.com/Ninja",
     note: "STR/DEX throwing build — Huuma throwing is a physical hit, so STR is primary (wiki: STR 90+, DEX 90+). Equip a huuma shuriken; Throw Huuma Shuriken is preselected." },
