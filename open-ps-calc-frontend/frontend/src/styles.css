@@ -504,18 +504,22 @@ label {
 
 /* Mimics the classic RO status window: a big total per stat, with the
    editable base value and job-level bonus as smaller supporting detail. */
-.ro-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+/* minmax(0,1fr) lets the three tracks shrink below their content's min-content
+   width — without it a wide card (big total + several bonus badges) forces the
+   grid past a narrow panel column (3-/4-column editor layout). */
+.ro-stat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; }
 .ro-stat-card {
   background: var(--bg-panel-raised);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius);
-  padding: 0.6rem 0.7rem;
+  padding: 0.6rem 0.5rem;
   text-align: center;
+  min-width: 0; /* allow the grid item to shrink instead of overflowing */
 }
 .ro-stat-name { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
 .ro-stat-total { font-family: var(--mono); font-size: 1.5rem; color: var(--accent); line-height: 1.2; margin: 0.1rem 0 0.4rem; }
-.ro-stat-detail { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
-.ro-stat-detail input { width: 4.5rem; text-align: center; padding: 0.35rem 0.4rem; }
+.ro-stat-detail { display: flex; align-items: center; justify-content: center; gap: 0.3rem 0.4rem; flex-wrap: wrap; }
+.ro-stat-detail input { width: 3.4rem; min-width: 0; text-align: center; padding: 0.35rem 0.3rem; }
 .ro-stat-bonus { font-size: 0.75rem; color: var(--good); font-family: var(--mono); white-space: nowrap; }
 .ro-stat-bonus--equip { color: var(--link); }
 .ro-stat-bonus--buff  { color: var(--accent); }
