@@ -551,7 +551,21 @@ label {
    match their label size to the sibling checkbox-debuff rows (0.85rem). */
 .debuff-field label { font-size: 0.85rem; }
 
-.section-label { display: flex; align-items: center; }
+.section-label { display: flex; align-items: center; flex-wrap: wrap; row-gap: 0.3rem; }
+.stat-collapse-toggle {
+  margin-left: 0.55rem;
+  font-size: 0.72rem;
+  font-family: inherit;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 0.12rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.stat-collapse-toggle:hover { color: var(--text); border-color: var(--border); }
+.stat-collapse-toggle[aria-pressed="true"] { color: var(--accent); border-color: var(--accent-dim); }
 
 .buff-section-header {
   display: flex; align-items: center; gap: 0.4rem;

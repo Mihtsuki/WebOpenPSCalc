@@ -948,6 +948,9 @@ export default function BuildEditor() {
   const [classReworksOpen, setClassReworksOpen] = useState(false);
   // Manual stat bonuses: a niche override, collapsed by default (remembers the user's choice).
   const [manualStatsOpen, setManualStatsOpen] = useState(() => localStorage.getItem("manualStatsOpen") === "1");
+  // Collapse the per-source stat bonus badges (+job +gear +buff +manual) into a
+  // single summed "+N" per stat. Persisted; also tidies the stat cards.
+  const [collapseStatBonuses, setCollapseStatBonuses] = useState(() => localStorage.getItem("collapseStatBonuses") === "1");
   // The most recently loaded starter template (for the note/wiki-link hint).
   const [templateHint, setTemplateHint] = useState<BuildTemplate | null>(null);
 
@@ -1733,6 +1736,19 @@ export default function BuildEditor() {
                 Gloria, Attention Concentrate) — all folded into the
                 damage calculation.
               </InfoTooltip>
+              <button
+                type="button"
+                className="stat-collapse-toggle"
+                title={collapseStatBonuses ? "Show each bonus source separately" : "Combine all bonuses into one number per stat"}
+                aria-pressed={collapseStatBonuses}
+                onClick={() => {
+                  const next = !collapseStatBonuses;
+                  setCollapseStatBonuses(next);
+                  localStorage.setItem("collapseStatBonuses", next ? "1" : "0");
+                }}
+              >
+                {collapseStatBonuses ? "Split bonuses" : "Combine bonuses"}
+              </button>
               <span className={`stat-pts-counter${remainingStatPoints < 0 ? " stat-pts-counter--over" : remainingStatPoints <= 10 ? " stat-pts-counter--low" : ""}`}>
                 <span className="stat-pts-bar">
                   <span className="stat-pts-bar__fill" style={{ width: `${(Math.min(1, Math.max(0, 1 - remainingStatPoints / totalStatPoints)) * 100).toFixed(1)}%` }} />
@@ -1770,10 +1786,26 @@ export default function BuildEditor() {
                           }
                         }}
                       />
-                      {jobBonus > 0 && <span className="ro-stat-bonus" title={`+${jobBonus} from job level`}>+{jobBonus}</span>}
-                      {equipBonus > 0 && <span className="ro-stat-bonus ro-stat-bonus--equip" title={`+${equipBonus} from equipment`}>+{equipBonus}</span>}
-                      {buffBonus > 0 && <span className="ro-stat-bonus ro-stat-bonus--buff" title={`+${buffBonus} from skills / buffs`}>+{buffBonus}</span>}
-                      {manualBonus !== 0 && <span className="ro-stat-bonus ro-stat-bonus--manual" title={`${manualBonus > 0 ? "+" : ""}${manualBonus} manual`}>{manualBonus > 0 ? "+" : ""}{manualBonus}</span>}
+                      {collapseStatBonuses ? (
+                        (() => {
+                          const totalBonus = jobBonus + equipBonus + buffBonus + manualBonus;
+                          if (totalBonus === 0) return null;
+                          const parts = [
+                            jobBonus > 0 ? `+${jobBonus} job` : "",
+                            equipBonus > 0 ? `+${equipBonus} equip` : "",
+                            buffBonus > 0 ? `+${buffBonus} buff` : "",
+                            manualBonus !== 0 ? `${manualBonus > 0 ? "+" : ""}${manualBonus} manual` : "",
+                          ].filter(Boolean).join(", ");
+                          return <span className="ro-stat-bonus" title={parts}>{totalBonus > 0 ? "+" : ""}{totalBonus}</span>;
+                        })()
+                      ) : (
+                        <>
+                          {jobBonus > 0 && <span className="ro-stat-bonus" title={`+${jobBonus} from job level`}>+{jobBonus}</span>}
+                          {equipBonus > 0 && <span className="ro-stat-bonus ro-stat-bonus--equip" title={`+${equipBonus} from equipment`}>+{equipBonus}</span>}
+                          {buffBonus > 0 && <span className="ro-stat-bonus ro-stat-bonus--buff" title={`+${buffBonus} from skills / buffs`}>+{buffBonus}</span>}
+                          {manualBonus !== 0 && <span className="ro-stat-bonus ro-stat-bonus--manual" title={`${manualBonus > 0 ? "+" : ""}${manualBonus} manual`}>{manualBonus > 0 ? "+" : ""}{manualBonus}</span>}
+                        </>
+                      )}
                     </div>
                     <div className="ro-stat-cost">+{nextCost} pt</div>
                   </div>
