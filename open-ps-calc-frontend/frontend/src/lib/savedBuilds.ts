@@ -8,7 +8,7 @@ export interface SavedBuild {
 }
 
 const STORAGE_KEY = "openpscalc:saved-builds";
-export const MAX_SAVED_BUILDS = 10;
+export const MAX_SAVED_BUILDS = 30;
 
 export function listSavedBuilds(): SavedBuild[] {
   try {
