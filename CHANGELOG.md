@@ -23,6 +23,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Buff-picker labels aligned to skill names.** A few party/song buffs were shown under slightly
+  off names — "Increase AGI" → **Increase Agility**, "Overthrust" → **Over Thrust**, "Overthrust
+  Max" → **Maximum Over Thrust**, "Poem of Bragi" → **A Poem of Bragi** — now matching the skill
+  database. Added a test (`buff-labels.test.js`) that fails if any buff label drifts from its
+  skill's real name, so this class of mismatch (e.g. the earlier "Ki" vs Ninja Aura) can't recur
+  unnoticed.
+
 - **Blaze Shield (Ninja) damage.** Was modeled as a single hit at 100 + 10×level % MATK (200% at
   Lv10). Corrected to the wiki formula: **50% MATK per hit**, with the hit count scaling by level —
   3 hits (Lv1–4), 6 (Lv5–8), 9 (Lv9–10) — for 150% / 300% / 450% total.

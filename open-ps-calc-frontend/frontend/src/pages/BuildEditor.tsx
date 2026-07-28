@@ -342,11 +342,11 @@ const SELF_BUFFS = [
 const PARTY_BUFFS = [
   { key: "SC_IMPOSITIO", label: "Impositio Manus", max: 5, source: "Priest" },
   { key: "SC_BLESSING", label: "Blessing", max: 10, source: "Priest" },
-  { key: "SC_INC_AGI", label: "Increase AGI", max: 10, source: "Priest" },
+  { key: "SC_INC_AGI", label: "Increase Agility", max: 10, source: "Priest" },
   { key: "SC_GLORIA", label: "Gloria", max: 1, source: "Priest" },
   { key: "SC_ANGELUS", label: "Angelus", max: 5, source: "Priest" },
-  { key: "SC_OVERTHRUST", label: "Overthrust", max: 10, source: "Blacksmith" },
-  { key: "SC_OVERTHRUSTMAX", label: "Overthrust Max", max: 5, source: "Blacksmith" },
+  { key: "SC_OVERTHRUST", label: "Over Thrust", max: 10, source: "Blacksmith" },
+  { key: "SC_OVERTHRUSTMAX", label: "Maximum Over Thrust", max: 5, source: "Blacksmith" },
   { key: "SC_ADRENALINE", label: "Adrenaline Rush", max: 2, source: "Blacksmith" },
 ] as const;
 
@@ -359,7 +359,7 @@ const SONG_BUFFS = [
   // Reduces cast time + after-cast delay (skillTiming.js), not ASPD
   // directly -- only shows up in DPS when testing an actual skill, not a
   // normal attack, since normal-attack period is ASPD-only.
-  { key: "SC_POEMBRAGI", label: "Poem of Bragi", max: 10 },
+  { key: "SC_POEMBRAGI", label: "A Poem of Bragi", max: 10 },
   // Defensive/utility Bard songs — statusCalculator.js applies these to the
   // character status (flee / perfect dodge / Max HP), so they show in the
   // combat-stat readout even though they don't change outgoing damage.
