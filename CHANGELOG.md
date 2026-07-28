@@ -5,6 +5,45 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-07-26
+
+### Added
+
+- **Combine stat bonuses toggle.** A "Combine bonuses" / "Split bonuses" button in the Base stats
+  header collapses each stat's per-source badges (+job +gear +buff +manual) into a single summed
+  "+N", with the full breakdown kept on hover. The choice is remembered.
+
+### Changed
+
+- **Save up to 30 builds** (previously 10).
+
+### Fixed
+
+- **Stat cards no longer overflow their column** in the three- and four-column editor layout —
+  large totals and multiple bonus badges used to clip the rightmost (LUK) card.
+
+## 2026-07-25
+
+### Added
+
+- **Hunter Trapper support.** All four Hunter damage traps — Land Mine (Earth), Blast Mine (Wind),
+  Freezing Trap (Water), Claymore Trap (Fire) — are now selectable in the skill picker (only
+  Freezing Trap used to show), and there's a new **Hunter — Trapper** starter build.
+- **Reflect Shield** is now selectable in the skill picker; its per-hit reflected damage was
+  already computed but had no way to be picked.
+- **Rust-Worn Apparatus** accessory added (Hunter / Rogue line): INT +1, Perfect Dodge +2.
+- **Sage — Hindsight** starter build, and every starter build re-aligned to the Payon Stories
+  wiki's recommended stat spreads.
+
+### Fixed
+
+- **Starter build stats.** Corrected templates whose stats didn't match the wiki or broke the
+  level-99 stat-point budget — e.g. the Wizard PvE build is now a feasible 99 INT / 99 DEX, and
+  Grand Cross / Asura / Desperado / Throwing use the right primary stats.
+- **Improve Concentration stat display.** The stat cards no longer over-count AGI/DEX when
+  Improve Concentration is combined with Blessing / Increase AGI. The display now matches the
+  engine (which was already correct), so e.g. Blessing reads +10 DEX, not +11.
+
 ## 2026-07-24
 
 ### Added
@@ -16,6 +55,14 @@ instead of release version. Dates are taken from actual git commit history.
   30% chance on every physical attack. The results now show an **Auto Spell (Hindsight)** breakdown
   with the per-proc magic damage (bolt ranks roll a random Lv2–4 cast, shown as a range), and the
   proc's expected value is folded into the DPS estimate. Assumes the underlying spell is learned.
+- **Cast breakpoints show the next DEX jumps.** The Breakpoints panel's cast row now lists the next
+  few DEX thresholds (smallest +DEX to reach each successive cast-time step), ending at the
+  instant-cast point — matching the ASPD row — instead of only the instant-cast DEX.
+
+### Fixed
+
+- **Switching job resets the selected skill** to Normal Attack, so you no longer calculate a skill
+  the new class can't use (e.g. a Wizard's Storm Gust lingering after switching to Sage).
 
 ## 2026-07-20
 
