@@ -34,7 +34,17 @@ instead of release version. Dates are taken from actual git commit history.
 
 - **Ninja Aura (NJ_NEN).** The buff was labeled "Ki", capped at Lv10, and gave only +1 STR/INT per
   level. Corrected to its Payon Stories name **Ninja Aura**, capped at **Lv5**, granting **+2
-  STR/INT per level** (+10 each at Lv5) per the wiki.
+  STR/INT per level** (+10 each at Lv5) per the wiki. The stat-card display now shows +2/lv too.
+
+- **Amplify Magic Power** buff level cap: Lv10 → **Lv5** (its actual max on Payon Stories; Lv6–10
+  did nothing).
+
+### Changed
+
+- **Self-buffs renamed to their Payon Stories names** so you can find them by the in-game name:
+  Attention Concentrate → **Improve Concentration**, Fury → **Critical Explosion**, Two-Hand Quicken
+  → **Sword Quickening**, Mystical Amplification → **Amplify Magic Power**. (Double Bolt kept — that's
+  the PS wiki's name for it.)
 
 ## 2026-07-26
 

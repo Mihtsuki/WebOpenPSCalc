@@ -289,18 +289,18 @@ const ASPD_POTION_LABELS = [
 const SELF_BUFFS = [
   // Archer / Hunter / Sniper / Bard / Dancer / Clown / Gypsy — and Super Novice
   // (23), whose tree carries every 1st-class skill incl. AC_CONCENTRATION.
-  { key: "SC_CONCENTRATION",    label: "Attention Concentrate", max: 10, jobs: [3, 11, 19, 20, 23, 4012, 4020, 4021] },
+  { key: "SC_CONCENTRATION",    label: "Improve Concentration", max: 10, jobs: [3, 11, 19, 20, 23, 4012, 4020, 4021] },
   // Super Novice — the Fury chant (typed at exact 10% EXP increments) grants
   // Explosion Spirits at level 13: PS formula 175+25×13 = +50% crit
   // (wiki.payonstories.com/Super_Novice "critical rate +50"). Distinct from
   // the Monk's 5-level Fury below.
-  { key: "SC_EXPLOSIONSPIRITS", label: "Fury (chant, +50% crit)", max: 13, jobs: [23] },
+  { key: "SC_EXPLOSIONSPIRITS", label: "Critical Explosion (chant, +50% crit)", max: 13, jobs: [23] },
   // Swordman line — Auto Berserk (SM_AUTOBERSERK): while HP < 25% you gain a
   // self Provoke Lv10 (+32% base ATK, −55% self-DEF). Presence-only. Jobs
   // derived from skill_tree.json: Swordman / Knight / Crusader / LK / Paladin.
   { key: "SC_AUTOBERSERK",     label: "Auto Berserk (self Provoke 10)", max: 1, jobs: [1, 7, 14, 4008, 4015] },
   // Knight / Lord Knight
-  { key: "SC_TWOHANDQUICKEN",  label: "Two-Hand Quicken",      max: 10, jobs: [7, 4008] },
+  { key: "SC_TWOHANDQUICKEN",  label: "Sword Quickening",      max: 10, jobs: [7, 4008] },
   { key: "SC_ONEHANDQUICKEN",  label: "One-Hand Quicken",      max: 10, jobs: [7, 4008] },
   // Crusader / Paladin
   { key: "SC_SPEARQUICKEN",    label: "Spear Quicken",         max: 10, jobs: [14, 4015] },
@@ -309,7 +309,7 @@ const SELF_BUFFS = [
   { key: "SC_MAXIMIZEPOWER",   label: "Maximize Power",        max: 1,  jobs: [10, 4011] },
   { key: "SC_SHOUT",           label: "Loud Exclamation",      max: 1,  jobs: [10, 4011] },
   // Monk / Champion
-  { key: "SC_EXPLOSIONSPIRITS", label: "Fury",                 max: 5,  jobs: [15, 4016] },
+  { key: "SC_EXPLOSIONSPIRITS", label: "Critical Explosion",                 max: 5,  jobs: [15, 4016] },
   // Gunslinger — SC_GS_ACCURACY adds AGI+4/DEX+4 in statusCalculator.js.
   // Removed on Payon Stories (folded into Single Action), so hidden there.
   { key: "SC_GS_ACCURACY",     label: "Increasing Accuracy",   max: 1,  jobs: [24], psRemoved: true },
@@ -331,7 +331,7 @@ const SELF_BUFFS = [
   // Wizard / High Wizard — Mystical Amplification: next spell +50% MATK (vanilla),
   // or +10% per level capped at level 5 (PS rework). Max 10 vanilla / 5 PS;
   // PS cap enforced server-side via SC_AMPLIFYMAGICPOWER_SCALING mechanic flag.
-  { key: "SC_AMPLIFYMAGICPOWER", label: "Mystical Amplification", max: 10, jobs: [9, 4010] },
+  { key: "SC_AMPLIFYMAGICPOWER", label: "Amplify Magic Power", max: 5, jobs: [9, 4010] },
 ] as const;
 
 // Received from a party member rather than self-cast -- battle.c treats
@@ -410,7 +410,7 @@ function computeBuffStatBonuses(
   // Buffs applied AFTER Concentration (not scaled by it) — order per statusCalculator.js.
   if (activeSc.SC_SHOUT) b.str_ += 4;
   const njNenLv = (activeSc.SC_NJ_NEN as number) || 0;
-  if (njNenLv) { b.str_ += njNenLv; b.int_ += njNenLv; }
+  if (njNenLv) { b.str_ += 2 * njNenLv; b.int_ += 2 * njNenLv; } // Ninja Aura: +2 STR/INT per level
   if (activeSc.SC_GS_ACCURACY) { b.agi += 4; b.dex += 4; }
   const blessingLv = (supportBuffs.SC_BLESSING as number) || 0;
   if (blessingLv > 0) { b.str_ += blessingLv; b.int_ += blessingLv; b.dex += blessingLv; }
