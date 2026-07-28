@@ -2069,6 +2069,118 @@
    }
   }
  },
+ "hunter-blitz-beat-lv5": {
+  "status": {
+   "str": 5,
+   "agi": 96,
+   "vit": 3,
+   "int_": 64,
+   "dex": 70,
+   "luk": 84,
+   "batk": 136,
+   "max_hp": 4881,
+   "max_sp": 665,
+   "aspd": 167.2,
+   "cri": 290,
+   "hit": 169,
+   "flee": 195,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 145,
+   "matk_max": 208
+  },
+  "result": {
+   "dps": 2987.805,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 656,
+   "normal": {
+    "min": 1960,
+    "max": 1960,
+    "avg": 1960,
+    "steps": [
+     "Blitz Beat Lv5"
+    ]
+   }
+  }
+ },
+ "ninja-shadow-slash-hiding": {
+  "status": {
+   "str": 96,
+   "agi": 14,
+   "vit": 7,
+   "int_": 40,
+   "dex": 12,
+   "luk": 89,
+   "batk": 196,
+   "max_hp": 4547,
+   "max_sp": 730,
+   "aspd": 153.4,
+   "cri": 306,
+   "hit": 111,
+   "flee": 113,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 65,
+   "matk_max": 104
+  },
+  "result": {
+   "dps": 2432.979,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 30.6,
+   "period_ms": 932,
+   "normal": {
+    "min": 1679,
+    "max": 2575,
+    "avg": 2128,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 530 Lv 5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 2584,
+    "max": 2584,
+    "avg": 2584,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 530 Lv 5)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "incoming-banshee-physical": {
   "status": {
    "str": 67,

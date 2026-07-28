@@ -406,13 +406,13 @@ const SELF_BUFFS = [
   { key: "SC_GS_ADJUSTMENT",   label: "Run and Gun",          max: 1,  jobs: [24] },
   // Ninja — SC_NJ_NEN adds +lv STR and +lv INT (defaults; PS may override)
   { key: "SC_NJ_NEN",          label: "Ki",                    max: 10, jobs: [25] },
-  // PS wiki calls this "Double Bolt"; underlying constant is the vanilla
-  // Professor skill PF_DOUBLECASTING (status SC_DOUBLECASTING) -- only
-  // Professor has it in the skill tree, base Sage doesn't. 100% chance to
-  // instantly re-cast a Fire/Cold/Lightning Bolt, Earth Spike, or Soul
-  // Strike; modeled in battlePipeline.js as halving the effective period
-  // for those skills (DPS only, not per-hit damage).
-  { key: "SC_DOUBLECASTING",   label: "Double Bolt",          max: 1,  jobs: [4017] },
+  // PS wiki calls this "Double Bolt" (constant PF_DOUBLECASTING / status
+  // SC_DOUBLECASTING). On Payon Stories it's a SAGE skill (wiki: class = Sage),
+  // so both Sage and Professor get it — not just Professor as in vanilla. 100%
+  // chance to instantly re-cast a Fire/Cold/Lightning Bolt, Earth Spike, or Soul
+  // Strike; modeled in battlePipeline.js as halving the effective period for
+  // those skills (DPS only, not per-hit damage).
+  { key: "SC_DOUBLECASTING",   label: "Double Bolt",          max: 1,  jobs: [16, 4017] },
   // Wizard / High Wizard — Mystical Amplification: next spell +50% MATK (vanilla),
   // or +10% per level capped at level 5 (PS rework). Max 10 vanilla / 5 PS;
   // PS cap enforced server-side via SC_AMPLIFYMAGICPOWER_SCALING mechanic flag.
@@ -2557,6 +2557,23 @@ export default function BuildEditor() {
                     })}
                   />
                   <span>Backstab opportunity (+40%)</span>
+                </label>
+              </div>
+            )}
+            {(skill.id === 530 || skill.id === 528) && data.server === "payon_stories" && (
+              <div className="field field-checkbox" style={{ marginTop: "0.5rem" }}>
+                <label title="PS Ninja: casting from Hiding/Cloaking boosts this skill's damage (Shadow Slash uses the higher hide-on ratio and skips the range penalty; Haze Slash deals ×1.4).">
+                  <input
+                    type="checkbox"
+                    checked={!!(data.support_buffs as Record<string, unknown>)?.ninja_hiding}
+                    onChange={(e) => setData((prev) => {
+                      const next: Record<string, unknown> = { ...(prev.support_buffs || {}) };
+                      if (e.target.checked) next.ninja_hiding = true;
+                      else delete next.ninja_hiding;
+                      return { ...prev, support_buffs: next };
+                    })}
+                  />
+                  <span>Cast from Hiding</span>
                 </label>
               </div>
             )}

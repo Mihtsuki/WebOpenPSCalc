@@ -262,6 +262,23 @@ const scenarios = [
     target: 1002,
   },
 
+  // --- manual Blitz Beat (Falcon; per-hit × level, neutral, bypasses DEF) ------------------
+  {
+    name: "hunter-blitz-beat-lv5",
+    build: { job_id: 11, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 90, vit: 1, int: 60, dex: 60, luk: 80 }, equipped: { right_hand: 1707 }, mastery_levels: { HT_FALCON: 1, HT_STEELCROW: 10, HT_BLITZBEAT: 5 } },
+    skill: { name: "HT_BLITZBEAT", level: 5 },
+    target: 1002,
+  },
+
+  // --- Ninja Shadow Slash (NJ_KIRIKAGE) — from-Hiding ratio bonus --------------------------
+  {
+    name: "ninja-shadow-slash-hiding",
+    build: { job_id: 25, base_level: 99, job_level: 70, base_stats: { str: 90, agi: 1, vit: 1, int: 30, dex: 1, luk: 80 }, equipped: { right_hand: 13020 } },
+    skill: { name: "NJ_KIRIKAGE", level: 5 },
+    ninja_hiding: true,
+    target: 1002,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

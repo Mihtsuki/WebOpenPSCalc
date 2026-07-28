@@ -219,6 +219,11 @@ router.post("/", (req: Request, res: Response) => {
     if (targetModsInput?.performing) {
       effBuild.skill_params = { ...(effBuild.skill_params || {}), PS_PERFORMING_active: true };
     }
+    // PS Ninja: casting Shadow Slash (NJ_KIRIKAGE) or Haze Slash (NJ_KASUMIKIRI)
+    // from Hiding boosts their ratio — the profile ratio fns read these flags.
+    if (effBuild.support_buffs?.ninja_hiding) {
+      effBuild.skill_params = { ...(effBuild.skill_params || {}), NJ_KIRIKAGE_hiding: true, NJ_KASUMIKIRI_hiding: true };
+    }
 
     const pipeline = new BattlePipeline(config);
     const battleResult = pipeline.calculate(status, weapon, skill, target, effBuild, gearBonuses);

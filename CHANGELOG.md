@@ -5,6 +5,22 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-07-28
+
+### Added
+
+- **Manual Blitz Beat.** Blitz Beat (HT_BLITZBEAT) is now selectable in the skill picker for
+  Hunters/Snipers with a Falcon. Its damage is the per-hit value × the level's hit count (Lv5 = 5
+  hits); per hit = (LUK + INT/2 + 6×Steel Crow + 20) × 2 — neutral element, bypasses DEF, and
+  unaffected by ATK cards (wiki.payonstories.com/Blitz_Beat). Without a Falcon it shows "requires a
+  Falcon" rather than a number.
+- **Double Bolt for Sages.** The Double Bolt buff (100% instant re-cast of Fire/Cold/Lightning
+  Bolt, Earth Spike or Soul Strike) is now available to Sages, not just Professors — on Payon
+  Stories it's a Sage skill.
+- **Shadow Slash "from Hiding" toggle.** Casting Shadow Slash or Haze Slash from Hiding / Cloaking
+  now has a toggle in the Skill panel; the engine already applied the higher from-Hiding ratio, but
+  there was no way to switch it on.
+
 ## 2026-07-26
 
 ### Added

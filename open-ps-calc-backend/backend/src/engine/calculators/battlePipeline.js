@@ -45,6 +45,7 @@ const { calculateCardFix, calculateCardFixMagic } = require("./modifiers/cardFix
 const { calculateSkillRatio, BF_WEAPON_RATIOS } = require("./modifiers/skillRatio");
 const { calculateSkillTiming } = require("./skillTiming");
 const { calculateDps } = require("./dpsCalculator");
+const { computeFalconDamage } = require("./falconCalc");
 const { effectiveIsRanged, resolveWeapon, playerBuildToTarget } = require("../buildManager");
 const { resolveArmorElement } = require("../buildApplicator");
 
@@ -958,6 +959,39 @@ class BattlePipeline {
   }
 
   /**
+   * Manual Blitz Beat (HT_BLITZBEAT). PS formula (wiki.payonstories.com/Blitz_Beat):
+   * per hit = (LUK + floor(INT/2) + 6×Steel_Crow_lv + 20) × 2; number of hits =
+   * the skill level (Lv1→1 … Lv5→5). Neutral element, bypasses DEF, unaffected by
+   * ATK cards, requires a Falcon (Falconry Mastery). computeFalconDamage already
+   * yields the per-hit value with the target's element and race/boss bonuses
+   * folded in — the manual cast just multiplies it by the level's hit count.
+   */
+  _runBlitzBeatBranch(status, weapon, skill, target, build, opts = {}) {
+    const { gear_bonuses: gearBonuses } = opts;
+    const result = createDamageResult();
+    const falcon = computeFalconDamage(status, build, gearBonuses, target, loader);
+    if (!falcon) {
+      result.add_step({
+        name: "Requires a Falcon", value: 0, min_value: 0, max_value: 0,
+        note: "Blitz Beat needs Falconry Mastery — set Falcon (and Steel Crow) in the Passive skills, on a Hunter/Sniper.",
+        formula: "", hercules_ref: "wiki.payonstories.com/Blitz_Beat",
+      });
+      result.min_damage = 0; result.max_damage = 0; result.avg_damage = 0; result.pmf = { 0: 1.0 };
+      return result;
+    }
+    const hits = Math.max(1, skill.level);
+    const perHit = falcon.per_hit;
+    const total = perHit * hits;
+    result.add_step({
+      name: `Blitz Beat Lv${skill.level}`, value: total, min_value: total, max_value: total,
+      note: `${hits} hit${hits > 1 ? "s" : ""} × ${perHit} per hit — (LUK ${status.luk} + INT/2 ${Math.floor(status.int_ / 2)} + 6×SteelCrow ${falcon.steel_crow_lv} + 20) × 2, neutral, bypasses DEF; ATK cards don't apply`,
+      formula: `perHit × ${hits} hits`, hercules_ref: "wiki.payonstories.com/Blitz_Beat",
+    });
+    result.min_damage = total; result.max_damage = total; result.avg_damage = total; result.pmf = { [total]: 1.0 };
+    return result;
+  }
+
+  /**
    * CR_SHIELDBOOMERANG — PS formula (wiki.payonstories.com/Shield_Boomerang):
    *   damage = floor((BATK + shield_weight) × ratio / 100) + shield_refine × 10
    * Ratios per level: [130, 180, 220, 260, 300].
@@ -1431,6 +1465,18 @@ class BattlePipeline {
         attacks,
         period_ms: magicPeriod,
         dps_valid: true,
+      });
+    }
+    if (skillName === "HT_BLITZBEAT") {
+      const bbResult = this._runBlitzBeatBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
+      // Blitz Beat has no cast time or after-cast delay (PS wiki), so it fires at
+      // the attack-motion cadence.
+      const bbPeriod = adelay;
+      const bbAttacks = [createAttackDefinition(bbResult.avg_damage, 0.0, bbPeriod, 1.0)];
+      return createBattleResult({
+        normal: bbResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
+        dps: bbResult.avg_damage > 0 ? calculateDps(bbAttacks) : 0,
+        attacks: bbAttacks, period_ms: bbPeriod, dps_valid: bbResult.avg_damage > 0,
       });
     }
     if (TRAP_SKILL_NAMES.has(skillName)) {

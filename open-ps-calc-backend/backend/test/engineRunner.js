@@ -117,6 +117,9 @@ function runScenario(sc) {
     if (sc.performing) {
       effBuild.skill_params = { ...(effBuild.skill_params || {}), PS_PERFORMING_active: true };
     }
+    if (sc.ninja_hiding) {
+      effBuild.skill_params = { ...(effBuild.skill_params || {}), NJ_KIRIKAGE_hiding: true, NJ_KASUMIKIRI_hiding: true };
+    }
 
     const skill = sc.skill
       ? createSkillInstance({ id: skillIdByName(sc.skill.name), level: sc.skill.level })
