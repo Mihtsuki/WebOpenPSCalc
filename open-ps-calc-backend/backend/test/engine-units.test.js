@@ -284,3 +284,54 @@ test("pet AGI/DEX are excluded from Improve Concentration (not scaled)", () => {
   const sohee = dexWith("sohee"); // Sohee = +1 DEX
   assert.strictEqual(sohee - noPet, 1, "Sohee's +1 DEX must add exactly 1 — Improve Concentration must not scale it");
 });
+
+// ---------------------------------------------------------------------------
+// INT breakpoints (MATK + SP regen). The /breakpoints endpoint surfaces these
+// by re-running statusCalculator with bumped INT; these pin the formula shape
+// that detection assumes — pre-re MATK jumps at INT multiples of 5 (max) / 7
+// (min), and natural SP regen rises with INT.
+// ---------------------------------------------------------------------------
+function intStatus(baseInt) {
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 9, base_level: 99, job_level: 50, // Wizard, no MATK% gear
+    base_stats: { str: 1, agi: 1, vit: 1, int: baseInt, dex: 1, luk: 1 }, equipped: {},
+  });
+  return resolvePlayerState(b, createBattleConfig(), getProfile("payon_stories"))[3];
+}
+
+test("MATK follows INT + floor(INT/5)² (max) / INT + floor(INT/7)² (min) — INT-breakpoint basis", () => {
+  for (const baseInt of [10, 33, 50, 77, 99]) {
+    const st = intStatus(baseInt);
+    const n = st.int_; // actual resolved INT (job bonuses included)
+    assert.strictEqual(st.matk_max, n + Math.floor(n / 5) ** 2, `max MATK at INT ${n}`);
+    assert.strictEqual(st.matk_min, n + Math.floor(n / 7) ** 2, `min MATK at INT ${n}`);
+  }
+});
+
+test("MATK max gains a bonus step across a multiple of 5, only the linear +1 off it", () => {
+  // Compare consecutive resolved INT values; find one that lands on a multiple
+  // of 5 and one that doesn't, and check the max-MATK delta at each.
+  const maxAt = (bi) => intStatus(bi).matk_max;
+  const intAt = (bi) => intStatus(bi).int_;
+  // scan base INT until the resolved INT crosses a multiple of 5
+  let stepBase = null, flatBase = null;
+  for (let bi = 20; bi < 99 && (stepBase === null || flatBase === null); bi++) {
+    const to = intAt(bi), from = intAt(bi - 1);
+    if (to - from === 1) {
+      if (to % 5 === 0 && stepBase === null) stepBase = bi;
+      else if (to % 5 !== 0 && to % 7 !== 0 && flatBase === null) flatBase = bi;
+    }
+  }
+  assert.ok(stepBase !== null && flatBase !== null, "expected both a mult-of-5 crossing and an off-breakpoint step");
+  assert.ok(maxAt(stepBase) - maxAt(stepBase - 1) > 1, "max MATK should jump by more than 1 across a multiple of 5");
+  assert.strictEqual(maxAt(flatBase) - maxAt(flatBase - 1), 1, "max MATK should rise by only 1 off a breakpoint");
+});
+
+test("natural SP regen increases with INT", () => {
+  let prev = -1;
+  for (const bi of [20, 40, 60, 80, 99]) {
+    const sp = intStatus(bi).sp_regen;
+    assert.ok(sp > prev, `sp_regen must increase with INT (INT base ${bi})`);
+    prev = sp;
+  }
+});

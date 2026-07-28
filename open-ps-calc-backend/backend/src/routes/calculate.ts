@@ -373,8 +373,12 @@ router.post("/gear-stat-bonuses", (req: Request, res: Response) => {
 // the calculator already shows. Gear is resolved once; only the cheap status
 // pass is re-run per increment.
 function computeBreakpoints(eff: any, weapon: any, gb: any, status: any, config: any, target: any, skill: any, skillData: any) {
-  const statusWith = (dAgi: number, dDex: number) =>
-    new StatusCalculator(config).calculate({ ...eff, bonus_agi: eff.bonus_agi + dAgi, bonus_dex: eff.bonus_dex + dDex }, weapon, gb);
+  const statusWith = (dAgi: number, dDex: number, dInt = 0) =>
+    new StatusCalculator(config).calculate(
+      { ...eff, bonus_agi: eff.bonus_agi + dAgi, bonus_dex: eff.bonus_dex + dDex, bonus_int: (eff.bonus_int || 0) + dInt },
+      weapon,
+      gb
+    );
 
   // ASPD: pre-renewal ASPD is continuous (each AGI ≈ +0.2, each DEX ≈ +0.05), so
   // "breakpoints" are the next whole-number ASPD milestones players target — the
@@ -453,7 +457,54 @@ function computeBreakpoints(eff: any, weapon: any, gb: any, status: any, config:
     hit = { current_pct: Math.round(rateOf(0)), to95: need(95), to100: need(100) };
   }
 
-  return { aspd, cast, hit };
+  // INT: pre-renewal MATK = INT + floor(INT/5)² (max) / INT + floor(INT/7)² (min),
+  // so the bonus term steps up at every multiple of 5 (max) and 7 (min) — the
+  // classic caster "INT breakpoints", and the jump grows each time. SP natural
+  // regen also steps with INT (every ~6, plus a big jump at 120). Both come
+  // straight from statusCalculator, so we read them off the same bump-and-recalc
+  // sim. Only surfaced when there's real INT investment (casters / hybrids).
+  let intBp:
+    | {
+        matk_min: number;
+        matk_max: number;
+        current_int: number;
+        matk_jumps: { plus: number; int: number; matk_min: number; matk_max: number }[];
+        sp_regen: number;
+        sp_jumps: { plus: number; int: number; sp_regen: number }[];
+      }
+    | null = null;
+  const curInt = Math.round(Number(status.int_));
+  if (curInt >= 10) {
+    // A MATK breakpoint is the next INT that is a multiple of 5 (raises max MATK)
+    // or 7 (raises min MATK). Detected from the INT value — exact regardless of
+    // any MATK% gear multipliers — with the min/max read from the real sim.
+    const matk_jumps: { plus: number; int: number; matk_min: number; matk_max: number }[] = [];
+    for (let k = 1; k <= 200 && matk_jumps.length < 3; k++) {
+      const iv = curInt + k;
+      if (iv % 5 === 0 || iv % 7 === 0) {
+        const s = statusWith(0, 0, k);
+        matk_jumps.push({ plus: k, int: iv, matk_min: Number(s.matk_min), matk_max: Number(s.matk_max) });
+      }
+    }
+    // SP-regen steps are driven by both floor(INT/6) and MaxSP (which also grows
+    // with INT), plus the INT≥120 jump — no single modulus, so detect by value.
+    const sp_jumps: { plus: number; int: number; sp_regen: number }[] = [];
+    let prevSp = Number(status.sp_regen);
+    for (let k = 1; k <= 200 && sp_jumps.length < 2; k++) {
+      const sp = Number(statusWith(0, 0, k).sp_regen);
+      if (sp > prevSp) { sp_jumps.push({ plus: k, int: curInt + k, sp_regen: sp }); prevSp = sp; }
+    }
+    intBp = {
+      matk_min: Number(status.matk_min),
+      matk_max: Number(status.matk_max),
+      current_int: curInt,
+      matk_jumps,
+      sp_regen: Number(status.sp_regen),
+      sp_jumps,
+    };
+  }
+
+  return { aspd, cast, hit, int: intBp };
 }
 
 router.post("/breakpoints", (req: Request, res: Response) => {

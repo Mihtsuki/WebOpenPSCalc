@@ -46,7 +46,7 @@ export function BreakpointsView({ payload, targetName, skillLabel, skillLevel }:
 }
 
 function BreakpointsBody({ bp, targetName, skillLabel, skillLevel }: { bp: Breakpoints; targetName?: string | null; skillLabel?: string | null; skillLevel?: number | null }) {
-  const { aspd, cast, hit } = bp;
+  const { aspd, cast, hit, int } = bp;
   return (
     <div className="bp-body">
       <div className="bp-row">
@@ -79,6 +79,28 @@ function BreakpointsBody({ bp, targetName, skillLabel, skillLevel }: { bp: Break
             ) : cast.instant_plus_dex === 0
               ? <span className="bp-sub">— already instant</span>
               : <span className="bp-sub">— DEX doesn't reduce this cast</span>}
+          </span>
+        </div>
+      )}
+
+      {int && (
+        <div className="bp-row">
+          <span className="bp-k">MATK</span>
+          <span className="bp-v">
+            <b>{int.matk_min}–{int.matk_max}</b>
+            <span className="bp-vs"> @ {int.current_int} INT</span>{" "}
+            {int.matk_jumps.length ? (
+              <span title="Pre-renewal MATK = INT + (INT/5)² (max) and INT + (INT/7)² (min), so the bonus steps up at every multiple of 5 (max) and 7 (min) — and the jump grows each time. Each step is the smallest extra INT to reach the next multiple.">
+                {" — "}
+                {int.matk_jumps.map((j) => `+${j.plus} INT → ${j.matk_min}–${j.matk_max}`).join(" · ")}
+              </span>
+            ) : null}
+            {int.sp_jumps.length ? (
+              <span className="bp-sub" title="Natural SP recovery per tick — steps with INT (roughly every 6, with a larger jump at 120 INT).">
+                {" · SP regen "}
+                {int.sp_jumps.map((j) => `+${j.plus} INT → ${j.sp_regen}`).join(" · ")}
+              </span>
+            ) : null}
           </span>
         </div>
       )}

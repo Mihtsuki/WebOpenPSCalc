@@ -133,4 +133,12 @@ export interface Breakpoints {
     next_jumps?: { plus: number; dex: number; ms: number }[];
   } | null;
   hit: { current_pct: number; to95: number | null; to100: number | null } | null;
+  int: {
+    matk_min: number;
+    matk_max: number;
+    current_int: number;
+    matk_jumps: { plus: number; int: number; matk_min: number; matk_max: number }[];
+    sp_regen: number;
+    sp_jumps: { plus: number; int: number; sp_regen: number }[];
+  } | null;
 }
