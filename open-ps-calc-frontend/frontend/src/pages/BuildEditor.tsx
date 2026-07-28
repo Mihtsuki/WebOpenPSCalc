@@ -318,8 +318,9 @@ const SELF_BUFFS = [
   // presence-only (level doesn't change the magnitude in statusCalculator.js).
   { key: "SC_GS_MADNESSCANCEL", label: "Barrage",             max: 1,  jobs: [24] },
   { key: "SC_GS_ADJUSTMENT",   label: "Run and Gun",          max: 1,  jobs: [24] },
-  // Ninja — SC_NJ_NEN adds +lv STR and +lv INT (defaults; PS may override)
-  { key: "SC_NJ_NEN",          label: "Ki",                    max: 10, jobs: [25] },
+  // Ninja Aura (NJ_NEN) — PS: +2 STR / +2 INT per level, max Lv5 (+10 each).
+  // wiki.payonstories.com/Ninja_Aura. (Engine reads passive_overrides.SC_NJ_NEN.)
+  { key: "SC_NJ_NEN",          label: "Ninja Aura",            max: 5,  jobs: [25] },
   // PS wiki calls this "Double Bolt" (constant PF_DOUBLECASTING / status
   // SC_DOUBLECASTING). On Payon Stories it's a SAGE skill (wiki: class = Sage),
   // so both Sage and Professor get it — not just Professor as in vanilla. 100%

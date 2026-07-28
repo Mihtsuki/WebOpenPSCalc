@@ -32,6 +32,10 @@ instead of release version. Dates are taken from actual git commit history.
   and card stat bonuses are equipment-like and excluded from Improve Concentration in-game, so
   they're now excluded here — both in the damage engine and the stat display.
 
+- **Ninja Aura (NJ_NEN).** The buff was labeled "Ki", capped at Lv10, and gave only +1 STR/INT per
+  level. Corrected to its Payon Stories name **Ninja Aura**, capped at **Lv5**, granting **+2
+  STR/INT per level** (+10 each at Lv5) per the wiki.
+
 ## 2026-07-26
 
 ### Added
