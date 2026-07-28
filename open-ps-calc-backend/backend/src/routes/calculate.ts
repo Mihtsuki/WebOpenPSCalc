@@ -351,7 +351,14 @@ router.post("/gear-stat-bonuses", (req: Request, res: Response) => {
     applyPetBonuses(gb, build.selected_pet, profile);
     gearBonusAggregator.applyComboBonuses(gb, build.equipped, profile, ctx);
 
-    res.json({ str_: gb.str_, agi: gb.agi, vit: gb.vit, int_: gb.int_, dex: gb.dex, luk: gb.luk });
+    res.json({
+      str_: gb.str_, agi: gb.agi, vit: gb.vit, int_: gb.int_, dex: gb.dex, luk: gb.luk,
+      // The AGI/DEX that Improve Concentration must NOT scale (cards + card combos +
+      // pets — the engine's from_cards pool). Lets the client stat display compute
+      // IC on the same base the engine does (statusCalculator.js).
+      ic_excluded_agi: gb.from_cards ? gb.from_cards.agi : 0,
+      ic_excluded_dex: gb.from_cards ? gb.from_cards.dex : 0,
+    });
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Calculation failed", detail: String(err.message || err) });

@@ -144,6 +144,14 @@ function applyPetBonuses(gb, petKey, profile) {
   gb.int_ += bonus.int_ || 0;
   gb.dex += bonus.dex || 0;
   gb.luk += bonus.luk || 0;
+  // Pet loyalty AGI/DEX are equipment-like stat bonuses (pc_bonus in Hercules), so
+  // Improve Concentration must NOT scale them — it excludes all equipment/card/pet
+  // AGI/DEX (param_bonus[4], status.c). from_cards is the engine's IC-exclusion pool
+  // (statusCalculator.js), so mirror the pet AGI/DEX into it.
+  if (gb.from_cards) {
+    gb.from_cards.agi += bonus.agi || 0;
+    gb.from_cards.dex += bonus.dex || 0;
+  }
   gb.batk += bonus.batk || 0;
   gb.hit += bonus.hit || 0;
   gb.flee += bonus.flee || 0;

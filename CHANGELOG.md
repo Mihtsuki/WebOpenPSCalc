@@ -27,6 +27,11 @@ instead of release version. Dates are taken from actual git commit history.
   Lv10). Corrected to the wiki formula: **50% MATK per hit**, with the hit count scaling by level —
   3 hits (Lv1–4), 6 (Lv5–8), 9 (Lv9–10) — for 150% / 300% / 450% total.
 
+- **Improve Concentration no longer scales pet AGI/DEX.** Attention Concentrate's % was being
+  applied to the AGI/DEX granted by a loyal pet (and, in the stat-card display, to cards too). Pet
+  and card stat bonuses are equipment-like and excluded from Improve Concentration in-game, so
+  they're now excluded here — both in the damage engine and the stat display.
+
 ## 2026-07-26
 
 ### Added

@@ -53,7 +53,7 @@ export const api = {
   getSkillById: (id: number, server: string) =>
     request(`/data/skills/${id}?server=${server}`) as Promise<{ id: number; max_level: number; name: string; [key: string]: any }>,
   getGearStatBonuses: (build: unknown) =>
-    request("/calculate/gear-stat-bonuses", { method: "POST", body: { build } }) as Promise<{ str_: number; agi: number; vit: number; int_: number; dex: number; luk: number }>,
+    request("/calculate/gear-stat-bonuses", { method: "POST", body: { build } }) as Promise<{ str_: number; agi: number; vit: number; int_: number; dex: number; luk: number; ic_excluded_agi?: number; ic_excluded_dex?: number }>,
   getCharacterStatus: (build: unknown) =>
     request("/calculate/status", { method: "POST", body: { build } }) as Promise<{
       max_hp: number; max_sp: number; hp_regen: number; sp_regen: number;

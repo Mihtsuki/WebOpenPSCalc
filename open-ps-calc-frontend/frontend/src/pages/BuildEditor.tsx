@@ -1075,8 +1075,11 @@ export default function BuildEditor() {
       (data.support_buffs || {}) as Record<string, unknown>,
       activeSc as Record<string, unknown>,
       {
-        agi: (base.agi ?? 1) + (jobBonusStats.agi ?? 0) + (equipBonusStats.agi ?? 0),
-        dex: (base.dex ?? 1) + (jobBonusStats.dex ?? 0) + (equipBonusStats.dex ?? 0),
+        // Improve Concentration's base: base + job + gear, but MINUS the AGI/DEX it
+        // must not scale (cards + card combos + pets = ic_excluded, from the engine's
+        // from_cards pool). Keeps the display's IC in step with the damage engine.
+        agi: (base.agi ?? 1) + (jobBonusStats.agi ?? 0) + (equipBonusStats.agi ?? 0) - (equipBonusStats.ic_excluded_agi ?? 0),
+        dex: (base.dex ?? 1) + (jobBonusStats.dex ?? 0) + (equipBonusStats.dex ?? 0) - (equipBonusStats.ic_excluded_dex ?? 0),
       },
       (data.mastery_levels || {}) as Record<string, unknown>,
       data.clan ?? "",

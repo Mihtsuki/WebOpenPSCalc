@@ -261,3 +261,26 @@ test("Hindsight: gated to PS profile and the Sage line", () => {
   // A non-Sage job with the field set is ignored (Knight = 7).
   assert.strictEqual(runScenario(SAGE_HINDSIGHT(2, "payon_stories", 7)).result.proc_branches, undefined);
 });
+
+// ---------------------------------------------------------------------------
+// Improve Concentration (SC_CONCENTRATION) must not scale pet AGI/DEX — pet
+// loyalty stat bonuses are equipment-like (pc_bonus/param_bonus), which IC
+// excludes (status.c). Regression for the from_cards fix in buildApplicator.
+// ---------------------------------------------------------------------------
+test("pet AGI/DEX are excluded from Improve Concentration (not scaled)", () => {
+  // Hunter, base DEX 15 (+1 job = 16 pre-IC), IC Lv10 (12%) — an IC flooring
+  // boundary: if the pet's +1 DEX were folded into IC's base, the total would
+  // jump by 2 (floor(17*.12)=2) instead of 1 (floor(16*.12)=1).
+  const dexWith = (pet) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 11, base_level: 50, job_level: 1,
+      base_stats: { str: 1, agi: 1, vit: 1, int: 1, dex: 15, luk: 1 },
+      equipped: {}, active_buffs: { SC_CONCENTRATION: 10 }, selected_pet: pet,
+    });
+    const [, , , status] = resolvePlayerState(b, createBattleConfig(), getProfile("payon_stories"));
+    return status.dex;
+  };
+  const noPet = dexWith(null);
+  const sohee = dexWith("sohee"); // Sohee = +1 DEX
+  assert.strictEqual(sohee - noPet, 1, "Sohee's +1 DEX must add exactly 1 — Improve Concentration must not scale it");
+});
