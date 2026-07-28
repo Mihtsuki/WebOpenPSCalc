@@ -1,0 +1,183 @@
+[
+  {
+    "slug": "knight-hybrid", "label": "Knight — Hybrid", "cls": "Knight", "build": "Hybrid",
+    "job": "Swordman → Knight", "job_id": 7, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 90, "agi": 60, "vit": 60, "int": 1, "dex": 40, "luk": 1 },
+    "skill": { "id": 5, "level": 10, "label": "Bash", "max_level": 10 },
+    "wiki": "Knight",
+    "note": "Balanced STR/VIT/AGI two-hander. Max your weapon mastery in Passive skills; Bash is preselected.",
+    "summary": "A balanced STR/VIT/AGI Knight built around a two-handed sword or spear. High STR drives Bash and auto-attacks, VIT keeps you alive for melee and MvP work, and enough AGI to attack at a reasonable clip. A forgiving, all-round melee build that leans on weapon mastery for flat ATK.",
+    "gear": "Two-hand sword or spear, weapon mastery maxed, and STR/VIT gear. Race and size cards on your weapon scale damage hardest."
+  },
+  {
+    "slug": "crusader-grand-cross", "label": "Crusader — Grand Cross (GC)", "cls": "Crusader", "build": "Grand Cross (GC)",
+    "job": "Swordman → Crusader", "job_id": 14, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 50, "agi": 1, "vit": 60, "int": 90, "dex": 60, "luk": 1 },
+    "skill": { "id": 254, "level": 10, "label": "Grand Cross", "max_level": 10 },
+    "wiki": "Crusader",
+    "note": "Grand Cross (preselected) sums ATK + MATK, so INT is co-primary (wiki: INT 90+). Equip a spear or sword + shield; check the recoil panel.",
+    "summary": "The classic VIT tank / Grand Cross Crusader. Grand Cross deals Holy AoE that scales with both ATK and MATK, so you invest in STR, INT, and VIT together. It ignores hard DEF and the weapon-size penalty, but recoils onto you — bring Holy resist and watch the recoil readout.",
+    "gear": "Spear or sword + shield, INT for the magic half, and Holy/Demi-Human resist gear to survive the Grand Cross recoil."
+  },
+  {
+    "slug": "wizard-pve-dex", "label": "Wizard — PvE (DEX)", "cls": "Wizard", "build": "PvE (DEX)",
+    "job": "Magician → Wizard", "job_id": 9, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 1, "vit": 9, "int": 99, "dex": 99, "luk": 1 },
+    "skill": { "id": 89, "level": 10, "label": "Storm Gust", "max_level": 10 },
+    "wiki": "Wizard",
+    "note": "Max INT/DEX nuker (wiki: INT 99, DEX 99) with a staff — the two 99s use nearly the whole point budget, so only ~9 is left over (VIT). Storm Gust is preselected — check its cast breakpoints.",
+    "summary": "The pure DEX nuker. Wizards get enormous value from DEX because their strongest spells — Storm Gust, Lord of Vermilion, Meteor Storm — have long cast times. Max INT for raw MATK, then stack DEX to cast fast (and hit the instant-cast breakpoint), with a little VIT so you aren't one-shot mid-cast.",
+    "gear": "A MATK staff, INT headgear, and DEX for cast reduction. Check the cast breakpoints for the DEX needed to instant-cast."
+  },
+  {
+    "slug": "sage-bolter", "label": "Sage — Bolter", "cls": "Sage", "build": "Bolter",
+    "job": "Magician → Sage", "job_id": 16, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 1, "vit": 40, "int": 99, "dex": 80, "luk": 1 },
+    "skill": { "id": 19, "level": 10, "label": "Fire Bolt", "max_level": 10 },
+    "wiki": "Sage",
+    "note": "INT/DEX bolter (wiki: INT 99, DEX 80+). Fire Bolt is preselected; equip a book/staff.",
+    "summary": "The Sage bolter weaponizes single-target bolts (Fire / Cold / Lightning), often double-cast, matched to the target's weak element. INT/DEX identical to a Wizard, but the bolt-per-hit model makes element-matching and cast speed the levers that matter most.",
+    "gear": "A book or MATK staff, INT gear, and elemental-matching (endows/bolt choice) against each target's armor element."
+  },
+  {
+    "slug": "sage-hindsight", "label": "Sage — Hindsight (Auto Spell)", "cls": "Sage", "build": "Hindsight (Auto Spell)",
+    "job": "Magician → Sage", "job_id": 16, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 90, "vit": 1, "int": 99, "dex": 30, "luk": 1 },
+    "skill": { "id": 0, "level": 1, "label": "Normal Attack", "max_level": 10 },
+    "support_buffs": { "auto_spell_lv": 1 },
+    "wiki": "Sage",
+    "note": "Melee auto-attacker: 99 INT/AGI with Auto Spell (Hindsight) active — rank 1 (Soul Strike) here; switch ranks in the Buffs panel. Equip a book/staff and check the Auto Spell breakdown in results.",
+    "summary": "The Hindsight (Auto Spell) Sage — a melee auto-attacker whose swings autocast a chosen spell at a flat 30% chance. 99 INT powers the autocast damage and 99 AGI drives attack speed and flee. Switch Hindsight ranks on the fly to pick the spell (Soul Strike, bolts, Fire Ball, Heaven's Drive…) — the most adaptable melee caster on the server.",
+    "gear": "A book or MATK staff and INT/AGI gear; set the Auto Spell rank in the Buffs panel and read the Auto Spell breakdown in the results to see the per-proc damage."
+  },
+  {
+    "slug": "hunter-double-strafe", "label": "Hunter — Double Strafe (DS)", "cls": "Hunter", "build": "Double Strafe (DS)",
+    "job": "Archer → Hunter", "job_id": 11, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 90, "vit": 1, "int": 30, "dex": 99, "luk": 1 },
+    "skill": { "id": 46, "level": 10, "label": "Double Strafe", "max_level": 10 },
+    "wiki": "Hunter",
+    "note": "AGI + DEX single-target build (wiki: AGI 90+, DEX 90+). Equip a bow and elemental arrows (Ammo slot); Double Strafe is preselected.",
+    "summary": "Single-target Double Strafe Hunter. Bow damage keys off DEX (maxed), with AGI maxed for attack speed and a little INT for the SP to keep spamming. Equip elemental arrows to match each target and you shred single targets from range.",
+    "gear": "A bow and a full set of elemental arrows in the Ammo slot; AGI/DEX gear. Falcon for Blitz Beat procs."
+  },
+  {
+    "slug": "hunter-trapper", "label": "Hunter — Trapper", "cls": "Hunter", "build": "Trapper",
+    "job": "Archer → Hunter", "job_id": 11, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 30, "vit": 1, "int": 99, "dex": 90, "luk": 1 },
+    "skill": { "id": 122, "level": 5, "label": "Blast Mine", "max_level": 5 },
+    "wiki": "Hunter",
+    "note": "INT/DEX trapper (wiki: INT 80+, DEX 80+) — trap damage scales with INT and DEX and ignores DEF. Blast Mine (Wind) is preselected; swap to Land Mine (Earth), Freezing Trap (Water) or Claymore Trap (Fire) to match the target's element.",
+    "summary": "The INT/DEX Trapper Hunter. Trap damage — Land Mine (Earth), Blast Mine (Wind), Freezing Trap (Water), Claymore Trap (Fire) — scales with INT and DEX and ignores DEF, making it brutal against high-DEF targets. Pick the trap whose element the target is weakest to and let the mines do the work.",
+    "gear": "INT/DEX gear and a bow for setup; the Rust-Worn Apparatus accessory suits Trappers. Swap traps to match each target's element weakness."
+  },
+  {
+    "slug": "bard-musical-strike", "label": "Bard — Musical Strike", "cls": "Bard", "build": "Musical Strike",
+    "job": "Archer → Bard", "job_id": 19, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 90, "vit": 24, "int": 40, "dex": 90, "luk": 1 },
+    "skill": { "id": 316, "level": 5, "label": "Musical Strike", "max_level": 5 },
+    "wiki": "Bard",
+    "note": "DEX/AGI performer. Equip an instrument + arrows; Musical Strike is preselected (toggle Performing in Target).",
+    "summary": "A DEX/AGI performer that attacks with Musical Strike. On Payon Stories the Performing bonus adds ratio to Musical Strike, and the equipped arrow supplies the element — so an instrument plus the right arrows turns songs-class into a real ranged attacker.",
+    "gear": "An instrument plus elemental arrows; toggle Performing in the Target panel to see the bonus applied."
+  },
+  {
+    "slug": "dancer-throw-arrow", "label": "Dancer — Throw Arrow", "cls": "Dancer", "build": "Throw Arrow",
+    "job": "Archer → Dancer", "job_id": 20, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 90, "vit": 24, "int": 40, "dex": 90, "luk": 1 },
+    "skill": { "id": 324, "level": 5, "label": "Throw Arrow", "max_level": 5 },
+    "wiki": "Dancer",
+    "note": "DEX/AGI performer. Equip a whip + arrows; Throw Arrow is preselected (toggle Performing in Target).",
+    "summary": "The Dancer mirror of the Bard attacker, using Throw Arrow. DEX-heavy for damage and hit, AGI for attack speed, and the equipped arrow's element decides your damage type. Performing adds ratio on Payon Stories.",
+    "gear": "A whip plus elemental arrows; toggle Performing in the Target panel."
+  },
+  {
+    "slug": "priest-magnus-exorcismus", "label": "Priest — Magnus Exorcismus", "cls": "Priest", "build": "Magnus Exorcismus",
+    "job": "Acolyte → Priest", "job_id": 8, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 1, "agi": 1, "vit": 43, "int": 99, "dex": 80, "luk": 1 },
+    "skill": { "id": 79, "level": 10, "label": "Magnus Exorcismus", "max_level": 10 },
+    "wiki": "Priest",
+    "note": "INT/DEX caster for Undead/Demon hunting. Magnus Exorcismus is preselected; equip a book/staff.",
+    "summary": "The INT/DEX caster Priest built to farm Undead and Demon. Magnus Exorcismus lays down Holy AoE that hits those races in full, while Turn Undead and Holy Strike round out the anti-undead kit. High INT for damage, DEX for cast speed, VIT for survivability.",
+    "gear": "A MATK book/staff, INT gear, and Holy-boosting equipment; pair with Turn Undead against tough Undead."
+  },
+  {
+    "slug": "monk-asura", "label": "Monk — Asura", "cls": "Monk", "build": "Asura",
+    "job": "Acolyte → Monk", "job_id": 15, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 90, "agi": 1, "vit": 1, "int": 80, "dex": 60, "luk": 1 },
+    "skill": { "id": 271, "level": 5, "label": "Asura Strike", "max_level": 5 },
+    "wiki": "Monk",
+    "note": "Asura Monk (wiki: STR 90+, INT 70–90, DEX 40–60) — high INT because Asura scales with SP. Add spirit spheres in Buffs and a knuckle; Asura Strike is preselected.",
+    "summary": "The burst Monk built around Asura Strike, whose damage is ATK × (8 + SP/10) + 1000 — so both ATK (STR) and Max SP (INT) matter. Spirit spheres add flat, true-neutral damage that stacks per hit. A high-ceiling nuke for MvPs and beefy targets.",
+    "gear": "A knuckle, STR/INT gear for ATK and SP; add spirit spheres in the Buffs panel to see the full Asura number."
+  },
+  {
+    "slug": "blacksmith-battle-smith", "label": "Blacksmith — Battle Smith (AGI)", "cls": "Blacksmith", "build": "Battle Smith (AGI)",
+    "job": "Merchant → Blacksmith", "job_id": 10, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 90, "agi": 90, "vit": 1, "int": 1, "dex": 30, "luk": 1 },
+    "skill": { "id": 42, "level": 10, "label": "Mammonite", "max_level": 10 },
+    "wiki": "Blacksmith",
+    "note": "STR/AGI Battle Smith (wiki AGI build: STR 80+, AGI 90+, DEX 17–30). Max your weapon mastery in Passive skills; Mammonite is preselected.",
+    "summary": "The AGI Battle Smith swings an axe or mace with Mammonite and fast auto-attacks. STR and weapon mastery drive damage, AGI provides attack speed, and Weapon Research adds hit. A sturdy, self-sufficient farmer.",
+    "gear": "An axe or mace with weapon mastery maxed; STR/AGI gear and race/size cards."
+  },
+  {
+    "slug": "alchemist-acid-demonstration", "label": "Alchemist — Acid Demonstration (SAD)", "cls": "Alchemist", "build": "Acid Demonstration (SAD)",
+    "job": "Merchant → Alchemist", "job_id": 18, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 90, "agi": 60, "vit": 1, "int": 1, "dex": 80, "luk": 1 },
+    "skill": { "id": 490, "level": 10, "label": "Acid Demonstration", "max_level": 10 },
+    "wiki": "Alchemist",
+    "note": "SAD build (wiki: STR 90+, AGI 60+, DEX 60+) — STR/DEX with plant + Acid Terror spam, strong under Bragi. Acid Demonstration is preselected; works through DEF.",
+    "summary": "The SAD Alchemist — STR/DEX with plant summons and Acid Terror spam that works through DEF, brutal against high-DEF and high-HP targets. STR and DEX drive the throughput, AGI adds flee and plant attack speed, and it shines hardest under a Bard's Bragi.",
+    "gear": "Bottles as ammo, STR/DEX/AGI gear; excellent against tanky targets that shrug off physical hits, especially with Bragi support."
+  },
+  {
+    "slug": "assassin-sonic-blow", "label": "Assassin — Sonic Blow (PvE)", "cls": "Assassin", "build": "Sonic Blow (PvE)",
+    "job": "Thief → Assassin", "job_id": 12, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 90, "agi": 30, "vit": 1, "int": 60, "dex": 10, "luk": 65 },
+    "skill": { "id": 136, "level": 10, "label": "Sonic Blow", "max_level": 10 },
+    "wiki": "Assassin",
+    "note": "PvE Sonic Blow (wiki: STR 90+, INT 42–90, LUK 50–80) — LUK/INT crit-hybrid for consistent damage and SP to spam. Equip a katar and ATK cards; Sonic Blow is preselected.",
+    "summary": "The PvE Sonic Blow Assassin — a STR/LUK/INT crit-hybrid. High STR for burst, LUK for consistent crits (which bypass flee and DEF), and INT for the SP to keep spamming Sonic Blow. Reliable single-target damage that doesn't hinge on hit rate.",
+    "gear": "A katar with mastery, STR/LUK gear and crit cards; Enchant Poison to add element vs Poison targets."
+  },
+  {
+    "slug": "rogue-back-stab", "label": "Rogue — Back Stab", "cls": "Rogue", "build": "Back Stab",
+    "job": "Thief → Rogue", "job_id": 17, "base_level": 99, "job_level": 50,
+    "base_stats": { "str": 90, "agi": 70, "vit": 1, "int": 60, "dex": 30, "luk": 1 },
+    "skill": { "id": 212, "level": 10, "label": "Back Stab", "max_level": 10 },
+    "wiki": "Rogue",
+    "note": "STR/AGI Back Stab build (wiki: STR 90+, AGI 70+, INT 30–60, DEX 20–40). Equip a dagger; Back Stab is preselected.",
+    "summary": "A STR/AGI Rogue built around Back Stab, which lands a heavy hit from behind (with a further bonus when the target isn't facing you). STR drives the hit, AGI gives speed and flee, and a chunk of INT sustains SP for repeated Back Stabs.",
+    "gear": "A dagger, STR/AGI/DEX gear; the Back Stab opportunity bonus rewards attacking from behind."
+  },
+  {
+    "slug": "super-novice-melee", "label": "Super Novice — Melee (Auto-attacker)", "cls": "Super Novice", "build": "Melee (Auto-attacker)",
+    "job": "Super Novice", "job_id": 23, "base_level": 99, "job_level": 70,
+    "base_stats": { "str": 80, "agi": 90, "vit": 40, "int": 1, "dex": 40, "luk": 1 },
+    "skill": { "id": 0, "level": 1, "label": "Normal Attack", "max_level": 10 },
+    "wiki": "Super_Novice",
+    "note": "STR/AGI auto-attacker. Equip a dagger, 1H sword, or mace; add Fury / never-died in Buffs.",
+    "summary": "The auto-attacker Super Novice. With borrowed first-class skills, Fury (crit), and the never-died stat bonus, a STR/AGI Super Novice auto-attacks surprisingly hard for a novice. Equip a dagger, one-hand sword, or mace and stack crit.",
+    "gear": "A dagger / 1H sword / mace; add Fury and the never-died bonus in the Buffs panel."
+  },
+  {
+    "slug": "gunslinger-desperado", "label": "Gunslinger — Desperado", "cls": "Gunslinger", "build": "Desperado",
+    "job": "Gunslinger", "job_id": 24, "base_level": 99, "job_level": 70,
+    "base_stats": { "str": 1, "agi": 1, "vit": 70, "int": 60, "dex": 99, "luk": 1 },
+    "skill": { "id": 516, "level": 10, "label": "Desperado", "max_level": 10 },
+    "wiki": "Gunslinger",
+    "note": "DEX-primary Desperado (wiki: max DEX, mid INT for SP, rest VIT). Equip a revolver; Desperado is preselected.",
+    "summary": "The revolver Desperado Gunslinger — a rapid multi-hit AoE that scales primarily with DEX. Max DEX for damage, mid INT for the SP to keep firing, and the rest in VIT for survivability while you burst a gathered mob down.",
+    "gear": "A revolver for Desperado; DEX/INT/VIT gear. Barrage boosts your damage; cancel it with Run and Gun to recast coins."
+  },
+  {
+    "slug": "ninja-throwing", "label": "Ninja — Throwing (DEX)", "cls": "Ninja", "build": "Throwing (DEX)",
+    "job": "Ninja", "job_id": 25, "base_level": 99, "job_level": 70,
+    "base_stats": { "str": 90, "agi": 1, "vit": 1, "int": 50, "dex": 90, "luk": 1 },
+    "skill": { "id": 525, "level": 5, "label": "Throw Huuma Shuriken", "max_level": 5 },
+    "wiki": "Ninja",
+    "note": "STR/DEX throwing build — Huuma throwing is a physical hit, so STR is primary (wiki: STR 90+, DEX 90+). Equip a huuma shuriken; Throw Huuma Shuriken is preselected.",
+    "summary": "The Throwing Ninja, hurling Huuma Shuriken for heavy ranged AoE. Throwing is a physical hit, so STR is the primary damage stat alongside DEX for hit and consistency, with INT feeding the SP for sustained throwing. A strong, mobile ranged nuker.",
+    "gear": "A huuma shuriken to throw; STR/DEX gear, with INT supporting SP for sustained throwing."
+  }
+]

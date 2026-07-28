@@ -11,6 +11,7 @@ import SavedBuildsModal from "../components/SavedBuildsModal";
 import ImportJaludevModal from "../components/ImportJaludevModal";
 import { summaryMetrics, type ComparePin } from "../components/CompareView";
 import { BreakpointsView } from "../components/BreakpointsView";
+import starterBuildsJson from "../data/starterBuilds.json";
 import {
   BuildData, SkillState, CustomTarget, TargetMode, TargetMods,
   UrlEditorState, SearchResult, PassiveSkill, EquippedItemInfo, ConsumableBuffs,
@@ -170,14 +171,31 @@ const DEFAULT_BUILD: BuildData = {
   wildcard_slots: {},
 };
 
-// Starter build templates. Stat spreads are taken from each class's ==Builds==
-// section on wiki.payonstories.com (each links to its class page) — matched to the
-// same-named build there, placed within the wiki's recommended stat ranges, AND
-// kept inside the base-99 status-point budget (1273 pts; getStatPointsAtLevel).
-// Note two stats at 99 already cost 1256, leaving room for only ~9 more elsewhere —
-// so builds with a 99 cap their other stats accordingly. They set job / level /
-// stats (+ a buff or two where the build needs it, e.g. Hindsight) — gear and main
-// skill are left for the player to pick (see each note). A starting point to tweak.
+// Starter build templates — derived from the single source of truth in
+// src/data/starterBuilds.json, which scripts/gen-guides.mjs ALSO reads to build the
+// SEO guide pages, so the template picker and the guides can never drift apart.
+// Stat spreads come from each class's ==Builds== section on wiki.payonstories.com,
+// matched to the same-named build within the wiki's ranges and kept inside the
+// base-99 status-point budget (1273 pts; two stats at 99 already cost 1256).
+type StarterBuild = {
+  slug: string;
+  label: string;
+  cls: string;
+  build: string;
+  job: string;
+  job_id: number;
+  base_level: number;
+  job_level: number;
+  base_stats: { str: number; agi: number; vit: number; int: number; dex: number; luk: number };
+  skill: SkillState;
+  support_buffs?: Record<string, number | string | boolean>;
+  wiki: string;
+  note: string;
+  summary: string;
+  gear: string;
+};
+const STARTER_BUILDS = starterBuildsJson as unknown as StarterBuild[];
+
 type BuildTemplate = {
   label: string;
   job_id: number;
@@ -189,128 +207,24 @@ type BuildTemplate = {
   wiki: string;
   note: string;
 };
-const BUILD_TEMPLATES: BuildTemplate[] = [
-  // Swordman tree
-  { label: "Knight — Hybrid", job_id: 7, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 60, vit: 60, int: 1, dex: 40, luk: 1 },
-    skill: { id: 5, level: 10, label: "Bash", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Knight",
-    note: "Balanced STR/VIT/AGI two-hander. Max your weapon mastery in Passive skills; Bash is preselected." },
-  { label: "Crusader — Grand Cross (GC)", job_id: 14, base_level: 99, job_level: 50,
-    base_stats: { str: 50, agi: 1, vit: 60, int: 90, dex: 60, luk: 1 },
-    skill: { id: 254, level: 10, label: "Grand Cross", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Crusader",
-    note: "Grand Cross (preselected) sums ATK + MATK, so INT is co-primary (wiki: INT 90+). Equip a spear or sword + shield; check the recoil panel." },
-  // Mage tree
-  { label: "Wizard — PvE (DEX)", job_id: 9, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 1, vit: 9, int: 99, dex: 99, luk: 1 },
-    skill: { id: 89, level: 10, label: "Storm Gust", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Wizard",
-    note: "Max INT/DEX nuker (wiki: INT 99, DEX 99) with a staff — the two 99s use nearly the whole point budget, so only ~9 is left over (VIT). Storm Gust is preselected — check its cast breakpoints." },
-  { label: "Sage — Bolter", job_id: 16, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 1, vit: 40, int: 99, dex: 80, luk: 1 },
-    skill: { id: 19, level: 10, label: "Fire Bolt", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Sage",
-    note: "INT/DEX bolter (wiki: INT 99, DEX 80+). Fire Bolt is preselected; equip a book/staff." },
-  { label: "Sage — Hindsight (Auto Spell)", job_id: 16, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 90, vit: 1, int: 99, dex: 30, luk: 1 },
-    skill: { id: 0, level: 1, label: "Normal Attack", max_level: 10 },
-    support_buffs: { auto_spell_lv: 1 },
-    wiki: "https://wiki.payonstories.com/Sage",
-    note: "Melee auto-attacker: 99 INT/AGI with Auto Spell (Hindsight) active — rank 1 (Soul Strike) here; switch ranks in the Buffs panel. Equip a book/staff and check the Auto Spell breakdown in results." },
-  // Archer tree
-  { label: "Hunter — Double Strafe (DS)", job_id: 11, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 90, vit: 1, int: 30, dex: 99, luk: 1 },
-    skill: { id: 46, level: 10, label: "Double Strafe", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Hunter",
-    note: "AGI + DEX single-target build (wiki: AGI 90+, DEX 90+). Equip a bow and elemental arrows (Ammo slot); Double Strafe is preselected." },
-  { label: "Hunter — Trapper", job_id: 11, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 30, vit: 1, int: 99, dex: 90, luk: 1 },
-    skill: { id: 122, level: 5, label: "Blast Mine", max_level: 5 },
-    wiki: "https://wiki.payonstories.com/Hunter",
-    note: "INT/DEX trapper (wiki: INT 80+, DEX 80+) — trap damage scales with INT and DEX and ignores DEF. Blast Mine (Wind) is preselected; swap to Land Mine (Earth), Freezing Trap (Water) or Claymore Trap (Fire) to match the target's element." },
-  { label: "Bard — Musical Strike", job_id: 19, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 90, vit: 24, int: 40, dex: 90, luk: 1 },
-    skill: { id: 316, level: 5, label: "Musical Strike", max_level: 5 },
-    wiki: "https://wiki.payonstories.com/Bard",
-    note: "DEX/AGI performer. Equip an instrument + arrows; Musical Strike is preselected (toggle Performing in Target)." },
-  { label: "Dancer — Throw Arrow", job_id: 20, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 90, vit: 24, int: 40, dex: 90, luk: 1 },
-    skill: { id: 324, level: 5, label: "Throw Arrow", max_level: 5 },
-    wiki: "https://wiki.payonstories.com/Dancer",
-    note: "DEX/AGI performer. Equip a whip + arrows; Throw Arrow is preselected (toggle Performing in Target)." },
-  // Acolyte tree
-  { label: "Priest — Magnus Exorcismus", job_id: 8, base_level: 99, job_level: 50,
-    base_stats: { str: 1, agi: 1, vit: 43, int: 99, dex: 80, luk: 1 },
-    skill: { id: 79, level: 10, label: "Magnus Exorcismus", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Priest",
-    note: "INT/DEX caster for Undead/Demon hunting. Magnus Exorcismus is preselected; equip a book/staff." },
-  { label: "Monk — Asura", job_id: 15, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 1, vit: 1, int: 80, dex: 60, luk: 1 },
-    skill: { id: 271, level: 5, label: "Asura Strike", max_level: 5 },
-    wiki: "https://wiki.payonstories.com/Monk",
-    note: "Asura Monk (wiki: STR 90+, INT 70–90, DEX 40–60) — high INT because Asura scales with SP. Add spirit spheres in Buffs and a knuckle; Asura Strike is preselected." },
-  // Merchant tree
-  { label: "Blacksmith — Battle Smith (AGI)", job_id: 10, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 90, vit: 1, int: 1, dex: 30, luk: 1 },
-    skill: { id: 42, level: 10, label: "Mammonite", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Blacksmith",
-    note: "STR/AGI Battle Smith (wiki AGI build: STR 80+, AGI 90+, DEX 17–30). Max your weapon mastery in Passive skills; Mammonite is preselected." },
-  { label: "Alchemist — Acid Demonstration (SAD)", job_id: 18, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 60, vit: 1, int: 1, dex: 80, luk: 1 },
-    skill: { id: 490, level: 10, label: "Acid Demonstration", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Alchemist",
-    note: "SAD build (wiki: STR 90+, AGI 60+, DEX 60+) — STR/DEX with plant + Acid Terror spam, strong under Bragi. Acid Demonstration is preselected; works through DEF." },
-  // Thief tree
-  { label: "Assassin — Sonic Blow (PvE)", job_id: 12, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 30, vit: 1, int: 60, dex: 10, luk: 65 },
-    skill: { id: 136, level: 10, label: "Sonic Blow", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Assassin",
-    note: "PvE Sonic Blow (wiki: STR 90+, INT 42–90, LUK 50–80) — LUK/INT crit-hybrid for consistent damage and SP to spam. Equip a katar and ATK cards; Sonic Blow is preselected." },
-  { label: "Rogue — Back Stab", job_id: 17, base_level: 99, job_level: 50,
-    base_stats: { str: 90, agi: 70, vit: 1, int: 60, dex: 30, luk: 1 },
-    skill: { id: 212, level: 10, label: "Back Stab", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Rogue",
-    note: "STR/AGI Back Stab build (wiki: STR 90+, AGI 70+, INT 30–60, DEX 20–40). Equip a dagger; Back Stab is preselected." },
-  // Novice / Expanded
-  { label: "Super Novice — Melee (Auto-attacker)", job_id: 23, base_level: 99, job_level: 70,
-    base_stats: { str: 80, agi: 90, vit: 40, int: 1, dex: 40, luk: 1 },
-    skill: { id: 0, level: 1, label: "Normal Attack", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Super_Novice",
-    note: "STR/AGI auto-attacker. Equip a dagger, 1H sword, or mace; add Fury / never-died in Buffs." },
-  { label: "Gunslinger — Desperado", job_id: 24, base_level: 99, job_level: 70,
-    base_stats: { str: 1, agi: 1, vit: 70, int: 60, dex: 99, luk: 1 },
-    skill: { id: 516, level: 10, label: "Desperado", max_level: 10 },
-    wiki: "https://wiki.payonstories.com/Gunslinger",
-    note: "DEX-primary Desperado (wiki: max DEX, mid INT for SP, rest VIT). Equip a revolver; Desperado is preselected." },
-  { label: "Ninja — Throwing (DEX)", job_id: 25, base_level: 99, job_level: 70,
-    base_stats: { str: 90, agi: 1, vit: 1, int: 50, dex: 90, luk: 1 },
-    skill: { id: 525, level: 5, label: "Throw Huuma Shuriken", max_level: 5 },
-    wiki: "https://wiki.payonstories.com/Ninja",
-    note: "STR/DEX throwing build — Huuma throwing is a physical hit, so STR is primary (wiki: STR 90+, DEX 90+). Equip a huuma shuriken; Throw Huuma Shuriken is preselected." },
-];
+const BUILD_TEMPLATES: BuildTemplate[] = STARTER_BUILDS.map((b) => ({
+  label: b.label,
+  job_id: b.job_id,
+  base_level: b.base_level,
+  job_level: b.job_level,
+  base_stats: { ...b.base_stats },
+  skill: { ...b.skill },
+  support_buffs: b.support_buffs,
+  wiki: `https://wiki.payonstories.com/${b.wiki}`,
+  note: b.note,
+}));
 
-// Maps a guide-page slug (?t=…) to a template label. MUST match the slugs in
-// scripts/gen-guides.mjs so a guide's "Open in the calculator" deep-link
-// auto-loads the matching build.
-const GUIDE_SLUG_TO_LABEL: Record<string, string> = {
-  "knight-hybrid": "Knight — Hybrid",
-  "crusader-grand-cross": "Crusader — Grand Cross (GC)",
-  "wizard-pve-dex": "Wizard — PvE (DEX)",
-  "sage-bolter": "Sage — Bolter",
-  "hunter-double-strafe": "Hunter — Double Strafe (DS)",
-  "bard-musical-strike": "Bard — Musical Strike",
-  "dancer-throw-arrow": "Dancer — Throw Arrow",
-  "priest-magnus-exorcismus": "Priest — Magnus Exorcismus",
-  "monk-asura": "Monk — Asura",
-  "blacksmith-battle-smith": "Blacksmith — Battle Smith (AGI)",
-  "alchemist-acid-demonstration": "Alchemist — Acid Demonstration (SAD)",
-  "assassin-sonic-blow": "Assassin — Sonic Blow (PvE)",
-  "rogue-back-stab": "Rogue — Back Stab",
-  "super-novice-melee": "Super Novice — Melee (Auto-attacker)",
-  "gunslinger-desperado": "Gunslinger — Desperado",
-  "ninja-throwing": "Ninja — Throwing (DEX)",
-};
+// Maps a guide-page slug (?t=…) to a template label — derived from the shared
+// starterBuilds.json (same source scripts/gen-guides.mjs uses), so a guide's
+// "Open in the calculator" deep-link always resolves to the matching build.
+const GUIDE_SLUG_TO_LABEL: Record<string, string> = Object.fromEntries(
+  STARTER_BUILDS.map((b) => [b.slug, b.label]),
+);
 
 // Bonuses from wiki.payonstories.com/Cute_Pet_System. Only PS server has
 // pet_bonuses populated; standard server sends selected_pet but profile
