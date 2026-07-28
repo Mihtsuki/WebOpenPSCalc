@@ -1,0 +1,35 @@
+# Open PS Calc
+
+> Free, fan-made damage calculator for Payon Stories (a pre-renewal Ragnarok
+> Online private server). Build a character, equip gear and cards, and get a
+> step-by-step damage breakdown with ASPD/cast/hit breakpoints, build
+> comparison, time-to-kill, and survivability — modeling the server's actual
+> reworked mechanics so the numbers match in-game. Unofficial community project.
+
+- [Damage calculator](https://openpscalc.com/): the interactive tool — pick a class, skill, stats, gear and cards; see how each number is reached.
+- [Build guides index](https://openpscalc.com/guides.html): starter builds for every class, each openable in the calculator.
+
+## Build guides
+- [Knight — Hybrid](https://openpscalc.com/guides/knight-hybrid.html): A balanced STR/VIT/AGI Knight built around a two-handed sword or spear. High STR drives Bash and auto-attacks, VIT keeps you alive for melee and MvP work, and enough AGI to attack at a reasonable clip. A forgiving, all-round melee build that leans on weapon mastery for flat ATK.
+- [Crusader — Grand Cross (GC)](https://openpscalc.com/guides/crusader-grand-cross.html): The classic VIT tank / Grand Cross Crusader. Grand Cross deals Holy AoE that scales with both ATK and MATK, so you invest in STR, INT, and VIT together. It ignores hard DEF and the weapon-size penalty, but recoils onto you — bring Holy resist and watch the recoil readout.
+- [Wizard — PvE (DEX)](https://openpscalc.com/guides/wizard-pve-dex.html): The pure DEX nuker. Wizards get enormous value from DEX because their strongest spells — Storm Gust, Lord of Vermilion, Meteor Storm — have long cast times. Max INT for raw MATK, then stack DEX to cast fast (and hit the instant-cast breakpoint), with a little VIT so you aren't one-shot mid-cast.
+- [Sage — Bolter](https://openpscalc.com/guides/sage-bolter.html): The Sage bolter weaponizes single-target bolts (Fire / Cold / Lightning), often double-cast, matched to the target's weak element. INT/DEX identical to a Wizard, but the bolt-per-hit model makes element-matching and cast speed the levers that matter most.
+- [Sage — Hindsight (Auto Spell)](https://openpscalc.com/guides/sage-hindsight.html): The Hindsight (Auto Spell) Sage — a melee auto-attacker whose swings autocast a chosen spell at a flat 30% chance. 99 INT powers the autocast damage and 99 AGI drives attack speed and flee. Switch Hindsight ranks on the fly to pick the spell (Soul Strike, bolts, Fire Ball, Heaven's Drive…) — the most adaptable melee caster on the server.
+- [Hunter — Double Strafe (DS)](https://openpscalc.com/guides/hunter-double-strafe.html): Single-target Double Strafe Hunter. Bow damage keys off DEX (maxed), with AGI maxed for attack speed and a little INT for the SP to keep spamming. Equip elemental arrows to match each target and you shred single targets from range.
+- [Hunter — Trapper](https://openpscalc.com/guides/hunter-trapper.html): The INT/DEX Trapper Hunter. Trap damage — Land Mine (Earth), Blast Mine (Wind), Freezing Trap (Water), Claymore Trap (Fire) — scales with INT and DEX and ignores DEF, making it brutal against high-DEF targets. Pick the trap whose element the target is weakest to and let the mines do the work.
+- [Bard — Musical Strike](https://openpscalc.com/guides/bard-musical-strike.html): A DEX/AGI performer that attacks with Musical Strike. On Payon Stories the Performing bonus adds ratio to Musical Strike, and the equipped arrow supplies the element — so an instrument plus the right arrows turns songs-class into a real ranged attacker.
+- [Dancer — Throw Arrow](https://openpscalc.com/guides/dancer-throw-arrow.html): The Dancer mirror of the Bard attacker, using Throw Arrow. DEX-heavy for damage and hit, AGI for attack speed, and the equipped arrow's element decides your damage type. Performing adds ratio on Payon Stories.
+- [Priest — Magnus Exorcismus](https://openpscalc.com/guides/priest-magnus-exorcismus.html): The INT/DEX caster Priest built to farm Undead and Demon. Magnus Exorcismus lays down Holy AoE that hits those races in full, while Turn Undead and Holy Strike round out the anti-undead kit. High INT for damage, DEX for cast speed, VIT for survivability.
+- [Monk — Asura](https://openpscalc.com/guides/monk-asura.html): The burst Monk built around Asura Strike, whose damage is ATK × (8 + SP/10) + 1000 — so both ATK (STR) and Max SP (INT) matter. Spirit spheres add flat, true-neutral damage that stacks per hit. A high-ceiling nuke for MvPs and beefy targets.
+- [Blacksmith — Battle Smith (AGI)](https://openpscalc.com/guides/blacksmith-battle-smith.html): The AGI Battle Smith swings an axe or mace with Mammonite and fast auto-attacks. STR and weapon mastery drive damage, AGI provides attack speed, and Weapon Research adds hit. A sturdy, self-sufficient farmer.
+- [Alchemist — Acid Demonstration (SAD)](https://openpscalc.com/guides/alchemist-acid-demonstration.html): The SAD Alchemist — STR/DEX with plant summons and Acid Terror spam that works through DEF, brutal against high-DEF and high-HP targets. STR and DEX drive the throughput, AGI adds flee and plant attack speed, and it shines hardest under a Bard's Bragi.
+- [Assassin — Sonic Blow (PvE)](https://openpscalc.com/guides/assassin-sonic-blow.html): The PvE Sonic Blow Assassin — a STR/LUK/INT crit-hybrid. High STR for burst, LUK for consistent crits (which bypass flee and DEF), and INT for the SP to keep spamming Sonic Blow. Reliable single-target damage that doesn't hinge on hit rate.
+- [Rogue — Back Stab](https://openpscalc.com/guides/rogue-back-stab.html): A STR/AGI Rogue built around Back Stab, which lands a heavy hit from behind (with a further bonus when the target isn't facing you). STR drives the hit, AGI gives speed and flee, and a chunk of INT sustains SP for repeated Back Stabs.
+- [Super Novice — Melee (Auto-attacker)](https://openpscalc.com/guides/super-novice-melee.html): The auto-attacker Super Novice. With borrowed first-class skills, Fury (crit), and the never-died stat bonus, a STR/AGI Super Novice auto-attacks surprisingly hard for a novice. Equip a dagger, one-hand sword, or mace and stack crit.
+- [Gunslinger — Desperado](https://openpscalc.com/guides/gunslinger-desperado.html): The revolver Desperado Gunslinger — a rapid multi-hit AoE that scales primarily with DEX. Max DEX for damage, mid INT for the SP to keep firing, and the rest in VIT for survivability while you burst a gathered mob down.
+- [Ninja — Throwing (DEX)](https://openpscalc.com/guides/ninja-throwing.html): The Throwing Ninja, hurling Huuma Shuriken for heavy ranged AoE. Throwing is a physical hit, so STR is the primary damage stat alongside DEX for hit and consistency, with INT feeding the SP for sustained throwing. A strong, mobile ranged nuker.
+
+## About
+- Pre-renewal mechanics only (no 3rd-job / homunculus / renewal formulas).
+- Formulas follow the Payon Stories wiki and class-rework notes; the calculator is honest about what it can't yet model rather than showing fabricated numbers.
+- Not affiliated with or endorsed by Payon Stories.

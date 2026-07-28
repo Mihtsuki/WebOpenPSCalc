@@ -9,6 +9,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Structured data + `llms.txt` for search / AI answer engines.** Every build-guide page now
+  carries `BreadcrumbList` and `Article` JSON-LD, and the guides index carries `BreadcrumbList`,
+  `CollectionPage`/`ItemList`, and `SoftwareApplication` — so Google can show rich results and AI
+  answer engines can resolve the calculator and its guides. Added a curated `/llms.txt` content map.
+  All generated from the same single source of truth as the guides, so they can't drift.
+
 - **Manual Blitz Beat.** Blitz Beat (HT_BLITZBEAT) is now selectable in the skill picker for
   Hunters/Snipers with a Falcon. Its damage is the per-hit value × the level's hit count (Lv5 = 5
   hits); per hit = (LUK + INT/2 + 6×Steel Crow + 20) × 2 — neutral element, bypasses DEF, and

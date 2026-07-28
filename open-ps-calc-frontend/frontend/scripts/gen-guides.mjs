@@ -25,6 +25,35 @@ const GUIDES_DATA = STARTER_BUILDS.map((b) => ({
 const STAT_ORDER = [["str", "STR"], ["agi", "AGI"], ["vit", "VIT"], ["int", "INT"], ["dex", "DEX"], ["luk", "LUK"]];
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+// JSON-LD structured data. `\u003c` escapes every "<" so a stray "</script>" in
+// any string value can't break out of the <script> block.
+const jsonLdScript = (obj) =>
+  `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, "\\u003c")}</script>`;
+
+// The calculator itself, as a schema.org SoftwareApplication — reused on hub
+// pages so answer engines landing on a guide still resolve the app entity.
+const softwareApp = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Open PS Calc",
+  alternateName: "Payon Stories Damage Calculator",
+  url: `${SITE}/`,
+  applicationCategory: "GameApplication",
+  operatingSystem: "Web browser",
+  description:
+    "Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  isAccessibleForFree: true,
+};
+
+const breadcrumb = (trail) => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: trail.map(([name, item], i) => ({
+    "@type": "ListItem", position: i + 1, name, item,
+  })),
+});
+
 // Theme-aware: dark by default (matching the app), light when the app's
 // localStorage theme is "light" (same origin, so it's shared). Palette values
 // mirror styles.css :root / [data-theme=light].
@@ -53,7 +82,8 @@ const STYLE = `
   footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.82rem}
 `;
 
-function shell({ title, desc, canonical, body }) {
+function shell({ title, desc, canonical, body, jsonLd = [] }) {
+  const ld = jsonLd.map(jsonLdScript).join("\n");
   return `<!doctype html>
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -65,6 +95,7 @@ function shell({ title, desc, canonical, body }) {
 <meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${canonical}">
 <meta property="og:image" content="${SITE}/icon-512.png">
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
+${ld}
 <style>${STYLE}</style></head>
 <body><div class="wrap">${body}</div></body></html>`;
 }
@@ -74,6 +105,32 @@ function guidePage(g) {
   const title = `${g.cls} — ${g.build} Build Guide | Payon Stories | Open PS Calc`;
   const desc = `${g.cls} ${g.build} build for Payon Stories (pre-renewal RO): recommended stats, signature skill (${g.skill}), gear, and a link to calculate its damage.`;
   const statRows = STAT_ORDER.map(([k, l]) => `<tr><td>${l}</td><td class="n">${g.stats[k]}</td></tr>`).join("");
+  const jsonLd = [
+    breadcrumb([
+      ["Open PS Calc", `${SITE}/`],
+      ["Build guides", `${SITE}/guides.html`],
+      [`${g.cls} — ${g.build}`, canonical],
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: `${g.cls} — ${g.build} Build Guide`,
+      description: desc,
+      url: canonical,
+      mainEntityOfPage: canonical,
+      image: `${SITE}/icon-512.png`,
+      inLanguage: "en",
+      about: `Payon Stories ${g.cls} ${g.build} build`,
+      author: { "@type": "Organization", name: "Open PS Calc", url: `${SITE}/` },
+      publisher: {
+        "@type": "Organization",
+        name: "Open PS Calc",
+        logo: { "@type": "ImageObject", url: `${SITE}/icon-512.png` },
+      },
+      isPartOf: { "@type": "WebSite", name: "Open PS Calc", url: `${SITE}/` },
+      mentions: softwareApp,
+    },
+  ];
   const body = `
 <header><nav><a href="/">Open PS Calc</a> › <a href="/guides.html">Build guides</a> › ${esc(g.cls)}</nav></header>
 <span class="eyebrow">Payon Stories build guide</span>
@@ -90,11 +147,36 @@ function guidePage(g) {
 <h2>Learn more</h2>
 <p><a href="https://wiki.payonstories.com/${g.wiki}" rel="noopener">${esc(g.cls)} on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer>`;
-  return shell({ title, desc, canonical, body });
+  return shell({ title, desc, canonical, body, jsonLd });
 }
 
 function indexPage() {
   const canonical = `${SITE}/guides.html`;
+  const jsonLd = [
+    breadcrumb([
+      ["Open PS Calc", `${SITE}/`],
+      ["Build guides", canonical],
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Payon Stories Build Guides",
+      url: canonical,
+      description:
+        "Starter build guides for every Payon Stories class (pre-renewal RO): recommended stats and signature skills, ready to open in the damage calculator.",
+      isPartOf: { "@type": "WebSite", name: "Open PS Calc", url: `${SITE}/` },
+      mainEntity: {
+        "@type": "ItemList",
+        itemListElement: GUIDES_DATA.map((g, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `${SITE}/guides/${g.slug}.html`,
+          name: `${g.cls} — ${g.build}`,
+        })),
+      },
+    },
+    softwareApp,
+  ];
   const cards = GUIDES_DATA.map((g) =>
     `<a class="card" href="/guides/${g.slug}.html"><strong>${esc(g.cls)}</strong><div class="c">${esc(g.build)}</div></a>`
   ).join("");
@@ -105,7 +187,7 @@ function indexPage() {
 <p class="lead">Starter builds for every class on Payon Stories (pre-renewal Ragnarok Online) — recommended stats and a signature skill, each ready to open in the <a href="/">damage calculator</a> and tune to your gear.</p>
 <div class="grid">${cards}</div>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>.</footer>`;
-  return shell({ title: "Payon Stories Build Guides — every class | Open PS Calc", desc: "Starter build guides for every Payon Stories class (pre-renewal RO): recommended stats and signature skills, ready to open in the damage calculator.", canonical, body });
+  return shell({ title: "Payon Stories Build Guides — every class | Open PS Calc", desc: "Starter build guides for every Payon Stories class (pre-renewal RO): recommended stats and signature skills, ready to open in the damage calculator.", canonical, body, jsonLd });
 }
 
 // --- write flat .html files ---
@@ -130,4 +212,28 @@ ${urls.map((u) => `  <url><loc>${u}</loc><changefreq>weekly</changefreq></url>`)
 `;
 fs.writeFileSync(path.join(PUBLIC, "sitemap.xml"), sitemap);
 
-console.log(`Generated ${GUIDES_DATA.length} guide pages + index + sitemap (${urls.length} urls).`);
+// --- llms.txt: a curated, crawlable content map for AI answer engines ---
+// (https://llmstxt.org/). Markdown, derived from the same GUIDES_DATA so it
+// can never list a build the guides don't have.
+const llmsTxt = `# Open PS Calc
+
+> Free, fan-made damage calculator for Payon Stories (a pre-renewal Ragnarok
+> Online private server). Build a character, equip gear and cards, and get a
+> step-by-step damage breakdown with ASPD/cast/hit breakpoints, build
+> comparison, time-to-kill, and survivability — modeling the server's actual
+> reworked mechanics so the numbers match in-game. Unofficial community project.
+
+- [Damage calculator](${SITE}/): the interactive tool — pick a class, skill, stats, gear and cards; see how each number is reached.
+- [Build guides index](${SITE}/guides.html): starter builds for every class, each openable in the calculator.
+
+## Build guides
+${GUIDES_DATA.map((g) => `- [${g.cls} — ${g.build}](${SITE}/guides/${g.slug}.html): ${g.summary}`).join("\n")}
+
+## About
+- Pre-renewal mechanics only (no 3rd-job / homunculus / renewal formulas).
+- Formulas follow the Payon Stories wiki and class-rework notes; the calculator is honest about what it can't yet model rather than showing fabricated numbers.
+- Not affiliated with or endorsed by Payon Stories.
+`;
+fs.writeFileSync(path.join(PUBLIC, "llms.txt"), llmsTxt);
+
+console.log(`Generated ${GUIDES_DATA.length} guide pages + index + sitemap (${urls.length} urls) + llms.txt.`);
