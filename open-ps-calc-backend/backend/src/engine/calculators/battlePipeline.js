@@ -79,7 +79,7 @@ const BF_MAGIC_RATIOS = {
   NJ_KOUENKA:        () => 90, // Flaming Petals — 90% MATK per hit (hits = skill level); old 100+30×lv was wrong
   NJ_HYOUSENSOU:     () => 100,
   NJ_KAMAITACHI:     (lv) => 100 + 30 * lv,
-  NJ_KAENSIN:        (lv) => 100 + 10 * lv,
+  NJ_KAENSIN:        () => 50, // Blaze Shield — 50% MATK per hit (flat, all levels); hits 3/6/9 by level via magic_hit_counts. wiki.payonstories.com/Blaze_Shield (old 100+10×lv single-hit lump was wrong).
   NJ_HITOKIRI:       (lv) => 150 + 50 * lv,
   // Bakuenryu (Exploding Dragon): a single hit split into 3, total 150+150×lv%
   // MATK (300%→900% for Lv1→5). skills.json marks it 3 hits, so this is the
@@ -221,8 +221,14 @@ class BattlePipeline {
       ratioSrc = "ratio_base (DB fallback)";
     }
 
+    // Hit count: a PS profile magic_hit_counts fn (e.g. Blaze Shield's 3/6/9 by
+    // level) overrides the skills.json number_of_hits, which is sometimes wrong
+    // for PS-reworked multi-hit spells. Mirrors weapon_hit_counts in skillRatio.js.
     let hitCountRaw = 1;
-    if (skillData) {
+    const psHitFn = (profile.magic_hit_counts || {})[skillName];
+    if (psHitFn) {
+      hitCountRaw = psHitFn(skill.level, target, ctx);
+    } else if (skillData) {
       const noh = skillData.number_of_hits;
       if (noh && skill.level <= noh.length) hitCountRaw = noh[skill.level - 1];
     }

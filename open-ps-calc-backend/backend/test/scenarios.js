@@ -262,6 +262,20 @@ const scenarios = [
     target: 1002,
   },
 
+  // --- Blaze Shield (NJ_KAENSIN): 50% MATK per hit; hits 3/6/9 by level --------------------
+  {
+    name: "ninja-blaze-shield-lv4",  // 3 hits × 50%
+    build: { job_id: 25, base_level: 99, job_level: 70, base_stats: { str: 1, agi: 1, vit: 1, int: 99, dex: 90, luk: 1 }, equipped: { right_hand: 1601 } },
+    skill: { name: "NJ_KAENSIN", level: 4 },
+    target: 1002,
+  },
+  {
+    name: "ninja-blaze-shield-lv10",  // 9 hits × 50%
+    build: { job_id: 25, base_level: 99, job_level: 70, base_stats: { str: 1, agi: 1, vit: 1, int: 99, dex: 90, luk: 1 }, equipped: { right_hand: 1601 } },
+    skill: { name: "NJ_KAENSIN", level: 10 },
+    target: 1113, // Drops (Fire 1) — locks the 9-hit × 50% total (Fire vs Fire mult applies)
+  },
+
   // --- manual Blitz Beat (Falcon; per-hit × level, neutral, bypasses DEF) ------------------
   {
     name: "hunter-blitz-beat-lv5",

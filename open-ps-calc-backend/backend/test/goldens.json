@@ -2069,6 +2069,90 @@
    }
   }
  },
+ "ninja-blaze-shield-lv4": {
+  "status": {
+   "str": 2,
+   "agi": 9,
+   "vit": 2,
+   "int_": 104,
+   "dex": 96,
+   "luk": 5,
+   "batk": 22,
+   "max_hp": 4335,
+   "max_sp": 1064,
+   "aspd": 26.4,
+   "cri": 26,
+   "hit": 195,
+   "flee": 108,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 345,
+   "matk_max": 579
+  },
+  "result": {
+   "dps": 143.511,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 2620,
+   "normal": {
+    "min": 281,
+    "max": 472,
+    "avg": 376,
+    "steps": [
+     "Base MATK",
+     "bMatkRate",
+     "Skill Ratio (ID 535 Lv 4)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "ninja-blaze-shield-lv10": {
+  "status": {
+   "str": 2,
+   "agi": 9,
+   "vit": 2,
+   "int_": 104,
+   "dex": 96,
+   "luk": 5,
+   "batk": 22,
+   "max_hp": 4335,
+   "max_sp": 1064,
+   "aspd": 26.4,
+   "cri": 26,
+   "hit": 195,
+   "flee": 108,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 345,
+   "matk_max": 579
+  },
+  "result": {
+   "dps": 386.364,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 1540,
+   "normal": {
+    "min": 445,
+    "max": 746,
+    "avg": 595,
+    "steps": [
+     "Base MATK",
+     "bMatkRate",
+     "Skill Ratio (ID 535 Lv 10)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "hunter-blitz-beat-lv5": {
   "status": {
    "str": 5,

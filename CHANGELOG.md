@@ -21,6 +21,12 @@ instead of release version. Dates are taken from actual git commit history.
   now has a toggle in the Skill panel; the engine already applied the higher from-Hiding ratio, but
   there was no way to switch it on.
 
+### Fixed
+
+- **Blaze Shield (Ninja) damage.** Was modeled as a single hit at 100 + 10×level % MATK (200% at
+  Lv10). Corrected to the wiki formula: **50% MATK per hit**, with the hit count scaling by level —
+  3 hits (Lv1–4), 6 (Lv5–8), 9 (Lv9–10) — for 150% / 300% / 450% total.
+
 ## 2026-07-26
 
 ### Added

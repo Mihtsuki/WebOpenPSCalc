@@ -178,6 +178,14 @@ const PS_WEAPON_HIT_COUNTS = {
   ML_PIERCE: (lv, tgt) => ({ Small: 1, Medium: 2, Large: 3 }[tgt && tgt.size] ?? 3),
 };
 
+// Per-level hit counts for PS-reworked MAGIC spells where skills.json is wrong.
+// Same fn signature as PS_WEAPON_HIT_COUNTS; consumed in _runMagicBranch.
+const PS_MAGIC_HIT_COUNTS = {
+  // Blaze Shield (NJ_KAENSIN): single-target hits scale by level — 3 (Lv1-4),
+  // 6 (Lv5-8), 9 (Lv9-10) — each at 50% MATK. wiki.payonstories.com/Blaze_Shield.
+  NJ_KAENSIN: (lv) => (lv <= 4 ? 3 : lv <= 8 ? 6 : 9),
+};
+
 // Mechanic flag sentinels — checked by individual modifiers across the engine.
 // Source: core/server_profiles.py's _PS_MECHANIC_FLAGS (StatGameDev/Open_PS_Calc,
 // MIT licensed — the reference implementation this whole port tracks against).
@@ -495,6 +503,7 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
   ps_job_bonuses: PS_JOB_BONUSES,
   weapon_ratios: PS_BF_WEAPON_RATIOS,
   weapon_hit_counts: PS_WEAPON_HIT_COUNTS,
+  magic_hit_counts: PS_MAGIC_HIT_COUNTS,
   weapon_vanilla_ok: PS_WEAPON_VANILLA_OK,
   magic_ratios: PS_BF_MAGIC_RATIOS,
   magic_vanilla_ok: PS_MAGIC_VANILLA_OK,
