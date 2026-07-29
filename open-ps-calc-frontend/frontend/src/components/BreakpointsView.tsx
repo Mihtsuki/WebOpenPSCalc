@@ -86,22 +86,30 @@ function BreakpointsBody({ bp, targetName, skillLabel, skillLevel }: { bp: Break
       {int && (
         <div className="bp-row">
           <span className="bp-k">MATK</span>
-          <span className="bp-v">
-            <b>{int.matk_min}–{int.matk_max}</b>
-            <span className="bp-vs"> @ {int.current_int} INT</span>{" "}
-            {int.matk_jumps.length ? (
-              <span title="Pre-renewal max MATK = INT + (INT/5)², so it jumps every multiple of 5 INT — and the jump grows each time. Each step is the smallest extra INT to reach the next multiple of 5. (The min side steps every 7 INT; it doesn't move the headline max.)">
-                {" — "}
-                {int.matk_jumps.map((j) => `+${j.plus} INT → ${j.matk_min}–${j.matk_max}`).join(" · ")}
-              </span>
+          <div className="bp-v bp-matk">
+            <div>
+              <b>{int.matk_min}–{int.matk_max}</b>
+              <span className="bp-vs"> @ {int.current_int} INT</span>
+            </div>
+            {int.max_jumps.length ? (
+              <div title="Max MATK = INT + (INT/5)² — jumps at every multiple of 5 INT, by a growing amount.">
+                <span className="bp-tag">max</span>
+                {int.max_jumps.map((j) => `+${j.plus} INT → ${j.matk_max}`).join(" · ")}
+              </div>
+            ) : null}
+            {int.min_jumps.length ? (
+              <div title="Min MATK = INT + (INT/7)² — jumps at every multiple of 7 INT.">
+                <span className="bp-tag">min</span>
+                {int.min_jumps.map((j) => `+${j.plus} INT → ${j.matk_min}`).join(" · ")}
+              </div>
             ) : null}
             {int.sp_jumps.length ? (
-              <span className="bp-sub" title="Natural SP recovery per tick — steps with INT (roughly every 6, with a larger jump at 120 INT).">
-                {" · SP regen "}
+              <div className="bp-sub" title="Natural SP recovery per tick — steps with INT (roughly every 6, with a larger jump at 120 INT).">
+                <span className="bp-tag">SP regen</span>
                 {int.sp_jumps.map((j) => `+${j.plus} INT → ${j.sp_regen}`).join(" · ")}
-              </span>
+              </div>
             ) : null}
-          </span>
+          </div>
         </div>
       )}
 

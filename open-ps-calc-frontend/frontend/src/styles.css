@@ -1391,3 +1391,5 @@ th.cmp-col--live { border-bottom-color: var(--accent-dim); }
 .build-template-hint strong { color: var(--text); }
 .build-template-hint a { color: var(--link); white-space: nowrap; }
 .bp-sub { color: var(--text-faint); }
+.bp-matk { display: flex; flex-direction: column; gap: 0.15rem; }
+.bp-tag { display: inline-block; min-width: 1.9rem; margin-right: 0.4rem; font-size: 0.7rem; letter-spacing: 0.03em; text-transform: uppercase; font-weight: 600; color: var(--text-dim); }

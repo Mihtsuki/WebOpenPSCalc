@@ -137,7 +137,8 @@ export interface Breakpoints {
     matk_min: number;
     matk_max: number;
     current_int: number;
-    matk_jumps: { plus: number; int: number; matk_min: number; matk_max: number }[];
+    max_jumps: { plus: number; int: number; matk_max: number }[];
+    min_jumps: { plus: number; int: number; matk_min: number }[];
     sp_regen: number;
     sp_jumps: { plus: number; int: number; sp_regen: number }[];
   } | null;

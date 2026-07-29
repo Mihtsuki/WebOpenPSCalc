@@ -10,11 +10,11 @@ instead of release version. Dates are taken from actual git commit history.
 ### Added
 
 - **INT breakpoints.** The Breakpoints panel now shows a MATK row for builds with real INT
-  investment: your current MATK range and the next few INT thresholds where MATK jumps. Pre-renewal
-  max MATK is INT + (INT/5)², so it jumps at every multiple of 5 INT — by a growing amount — which
-  is what the row lists. It also flags the next natural-SP-regen steps. Computed the same way as the
-  ASPD/cast/hit rows — by re-running the real status code with INT bumped — so the numbers match the
-  calculator.
+  investment: your current MATK range plus the next INT thresholds where it jumps, listed
+  separately for **max** and **min**. Pre-renewal max MATK is INT + (INT/5)² (jumps every multiple
+  of 5) and min MATK is INT + (INT/7)² (jumps every multiple of 7), each by a growing amount. It
+  also flags the next natural-SP-regen steps. Computed the same way as the ASPD/cast/hit rows — by
+  re-running the real status code with INT bumped — so the numbers match the calculator.
 
 - **Structured data + `llms.txt` for search / AI answer engines.** Every build-guide page now
   carries `BreadcrumbList` and `Article` JSON-LD, and the guides index carries `BreadcrumbList`,

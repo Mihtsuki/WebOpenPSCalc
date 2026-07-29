@@ -468,27 +468,29 @@ function computeBreakpoints(eff: any, weapon: any, gb: any, status: any, config:
         matk_min: number;
         matk_max: number;
         current_int: number;
-        matk_jumps: { plus: number; int: number; matk_min: number; matk_max: number }[];
+        max_jumps: { plus: number; int: number; matk_max: number }[];
+        min_jumps: { plus: number; int: number; matk_min: number }[];
         sp_regen: number;
         sp_jumps: { plus: number; int: number; sp_regen: number }[];
       }
     | null = null;
   const curInt = Math.round(Number(status.int_));
   if (curInt >= 10) {
-    // A MATK breakpoint is the next INT that is a multiple of 5 — that's where the
-    // max-MATK bonus term ⌊INT/5⌋² steps up, i.e. where MATK actually jumps (and by
-    // a growing amount). Multiples of 7 only bump the min by one bonus point, which
-    // doesn't move the headline number, so they're not surfaced as jumps. Detected
-    // from the INT value (exact regardless of any MATK% gear multipliers) with the
-    // min/max read from the real sim.
-    const matk_jumps: { plus: number; int: number; matk_min: number; matk_max: number }[] = [];
-    for (let k = 1; k <= 200 && matk_jumps.length < 3; k++) {
-      const iv = curInt + k;
-      if (iv % 5 === 0) {
-        const s = statusWith(0, 0, k);
-        matk_jumps.push({ plus: k, int: iv, matk_min: Number(s.matk_min), matk_max: Number(s.matk_max) });
+    // MATK breakpoints step with INT: max MATK = INT + ⌊INT/5⌋² jumps at every
+    // multiple of 5, min MATK = INT + ⌊INT/7⌋² jumps at every multiple of 7 — and
+    // both jumps grow each time. Surfaced separately. The trigger is the INT value
+    // (exact regardless of any MATK% gear multipliers); the resulting min/max are
+    // read from the real sim so they include those multipliers.
+    const jumpsFor = <T extends object>(mod: number, read: (s: any) => T) => {
+      const out: ({ plus: number; int: number } & T)[] = [];
+      for (let k = 1; k <= 210 && out.length < 3; k++) {
+        const iv = curInt + k;
+        if (iv % mod === 0) out.push({ plus: k, int: iv, ...read(statusWith(0, 0, k)) });
       }
-    }
+      return out;
+    };
+    const max_jumps = jumpsFor(5, (s) => ({ matk_max: Number(s.matk_max) }));
+    const min_jumps = jumpsFor(7, (s) => ({ matk_min: Number(s.matk_min) }));
     // SP-regen steps are driven by both floor(INT/6) and MaxSP (which also grows
     // with INT), plus the INT≥120 jump — no single modulus, so detect by value.
     const sp_jumps: { plus: number; int: number; sp_regen: number }[] = [];
@@ -501,7 +503,8 @@ function computeBreakpoints(eff: any, weapon: any, gb: any, status: any, config:
       matk_min: Number(status.matk_min),
       matk_max: Number(status.matk_max),
       current_int: curInt,
-      matk_jumps,
+      max_jumps,
+      min_jumps,
       sp_regen: Number(status.sp_regen),
       sp_jumps,
     };
