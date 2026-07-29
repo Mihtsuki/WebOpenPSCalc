@@ -1447,7 +1447,11 @@ class BattlePipeline {
       if (skillData) {
         [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
       }
-      let magicPeriod = Math.max(castMs + delayMs, 100);
+      // Spam cap: a cast skill can't be repeated faster than the profile floor
+      // (PS = 333ms / 3-per-sec). Applied to the base cast action BEFORE Double
+      // Bolt, since Double Bolt fires a second bolt per cast — the *cast* rate is
+      // what's capped, not the per-bolt rate.
+      let magicPeriod = Math.max(castMs + delayMs, profile.min_cast_period_ms || 100);
 
       const doubleCastingLv = Number((build.active_status_levels || {}).SC_DOUBLECASTING || 0);
       if (doubleCastingLv > 0 && DOUBLECASTING_SKILLS.has(skillName)) {
@@ -1490,7 +1494,7 @@ class BattlePipeline {
         const trapResult = this._runTrapBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
         let castMs = 0, delayMs = 0;
         if (skillData) [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
-        const trapPeriod = Math.max(castMs + delayMs, 100);
+        const trapPeriod = Math.max(castMs + delayMs, profile.min_cast_period_ms || 100);
         const trapAttacks = [createAttackDefinition(trapResult.avg_damage, 0.0, trapPeriod, 1.0)];
         return createBattleResult({
           normal: trapResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,

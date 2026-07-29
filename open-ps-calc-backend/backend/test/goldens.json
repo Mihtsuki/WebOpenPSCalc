@@ -1269,6 +1269,48 @@
    }
   }
  },
+ "wizard-instant-firebolt-bragi-spamcap": {
+  "status": {
+   "str": 2,
+   "agi": 9,
+   "vit": 2,
+   "int_": 111,
+   "dex": 165,
+   "luk": 3,
+   "batk": 35,
+   "max_hp": 3319,
+   "max_sp": 1901,
+   "aspd": 150,
+   "cri": 20,
+   "hit": 264,
+   "flee": 108,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 386,
+   "matk_max": 684
+  },
+  "result": {
+   "dps": 8765.766,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 333,
+   "normal": {
+    "min": 2103,
+    "max": 3733,
+    "avg": 2919,
+    "steps": [
+     "Base MATK",
+     "bMatkRate",
+     "Skill Ratio (ID 19 Lv 10)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "alchemist-acid-terror": {
   "status": {
    "str": 85,
@@ -1341,11 +1383,11 @@
    "matk_max": 418
   },
   "result": {
-   "dps": 34090,
+   "dps": 10237.237,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
-   "period_ms": 100,
+   "period_ms": 333,
    "normal": {
     "min": 3409,
     "max": 3409,
@@ -1967,11 +2009,11 @@
    "matk_max": 503
   },
   "result": {
-   "dps": 59200,
+   "dps": 17777.778,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
-   "period_ms": 100,
+   "period_ms": 333,
    "normal": {
     "min": 5920,
     "max": 5920,
@@ -2008,11 +2050,11 @@
    "matk_max": 503
   },
   "result": {
-   "dps": 32610,
+   "dps": 9792.793,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
-   "period_ms": 100,
+   "period_ms": 333,
    "normal": {
     "min": 3261,
     "max": 3261,

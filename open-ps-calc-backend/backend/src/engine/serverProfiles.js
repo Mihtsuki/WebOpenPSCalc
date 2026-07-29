@@ -47,6 +47,12 @@ function emptyProfile(name, overrides = {}) {
     magic_vanilla_ok: new Set(),
     tick_hp_stand: 6, tick_hp_sit: 4, tick_sp_stand: 8, tick_sp_sit: 6, tick_skill: 5,
     skill_min_period_ms: {},
+    // Minimum attack period for CAST skills (magic spells, traps) — a spam cap.
+    // Their cast+after-cast-delay can be driven very low (instant cast + Bragi +
+    // delayrate gear, or Double Bolt), so without a floor DPS would assume an
+    // unrealistic cast rate. Vanilla min_skill_delay_limit is 100ms (10/sec); PS
+    // caps effective cast-skill spam at 3/sec (see PAYON_STORIES override).
+    min_cast_period_ms: 100,
     ps_skill_delay_fn: {},
     ps_acd_zero: new Set(),
     ps_zero_cast: new Set(),
@@ -466,6 +472,12 @@ const PS_PET_BONUSES = {
 const PAYON_STORIES = emptyProfile("payon_stories", {
   use_ps_data: true,
   use_ps_skill_names: true,
+  // Cast-skill spam cap: 3 casts/sec (333ms). Matches what the community PS calcs
+  // use as the effective floor for instant-cast / Bragi-boosted / Double Bolt spam.
+  // Applied to the magic + trap branches (see battlePipeline). NB: not PDF-verified
+  // — sourced from other PS calcs' 0.33s default per the user; the PS wiki documents
+  // Bragi's % reductions but no explicit spam cap.
+  min_cast_period_ms: 333,
   rate_bonuses: PS_RATE_BONUSES,
   mechanic_flags: PS_MECHANIC_FLAGS,
   aspd_buffs: PS_ASPD_BUFFS,

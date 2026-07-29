@@ -5,6 +5,20 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-07-29
+
+### Fixed
+
+- **Cast-skill spam cap (3 casts/sec).** Instant-cast spells (high DEX + Poem of Bragi + delayrate
+  gear, or Double Bolt) and **traps** were modeled with a 100 ms floor — up to 10 casts/sec, which
+  is physically impossible and badly inflated DPS. Cast skills (magic + traps) are now floored at
+  **333 ms (3/sec)**, matching the default other Payon Stories calcs use. The biggest correction is
+  traps: Land/Blast/Freezing/Claymore Trap DPS drops ~3.3× to a realistic re-lay rate (per-trap
+  damage is unchanged — only the assumed rate). For Bragi/Double Bolt bolt-spam the cap only binds
+  once cast time reaches ~0; ordinary casts are unaffected. (Sourced from other PS calcs' 0.33 s
+  default; the PS wiki documents Bragi's % reductions but no explicit cap, and this wasn't
+  PDF-verified.)
+
 ## 2026-07-28
 
 ### Added

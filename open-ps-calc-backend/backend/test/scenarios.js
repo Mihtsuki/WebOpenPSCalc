@@ -159,6 +159,15 @@ const scenarios = [
     skill: { name: "MG_SOULSTRIKE", level: 10 },
     target: 1036, // Undead race — PS +5%×lv bonus + 50% MDEF ignore
   },
+  {
+    // Cast-skill spam cap: instant-cast (159 DEX) Fire Bolt under max Poem of Bragi
+    // would otherwise repeat faster than 3/sec. period_ms must floor at 333
+    // (profile.min_cast_period_ms), not cast+delay. Regression for that cap.
+    name: "wizard-instant-firebolt-bragi-spamcap",
+    build: { job_id: 9, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 1, vit: 1, int: 99, dex: 99, luk: 1 }, bonus_stats: { dex: 60 }, equipped: { right_hand: 1601 }, song_state: { SC_POEMBRAGI: 10, SC_POEMBRAGI_lesson: 10, SC_POEMBRAGI_int: 99 } },
+    skill: { name: "MG_FIREBOLT", level: 10 },
+    target: 1002, // Water 1 — fire amplified
+  },
 
   // --- misc / special mechanics ---------------------------------------------------
   {
