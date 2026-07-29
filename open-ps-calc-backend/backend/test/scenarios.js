@@ -160,6 +160,15 @@ const scenarios = [
     target: 1036, // Undead race — PS +5%×lv bonus + 50% MDEF ignore
   },
   {
+    // Double Bolt (SC_DOUBLECASTING): fires the bolt volley a second time per cast,
+    // so one cast deals 2× damage (period unchanged) and kills in half the casts.
+    // Regression that Double Bolt changes per-cast damage / hits-to-kill, not just DPS.
+    name: "sage-fire-bolt-double-bolt",
+    build: { job_id: 16, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 40, vit: 30, int: 99, dex: 80, luk: 10 }, equipped: { right_hand: 1601 }, active_buffs: { SC_DOUBLECASTING: 1 } },
+    skill: { name: "MG_FIREBOLT", level: 10 },
+    target: 1002, // Water 1 — fire amplified
+  },
+  {
     // Cast-skill spam cap: instant-cast (159 DEX) Fire Bolt under max Poem of Bragi
     // would otherwise repeat faster than 3/sec. period_ms must floor at 333
     // (profile.min_cast_period_ms), not cast+delay. Regression for that cap.

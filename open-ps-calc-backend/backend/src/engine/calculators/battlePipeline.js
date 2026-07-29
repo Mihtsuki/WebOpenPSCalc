@@ -1448,18 +1448,25 @@ class BattlePipeline {
         [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
       }
       // Spam cap: a cast skill can't be repeated faster than the profile floor
-      // (PS = 333ms / 3-per-sec). Applied to the base cast action BEFORE Double
-      // Bolt, since Double Bolt fires a second bolt per cast — the *cast* rate is
-      // what's capped, not the per-bolt rate.
-      let magicPeriod = Math.max(castMs + delayMs, profile.min_cast_period_ms || 100);
+      // (PS = 333ms / 3-per-sec).
+      const magicPeriod = Math.max(castMs + delayMs, profile.min_cast_period_ms || 100);
 
       const doubleCastingLv = Number((build.active_status_levels || {}).SC_DOUBLECASTING || 0);
       if (doubleCastingLv > 0 && DOUBLECASTING_SKILLS.has(skillName)) {
-        magicPeriod = magicPeriod / 2;
+        // Double Bolt fires the whole bolt volley a SECOND time per cast (instantly),
+        // so one cast deals two volleys' worth of damage — it kills in half the casts.
+        // Model it as ×2 damage per cast, NOT a halved period: halving the period would
+        // (a) leave per-cast damage / hits-to-kill unchanged and (b) imply 6 casts/sec,
+        // breaking the 3/sec spam cap. DPS still doubles (2× damage over the same period).
+        magicResult.pmf = scaleFloor(magicResult.pmf, 2, 1);
+        const [mn, mx, av] = pmfStats(magicResult.pmf);
+        magicResult.min_damage = mn;
+        magicResult.max_damage = mx;
+        magicResult.avg_damage = av;
         magicResult.add_step({
-          name: "Double Casting", value: magicResult.avg_damage, min_value: magicResult.min_damage, max_value: magicResult.max_damage, multiplier: 1.0,
-          note: "SC_DOUBLECASTING (PF_DOUBLECASTING): 100% chance to cast a second time instantly -- modeled as half the effective attack period (DPS only, not per-hit damage).",
-          formula: "period / 2", hercules_ref: "skill.c pc_use_skill PF_DOUBLECASTING",
+          name: "Double Bolt", value: av, min_value: mn, max_value: mx, multiplier: 2.0,
+          note: "SC_DOUBLECASTING (PF_DOUBLECASTING): 100% chance to fire the bolt a second time instantly — one cast deals two volleys (×2 damage per cast), killing in half the casts. Cast rate is unchanged (and capped), so DPS still doubles.",
+          formula: "damage × 2 per cast", hercules_ref: "skill.c pc_use_skill PF_DOUBLECASTING",
         });
       }
 

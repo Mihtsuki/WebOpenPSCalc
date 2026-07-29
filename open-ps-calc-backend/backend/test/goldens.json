@@ -1269,6 +1269,49 @@
    }
   }
  },
+ "sage-fire-bolt-double-bolt": {
+  "status": {
+   "str": 6,
+   "agi": 45,
+   "vit": 33,
+   "int_": 108,
+   "dex": 85,
+   "luk": 13,
+   "batk": 25,
+   "max_hp": 5657,
+   "max_sp": 1462,
+   "aspd": 154,
+   "cri": 53,
+   "hit": 184,
+   "flee": 144,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 382,
+   "matk_max": 631
+  },
+  "result": {
+   "dps": 947.54,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 5833,
+   "normal": {
+    "min": 4168,
+    "max": 6886,
+    "avg": 5527,
+    "steps": [
+     "Base MATK",
+     "bMatkRate",
+     "Skill Ratio (ID 19 Lv 10)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "Final Damage",
+     "Double Bolt"
+    ]
+   }
+  }
+ },
  "wizard-instant-firebolt-bragi-spamcap": {
   "status": {
    "str": 2,

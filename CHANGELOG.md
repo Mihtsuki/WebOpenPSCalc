@@ -9,6 +9,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Double Bolt now changes hits-to-kill, not just DPS.** It was modeled as halving the attack
+  period with unchanged per-cast damage, so DPS and time-to-kill dropped but **hits-to-kill stayed
+  identical** with vs without it. Double Bolt actually fires the whole bolt volley a second time per
+  cast, so a cast deals **2× damage** and kills in **half the casts**. Now modeled as ×2 damage per
+  cast at the normal (capped) cast cadence — DPS still doubles, but per-cast damage and hits-to-kill
+  now correctly reflect it. Also keeps the 3-casts/sec cap honest (the old period-halving implied
+  6 casts/sec).
+
 - **Cast-skill spam cap (3 casts/sec).** Instant-cast spells (high DEX + Poem of Bragi + delayrate
   gear, or Double Bolt) and **traps** were modeled with a 100 ms floor — up to 10 casts/sec, which
   is physically impossible and badly inflated DPS. Cast skills (magic + traps) are now floored at
