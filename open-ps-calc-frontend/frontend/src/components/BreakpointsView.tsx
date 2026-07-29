@@ -90,7 +90,7 @@ function BreakpointsBody({ bp, targetName, skillLabel, skillLevel }: { bp: Break
             <b>{int.matk_min}–{int.matk_max}</b>
             <span className="bp-vs"> @ {int.current_int} INT</span>{" "}
             {int.matk_jumps.length ? (
-              <span title="Pre-renewal MATK = INT + (INT/5)² (max) and INT + (INT/7)² (min), so the bonus steps up at every multiple of 5 (max) and 7 (min) — and the jump grows each time. Each step is the smallest extra INT to reach the next multiple.">
+              <span title="Pre-renewal max MATK = INT + (INT/5)², so it jumps every multiple of 5 INT — and the jump grows each time. Each step is the smallest extra INT to reach the next multiple of 5. (The min side steps every 7 INT; it doesn't move the headline max.)">
                 {" — "}
                 {int.matk_jumps.map((j) => `+${j.plus} INT → ${j.matk_min}–${j.matk_max}`).join(" · ")}
               </span>

@@ -475,13 +475,16 @@ function computeBreakpoints(eff: any, weapon: any, gb: any, status: any, config:
     | null = null;
   const curInt = Math.round(Number(status.int_));
   if (curInt >= 10) {
-    // A MATK breakpoint is the next INT that is a multiple of 5 (raises max MATK)
-    // or 7 (raises min MATK). Detected from the INT value — exact regardless of
-    // any MATK% gear multipliers — with the min/max read from the real sim.
+    // A MATK breakpoint is the next INT that is a multiple of 5 — that's where the
+    // max-MATK bonus term ⌊INT/5⌋² steps up, i.e. where MATK actually jumps (and by
+    // a growing amount). Multiples of 7 only bump the min by one bonus point, which
+    // doesn't move the headline number, so they're not surfaced as jumps. Detected
+    // from the INT value (exact regardless of any MATK% gear multipliers) with the
+    // min/max read from the real sim.
     const matk_jumps: { plus: number; int: number; matk_min: number; matk_max: number }[] = [];
     for (let k = 1; k <= 200 && matk_jumps.length < 3; k++) {
       const iv = curInt + k;
-      if (iv % 5 === 0 || iv % 7 === 0) {
+      if (iv % 5 === 0) {
         const s = statusWith(0, 0, k);
         matk_jumps.push({ plus: k, int: iv, matk_min: Number(s.matk_min), matk_max: Number(s.matk_max) });
       }
