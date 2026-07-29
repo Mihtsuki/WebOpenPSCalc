@@ -9,6 +9,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Morpheus set no longer equippable by Super Novice.** The Morpheus set (Ring, Bracelet, Hood,
+  Shawl) is "All except Novice" — and since a Super Novice's equip check uses its base Novice class,
+  it can't wear them either. The vanilla item data shipped these with an empty job list, so the
+  picker treated them as usable by every class (including Novice and Super Novice). Restored the
+  proper restriction.
+
 - **Double Bolt now changes hits-to-kill, not just DPS.** It was modeled as halving the attack
   period with unchanged per-cast damage, so DPS and time-to-kill dropped but **hits-to-kill stayed
   identical** with vs without it. Double Bolt actually fires the whole bolt volley a second time per

@@ -335,3 +335,26 @@ test("natural SP regen increases with INT", () => {
     prev = sp;
   }
 });
+
+// ---------------------------------------------------------------------------
+// Item job restrictions. The Morpheus set is "All except Novice" — and since a
+// Super Novice's equip check uses its base Novice class, SN can't wear it either.
+// The vanilla item_db shipped these with an empty job array (→ treated as all
+// jobs), so ps_item_manual restores the restriction. Guards against a regression
+// back to the empty array (which would let Novice/SN equip them again).
+// ---------------------------------------------------------------------------
+test("Morpheus set is All-except-Novice (excludes Novice + Super Novice)", () => {
+  // Mirrors the picker filter in routes/data.ts (jobMatch + empty-job path).
+  const shows = (it, jobId) =>
+    !Array.isArray(it.job) || it.job.length === 0 || it.job.includes(jobId) || (jobId === 23 && it.job.includes(0));
+  for (const id of [2518, 2648, 2649, 5126]) { // Shawl, Ring, Bracelet, Hood
+    const it = loader.getItem(id);
+    assert.ok(it && Array.isArray(it.job) && it.job.length > 0, `Morpheus ${id} must have a job restriction`);
+    assert.ok(it.script && it.script.length > 0, `Morpheus ${id} must keep its base script (job merge must not wipe it)`);
+    assert.equal(shows(it, 0), false, `Novice must NOT equip Morpheus ${id}`);
+    assert.equal(shows(it, 23), false, `Super Novice must NOT equip Morpheus ${id}`);
+    for (const job of [9, 16, 7, 24]) { // Wizard, Sage, Knight, Gunslinger — all non-Novice
+      assert.equal(shows(it, job), true, `job ${job} must equip Morpheus ${id}`);
+    }
+  }
+});
