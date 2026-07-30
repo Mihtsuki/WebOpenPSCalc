@@ -1163,15 +1163,15 @@
    "matk_max": 630
   },
   "result": {
-   "dps": 402.041,
+   "dps": 400.729,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 6860,
    "normal": {
-    "min": 2080,
-    "max": 3438,
-    "avg": 2758,
+    "min": 2070,
+    "max": 3430,
+    "avg": 2749,
     "steps": [
      "Base MATK",
      "bMatkRate",
@@ -1179,6 +1179,7 @@
      "Magic Defense Fix",
      "Attr Fix",
      "Card Fix (Magic)",
+     "× 10 hits",
      "Final Damage"
     ]
    }
@@ -1247,15 +1248,15 @@
    "matk_max": 631
   },
   "result": {
-   "dps": 2387.317,
+   "dps": 2354.634,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2050,
    "normal": {
-    "min": 3687,
-    "max": 6100,
-    "avg": 4894,
+    "min": 3620,
+    "max": 6035,
+    "avg": 4827,
     "steps": [
      "Base MATK",
      "bMatkRate",
@@ -1264,6 +1265,50 @@
      "Attr Fix",
      "Soul Strike vs Undead",
      "Card Fix (Magic)",
+     "× 5 hits",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "wizard-cold-bolt-vs-greatest-general": {
+  "status": {
+   "str": 2,
+   "agi": 9,
+   "vit": 2,
+   "int_": 111,
+   "dex": 96,
+   "luk": 3,
+   "batk": 21,
+   "max_hp": 3319,
+   "max_sp": 1901,
+   "aspd": 145.7,
+   "cri": 20,
+   "hit": 195,
+   "flee": 108,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 386,
+   "matk_max": 684
+  },
+  "result": {
+   "dps": 1437.03,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 5320,
+   "normal": {
+    "min": 5090,
+    "max": 10200,
+    "avg": 7645,
+    "steps": [
+     "Base MATK",
+     "bMatkRate",
+     "Skill Ratio (ID 14 Lv 10)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "× 10 hits",
      "Final Damage"
     ]
    }
@@ -1290,15 +1335,15 @@
    "matk_max": 631
   },
   "result": {
-   "dps": 947.54,
+   "dps": 944.454,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 5833,
    "normal": {
-    "min": 4168,
-    "max": 6886,
-    "avg": 5527,
+    "min": 4160,
+    "max": 6860,
+    "avg": 5509,
     "steps": [
      "Base MATK",
      "bMatkRate",
@@ -1306,6 +1351,7 @@
      "Magic Defense Fix",
      "Attr Fix",
      "Card Fix (Magic)",
+     "× 10 hits",
      "Final Damage",
      "Double Bolt"
     ]
@@ -1333,15 +1379,15 @@
    "matk_max": 684
   },
   "result": {
-   "dps": 8765.766,
+   "dps": 8738.739,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 333,
    "normal": {
-    "min": 2103,
-    "max": 3733,
-    "avg": 2919,
+    "min": 2090,
+    "max": 3720,
+    "avg": 2910,
     "steps": [
      "Base MATK",
      "bMatkRate",
@@ -1349,6 +1395,7 @@
      "Magic Defense Fix",
      "Attr Fix",
      "Card Fix (Magic)",
+     "× 10 hits",
      "Final Damage"
     ]
    }
@@ -1790,7 +1837,7 @@
    "matk_max": 349
   },
   "result": {
-   "dps": 472.786,
+   "dps": 457.214,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 8.6,
@@ -1845,9 +1892,9 @@
    },
    "proc_branches": {
     "autospell": {
-     "min": 965,
-     "max": 1478,
-     "avg": 1221,
+     "min": 918,
+     "max": 1428,
+     "avg": 1172,
      "steps": [
       "Base MATK",
       "bMatkRate",
@@ -1856,6 +1903,7 @@
       "Attr Fix",
       "Soul Strike vs Undead",
       "Card Fix (Magic)",
+      "× 3 hits",
       "Final Damage"
      ]
     }
@@ -1883,7 +1931,7 @@
    "matk_max": 349
   },
   "result": {
-   "dps": 267.676,
+   "dps": 267.04,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 8.6,
@@ -1938,9 +1986,9 @@
    },
    "proc_branches": {
     "autospell": {
-     "min": 250,
-     "max": 761,
-     "avg": 472,
+     "min": 248,
+     "max": 756,
+     "avg": 470,
      "steps": [
       "Base MATK",
       "bMatkRate",
@@ -1948,6 +1996,7 @@
       "Magic Defense Fix",
       "Attr Fix",
       "Card Fix (Magic)",
+      "× 3 hits",
       "Final Damage",
       "Auto Spell level mix"
      ]
@@ -2175,15 +2224,15 @@
    "matk_max": 579
   },
   "result": {
-   "dps": 143.511,
+   "dps": 142.748,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2620,
    "normal": {
-    "min": 281,
-    "max": 472,
-    "avg": 376,
+    "min": 279,
+    "max": 471,
+    "avg": 374,
     "steps": [
      "Base MATK",
      "bMatkRate",
@@ -2191,6 +2240,7 @@
      "Magic Defense Fix",
      "Attr Fix",
      "Card Fix (Magic)",
+     "× 3 hits",
      "Final Damage"
     ]
    }
@@ -2217,15 +2267,15 @@
    "matk_max": 579
   },
   "result": {
-   "dps": 386.364,
+   "dps": 381.818,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 1540,
    "normal": {
-    "min": 445,
-    "max": 746,
-    "avg": 595,
+    "min": 441,
+    "max": 738,
+    "avg": 588,
     "steps": [
      "Base MATK",
      "bMatkRate",
@@ -2233,6 +2283,7 @@
      "Magic Defense Fix",
      "Attr Fix",
      "Card Fix (Magic)",
+     "× 9 hits",
      "Final Damage"
     ]
    }

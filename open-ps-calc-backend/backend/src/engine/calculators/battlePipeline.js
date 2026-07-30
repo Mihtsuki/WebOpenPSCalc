@@ -236,14 +236,18 @@ class BattlePipeline {
     const hitCount = hitCountRaw > 0 ? hitCountRaw : 1;
 
     pmf = scaleFloor(pmf, ratio, 100);
-    pmf = scaleFloor(pmf, hitCount, 1);
+    // number_of_hits is applied at the END of this branch (after MDEF/element/
+    // cards), NOT here: each bolt of a multi-hit spell is reduced by the target's
+    // MDEF *separately*. Multiplying by the hit count up front would subtract the
+    // (flat, soft) MDEF only once instead of once per hit, badly overestimating
+    // multi-hit spells (bolts) vs high-MDEF targets.
 
     const [mn1, mx1, av1] = pmfStats(pmf);
     result.add_step({
       name: `Skill Ratio (ID ${skill.id} Lv ${skill.level})`,
       value: av1, min_value: mn1, max_value: mx1, multiplier: ratio / 100,
       note: skillData ? (skillData.description || "") : "",
-      formula: `dmg × ${ratio}% × ${hitCount} hit${hitCount !== 1 ? "s" : ""} (${ratioSrc})`,
+      formula: `dmg × ${ratio}%${hitCount !== 1 ? ` (per hit — ×${hitCount} hits applied after MDEF)` : ""} (${ratioSrc})`,
       hercules_ref: "battle.c battle_calc_skillratio BF_MAGIC",
     });
 
@@ -352,7 +356,19 @@ class BattlePipeline {
       }
     }
 
-    pmf = floorAt(pmf, 1);
+    pmf = floorAt(pmf, 1); // per-hit floor (each bolt is at least 1)
+
+    // Now sum the hits: each bolt was fully computed (ratio → MDEF → element →
+    // cards) and floored above, so a multi-hit spell is per-hit-damage × hits.
+    if (hitCount > 1) {
+      pmf = scaleFloor(pmf, hitCount, 1);
+      const [mnH, mxH, avH] = pmfStats(pmf);
+      result.add_step({
+        name: `× ${hitCount} hits`, value: avH, min_value: mnH, max_value: mxH, multiplier: hitCount,
+        note: `${skillName}: ${hitCount} hits — MDEF is applied to each hit separately (above), then summed.`,
+        formula: `per-hit dmg × ${hitCount}`, hercules_ref: "battle.c multi-hit magic",
+      });
+    }
 
     const [mn, mx, av] = pmfStats(pmf);
     result.add_step({

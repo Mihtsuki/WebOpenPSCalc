@@ -160,6 +160,16 @@ const scenarios = [
     target: 1036, // Undead race — PS +5%×lv bonus + 50% MDEF ignore
   },
   {
+    // Multi-hit magic (Cold Bolt Lv10 = 10 hits) vs a high-MDEF target: each bolt
+    // is reduced by the target's MDEF (hard % + soft flat) SEPARATELY, then summed.
+    // Regression for the per-hit magic MDEF fix — MDEF used to be subtracted once
+    // from the summed total, badly overestimating bolts vs high-MDEF mobs.
+    name: "wizard-cold-bolt-vs-greatest-general",
+    build: { job_id: 9, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 1, vit: 1, int: 99, dex: 90, luk: 1 }, equipped: { right_hand: 1601 } },
+    skill: { name: "MG_COLDBOLT", level: 10 },
+    target: 1277, // Greatest General — Fire (Cold Bolt amplified), hard MDEF 15 + soft MDEF ~85
+  },
+  {
     // Double Bolt (SC_DOUBLECASTING): fires the bolt volley a second time per cast,
     // so one cast deals 2× damage (period unchanged) and kills in half the casts.
     // Regression that Double Bolt changes per-cast damage / hits-to-kill, not just DPS.

@@ -9,6 +9,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Multi-hit magic (bolts) now applies MDEF per hit — big overestimate fixed.** Each bolt of a
+  multi-hit spell (Fire/Cold/Lightning Bolt, Soul Strike, Blaze Shield, autospell bolts) is reduced
+  by the target's MDEF **separately**. The calc was multiplying the per-hit damage by the hit count
+  *before* subtracting MDEF, so a target's (soft/flat) MDEF was subtracted only once from the whole
+  volley instead of once per bolt — badly overestimating bolts vs high-MDEF monsters. Now the hit
+  count is applied last, after per-hit MDEF/element/cards. Effect is small vs low-MDEF targets and
+  large vs high-MDEF ones (e.g. Cold Bolt vs Greatest General drops ~20%, matching field results).
+
 - **Momoe's Hairband now applies its Turtle Island bonus.** The hat's +1 AGI / +5 Flee already
   worked, but its main effect — **+20% damage vs the turtles of Turtle Island** (Permeter,
   Assaulter, Heater, Freezer; Turtle General is excluded) — wasn't modeled, so it looked like it did
