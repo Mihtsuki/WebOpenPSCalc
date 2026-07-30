@@ -1579,7 +1579,7 @@
     "job": [],
     "equip_level": 0,
     "refineable": false,
-    "script": "bonus bAgi,1; bonus bFlee,5;"
+    "script": "bonus bAgi,1; bonus bFlee,5; bonus2 bAddDamageClass,1314,20; bonus2 bAddDamageClass,1315,20; bonus2 bAddDamageClass,1318,20; bonus2 bAddDamageClass,1319,20;"
   },
   "8122": {
     "type": "IT_ARMOR",

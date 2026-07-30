@@ -17,6 +17,7 @@ const { calculateSkillRatio } = require("../src/engine/calculators/modifiers/ski
 const { calculateHitChance } = require("../src/engine/calculators/modifiers/hitChance");
 const { resolveWeapon, buildFromSaveSchema } = require("../src/engine/buildManager");
 const { createTarget, createSkillInstance, createCalcContext, createStatusData } = require("../src/engine/models");
+const { BattlePipeline } = require("../src/engine/calculators/battlePipeline");
 const { createBattleConfig } = require("../src/engine/config");
 const { resolvePlayerState } = require("../src/engine/playerStateBuilder");
 const { importJaludev } = require("../src/engine/jaludevImport");
@@ -343,6 +344,29 @@ test("natural SP regen increases with INT", () => {
 // jobs), so ps_item_manual restores the restriction. Guards against a regression
 // back to the empty array (which would let Novice/SN equip them again).
 // ---------------------------------------------------------------------------
+test("Momoe's Hairband gives +20% vs Turtle Island turtles, nothing vs others", () => {
+  const cfg = createBattleConfig();
+  const dmg = (hat, mobId) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 11, base_level: 99, job_level: 50,
+      base_stats: { str: 99, agi: 50, vit: 1, int: 1, dex: 99, luk: 1 },
+      equipped: hat ? { right_hand: 1201, head_top: 8065 } : { right_hand: 1201 },
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, getProfile("payon_stories"));
+    const r = new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }), loader.getMonster(mobId), eff, gb);
+    return r.normal.avg_damage;
+  };
+  // Turtle Island turtles (excluding Turtle General 1312): Permeter/Assaulter/Heater/Freezer.
+  for (const id of [1314, 1315, 1318, 1319]) {
+    const ratio = dmg(true, id) / dmg(false, id);
+    assert.ok(ratio > 1.15 && ratio <= 1.20 + 1e-9, `Momoe should add ~+20% vs mob ${id}, got x${ratio.toFixed(3)}`);
+  }
+  // Turtle General (1312) is explicitly excluded; Poring (1002) is unrelated.
+  for (const id of [1312, 1002]) {
+    assert.equal(dmg(true, id), dmg(false, id), `Momoe must not boost damage vs mob ${id}`);
+  }
+});
+
 test("Morpheus set is All-except-Novice (excludes Novice + Super Novice)", () => {
   // Mirrors the picker filter in routes/data.ts (jobMatch + empty-job path).
   const shows = (it, jobId) =>

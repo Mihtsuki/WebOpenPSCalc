@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-07-30
+
+### Fixed
+
+- **Momoe's Hairband now applies its Turtle Island bonus.** The hat's +1 AGI / +5 Flee already
+  worked, but its main effect — **+20% damage vs the turtles of Turtle Island** (Permeter,
+  Assaulter, Heater, Freezer; Turtle General is excluded) — wasn't modeled, so it looked like it did
+  nothing. Added the per-monster damage bonus; it now shows in the breakdown when you target one of
+  those mobs.
+
 ## 2026-07-29
 
 ### Fixed
