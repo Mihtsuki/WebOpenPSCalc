@@ -318,6 +318,11 @@ const SELF_BUFFS = [
   // presence-only (level doesn't change the magnitude in statusCalculator.js).
   { key: "SC_GS_MADNESSCANCEL", label: "Barrage",             max: 1,  jobs: [24] },
   { key: "SC_GS_ADJUSTMENT",   label: "Run and Gun",          max: 1,  jobs: [24] },
+  // Gatling Fever (GS_GATLINGFEVER): PS gives a flat +40% ATK at all levels plus
+  // an ASPD boost that scales with level; PS suppresses the vanilla flee penalty
+  // (statusCalculator.js + PS_RATE_BONUSES/PS_ASPD_BUFFS). Level is kept because
+  // the ASPD (and thus DPS) rises with it, even though the ATK% is flat.
+  { key: "SC_GS_GATLINGFEVER", label: "Gatling Fever",        max: 10, jobs: [24] },
   // Ninja Aura (NJ_NEN) — PS: +2 STR / +2 INT per level, max Lv5 (+10 each).
   // wiki.payonstories.com/Ninja_Aura. (Engine reads passive_overrides.SC_NJ_NEN.)
   { key: "SC_NJ_NEN",          label: "Ninja Aura",            max: 5,  jobs: [25] },

@@ -9,6 +9,11 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Gatling Fever selectable (Gunslinger).** The Gatling Fever self-buff was modeled in the engine
+  (PS: flat +40% ATK, level-scaled ASPD, no flee penalty) but wasn't in the buff picker, so there
+  was no way to turn it on. Added it to the Gunslinger self-buffs (levels 1–10 — the ATK% is flat
+  but ASPD/DPS rise with level).
+
 - **Short share links.** "Copy share link" now produces a short `/?s=<id>` URL instead of the long
   `?b=…` build string (a stored, deduplicated build payload). Opening a short link resolves it and
   loads the build; if the shortener is unreachable it falls back to the self-contained long link, so

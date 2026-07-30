@@ -51,6 +51,7 @@ const BUFF_SKILL = {
   SC_MAXIMIZEPOWER: "BS_MAXIMIZE",            // Maximize Power
   SC_GS_MADNESSCANCEL: "GS_MADNESSCANCEL",    // Barrage (PS rename, in DB)
   SC_GS_ADJUSTMENT: "GS_ADJUSTMENT",          // Run and Gun (PS rename, in DB)
+  SC_GS_GATLINGFEVER: "GS_GATLINGFEVER",      // Gatling Fever
   SC_NJ_NEN: "NJ_NEN",                        // Ninja Aura  <-- the "Ki" regression guard
   SC_AMPLIFYMAGICPOWER: "HW_MAGICPOWER",      // Amplify Magic Power
   // --- PARTY_BUFFS ---
