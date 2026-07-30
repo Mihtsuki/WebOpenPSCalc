@@ -7,6 +7,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-07-30
 
+### Added
+
+- **Short share links.** "Copy share link" now produces a short `/?s=<id>` URL instead of the long
+  `?b=…` build string (a stored, deduplicated build payload). Opening a short link resolves it and
+  loads the build; if the shortener is unreachable it falls back to the self-contained long link, so
+  existing `?b=` links keep working.
+
 ### Fixed
 
 - **Multi-hit magic (bolts) now applies MDEF per hit — big overestimate fixed.** Each bolt of a

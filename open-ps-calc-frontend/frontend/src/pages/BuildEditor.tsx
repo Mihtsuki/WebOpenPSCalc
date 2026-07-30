@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import LZString from "lz-string";
-import { api, statsApi } from "../api/client";
+import { api, statsApi, shareApi } from "../api/client";
 import SearchPicker from "../components/SearchPicker";
 import Panel from "../components/Panel";
 import InfoTooltip from "../components/InfoTooltip";
@@ -634,6 +634,27 @@ export default function BuildEditor() {
   const [targetMode, setTargetMode] = useState<TargetMode>(initialState?.targetMode ?? "monster");
   const [customTarget, setCustomTarget] = useState<CustomTarget>(initialState?.customTarget ?? DEFAULT_CUSTOM_TARGET);
   const [targetMods, setTargetMods] = useState<TargetMods>(initialState?.targetMods ?? DEFAULT_TARGET_MODS);
+
+  // Short share links (/?s=<id>): resolve the id to the full "z3_…" payload, then
+  // reload as /?b=<payload> so the entire existing decode/load path runs unchanged.
+  const [shareError, setShareError] = useState("");
+  useEffect(() => {
+    const sid = searchParams.get("s");
+    if (!sid || searchParams.get("b")) return;
+    let cancelled = false;
+    shareApi.resolve(sid)
+      .then(({ b }) => {
+        if (cancelled || !b) return;
+        window.location.replace(`${window.location.origin}${window.location.pathname}?${new URLSearchParams({ b })}`);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setShareError("That shared build link couldn’t be found — it may have been mistyped.");
+        setSearchParams({}, { replace: true });
+      });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Which equipment slot groups are in wildcard (custom card mix) mode.
   // Auto-enable only for slots that have both wildcard data AND an item actually equipped there.
@@ -1276,13 +1297,24 @@ export default function BuildEditor() {
     setResultsOpen(false);
   }
 
-  function onCopyLink() {
+  async function onCopyLink() {
     statsApi.trackFeature("share_link");
-    const url = writeStateToUrl(); // encode current state, reflect it in the URL, and copy that link
-    navigator.clipboard.writeText(url).then(() => {
+    const longUrl = writeStateToUrl(); // encode current state + reflect it in the address bar
+    // Prefer a short /?s=<id> link (backend stores the payload). Fall back to the
+    // self-contained long ?b= link if the shortener is unreachable.
+    let url = longUrl;
+    try {
+      const b = new URL(longUrl).searchParams.get("b");
+      if (b) {
+        const { id } = await shareApi.create(b);
+        url = `${window.location.origin}${window.location.pathname}?s=${id}`;
+      }
+    } catch { /* shortener unavailable — keep the long link */ }
+    try {
+      await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    });
+    } catch { /* clipboard blocked */ }
   }
 
   const itemLabel = (it: any) => it.slots > 0 ? `${it.name}[${it.slots}]` : it.name;
@@ -1367,6 +1399,12 @@ export default function BuildEditor() {
 
   return (
     <div className="app-shell">
+      {shareError && (
+        <div className="share-error" role="alert">
+          {shareError}
+          <button onClick={() => setShareError("")} aria-label="Dismiss">×</button>
+        </div>
+      )}
       <div className="topbar">
         <div className="topbar-left">
           <img className="brand-mark" src="/icon.svg" alt="Open PS Calc logo" width="26" height="26" />

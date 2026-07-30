@@ -88,6 +88,13 @@ export const api = {
     }>,
 };
 
+// Build-share URL shortener: store the long "z3_…" ?b= payload and get a short
+// id back, resolvable as /?s=<id>. See backend routes/share.ts.
+export const shareApi = {
+  create: (b: string) => request("/share", { method: "POST", body: { b } }) as Promise<{ id: string }>,
+  resolve: (id: string) => request(`/share/${encodeURIComponent(id)}`) as Promise<{ b: string }>,
+};
+
 // Fire-and-forget tracking beacon. Uses the proxied /api/calculate prefix (POST
 // to /stats/* isn't proxied) and sends the API key so it clears the /api gate.
 function beacon(payload: Record<string, unknown>) {

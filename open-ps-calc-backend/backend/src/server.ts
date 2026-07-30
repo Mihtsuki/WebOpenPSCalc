@@ -4,6 +4,7 @@ import cors from "cors";
 import dataRoutes from "./routes/data";
 import calculateRoutes from "./routes/calculate";
 import statsRoutes from "./routes/stats";
+import shareRoutes from "./routes/share";
 const { logCalculate } = require("./middleware/statsLogger");
 
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api", (req, res, next) => {
 
 app.use("/api/data", dataRoutes);
 app.use("/api/calculate", calculateRoutes);
+app.use("/api/share", shareRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
