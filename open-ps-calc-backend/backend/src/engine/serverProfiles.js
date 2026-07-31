@@ -361,6 +361,9 @@ const PS_WEAPON_VANILLA_OK = new Set([
   "MO_BALKYOUNG", "MO_FINGEROFFENSIVE", "MO_INVESTIGATE", "TK_STORMKICK",
   "TK_DOWNKICK", "TK_TURNKICK", "TK_COUNTER", "TK_JUMPKICK", "NJ_KUNAI",
   "NJ_ISSEN", "NJ_SYURIKEN", "CG_ARROWVULCAN",
+  // Rapid Shower: the vanilla per-hit ratio (100+10×lv)% × 5 hits = 550%→1000%
+  // total exactly matches the PS wiki ("500+50×SkillLvl", 550% Lv1 → 1000% Lv10).
+  "GS_RAPIDSHOWER",
 ]);
 
 // core/server_profiles.py's _PS_BF_MAGIC_RATIOS.

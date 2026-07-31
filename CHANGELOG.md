@@ -15,6 +15,10 @@ instead of release version. Dates are taken from actual git commit history.
   and its double-attack proc is folded into DPS when a **revolver** is equipped (no effect with
   rifles/shotguns/etc., per the wiki). At Lv10 a revolver's auto-attack DPS rises ~70%.
 
+- **Rapid Shower marked verified (no longer flagged "unaudited").** Its ratio was using the vanilla
+  fallback, which turns out to exactly match the PS wiki formula ((100+10×lv)% × 5 hits = 550% at
+  Lv1 → 1000% at Lv10), so the "⚠ PS unaudited" tag was misleading. Confirmed and cleared it.
+
 ## 2026-07-30
 
 ### Added
