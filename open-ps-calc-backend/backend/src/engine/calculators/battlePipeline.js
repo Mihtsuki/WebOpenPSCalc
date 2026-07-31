@@ -1636,7 +1636,11 @@ class BattlePipeline {
     // rate in the same roll (battle.c battle_calc_weapon_attack), so it's
     // additive here too, just without the dagger/normal-attack-only
     // restriction TF_DOUBLE itself has.
+    // Double-attack proc level + which proc-rate override supplies its per-level
+    // rate. Daggers use TF_DOUBLE; PS lets bows (Rogue rework) and revolvers
+    // (Gunslinger Chain Action) proc too.
     let tfDoubleLv = 0;
+    let doubleProcKey = "TF_DOUBLE";
     if (skill.id === 0 && weapon.weapon_type === "Knife") {
       tfDoubleLv = gearBonuses.effective_mastery.TF_DOUBLE || 0;
     } else if (skill.id === 0 && weapon.weapon_type === "Bow"
@@ -1646,8 +1650,14 @@ class BattlePipeline {
       const bowDA = gearBonuses.effective_mastery.TF_DOUBLE || 0;
       const vultureLv = gearBonuses.effective_mastery.AC_VULTURE || 0;
       if (bowDA > 0 && vultureLv > 0) tfDoubleLv = Math.min(bowDA, vultureLv);
+    } else if (skill.id === 0 && weapon.weapon_type === "Revolver") {
+      // Gunslinger Chain Action (GS_CHAINACTION): revolver normal attacks have a
+      // 7%/lv chance to fire a second time — "similar to Thieves Double Attack"
+      // (wiki.payonstories.com/Chain_Action: 7% at Lv1 → 70% at Lv10).
+      tfDoubleLv = gearBonuses.effective_mastery.GS_CHAINACTION || 0;
+      doubleProcKey = "GS_CHAINACTION";
     }
-    const doubleRate = (profile.proc_rate_overrides || {}).TF_DOUBLE ?? 5.0;
+    const doubleRate = (profile.proc_rate_overrides || {})[doubleProcKey] ?? 5.0;
     const skillProcChance = tfDoubleLv > 0 ? doubleRate * tfDoubleLv : 0;
     const itemDoubleRate = skill.id === 0 ? (gearBonuses.double_rate || 0) : 0;
     const procChance = Math.min(100, skillProcChance + itemDoubleRate);

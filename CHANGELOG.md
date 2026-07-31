@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-07-31
+
+### Fixed
+
+- **Chain Action now works (Gunslinger).** Chain Action (GS_CHAINACTION) — revolver normal attacks
+  have a 7%/lv chance (70% at Lv10) to fire a second time, like Thieves' Double Attack — was defined
+  in the profile but never applied, and wasn't selectable. Now it's a settable Gunslinger passive
+  and its double-attack proc is folded into DPS when a **revolver** is equipped (no effect with
+  rifles/shotguns/etc., per the wiki). At Lv10 a revolver's auto-attack DPS rises ~70%.
+
 ## 2026-07-30
 
 ### Added

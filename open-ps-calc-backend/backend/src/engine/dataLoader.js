@@ -433,6 +433,9 @@ class DataLoader {
       "SA_FREECAST",
       // Proc-based extra hits on normal attacks (battlePipeline.js#calculate)
       "TF_DOUBLE",
+      // PS Gunslinger Chain Action: revolver normal attacks proc a second hit
+      // (7%/lv → 70% at Lv10), read as effective_mastery.GS_CHAINACTION.
+      "GS_CHAINACTION",
       // PS Monk rework: MO_TRIPLEATTACK level sets proc rate and TA ratio damage
       "MO_TRIPLEATTACK",
       // PS Assassin rework: AS_ENCHANTPOISON level feeds the passive +2%/lv vs Poison element bonus

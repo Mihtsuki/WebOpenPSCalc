@@ -219,6 +219,14 @@ const scenarios = [
     skill: { name: "GS_DESPERADO", level: 10 },
     target: 1036,
   },
+  {
+    // Gunslinger Chain Action (GS_CHAINACTION): revolver normal attacks proc a
+    // second hit at 7%/lv (70% at Lv10). Normal attack (no skill). Regression
+    // that the double-attack shows up in DPS with a revolver equipped.
+    name: "gunslinger-chain-action-revolver",
+    build: { job_id: 24, base_level: 99, job_level: 50, base_stats: { str: 80, agi: 90, vit: 1, int: 1, dex: 80, luk: 1 }, equipped: { right_hand: 13100 }, mastery_levels: { GS_CHAINACTION: 10 } },
+    target: 1002,
+  },
 
   // --- Super Novice ------------------------------------------------------------------
   {

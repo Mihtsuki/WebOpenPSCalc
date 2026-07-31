@@ -1647,6 +1647,105 @@
    }
   }
  },
+ "gunslinger-chain-action-revolver": {
+  "status": {
+   "str": 83,
+   "agi": 93,
+   "vit": 1,
+   "int_": 1,
+   "dex": 90,
+   "luk": 6,
+   "batk": 188,
+   "max_hp": 4545,
+   "max_sp": 460,
+   "aspd": 162.3,
+   "cri": 30,
+   "hit": 179,
+   "flee": 192,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 1,
+   "matk_max": 1
+  },
+  "result": {
+   "dps": 459.196,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 3,
+   "period_ms": 754,
+   "normal": {
+    "min": 196,
+    "max": 216,
+    "avg": 206,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 218,
+    "max": 218,
+    "avg": 218,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "double_hit": {
+    "min": 196,
+    "max": 216,
+    "avg": 206,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "sn-status-fury-neverdied-conc": {
   "status": {
    "str": 65,
