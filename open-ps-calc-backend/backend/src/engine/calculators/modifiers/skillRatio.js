@@ -47,6 +47,16 @@ const BF_WEAPON_RATIOS = {
   BA_MUSICALSTRIKE: (lv) => 125 + 25 * lv,
   DC_THROWARROW: (lv) => 125 + 25 * lv,
   CG_ARROWVULCAN: (lv) => 200 + 100 * lv,   // battle.c: skillratio += 100 + 100*lv (base 100) → Lv1 300%..Lv10 1200%
+  // Learnable damage skills that were falling through to a flat 100% ratio. These
+  // are the vanilla pre-re formulas (ROADMAP "Not-yet-ported BF_WEAPON" audit,
+  // battle.c refs); not yet PS-confirmed, so they stay flagged "PS unaudited" on
+  // the Payon Stories profile until verified in-game.
+  CH_TIGERFIST: (lv) => 40 + 100 * lv,       // Tiger Knuckle Fist (battle.c:2073)
+  CH_CHAINCRUSH: (lv) => 400 + 100 * lv,     // Chain Crush Combo (battle.c:2076)
+  CH_PALMSTRIKE: (lv) => 200 + 100 * lv,     // Raging Palm Strike (battle.c:2079)
+  LK_HEADCRUSH: (lv) => 100 + 40 * lv,       // Head Crush (battle.c:2082)
+  LK_JOINTBEAT: (lv) => 50 + 10 * lv,        // Joint Beat base (×2 w/ Break-Neck ailment — not modeled) (battle.c:2085)
+  SN_SHARPSHOOTING: (lv) => 200 + 50 * lv,   // Sharp Shooting; auto-crit is wired separately in critChance.js (battle.c:2094)
   AM_DEMONSTRATION: (lv) => 100 + 20 * lv,
   // Added from core/calculators/modifiers/skill_ratio.py's _BF_WEAPON_RATIOS
   // (StatGameDev/Open_PS_Calc, MIT) — fills the table out to its full 52 entries.

@@ -86,7 +86,10 @@ test("skillRatio: Performing adds +100 ratio points and its own step", () => {
 });
 
 test("skillRatio: unknown skill falls back to 100% and flags the PS-unaudited warning", () => {
-  const { avg, steps } = ratioOf("LK_HEADCRUSH", 5); // documented vanilla-fallback skill (ROADMAP)
+  // A single-hit skill with no ratio table entry and not in weapon_vanilla_ok:
+  // Pressure's fixed-damage formula is still unported, so it falls back to flat
+  // 100%. (If it later gets a dedicated branch, swap this for another unmodeled skill.)
+  const { avg, steps } = ratioOf("PA_PRESSURE", 5);
   assert.strictEqual(avg, 1000);
   assert.ok(steps.some((n) => n.includes("Vanilla fallback")), `missing fallback warning: ${steps}`);
 });

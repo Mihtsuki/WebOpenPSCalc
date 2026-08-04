@@ -5,6 +5,19 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-05
+
+### Fixed
+
+- **Modeled several damage skills that were silently computing a flat 100% ratio.** A cross-class
+  audit found learnable damage skills falling through to a placeholder 100% ratio. Added the
+  (battle.c-verified) formulas for **Tiger Knuckle Fist** (40+100×lv), **Chain Crush Combo**
+  (400+100×lv), **Raging Palm Strike** (200+100×lv), **Head Crush** (100+40×lv), **Joint Beat**
+  (50+10×lv), and **Sharp Shooting** (200+50×lv). These are vanilla pre-re values pending in-game PS
+  confirmation, so they still show the "PS unaudited" tag in the breakdown. (Remaining gaps with
+  special mechanics — Spiral Pierce, Pressure, Shield Chain, Magic Crasher — are tracked for a
+  dedicated pass.)
+
 ## 2026-07-31
 
 ### Fixed
