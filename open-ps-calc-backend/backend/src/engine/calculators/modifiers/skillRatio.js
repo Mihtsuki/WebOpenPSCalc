@@ -145,7 +145,13 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
 
   let hitCountRaw = 1;
   if (skillName === "MO_FINGEROFFENSIVE") {
-    hitCountRaw = Math.max(1, params.MO_FINGEROFFENSIVE_spheres || 1);
+    // Throws one spirit sphere per skill level (each a hit), capped by the active
+    // spheres set on the build — you can't throw more than you have. 0 spheres
+    // (unset) assumes you have enough for the cast level. An explicit skill_param
+    // override still wins. wiki.payonstories.com/Finger_Offensive.
+    const spheres = build.spirit_spheres || 0;
+    const fromBuild = spheres > 0 ? Math.min(skill.level, spheres) : skill.level;
+    hitCountRaw = Math.max(1, params.MO_FINGEROFFENSIVE_spheres || fromBuild);
   } else {
     const psHcFn = (profile.weapon_hit_counts || {})[skillName];
     if (psHcFn) {

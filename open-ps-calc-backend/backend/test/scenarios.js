@@ -97,6 +97,15 @@ const scenarios = [
     target: 1867,
   },
   {
+    // Finger Offensive: PS = 350% ATK per spirit sphere (flat), throwing one sphere
+    // per skill level. Lv5 + 5 spheres = 5 hits. Regression that the hit count
+    // tracks the active spheres instead of always being 1.
+    name: "monk-finger-offensive-5-spheres",
+    build: { job_id: 15, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 40, int: 1, dex: 60, luk: 10 }, equipped: { right_hand: 1801 }, flags: { spirit_spheres: 5 } },
+    skill: { name: "MO_FINGEROFFENSIVE", level: 5 },
+    target: 1867,
+  },
+  {
     name: "monk-normal-attack-spheres",
     build: { job_id: 15, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 40, int: 40, dex: 60, luk: 10 }, equipped: {}, flags: { spirit_spheres: 5 } },
     target: 1036,

@@ -18,6 +18,12 @@ instead of release version. Dates are taken from actual git commit history.
   special mechanics — Spiral Pierce, Pressure, Shield Chain, Magic Crasher — are tracked for a
   dedicated pass.)
 
+- **Finger Offensive now throws the right number of spirit spheres.** It was hardcoded to a single
+  sphere (1 hit) regardless of the spheres set in Buffs, and used the vanilla per-hit ratio. Fixed to
+  the PS values: **350% ATK per sphere (flat, all levels)**, throwing one sphere per skill level, so
+  the hit count now tracks your active spheres (Lv5 with 5 spheres = 5 hits ≈ 5× the old damage),
+  capped by the level and by how many spheres you actually have.
+
 - **Wind Blade & Snow Flake Draft (Ninja) now do real damage.** Both were marked verified but had no
   ratio, so they computed a flat 100%. Added the PS-wiki values: **Wind Blade** 100% MATK per hit
   (Wind, hits scale by level), **Snow Flake Draft** 150%→350% MATK (Water, single hit, max Lv5).

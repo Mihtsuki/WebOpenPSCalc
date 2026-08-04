@@ -314,6 +314,7 @@ const PS_BF_WEAPON_RATIOS = {
   MO_TRIPLEATTACK: (lv) => 100 + 40 * lv,   // PS rework: 5 levels → 140/180/220/260/300%
   MO_CHAINCOMBO:   (lv) => 200 + 60 * lv,   // PS rework: 260/320/380/440/500%
   MO_COMBOFINISH:  (lv) => 255 + 90 * lv,   // PS rework: 345/435/525/615/705%
+  MO_FINGEROFFENSIVE: () => 350,            // PS: 350% ATK per spirit sphere, FLAT at all levels; throws up to `skill level` spheres (each a hit). wiki.payonstories.com/Finger_Offensive (vanilla was 100+50×lv/hit).
   PS_RG_TRICKARROW: () => 200,   // 2 hits × 100% ATK each
   PS_RG_QUICKSTEP: () => 10,
   PS_PR_HOLYSTRIKE: (lv, tgt, ctx) => 101 + (ctx ? ctx.base_str : 0) + (ctx ? ctx.base_level : 0),
@@ -358,7 +359,7 @@ const PS_WEAPON_VANILLA_OK = new Set([
   "SM_BASH", "SM_MAGNUM", "KN_SPEARSTAB", "KN_SPEARBOOMERANG", "KN_PIERCE",
   "KN_CHARGEATK", "TF_SPRINKLESAND", "AS_GRIMTOOTH", "AS_VENOMKNIFE",
   "RG_INTIMIDATE", "AC_SHOWER", "AC_CHARGEARROW", "HT_PHANTASMIC",
-  "MO_BALKYOUNG", "MO_FINGEROFFENSIVE", "MO_INVESTIGATE", "TK_STORMKICK",
+  "MO_BALKYOUNG", "MO_INVESTIGATE", "TK_STORMKICK",
   "TK_DOWNKICK", "TK_TURNKICK", "TK_COUNTER", "TK_JUMPKICK", "NJ_KUNAI",
   "NJ_ISSEN", "NJ_SYURIKEN", "CG_ARROWVULCAN",
   // Rapid Shower: the vanilla per-hit ratio (100+10×lv)% × 5 hits = 550%→1000%
