@@ -18,6 +18,10 @@ instead of release version. Dates are taken from actual git commit history.
   special mechanics — Spiral Pierce, Pressure, Shield Chain, Magic Crasher — are tracked for a
   dedicated pass.)
 
+- **Wind Blade & Snow Flake Draft (Ninja) now do real damage.** Both were marked verified but had no
+  ratio, so they computed a flat 100%. Added the PS-wiki values: **Wind Blade** 100% MATK per hit
+  (Wind, hits scale by level), **Snow Flake Draft** 150%→350% MATK (Water, single hit, max Lv5).
+
 ## 2026-07-31
 
 ### Fixed

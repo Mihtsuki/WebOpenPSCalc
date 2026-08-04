@@ -81,6 +81,8 @@ const BF_MAGIC_RATIOS = {
   NJ_KAMAITACHI:     (lv) => 100 + 30 * lv,
   NJ_KAENSIN:        () => 50, // Blaze Shield — 50% MATK per hit (flat, all levels); hits 3/6/9 by level via magic_hit_counts. wiki.payonstories.com/Blaze_Shield (old 100+10×lv single-hit lump was wrong).
   NJ_HITOKIRI:       (lv) => 150 + 50 * lv,
+  NJ_HUUJIN:         () => 100,             // Wind Blade — 100% MATK per hit (Wind); hits scale by level via number_of_hits. wiki.payonstories.com/Wind_Blade. (Was flagged vanilla-OK but had no ratio → flat 100% single value.)
+  NJ_HYOUSYOURAKU:   (lv) => 100 + 50 * lv, // Snow Flake Draft — 150%→350% MATK (Water), single hit, max Lv5. wiki.payonstories.com/Snow_Flake_Draft.
   // Bakuenryu (Exploding Dragon): a single hit split into 3, total 150+150×lv%
   // MATK (300%→900% for Lv1→5). skills.json marks it 3 hits, so this is the
   // per-hit ratio (50+50×lv). Without this it fell through to a flat 100%×3.
