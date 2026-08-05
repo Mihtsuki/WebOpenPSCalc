@@ -2782,7 +2782,7 @@ export default function BuildEditor() {
           <span className="credits-support-text">A fan project, running on milk tea</span>
         </div>
         <div className="credits-row">
-          <span>Thanks to our testers:&nbsp;<span className="credits-names">Metan, hokageyyy, leafhill, knightzeroxx, kerfuffl, jenardpwet, halcyon02, Solepto</span></span>
+          <span>Thanks to our testers:&nbsp;<span className="credits-names">Metan, hokageyyy, leafhill, knightzeroxx, kerfuffl, jenardpwet, halcyon02, Solepto, gibz0001</span></span>
           <span className="credits-sep">·</span>
           <span>Base engine by&nbsp;<span className="credits-names">tochoco.latte</span></span>
           <span className="credits-sep">·</span>
