@@ -1436,7 +1436,8 @@
     "weapon_level": 3,
     "equip_level": 12,
     "refineable": true,
-    "script": "bonus2 bSkillAtk,\"HT_LANDMINE\",5; bonus2 bSkillAtk,\"HT_FREEZINGTRAP\",5; bonus2 bSkillAtk,\"HT_BLASTMINE\",5; bonus2 bSkillAtk,\"HT_CLAYMORETRAP\",5;"
+    "script": "bonus2 bSkillAtk,\"HT_LANDMINE\",5; bonus2 bSkillAtk,\"HT_FREEZINGTRAP\",5; bonus2 bSkillAtk,\"HT_BLASTMINE\",5; bonus2 bSkillAtk,\"HT_CLAYMORETRAP\",5;",
+    "description": "A small Rekenber dagger that doubles as a tool for placing traps.<br/>Increases All Trap Damage by 5%<br/>Dealing damage with traps increases movement speed for (base INT/10) seconds.<br/>Must be equipped for 5 seconds for this effect to occur<br/>Class:<font color='#6666CC'> Dagger</font><br/>Attack:<font color='#CC0000'> 65</font><br/>Weight:<font color='#009900'> 50</font><br/>Weapon Level:<font color='#009900'> 3</font><br/>Level Requirement:<font color='#009900'> 12</font><br/>Jobs:<font color='#6666CC'> Hunter, Rogue</font>"
   },
   "81000": {
     "type": "IT_WEAPON",

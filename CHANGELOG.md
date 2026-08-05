@@ -9,6 +9,9 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Setting Dirk description corrected (20% → 5%).** The item tooltip claimed "+20% trap damage"; the
+  actual (and calculated) bonus is +5%. Display-only fix — the calc already used 5%.
+
 - **Magic damage no longer double-counts a weapon's +MATK%.** A magic weapon's `bMatkRate` (e.g. a
   Rod's +15% MATK) is already folded into your MATK stat, but the magic damage step was multiplying
   by it a **second** time — inflating every spell for any caster using a MATK% weapon/gear by that
