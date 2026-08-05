@@ -170,30 +170,21 @@ class BattlePipeline {
     const skillData = loader.getSkill(skill.id);
     const skillName = skill.name || "";
 
-    // 1. Base MATK (uniform distribution between matk_min and matk_max)
+    // 1. MATK (uniform between matk_min and matk_max). status.matk_min/max ALREADY
+    // includes every MATK modifier — gear/weapon bMatkRate, Amplify Magic Power,
+    // Volcano, flat MATK (statusCalculator status_calc_matk). Do NOT re-apply
+    // bMatkRate here: it was being applied a second time, double-counting the
+    // weapon's +MATK% (the % is already baked into the base MATK).
     const matkLo = Math.max(1, status.matk_min);
     const matkHi = Math.max(matkLo, status.matk_max);
     let pmf = uniformPmf(matkLo, matkHi);
     const [mn0, mx0, av0] = pmfStats(pmf);
     result.add_step({
       name: "Base MATK", value: av0, min_value: mn0, max_value: mx0,
-      note: `INT=${status.int_}  MATK ${matkLo}–${matkHi}`,
-      formula: "int+(int/7)² to int+(int/5)²",
+      note: `INT=${status.int_} — resolved MATK ${matkLo}–${matkHi} (already includes gear/buff MATK%: bMatkRate, Amplify, Volcano)`,
+      formula: "int+(int/7)² to int+(int/5)², × MATK% bonuses",
       hercules_ref: "status.c status_calc_matk",
     });
-
-    // bMatkRate gear bonus
-    if (gearBonuses && gearBonuses.matk_rate) {
-      pmf = scaleFloor(pmf, 100 + gearBonuses.matk_rate, 100);
-      const [mn, mx, av] = pmfStats(pmf);
-      result.add_step({
-        name: "bMatkRate", value: av, min_value: mn, max_value: mx,
-        multiplier: (100 + gearBonuses.matk_rate) / 100,
-        note: `bMatkRate +${gearBonuses.matk_rate}%`,
-        formula: `dmg*(100+${gearBonuses.matk_rate})//100`,
-        hercules_ref: "battle.c:5382",
-      });
-    }
 
     // 2. Skill ratio — explicit BF_MAGIC_RATIOS, then PS profile, then skill DB fallback
     const ctx = createCalcContext({
@@ -515,14 +506,12 @@ class BattlePipeline {
     // (wiki.payonstories.com/Grand_Cross). Vanilla bypasses via MASTERY_EXEMPT_SKILLS.
     atkPmf = calculateMasteryFix(weapon, build, target, atkPmf, result, skill, { profile, ctx });
 
-    // ── Magic part `ad`: MATK → MDEF ──
+    // ── Magic part `ad`: MATK → MDEF ── status.matk already includes bMatkRate/
+    // Amplify/Volcano (statusCalculator), so it is NOT re-applied here.
     const matkLo = Math.max(1, status.matk_min);
     const matkHi = Math.max(matkLo, status.matk_max);
     let matkPmf = uniformPmf(matkLo, matkHi);
-    if (gearBonuses && gearBonuses.matk_rate) {
-      matkPmf = scaleFloor(matkPmf, 100 + gearBonuses.matk_rate, 100);
-    }
-    { const [mn, mx, av] = pmfStats(matkPmf); result.add_step({ name: "Base MATK", value: av, min_value: mn, max_value: mx, note: `INT=${status.int_}  MATK ${matkLo}-${matkHi}`, formula: "int+(int/7)^2 to int+(int/5)^2", hercules_ref: "status.c status_calc_matk" }); }
+    { const [mn, mx, av] = pmfStats(matkPmf); result.add_step({ name: "Base MATK", value: av, min_value: mn, max_value: mx, note: `INT=${status.int_} — resolved MATK ${matkLo}-${matkHi} (incl. gear/buff MATK%)`, formula: "int+(int/7)^2 to int+(int/5)^2, × MATK% bonuses", hercules_ref: "status.c status_calc_matk" }); }
     // GC ignores the target's HARD MDEF too (see the DEF note above): pass a target
     // clone with mdef_ = 0 so the ×(100−MDEF)% step is skipped, while soft MDEF2
     // (INT + VIT/2) still subtracts.
@@ -623,11 +612,11 @@ class BattlePipeline {
     });
     atkPmf = calculateMasteryFix(weapon, build, casterTarget, atkPmf, scratch, skill, { profile, ctx });
 
-    // ── Magic part vs the caster's MDEF ──
+    // ── Magic part vs the caster's MDEF ── status.matk already includes bMatkRate/
+    // Amplify/Volcano (statusCalculator), so it is NOT re-applied here.
     const matkLo = Math.max(1, status.matk_min);
     const matkHi = Math.max(matkLo, status.matk_max);
     let matkPmf = uniformPmf(matkLo, matkHi);
-    if (gearBonuses && gearBonuses.matk_rate) matkPmf = scaleFloor(matkPmf, 100 + gearBonuses.matk_rate, 100);
     matkPmf = calculateMagicDefenseFix(casterTarget, gearBonuses || {}, matkPmf, scratch);
 
     // ── Sum → Holy element vs caster armour → × ratio → HALVE (build=null: the

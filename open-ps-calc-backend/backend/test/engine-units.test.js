@@ -412,3 +412,30 @@ test("bIgnoreDefRace,RC_All fans out and bypasses target DEF (Ahlspiess)", () =>
   assert.equal(zero.gb.ignore_def_rate.RC_NonBoss, 100, "RC_All → RC_NonBoss");
   assert.equal(zero.dmg, high.dmg, "Ahlspiess must ignore target DEF — damage is DEF-independent");
 });
+
+// ---------------------------------------------------------------------------
+// MATK% (bMatkRate) must be applied ONCE. statusCalculator bakes gear/weapon
+// bMatkRate into status.matk; the magic branch must not re-apply it (that
+// double-counted the weapon's +MATK%). Guards the fix.
+// ---------------------------------------------------------------------------
+test("magic bMatkRate is applied once, not double-counted", () => {
+  const cfg = createBattleConfig();
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 9, base_level: 99, job_level: 50,
+    base_stats: { str: 1, agi: 1, vit: 1, int: 99, dex: 1, luk: 1 },
+    equipped: { right_hand: 1601 }, // Rod = +15% MATK (bMatkRate,15)
+  });
+  const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, getProfile("payon_stories"));
+  assert.equal(gb.matk_rate, 15, "Rod should contribute +15% MATK");
+  const r = new BattlePipeline(cfg).calculate(
+    status, weapon, createSkillInstance({ id: 19, level: 1 }), // Fire Bolt Lv1 = 100% MATK, 1 hit
+    createTarget({ def_: 0, mdef_: 0, int_: 0, vit: 0, size: 1, race: 0, element: 0 }), eff, gb
+  ).normal;
+  // Neutral target, 0 DEF/MDEF, 100% ratio, no cards → damage == resolved MATK,
+  // which already includes the 15%. If bMatkRate were applied twice it'd be ×1.15 more.
+  const matkAvg = (status.matk_min + status.matk_max) / 2;
+  assert.ok(Math.abs(r.avg_damage - matkAvg) <= 1,
+    `magic damage ${r.avg_damage} should ≈ resolved MATK ${matkAvg} (no second matk_rate)`);
+  assert.ok(!r.steps.some((s) => /bMatkRate/.test(s.name)),
+    "bMatkRate must not be a separate step — it's already baked into Base MATK");
+});
