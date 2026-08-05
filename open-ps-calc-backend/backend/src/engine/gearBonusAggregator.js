@@ -58,12 +58,19 @@ function applyEffect(bonuses, eff) {
       for (const k of defn.keys) d[k] = (d[k] || 0) + v;
     } else if (defn.mode === "dict" && defn.field != null && typeof p[0] === "string") {
       const d = bonuses[defn.field];
-      d[p[0]] = (d[p[0]] || 0) + 1;
+      // Composite race constants fan out here too (see the arity-2 dict note below).
+      const keys = RC_FANOUT[p[0]] || [p[0]];
+      for (const k of keys) d[k] = (d[k] || 0) + 1;
     } else if (defn.mode === "dict_const" && defn.field != null && typeof p[0] === "string") {
       // arity-1 bonus whose single param is a dict key, set to a fixed value
       // (e.g. bIgnoreMdefRace,RC_NonBoss → ignore_mdef_rate.RC_NonBoss += 100).
+      // Composite race keys must fan out to their constituents (pc.c:3169-3185) —
+      // e.g. Ahlspiess's `bIgnoreDefRace,RC_All` has to land on RC_Boss + RC_NonBoss,
+      // which is what defenseFix looks up. Without this it stored a dead "RC_All" key.
       const d = bonuses[defn.field];
-      d[p[0]] = (d[p[0]] || 0) + (defn.value ?? 0);
+      const val = defn.value ?? 0;
+      const keys = RC_FANOUT[p[0]] || [p[0]];
+      for (const k of keys) d[k] = (d[k] || 0) + val;
     } else {
       const v = typeof p[0] === "number" ? p[0] : 0;
       if (defn.mode === "multi" && defn.fields) {

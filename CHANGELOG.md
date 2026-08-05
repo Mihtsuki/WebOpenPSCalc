@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Ahlspiess (and similar) now bypass DEF.** Weapons/gear with `bIgnoreDefRace,RC_All` (or a
+  composite race like `RC_DemiPlayer`) as a single-argument bonus were storing the DEF-ignore under
+  a dead `RC_All` key that the damage step never reads, so the pierce did nothing. Those composite
+  race keys now fan out to their real constituents (RC_Boss + RC_NonBoss, etc.) at aggregation time —
+  matching how the two-argument race bonuses already worked. Ahlspiess damage is now unaffected by
+  the target's DEF, as intended.
+
 - **Modeled several damage skills that were silently computing a flat 100% ratio.** A cross-class
   audit found learnable damage skills falling through to a placeholder 100% ratio. Added the
   (battle.c-verified) formulas for **Tiger Knuckle Fist** (40+100×lv), **Chain Crush Combo**

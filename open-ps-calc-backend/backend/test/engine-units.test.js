@@ -385,3 +385,30 @@ test("Morpheus set is All-except-Novice (excludes Novice + Super Novice)", () =>
     }
   }
 });
+
+// ---------------------------------------------------------------------------
+// Composite-race fan-out for arity-1 defensive dict bonuses. `bIgnoreDefRace,
+// RC_All` (Ahlspiess) must fan out to RC_Boss + RC_NonBoss — the keys defenseFix
+// actually reads — not persist as a dead "RC_All" key. Guards the DEF-bypass.
+// ---------------------------------------------------------------------------
+test("bIgnoreDefRace,RC_All fans out and bypasses target DEF (Ahlspiess)", () => {
+  const cfg = createBattleConfig();
+  const at = (def) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 7, base_level: 99, job_level: 50,
+      base_stats: { str: 99, agi: 60, vit: 1, int: 1, dex: 60, luk: 1 },
+      equipped: { right_hand: 1478 }, // Ahlspiess
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, getProfile("payon_stories"));
+    const dmg = new BattlePipeline(cfg)
+      .calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }),
+        createTarget({ def_: def, size: 1, race: 0, element: 0 }), eff, gb)
+      .normal.avg_damage;
+    return { gb, dmg };
+  };
+  const zero = at(0), high = at(120);
+  assert.ok(!("RC_All" in zero.gb.ignore_def_rate), "RC_All must fan out, not persist as a key");
+  assert.equal(zero.gb.ignore_def_rate.RC_Boss, 100, "RC_All → RC_Boss");
+  assert.equal(zero.gb.ignore_def_rate.RC_NonBoss, 100, "RC_All → RC_NonBoss");
+  assert.equal(zero.dmg, high.dmg, "Ahlspiess must ignore target DEF — damage is DEF-independent");
+});
