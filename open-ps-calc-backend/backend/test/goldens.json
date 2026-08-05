@@ -942,18 +942,17 @@
    "matk_max": 578
   },
   "result": {
-   "dps": 1187.206,
+   "dps": 1032.455,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2126,
    "normal": {
-    "min": 1876,
-    "max": 3172,
-    "avg": 2524,
+    "min": 1631,
+    "max": 2759,
+    "avg": 2195,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 542 Lv 5)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -984,18 +983,17 @@
    "matk_max": 630
   },
   "result": {
-   "dps": 8169.811,
+   "dps": 7033.543,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 477,
    "normal": {
-    "min": 2880,
-    "max": 4932,
-    "avg": 3897,
+    "min": 2460,
+    "max": 4260,
+    "avg": 3355,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 18 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -1376,18 +1374,17 @@
    "matk_max": 630
   },
   "result": {
-   "dps": 400.729,
+   "dps": 348.542,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 6860,
    "normal": {
-    "min": 2070,
-    "max": 3430,
-    "avg": 2749,
+    "min": 1800,
+    "max": 2980,
+    "avg": 2391,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 19 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -1419,18 +1416,17 @@
    "matk_max": 684
   },
   "result": {
-   "dps": 1035.97,
+   "dps": 901.371,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 9480,
    "normal": {
-    "min": 7073,
-    "max": 12561,
-    "avg": 9821,
+    "min": 6161,
+    "max": 10929,
+    "avg": 8545,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 85 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -1461,18 +1457,17 @@
    "matk_max": 631
   },
   "result": {
-   "dps": 2354.634,
+   "dps": 2043.902,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2050,
    "normal": {
-    "min": 3620,
-    "max": 6035,
-    "avg": 4827,
+    "min": 3135,
+    "max": 5235,
+    "avg": 4190,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 13 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -1505,18 +1500,17 @@
    "matk_max": 684
   },
   "result": {
-   "dps": 1437.03,
+   "dps": 1213.91,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 5320,
    "normal": {
-    "min": 5090,
-    "max": 10200,
-    "avg": 7645,
+    "min": 4250,
+    "max": 8680,
+    "avg": 6458,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 14 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -1548,18 +1542,17 @@
    "matk_max": 631
   },
   "result": {
-   "dps": 944.454,
+   "dps": 821.361,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 5833,
    "normal": {
-    "min": 4160,
-    "max": 6860,
-    "avg": 5509,
+    "min": 3600,
+    "max": 5980,
+    "avg": 4791,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 19 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -1592,18 +1585,17 @@
    "matk_max": 684
   },
   "result": {
-   "dps": 8738.739,
+   "dps": 7600.601,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 333,
    "normal": {
-    "min": 2090,
-    "max": 3720,
-    "avg": 2910,
+    "min": 1820,
+    "max": 3240,
+    "avg": 2531,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 19 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -2149,7 +2141,7 @@
    "matk_max": 349
   },
   "result": {
-   "dps": 457.214,
+   "dps": 405.731,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 8.6,
@@ -2204,12 +2196,11 @@
    },
    "proc_branches": {
     "autospell": {
-     "min": 918,
-     "max": 1428,
-     "avg": 1172,
+     "min": 789,
+     "max": 1236,
+     "avg": 1010,
      "steps": [
       "Base MATK",
-      "bMatkRate",
       "Skill Ratio (ID 13 Lv 5)",
       "Magic Defense Fix",
       "Attr Fix",
@@ -2243,7 +2234,7 @@
    "matk_max": 349
   },
   "result": {
-   "dps": 267.04,
+   "dps": 247.655,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 8.6,
@@ -2298,12 +2289,11 @@
    },
    "proc_branches": {
     "autospell": {
-     "min": 248,
-     "max": 756,
-     "avg": 470,
+     "min": 216,
+     "max": 660,
+     "avg": 409,
      "steps": [
       "Base MATK",
-      "bMatkRate",
       "Skill Ratio (ID 19 Lv 3)",
       "Magic Defense Fix",
       "Attr Fix",
@@ -2536,18 +2526,17 @@
    "matk_max": 579
   },
   "result": {
-   "dps": 142.748,
+   "dps": 124.046,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2620,
    "normal": {
-    "min": 279,
-    "max": 471,
-    "avg": 374,
+    "min": 243,
+    "max": 408,
+    "avg": 325,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 535 Lv 4)",
      "Magic Defense Fix",
      "Attr Fix",
@@ -2579,18 +2568,17 @@
    "matk_max": 579
   },
   "result": {
-   "dps": 381.818,
+   "dps": 331.818,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 1540,
    "normal": {
-    "min": 441,
-    "max": 738,
-    "avg": 588,
+    "min": 378,
+    "max": 639,
+    "avg": 511,
     "steps": [
      "Base MATK",
-     "bMatkRate",
      "Skill Ratio (ID 535 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",

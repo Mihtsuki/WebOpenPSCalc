@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Magic damage no longer double-counts a weapon's +MATK%.** A magic weapon's `bMatkRate` (e.g. a
+  Rod's +15% MATK) is already folded into your MATK stat, but the magic damage step was multiplying
+  by it a **second** time — inflating every spell for any caster using a MATK% weapon/gear by that
+  percentage. Removed the duplicate application in all magic paths (bolts/spells, autospell, Grand
+  Cross). Flat +MATK gear (e.g. Conductor Ring) was already correct and is unchanged. For a Rod
+  (+15%) that's a ~13% overstatement now corrected.
+
 - **Ahlspiess (and similar) now bypass DEF.** Weapons/gear with `bIgnoreDefRace,RC_All` (or a
   composite race like `RC_DemiPlayer`) as a single-argument bonus were storing the DEF-ignore under
   a dead `RC_All` key that the damage step never reads, so the pierce did nothing. Those composite
