@@ -106,6 +106,27 @@ const scenarios = [
     target: 1867,
   },
   {
+    // vanilla_ok re-audit fixes (PS wiki). Grimtooth: flat 200% ATK all levels.
+    name: "assassin-grimtooth",
+    build: { job_id: 12, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 80, vit: 30, int: 1, dex: 60, luk: 10 }, equipped: { right_hand: 1250 } },
+    skill: { name: "AS_GRIMTOOTH", level: 5 },
+    target: 1036,
+  },
+  {
+    // First Wind (Kamaitachi): PS 200%→600% MATK (+100/lv), Wind, 1 hit.
+    name: "ninja-first-wind",
+    build: { job_id: 25, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 40, vit: 30, int: 99, dex: 70, luk: 1 }, equipped: { right_hand: 1601 } },
+    skill: { name: "NJ_KAMAITACHI", level: 5 },
+    target: 1036,
+  },
+  {
+    // Fire Wall: PS 50% MATK per burn × (2 + level) hits (full-wall crossing).
+    name: "mage-fire-wall",
+    build: { job_id: 2, base_level: 70, job_level: 50, base_stats: { str: 1, agi: 40, vit: 20, int: 99, dex: 60, luk: 10 }, equipped: { right_hand: 1601 } },
+    skill: { name: "MG_FIREWALL", level: 10 },
+    target: 1036,
+  },
+  {
     name: "monk-normal-attack-spheres",
     build: { job_id: 15, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 40, int: 40, dex: 60, luk: 10 }, equipped: {}, flags: { spirit_spheres: 5 } },
     target: 1036,

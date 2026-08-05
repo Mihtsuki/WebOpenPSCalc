@@ -59,11 +59,13 @@ const BF_MAGIC_RATIOS = {
   MG_FIREBOLT:       () => 100,
   MG_COLDBOLT:       () => 100,
   MG_LIGHTNINGBOLT:  () => 100,
-  MG_FROSTDIVER:     () => 110,
-  MG_THUNDERSTORM:   () => 50,
+  MG_FROSTDIVER:     (lv) => 100 + 10 * lv,  // Frost Diver — 110%→200% MATK (+10/lv). wiki.payonstories.com/Frost_Diver (was flat 110%).
+  MG_THUNDERSTORM:   () => 80,               // Thunder Storm — 80% MATK per strike (hits scale by level via number_of_hits). PS wiki (was 50%).
+  MG_FIREWALL:       () => 50,               // Fire Wall — 50% MATK per burn; hits = 2 + skill level (magic_hit_counts), i.e. target crossing the full wall. PS wiki (was flat 100%, 1 hit).
   // Acolyte / Priest
   AL_HOLYLIGHT:      () => 125,
   PR_BENEDICTIO:     () => 50,
+  AL_RUWACH:         () => 145,              // Ruwach — 145% MATK, Holy (see skill_elements). PS wiki (was flat 100%).
   // Wizard / High Wizard
   WZ_EARTHSPIKE:     (lv) => 100 + 50 * lv,
   WZ_HEAVENDRIVE:    (lv) => 50 + 50 * lv,
@@ -78,7 +80,7 @@ const BF_MAGIC_RATIOS = {
   // Ninja
   NJ_KOUENKA:        () => 90, // Flaming Petals — 90% MATK per hit (hits = skill level); old 100+30×lv was wrong
   NJ_HYOUSENSOU:     () => 100,
-  NJ_KAMAITACHI:     (lv) => 100 + 30 * lv,
+  NJ_KAMAITACHI:     (lv) => 100 + 100 * lv, // First Wind — 200%→600% MATK (+100/lv), 1 hit, Wind, max Lv5. wiki.payonstories.com/First_Wind (was 100+30×lv).
   NJ_KAENSIN:        () => 50, // Blaze Shield — 50% MATK per hit (flat, all levels); hits 3/6/9 by level via magic_hit_counts. wiki.payonstories.com/Blaze_Shield (old 100+10×lv single-hit lump was wrong).
   NJ_HITOKIRI:       (lv) => 150 + 50 * lv,
   NJ_HUUJIN:         () => 100,             // Wind Blade — 100% MATK per hit (Wind); hits scale by level via number_of_hits. wiki.payonstories.com/Wind_Blade. (Was flagged vanilla-OK but had no ratio → flat 100% single value.)

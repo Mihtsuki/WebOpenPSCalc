@@ -191,6 +191,9 @@ const PS_MAGIC_HIT_COUNTS = {
   // Blaze Shield (NJ_KAENSIN): single-target hits scale by level — 3 (Lv1-4),
   // 6 (Lv5-8), 9 (Lv9-10) — each at 50% MATK. wiki.payonstories.com/Blaze_Shield.
   NJ_KAENSIN: (lv) => (lv <= 4 ? 3 : lv <= 8 ? 6 : 9),
+  // Fire Wall (MG_FIREWALL): the wall has 2 + skill level burn-cells, each 50%
+  // MATK — models a target crossing the full wall. wiki.payonstories.com/Fire_Wall.
+  MG_FIREWALL: (lv) => 2 + lv,
 };
 
 // Mechanic flag sentinels — checked by individual modifiers across the engine.
@@ -294,6 +297,7 @@ const PS_BF_WEAPON_RATIOS = {
     return Math.trunc((100 + 20 * lv) * mult);
   },
   AS_SONICBLOW: (lv) => 500 + 40 * lv,
+  AS_GRIMTOOTH: () => 200,   // PS: flat 200% ATK at all levels (only the AoE range scales). wiki.payonstories.com/Grimtooth (vanilla was 100+20×lv).
   KN_AUTOCOUNTER: () => 200,
   KN_SPEARSTAB: (lv) => 100 + 40 * lv, // 100 + 40×lv, capped at L5 (300%) — PDF-verified prior audit
   CR_HOLYCROSS: (lv) => 300 + 25 * lv,
@@ -357,7 +361,7 @@ const PS_BF_WEAPON_RATIOS = {
 // vanilla exactly on PS (suppresses skillRatio.js's "PS unaudited" warning).
 const PS_WEAPON_VANILLA_OK = new Set([
   "SM_BASH", "SM_MAGNUM", "KN_SPEARSTAB", "KN_SPEARBOOMERANG", "KN_PIERCE",
-  "KN_CHARGEATK", "TF_SPRINKLESAND", "AS_GRIMTOOTH", "AS_VENOMKNIFE",
+  "KN_CHARGEATK", "TF_SPRINKLESAND", "AS_VENOMKNIFE",
   "RG_INTIMIDATE", "AC_SHOWER", "AC_CHARGEARROW", "HT_PHANTASMIC",
   "MO_BALKYOUNG", "MO_INVESTIGATE", "TK_STORMKICK",
   "TK_DOWNKICK", "TK_TURNKICK", "TK_COUNTER", "TK_JUMPKICK", "NJ_KUNAI",

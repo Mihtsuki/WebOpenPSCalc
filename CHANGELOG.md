@@ -18,6 +18,13 @@ instead of release version. Dates are taken from actual git commit history.
   special mechanics — Spiral Pierce, Pressure, Shield Chain, Magic Crasher — are tracked for a
   dedicated pass.)
 
+- **Re-audit of "verified" skills caught six more wrong formulas.** A sweep of every skill marked
+  as matching PS (the `vanilla_ok` set) against the PS wiki found several that were mislabeled (same
+  class of bug as Finger Offensive). Corrected: **Grimtooth** → flat 200% ATK (was 100+20×lv);
+  **First Wind / Kamaitachi** → 200%→600% MATK (was 130%→250%); **Thunder Storm** → 80% MATK/hit
+  (was 50%); **Frost Diver** → 110%→200% scaling (was a flat 110%); **Ruwach** → 145% Holy MATK
+  (was flat 100%); **Fire Wall** → 50% MATK per burn × (2 + level) hits (was flat 100%, 1 hit).
+
 - **Finger Offensive now throws the right number of spirit spheres.** It was hardcoded to a single
   sphere (1 hit) regardless of the spheres set in Buffs, and used the vanilla per-hit ratio. Fixed to
   the PS values: **350% ATK per sphere (flat, all levels)**, throwing one sphere per skill level, so

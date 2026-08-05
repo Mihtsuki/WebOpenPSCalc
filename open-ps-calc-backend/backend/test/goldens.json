@@ -845,6 +845,167 @@
    }
   }
  },
+ "assassin-grimtooth": {
+  "status": {
+   "str": 96,
+   "agi": 90,
+   "vit": 32,
+   "int_": 5,
+   "dex": 68,
+   "luk": 10,
+   "batk": 192,
+   "max_hp": 7892,
+   "max_sp": 426,
+   "aspd": 171.4,
+   "cri": 43,
+   "hit": 167,
+   "flee": 189,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 5,
+   "matk_max": 6
+  },
+  "result": {
+   "dps": 942.21,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 8.6,
+   "period_ms": 572,
+   "normal": {
+    "min": 489,
+    "max": 571,
+    "avg": 530,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 137 Lv 5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 634,
+    "max": 634,
+    "avg": 634,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 137 Lv 5)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "ninja-first-wind": {
+  "status": {
+   "str": 1,
+   "agi": 46,
+   "vit": 30,
+   "int_": 103,
+   "dex": 74,
+   "luk": 3,
+   "batk": 15,
+   "max_hp": 5525,
+   "max_sp": 1059,
+   "aspd": 51.6,
+   "cri": 20,
+   "hit": 173,
+   "flee": 145,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 343,
+   "matk_max": 578
+  },
+  "result": {
+   "dps": 1187.206,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 2126,
+   "normal": {
+    "min": 1876,
+    "max": 3172,
+    "avg": 2524,
+    "steps": [
+     "Base MATK",
+     "bMatkRate",
+     "Skill Ratio (ID 542 Lv 5)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "mage-fire-wall": {
+  "status": {
+   "str": 1,
+   "agi": 44,
+   "vit": 20,
+   "int_": 107,
+   "dex": 63,
+   "luk": 13,
+   "batk": 15,
+   "max_hp": 1360,
+   "max_sp": 890,
+   "aspd": 146.7,
+   "cri": 53,
+   "hit": 133,
+   "flee": 114,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 381,
+   "matk_max": 630
+  },
+  "result": {
+   "dps": 8169.811,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 477,
+   "normal": {
+    "min": 2880,
+    "max": 4932,
+    "avg": 3897,
+    "steps": [
+     "Base MATK",
+     "bMatkRate",
+     "Skill Ratio (ID 18 Lv 10)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "× 12 hits",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "monk-normal-attack-spheres": {
   "status": {
    "str": 98,
