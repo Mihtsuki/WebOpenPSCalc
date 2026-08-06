@@ -2775,8 +2775,7 @@ export default function BuildEditor() {
 
       <footer className="credits-footer">
         <div className="credits-disclaimer">
-          Not affiliated with or maintained by the Payon Stories staff.
-          Numbers may be inaccurate; verify anything important in-game.
+          Not affiliated with or maintained by the Payon Stories staff. Numbers may be inaccurate; verify anything important in-game.
         </div>
         <div className="credits-support">
           <span className="credits-support-text">A fan project, running on milk tea</span>

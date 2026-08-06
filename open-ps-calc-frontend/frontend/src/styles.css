@@ -136,7 +136,7 @@ label {
   color: var(--text-faint);
   text-align: center;
 }
-.credits-disclaimer { max-width: 640px; font-size: 0.72rem; color: var(--text-dim); line-height: 1.5; }
+.credits-disclaimer { font-size: 0.72rem; color: var(--text-dim); line-height: 1.5; }
 .credits-support { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
 .credits-support-text { color: var(--text-faint); font-size: 0.72rem; }
 .credits-row { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
