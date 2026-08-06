@@ -18,6 +18,7 @@ interface StatsData {
   unique_ips: number;
   total_donate_clicks: number;
   donate_targets: DonateTarget[];
+  stored_shares?: number;
   browsers?: RankEntry[];
   operating_systems?: RankEntry[];
   devices?: RankEntry[];
@@ -323,6 +324,10 @@ export default function StatsPage() {
             <div className="stats-metric">
               <div className="stats-metric-val">{(data.total_donate_clicks ?? 0).toLocaleString()}</div>
               <div className="stats-metric-label">Donation clicks</div>
+            </div>
+            <div className="stats-metric">
+              <div className="stats-metric-val">{(data.stored_shares ?? 0).toLocaleString()}</div>
+              <div className="stats-metric-label">Stored builds</div>
             </div>
           </div>
 

@@ -7,7 +7,17 @@ const { loader } = require("../engine/dataLoader");
 const router = Router();
 const STATS_FILE   = path.join(__dirname, "../../../data-store/stats.ndjson");
 const CURSOR_FILE  = path.join(__dirname, "../../../data-store/consolidation-cursor.json");
+const SHARES_FILE  = path.join(__dirname, "../../../data-store/shares.json");
 const STATS_PASSWORD = process.env.STATS_PASSWORD;
+
+// Total number of copied/shared builds persisted in the share store (a single
+// id→entry JSON map; deduped by content, so this is the count of distinct builds).
+function countStoredShares(): number {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(SHARES_FILE, "utf8"));
+    return parsed && typeof parsed === "object" ? Object.keys(parsed).length : 0;
+  } catch { return 0; }
+}
 
 // Returns the timestamp up to which nginx logs have been consolidated into
 // NDJSON. Returns 0 if consolidation has never run.
@@ -239,6 +249,7 @@ router.get("/data", async (req: Request, res: Response) => {
     unique_ips:   uniqueIps.size,
     total_donate_clicks: donateEvents.length,
     donate_targets: donateTargets,
+    stored_shares:     countStoredShares(),
     browsers:          rankCounts(browserCounts),
     operating_systems: rankCounts(osCounts),
     devices:           rankCounts(deviceCounts),
