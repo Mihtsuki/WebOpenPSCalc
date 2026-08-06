@@ -265,18 +265,31 @@ label {
   flex-shrink: 0;
 }
 .kofi-modal-close:hover { color: var(--text); }
-/* The iframe fills a flexible pane; Ko-fi's form is ~680px tall. */
-.kofi-modal-frame { flex: 1; min-height: 560px; background: #fff; }
-.kofi-modal-fallback {
-  display: block;
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--text-faint);
-  padding: 0.5rem;
-  border-top: 1px solid var(--border-soft);
+/* Ko-fi's form is ~680px tall; the pane scrolls it on short viewports. Best
+   effort — some browsers block the cross-site form, so the CTA below is primary. */
+.kofi-modal-frame { flex: 1; min-height: 0; overflow-y: auto; background: #f9f9f9; }
+.kofi-modal-cta {
   flex-shrink: 0;
+  margin: 0.75rem 1.2rem 0.35rem;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--bg-panel);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: opacity 0.15s;
 }
-.kofi-modal-fallback:hover { color: var(--text-dim); }
+.kofi-modal-cta:hover { opacity: 0.88; text-decoration: none; }
+.kofi-modal-note {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  padding: 0 1.2rem 0.9rem;
+}
 
 .topbar {
   display: flex;
