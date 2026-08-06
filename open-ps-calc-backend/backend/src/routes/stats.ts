@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-const { logPageView, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache, parseUserAgent } = require("../middleware/statsLogger");
+const { logPageView, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache, parseUserAgent, isLocalIp } = require("../middleware/statsLogger");
 const { loader } = require("../engine/dataLoader");
 
 const router = Router();
@@ -112,7 +112,9 @@ router.get("/data", async (req: Request, res: Response) => {
     : [];
 
   const calcEvents = ndjsonEvents.filter((e: any) => e.type === "calculate");
-  const donateEvents = ndjsonEvents.filter((e: any) => e.type === "donate_click");
+  // Exclude donate clicks from localhost/private IPs — the owner's own testing
+  // (older events recorded before this filter existed are dropped here too).
+  const donateEvents = ndjsonEvents.filter((e: any) => e.type === "donate_click" && !isLocalIp(e.ip));
   const featureEvents = ndjsonEvents.filter((e: any) => e.type === "feature");
 
   const allEvents = [...archivedViews, ...recentViews, ...calcEvents];

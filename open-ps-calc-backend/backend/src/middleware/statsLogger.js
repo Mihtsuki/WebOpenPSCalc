@@ -214,6 +214,9 @@ function logDonateClick(req, target) {
   const ua = req.headers["user-agent"] || "";
   if (isBot(ua)) return;
   const ip = getIp(req);
+  // Don't record the owner's own testing: donate clicks from localhost/private
+  // IPs (e.g. localhost:5173 during development) are excluded.
+  if (isLocalIp(ip)) return;
   const label = typeof target === "string" ? target.slice(0, 40) : "unknown";
   resolveGeo(ip).then((geo) => {
     appendEvent({ ts: Date.now(), type: "donate_click", ip, ...geo, target: label });
@@ -233,4 +236,4 @@ function logFeature(req, name) {
   });
 }
 
-module.exports = { isBot, parseUserAgent, getIp, logPageView, logCalculate, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache };
+module.exports = { isBot, parseUserAgent, isLocalIp, getIp, logPageView, logCalculate, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache };
