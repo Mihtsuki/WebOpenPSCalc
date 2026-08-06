@@ -11,12 +11,16 @@ interface RegionEntry { region: string; count: number; }
 interface CountryEntry { country: string; count: number; regions?: RegionEntry[]; }
 interface FeatureEntry { name: string; count: number; }
 interface DonateTarget { target: string; count: number; }
+interface RankEntry { name: string; count: number; }
 interface StatsData {
   total_views: number;
   total_calcs: number;
   unique_ips: number;
   total_donate_clicks: number;
   donate_targets: DonateTarget[];
+  browsers?: RankEntry[];
+  operating_systems?: RankEntry[];
+  devices?: RankEntry[];
   by_day: DayEntry[];
   top_jobs: JobEntry[];
   top_skills: SkillEntry[];
@@ -164,6 +168,28 @@ function CountryTable({ countries }: { countries: CountryEntry[] }) {
             </React.Fragment>
           );
         })}
+      </tbody>
+    </table>
+  );
+}
+
+// Simple ranked name/count table with a share-of-total percentage — used for the
+// browser / OS / device visitor breakdowns.
+function RankTable({ rows, emptyMsg }: { rows?: RankEntry[]; emptyMsg: string }) {
+  if (!rows || rows.length === 0) return <p className="stats-empty">{emptyMsg}</p>;
+  const total = rows.reduce((a, r) => a + r.count, 0);
+  return (
+    <table className="stats-table">
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.name}>
+            <td className="stats-table-name">{r.name}</td>
+            <td className="stats-table-count">
+              {r.count.toLocaleString()}
+              {total > 0 && <span className="stats-table-pct"> · {Math.round((r.count / total) * 100)}%</span>}
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );
@@ -392,6 +418,21 @@ export default function StatsPage() {
                     </tbody>
                   </table>
                 )}
+            </div>
+
+            <div className="stats-section">
+              <h2 className="stats-section-title">Visitors by browser</h2>
+              <RankTable rows={data.browsers} emptyMsg="No browser data for this period." />
+            </div>
+
+            <div className="stats-section">
+              <h2 className="stats-section-title">Visitors by device</h2>
+              <RankTable rows={data.devices} emptyMsg="No device data for this period." />
+            </div>
+
+            <div className="stats-section">
+              <h2 className="stats-section-title">Visitors by OS</h2>
+              <RankTable rows={data.operating_systems} emptyMsg="No OS data for this period." />
             </div>
 
             <div className="stats-section">

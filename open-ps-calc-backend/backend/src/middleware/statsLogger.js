@@ -31,6 +31,39 @@ function isBot(ua = "") {
   return BOT_PATTERN.test(s);
 }
 
+// Lightweight, dependency-free User-Agent → {browser, os, device} classifier for
+// the stats page. Order matters: Edge/Opera/Samsung all embed "Chrome", and
+// Chrome embeds "Safari", so the more specific tokens must be tested first.
+function parseUserAgent(ua = "") {
+  const s = String(ua);
+  if (!s || s.length < 5) return { browser: "Unknown", os: "Unknown", device: "Unknown" };
+
+  let browser = "Other";
+  if (/\bEdg(e|A|iOS)?\//.test(s)) browser = "Edge";
+  else if (/\b(OPR|Opera)\//.test(s)) browser = "Opera";
+  else if (/\bSamsungBrowser\//.test(s)) browser = "Samsung Internet";
+  else if (/\bUCBrowser\//.test(s)) browser = "UC Browser";
+  else if (/\bCriOS\//.test(s)) browser = "Chrome";                 // Chrome on iOS
+  else if (/\bFirefox\//.test(s) || /\bFxiOS\//.test(s)) browser = "Firefox";
+  else if (/\bChrome\//.test(s)) browser = "Chrome";
+  else if (/\bSafari\//.test(s)) browser = "Safari";
+  else if (/\bMSIE |\bTrident\//.test(s)) browser = "Internet Explorer";
+
+  let os = "Other";
+  if (/Windows NT/.test(s)) os = "Windows";
+  else if (/\bCrOS\b/.test(s)) os = "ChromeOS";
+  else if (/Android/.test(s)) os = "Android";
+  else if (/(iPhone|iPad|iPod)/.test(s)) os = "iOS";
+  else if (/Mac OS X/.test(s)) os = "macOS";
+  else if (/Linux/.test(s)) os = "Linux";
+
+  let device = "Desktop";
+  if (/iPad/.test(s) || (/Android/.test(s) && !/Mobile/.test(s)) || /\bTablet\b/.test(s)) device = "Tablet";
+  else if (/Mobi|iPhone|iPod|Windows Phone|IEMobile/.test(s)) device = "Mobile";
+
+  return { browser, os, device };
+}
+
 function isLocalIp(ip) {
   return !ip || ip === "::1" || ip.startsWith("127.") || ip.startsWith("::ffff:127.") || ip.startsWith("192.168.") || ip.startsWith("10.");
 }
@@ -200,4 +233,4 @@ function logFeature(req, name) {
   });
 }
 
-module.exports = { isBot, getIp, logPageView, logCalculate, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache };
+module.exports = { isBot, parseUserAgent, getIp, logPageView, logCalculate, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache };

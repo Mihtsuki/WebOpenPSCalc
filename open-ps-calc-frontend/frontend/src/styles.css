@@ -1284,7 +1284,8 @@ label {
 .stats-table tr + tr td { border-top: 1px solid var(--border-soft); }
 .stats-table td { padding: 0.3rem 0.25rem; color: var(--text); }
 .stats-table-name { color: var(--text); }
-.stats-table-count { text-align: right; font-family: var(--mono); color: var(--accent); width: 3rem; }
+.stats-table-count { text-align: right; font-family: var(--mono); color: var(--accent); width: 3rem; white-space: nowrap; }
+.stats-table-pct { color: var(--text-faint); font-size: 0.85em; }
 
 .stats-loading { color: var(--text-faint); font-size: 0.9rem; }
 .stats-error   { color: #e55; font-size: 0.85rem; }

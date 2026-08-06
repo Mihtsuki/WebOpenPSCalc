@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import fs from "fs";
 import path from "path";
-const { logPageView, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache } = require("../middleware/statsLogger");
+const { logPageView, logDonateClick, logFeature, readNginxPageViews, batchResolveGeo, geoCache, parseUserAgent } = require("../middleware/statsLogger");
 const { loader } = require("../engine/dataLoader");
 
 const router = Router();
@@ -115,6 +115,11 @@ router.get("/data", async (req: Request, res: Response) => {
   const countryCounts: Record<string, number> = {};
   // country → (region → count), for the country drilldown.
   const regionsByCountry: Record<string, Record<string, number>> = {};
+  // Browser / OS / device of visitors, parsed from the page-view User-Agent
+  // (retroactive: nginx logs + archived NDJSON both carry `ua`).
+  const browserCounts: Record<string, number> = {};
+  const osCounts: Record<string, number> = {};
+  const deviceCounts: Record<string, number> = {};
   let totalViews = 0, totalCalcs = 0;
 
   for (const e of allEvents) {
@@ -129,6 +134,10 @@ router.get("/data", async (req: Request, res: Response) => {
     if (e.type === "page_view") {
       totalViews++;
       byDay[day].views++;
+      const { browser, os, device } = parseUserAgent(e.ua || "");
+      browserCounts[browser] = (browserCounts[browser] || 0) + 1;
+      osCounts[os] = (osCounts[os] || 0) + 1;
+      deviceCounts[device] = (deviceCounts[device] || 0) + 1;
     } else if (e.type === "calculate") {
       totalCalcs++;
       byDay[day].calcs++;
@@ -218,12 +227,21 @@ router.get("/data", async (req: Request, res: Response) => {
     .sort((a, b) => (b[1] as number) - (a[1] as number))
     .map(([target, count]) => ({ target, count }));
 
+  // Rank browser / OS / device breakdowns (highest first).
+  const rankCounts = (counts: Record<string, number>) =>
+    Object.entries(counts)
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .map(([name, count]) => ({ name, count }));
+
   res.json({
     total_views:  totalViews,
     total_calcs:  totalCalcs,
     unique_ips:   uniqueIps.size,
     total_donate_clicks: donateEvents.length,
     donate_targets: donateTargets,
+    browsers:          rankCounts(browserCounts),
+    operating_systems: rankCounts(osCounts),
+    devices:           rankCounts(deviceCounts),
     by_day:       filledDays,
     top_jobs:     topJobs,
     top_skills:   topSkills,
