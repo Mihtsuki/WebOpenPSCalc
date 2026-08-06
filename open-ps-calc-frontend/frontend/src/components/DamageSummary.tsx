@@ -168,7 +168,6 @@ function PipelineView({ steps, hideFinal = false }: { steps: Step[]; hideFinal?:
                 <span className="pl-name">{step.name}</span>
                 <span className="pl-dots" aria-hidden="true" />
                 <span className="pl-val">{stepDisplayVal(step)}</span>
-                {hasNote && <span className="pl-info" aria-hidden="true">ⓘ</span>}
               </div>
               {hasNote && <div className={`pl-note${isOpen ? " open" : ""}`}>{step.note}</div>}
             </div>
