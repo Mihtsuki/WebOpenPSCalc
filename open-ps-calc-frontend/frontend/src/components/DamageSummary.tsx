@@ -286,6 +286,38 @@ function AutoSpellView({ branch, chance, label }: { branch: DamageBranch; chance
   );
 }
 
+// Auto Blitz Beat — a Falcon Hunter/Sniper's bow auto-attack has a ⌊LUK/3⌋%
+// chance to auto-cast Blitz Beat. Fixed damage (no range), bypasses DEF; its
+// expected value is already folded into the DPS of the attack shown above. Shown
+// inline under the Normal tab so the proc's influence sits next to the DPS.
+function AutoBlitzView({ branch, chance, dpsAdded }: { branch: DamageBranch; chance: number; dpsAdded: number | null }) {
+  const n = (v: number) => Math.round(v).toLocaleString();
+  const note = branch.steps[0]?.note;
+  return (
+    <div className="breakdown-view">
+      <div className="breakdown-head">
+        <span className="breakdown-title">Auto Blitz Beat</span>
+        <span className="breakdown-sub">falcon proc · {chance}% per bow auto-attack</span>
+      </div>
+      {note && <div className="pl-note open" style={{ marginBottom: "0.5rem" }}>{note}</div>}
+      <div className="breakdown-total">
+        <span className="breakdown-total-label">Damage per proc</span>
+        <span className="breakdown-total-val">{n(branch.avg_damage)}</span>
+      </div>
+      {dpsAdded != null && dpsAdded > 0 && (
+        <div className="breakdown-total">
+          <span className="breakdown-total-label">≈ DPS added</span>
+          <span className="breakdown-total-val">+{n(dpsAdded)}</span>
+        </div>
+      )}
+      <div className="self-damage-resists" style={{ marginTop: "0.5rem" }}>
+        <span className="self-damage-chip muted">bypasses DEF · neutral element</span>
+        <span className="self-damage-chip muted">already folded into the DPS above</span>
+      </div>
+    </div>
+  );
+}
+
 function DualWieldStepList({ rh, lh, rhFactor, lhFactor, isCrit, psBonusPct }: {
   rh: DamageBranch; lh: DamageBranch;
   rhFactor: number; lhFactor: number; isCrit: boolean; psBonusPct?: number;
@@ -363,6 +395,19 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
         branch: autoSpellDamage,
         chance: activeResult.result.proc_chances?.autospell ?? 30,
         label: activeResult.result.proc_labels?.autospell ?? "",
+      }
+    : null;
+  // Auto Blitz Beat proc — shown inline (not on the Falcon tab) so its DPS
+  // influence sits next to the attack it rides on. ≈ DPS = chance × per-proc /
+  // attack period (the exact value is already folded into the DPS shown above).
+  const autoBlitzDamage = activeResult.result.proc_branches?.auto_blitz ?? null;
+  const autoBlitz = autoBlitzDamage && activeBranch !== "falcon"
+    ? {
+        branch: autoBlitzDamage,
+        chance: activeResult.result.proc_chances?.auto_blitz ?? 0,
+        dpsAdded: periodMs > 0
+          ? (autoBlitzDamage.avg_damage * (activeResult.result.proc_chances?.auto_blitz ?? 0) / 100) / (periodMs / 1000)
+          : null,
       }
     : null;
   const activeDamage: DamageBranch | null = activeBranch === "falcon"
@@ -663,6 +708,8 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
       {selfDamage && <SelfDamageView sd={selfDamage} />}
 
       {autoSpell && <AutoSpellView branch={autoSpell.branch} chance={autoSpell.chance} label={autoSpell.label} />}
+
+      {autoBlitz && <AutoBlitzView branch={autoBlitz.branch} chance={autoBlitz.chance} dpsAdded={autoBlitz.dpsAdded} />}
     </div>
   );
 }

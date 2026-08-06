@@ -15,7 +15,9 @@ instead of release version. Dates are taken from actual git commit history.
   min(Blitz Beat level, ⌊job level/10⌋+1) hits (capped at 5) — its expected value rides on the swing
   (no added attack time) and surfaces as a proc branch. The falcon panel now shows the real proc
   chance and hit count (previously it always said "5 hits") and hides the row when Blitz Beat isn't
-  learned.
+  learned. The proc is also surfaced **inline under the Normal-attack tab** (next to the DPS it
+  feeds) as an "Auto Blitz Beat" panel showing the proc chance, per-proc damage, and its
+  ≈ DPS contribution — instead of being buried in the separate Falcon tab.
 
 - **Negative stat bonuses now show on the stat cards.** A pet or gear that *lowers* a stat (e.g. the
   Yoyo pet's −1 LUK) was already applied to the stat total, but the little bonus badge only rendered
