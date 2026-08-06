@@ -9,6 +9,11 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Negative stat bonuses now show on the stat cards.** A pet or gear that *lowers* a stat (e.g. the
+  Yoyo pet's −1 LUK) was already applied to the stat total, but the little bonus badge only rendered
+  positive bonuses, so the −1 had no visible attribution. Equip/buff badges now show negative
+  values too (e.g. "−1 equip").
+
 - **Hits-to-kill and time-to-kill are now consistent.** Hits-to-kill was computed from the displayed
   branch's per-hit damage (e.g. the crit hit), effectively assuming every hit lands that way, while
   time-to-kill used the blended DPS (which folds in crit *rate* and procs). So a build with bigger

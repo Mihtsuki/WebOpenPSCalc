@@ -1753,8 +1753,8 @@ export default function BuildEditor() {
                           if (totalBonus === 0) return null;
                           const parts = [
                             jobBonus > 0 ? `+${jobBonus} job` : "",
-                            equipBonus > 0 ? `+${equipBonus} equip` : "",
-                            buffBonus > 0 ? `+${buffBonus} buff` : "",
+                            equipBonus !== 0 ? `${equipBonus > 0 ? "+" : ""}${equipBonus} equip` : "",
+                            buffBonus !== 0 ? `${buffBonus > 0 ? "+" : ""}${buffBonus} buff` : "",
                             manualBonus !== 0 ? `${manualBonus > 0 ? "+" : ""}${manualBonus} manual` : "",
                           ].filter(Boolean).join(", ");
                           return <span className="ro-stat-bonus" title={parts}>{totalBonus > 0 ? "+" : ""}{totalBonus}</span>;
@@ -1762,8 +1762,8 @@ export default function BuildEditor() {
                       ) : (
                         <>
                           {jobBonus > 0 && <span className="ro-stat-bonus" title={`+${jobBonus} from job level`}>+{jobBonus}</span>}
-                          {equipBonus > 0 && <span className="ro-stat-bonus ro-stat-bonus--equip" title={`+${equipBonus} from equipment`}>+{equipBonus}</span>}
-                          {buffBonus > 0 && <span className="ro-stat-bonus ro-stat-bonus--buff" title={`+${buffBonus} from skills / buffs`}>+{buffBonus}</span>}
+                          {equipBonus !== 0 && <span className="ro-stat-bonus ro-stat-bonus--equip" title={`${equipBonus > 0 ? "+" : ""}${equipBonus} from equipment / pet`}>{equipBonus > 0 ? "+" : ""}{equipBonus}</span>}
+                          {buffBonus !== 0 && <span className="ro-stat-bonus ro-stat-bonus--buff" title={`${buffBonus > 0 ? "+" : ""}${buffBonus} from skills / buffs`}>{buffBonus > 0 ? "+" : ""}{buffBonus}</span>}
                           {manualBonus !== 0 && <span className="ro-stat-bonus ro-stat-bonus--manual" title={`${manualBonus > 0 ? "+" : ""}${manualBonus} manual`}>{manualBonus > 0 ? "+" : ""}{manualBonus}</span>}
                         </>
                       )}
