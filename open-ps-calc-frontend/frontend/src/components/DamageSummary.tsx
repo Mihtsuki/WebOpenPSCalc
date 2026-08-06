@@ -419,14 +419,25 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
   const tuCastsRounded = tuCasts != null ? Math.max(1, Math.round(tuCasts)) : null;
   const periodS = (result.period_ms ?? 0) / 1000;
 
-  const hitsBest = isInstaKill ? null : hitsToKill(killMax);   // fewest hits — best-case (max) rolls
-  const hitsAvg = isInstaKill ? tuCastsRounded : hitsToKill(killAvg);
-  const hitsWorst = isInstaKill ? null : hitsToKill(killMin);  // most hits — worst-case (min) rolls
   // Poison ailment damage-over-time (per second), added to the attack DPS so the
   // target dies sooner. Constant since it's a fraction of Max HP, so it folds in
   // as a flat +DPS term. Only present in monster mode with the Poison status on.
   const poisonDot = poison_dot_per_sec != null && poison_dot_per_sec > 0 ? poison_dot_per_sec : 0;
   const killDps = (displayDpsValid && displayDps != null ? displayDps : 0) + poisonDot;
+
+  // Hits-to-kill and time-to-kill share ONE basis so they can't disagree: the
+  // expected damage per attack cycle = DPS × period, which folds in crit RATE,
+  // procs and ASPD exactly as the DPS/time do. (Using the displayed branch's
+  // per-hit damage for the hit count assumed 100% of that branch — e.g. all crits —
+  // so a big-crit / low-crit-rate build showed FEWER hits yet a SLOWER time.) The
+  // min/max envelope applies the displayed branch's roll spread around that value.
+  const expPerHit = !isInstaKill && killDps > 0 && periodS > 0 ? killDps * periodS : null;
+  const hiRatio = killAvg != null && killAvg > 0 && killMax != null ? killMax / killAvg : 1;
+  const loRatio = killAvg != null && killAvg > 0 && killMin != null ? killMin / killAvg : 1;
+  const hitsBest = isInstaKill ? null : hitsToKill(expPerHit != null ? expPerHit * hiRatio : null);   // fewest hits — best-case rolls
+  const hitsAvg = isInstaKill ? tuCastsRounded : hitsToKill(expPerHit);
+  const hitsWorst = isInstaKill ? null : hitsToKill(expPerHit != null ? expPerHit * loRatio : null);  // most hits — worst-case rolls
+
   const timeToKill = isInstaKill
     ? (tuCasts != null && periodS > 0 ? tuCasts * periodS : null)
     : (target_hp != null && killDps > 0 ? target_hp / killDps : null);
@@ -499,7 +510,7 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
           </div>
         )}
         {!isInstaKill && hitsAvg != null && (
-          <div className="metric metric-range" title={`Hits to kill the ${target_hp!.toLocaleString()}-HP target — from best-case (all max-damage rolls) to worst-case (all min-damage rolls).`}>
+          <div className="metric metric-range" title={`Expected hits to kill the ${target_hp!.toLocaleString()}-HP target — using your effective per-hit damage (folding in crit rate, procs and ASPD, same as Time to kill), from best-case to worst-case damage rolls.`}>
             <div className="label">Hits to kill</div>
             <div className="value range">
               {hitsBest}<span className="unit">min</span>

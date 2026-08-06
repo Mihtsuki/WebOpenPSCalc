@@ -5,6 +5,17 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-06
+
+### Fixed
+
+- **Hits-to-kill and time-to-kill are now consistent.** Hits-to-kill was computed from the displayed
+  branch's per-hit damage (e.g. the crit hit), effectively assuming every hit lands that way, while
+  time-to-kill used the blended DPS (which folds in crit *rate* and procs). So a build with bigger
+  crits but a lower crit rate could show *fewer* hits yet a *slower* kill time — contradictory. Both
+  now derive from the same expected damage-per-cycle (DPS × attack period), so more damage/fewer hits
+  always means a faster kill.
+
 ## 2026-08-05
 
 ### Fixed
