@@ -207,6 +207,8 @@ label {
   padding: 0.35rem 0.85rem;
   border-radius: 20px;
   white-space: nowrap;
+  cursor: pointer;
+  font-family: inherit;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .support-card-cta:hover { background: var(--accent); color: var(--bg-panel); border-color: var(--accent); }
@@ -214,6 +216,67 @@ label {
   .support-card { flex-wrap: wrap; }
   .support-card-msg { flex-basis: 100%; }
 }
+
+/* Ko-fi in-app tip panel (KofiModal) — donation form embedded so tipping never
+   leaves the calc. */
+.kofi-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 9, 14, 0.72);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+  padding: 1.5rem 1rem;
+}
+.kofi-modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--accent-soft);
+  width: 100%;
+  max-width: 420px;
+  max-height: min(90dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.kofi-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+.kofi-modal-msg { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; min-width: 0; }
+.kofi-modal-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+.kofi-modal-sub { font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; }
+.kofi-modal-sub strong { color: var(--accent); }
+.kofi-modal-close {
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 0 0.3rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.kofi-modal-close:hover { color: var(--text); }
+/* The iframe fills a flexible pane; Ko-fi's form is ~680px tall. */
+.kofi-modal-frame { flex: 1; min-height: 560px; background: #fff; }
+.kofi-modal-fallback {
+  display: block;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  padding: 0.5rem;
+  border-top: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+.kofi-modal-fallback:hover { color: var(--text-dim); }
 
 .topbar {
   display: flex;

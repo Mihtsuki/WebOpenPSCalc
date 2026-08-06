@@ -17,10 +17,11 @@ interface Props {
   onRemovePin: (id: string) => void;
   onLoadPin: (pin: ComparePin) => void;
   onClearPins: () => void;
+  onOpenTip: () => void;
 }
 
 const ResultsPanel = forwardRef<HTMLDivElement, Props>(
-  ({ open, onClose, calcResult, calculating, error, forceProcs, onToggleForceProcs, pins, onPin, onRemovePin, onLoadPin, onClearPins }, ref) => {
+  ({ open, onClose, calcResult, calculating, error, forceProcs, onToggleForceProcs, pins, onPin, onRemovePin, onLoadPin, onClearPins, onOpenTip }, ref) => {
     if (!open) return null;
     const live = summaryMetrics(calcResult);
     return (
@@ -53,17 +54,14 @@ const ResultsPanel = forwardRef<HTMLDivElement, Props>(
               <span className="support-card-emoji">🍵</span>
               <div className="support-card-msg">
                 <span className="support-card-head">Enjoying the calc?</span>
-                <span className="support-card-sub">A fan project for the Payon Stories community — milk tea keeps it brewing.</span>
+                <span className="support-card-sub">A fan project for the Payon Stories community — a $3 milk tea keeps it brewing.</span>
               </div>
-              <a
+              <button
                 className="support-card-cta"
-                href="https://ko-fi.com/I7A322JOTP"
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => statsApi.trackDonateClick("results")}
+                onClick={() => { statsApi.trackDonateClick("results"); onOpenTip(); }}
               >
-                Buy me one
-              </a>
+                Tip $3
+              </button>
             </div>
           )}
         </div>

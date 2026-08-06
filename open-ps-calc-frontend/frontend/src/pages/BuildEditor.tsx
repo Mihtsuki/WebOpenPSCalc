@@ -9,6 +9,7 @@ import ChangelogModal from "../components/ChangelogModal";
 import ResultsPanel from "../components/ResultsPanel";
 import SavedBuildsModal from "../components/SavedBuildsModal";
 import ImportJaludevModal from "../components/ImportJaludevModal";
+import KofiModal from "../components/KofiModal";
 import { summaryMetrics, type ComparePin } from "../components/CompareView";
 import { BreakpointsView } from "../components/BreakpointsView";
 import starterBuildsJson from "../data/starterBuilds.json";
@@ -826,6 +827,7 @@ export default function BuildEditor() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [savedBuildsOpen, setSavedBuildsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [tipOpen, setTipOpen] = useState(false);
   const handleImported = useCallback((imported: any) => {
     statsApi.trackFeature("jaludev_import");
     setData((prev) => ({ ...DEFAULT_BUILD, ...imported, server: prev.server }));
@@ -1482,7 +1484,7 @@ export default function BuildEditor() {
             <button onClick={() => { onNewBuild(); setMenuOpen(false); }}>Start over</button>
             <button onClick={() => { setChangelogOpen(true); setMenuOpen(false); }}>Changelog</button>
             <button onClick={() => { onCopyLink(); setMenuOpen(false); }}>{copied ? "Copied!" : "Copy share link"}</button>
-            <a className="topbar-kofi-btn" href="https://ko-fi.com/I7A322JOTP" target="_blank" rel="noreferrer" onClick={() => { statsApi.trackDonateClick("topbar"); setMenuOpen(false); }}>🍵 Support the calc</a>
+            <button type="button" className="topbar-kofi-btn" onClick={() => { statsApi.trackDonateClick("topbar"); setMenuOpen(false); setTipOpen(true); }}>🍵 Support the calc</button>
           </div>
 
           {/* Hamburger — hidden on desktop */}
@@ -1504,6 +1506,7 @@ export default function BuildEditor() {
 
       <div className="page">
         <ChangelogModal open={changelogOpen} onClose={() => setChangelogOpen(false)} />
+        <KofiModal open={tipOpen} onClose={() => setTipOpen(false)} />
         <SavedBuildsModal
           open={savedBuildsOpen}
           onClose={() => setSavedBuildsOpen(false)}
@@ -1593,6 +1596,7 @@ export default function BuildEditor() {
           onRemovePin={handleRemovePin}
           onLoadPin={handleLoadPin}
           onClearPins={handleClearPins}
+          onOpenTip={() => setTipOpen(true)}
         />
 
         <div className="editor-grid">
