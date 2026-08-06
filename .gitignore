@@ -11,9 +11,7 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Local agent working context (never pushed)
+# Local agent working context (never pushed) — this is a public repo
 CLAUDE.md
 context.md
-
-# Per-machine Claude permissions (.claude/settings.json IS shared and committed)
-.claude/settings.local.json
+.claude/
