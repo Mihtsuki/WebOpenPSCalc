@@ -9,6 +9,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Auto Blitz Beat now factors into a Falcon Hunter/Sniper's DPS.** The falcon's auto-triggered
+  Blitz Beat was displayed as a damage number but was never folded into the attack DPS or
+  time/hits-to-kill. A bow *auto-attack* now procs it at ⌊LUK/3⌋% chance for
+  min(Blitz Beat level, ⌊job level/10⌋+1) hits (capped at 5) — its expected value rides on the swing
+  (no added attack time) and surfaces as a proc branch. The falcon panel now shows the real proc
+  chance and hit count (previously it always said "5 hits") and hides the row when Blitz Beat isn't
+  learned.
+
 - **Negative stat bonuses now show on the stat cards.** A pet or gear that *lowers* a stat (e.g. the
   Yoyo pet's −1 LUK) was already applied to the stat total, but the little bonus badge only rendered
   positive bonuses, so the −1 had no visible attribution. Equip/buff badges now show negative

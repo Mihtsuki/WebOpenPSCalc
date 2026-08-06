@@ -51,11 +51,20 @@ function computeFalconDamage(status, build, gearBonuses, target, loader) {
   const racePct = (addRace[raceRc] || 0) + (addRace[bossRc] || 0);
   const perHit = racePct ? Math.floor(afterElem * (100 + racePct) / 100) : afterElem;
 
+  // Auto Blitz Beat (triggers on a BOW auto-attack): chance = ⌊LUK/3⌋%, hits =
+  // min(Blitz Beat level, ⌊job level/10⌋+1) capped at 5 — requires Blitz Beat
+  // learned. wiki.payonstories.com/Blitz_Beat.
+  const jobLevel = build.job_level || 1;
+  const autoBlitzHits = blitzBeatLv >= 1 ? Math.min(blitzBeatLv, Math.floor(jobLevel / 10) + 1, 5) : 0;
+  const autoBlitzChance = Math.min(100, Math.floor(status.luk / 3));
+
   return {
     per_hit:           perHit,
     blitz_beat_lv:     blitzBeatLv,
     steel_crow_lv:     steelCrowLv,
-    auto_blitz_total:  perHit * 5,               // always 5 hits (same as Blitz Beat lv5)
+    auto_blitz_hits:   autoBlitzHits,
+    auto_blitz_chance: autoBlitzChance,
+    auto_blitz_total:  perHit * autoBlitzHits,   // per-hit × actual hit count
     blitz_beat_total:  blitzBeatLv ? perHit * blitzBeatLv : null,
   };
 }

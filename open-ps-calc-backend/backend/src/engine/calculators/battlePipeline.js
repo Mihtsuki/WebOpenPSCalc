@@ -1806,6 +1806,30 @@ class BattlePipeline {
       }
     }
 
+    // PS Auto Blitz Beat: a Hunter/Sniper with a Falcon has a ⌊LUK/3⌋% chance on
+    // each BOW auto-attack to auto-trigger Blitz Beat (bypasses flee/DEF; ATK cards
+    // don't apply). Hits = min(Blitz Beat level, ⌊job level/10⌋+1), capped at 5.
+    // Its expected value folds into DPS on the swing (no added attack time), and it
+    // surfaces as a proc branch. wiki.payonstories.com/Blitz_Beat.
+    let autoBlitzBranch = null, autoBlitzChance = 0;
+    if (skill.id === 0 && weapon.weapon_type === "Bow") {
+      const falcon = computeFalconDamage(status, build, gearBonuses, target, loader);
+      if (falcon && falcon.auto_blitz_hits >= 1 && falcon.auto_blitz_chance > 0) {
+        const hits = falcon.auto_blitz_hits;
+        autoBlitzChance = falcon.auto_blitz_chance;
+        const total = falcon.auto_blitz_total;
+        autoBlitzBranch = createDamageResult({
+          min_damage: total, max_damage: total, avg_damage: total,
+          steps: [{
+            name: `Auto Blitz Beat (${hits} hit${hits > 1 ? "s" : ""})`, value: total, min_value: total, max_value: total, multiplier: 1.0,
+            note: `⌊LUK/3⌋ = ${autoBlitzChance}% chance per bow attack; ${hits} × ${falcon.per_hit} — (LUK ${status.luk} + INT/2 ${Math.floor(status.int_ / 2)} + 6×SteelCrow ${falcon.steel_crow_lv} + 20)×2, neutral, bypasses DEF`,
+            formula: `perHit × ${hits} hits`, hercules_ref: "wiki.payonstories.com/Blitz_Beat",
+          }],
+        });
+        attacks.push(createAttackDefinition(total, 0.0, 0.0, autoBlitzChance / 100.0));
+      }
+    }
+
     const dps = calculateDps(attacks);
 
     return createBattleResult({
@@ -1826,9 +1850,9 @@ class BattlePipeline {
       ta_proc: taProc,
       ta_crit_proc: taCritProc,
       ta_proc_chance: taProcChance,
-      proc_branches: autoSpellBranch ? { autospell: autoSpellBranch } : {},
-      proc_chances: autoSpellBranch ? { autospell: autoSpellChance } : {},
-      proc_labels: autoSpellBranch ? { autospell: autoSpellLabel } : {},
+      proc_branches: { ...(autoSpellBranch ? { autospell: autoSpellBranch } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzBranch } : {}) },
+      proc_chances: { ...(autoSpellBranch ? { autospell: autoSpellChance } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzChance } : {}) },
+      proc_labels: { ...(autoSpellBranch ? { autospell: autoSpellLabel } : {}), ...(autoBlitzBranch ? { auto_blitz: "Auto Blitz Beat" } : {}) },
       dw_lh_normal:    dualWield ? dualWield.lhNormal        : null,
       dw_lh_crit:      dualWield ? dualWield.lhCrit          : null,
       dw_rh_factor:    dualWield ? dualWield.rhFactor         : null,

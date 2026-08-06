@@ -45,6 +45,8 @@ interface FalconResult {
   per_hit: number;
   blitz_beat_lv: number;
   steel_crow_lv: number;
+  auto_blitz_hits: number;
+  auto_blitz_chance: number;
   auto_blitz_total: number;
   blitz_beat_total: number | null;
 }
@@ -180,10 +182,12 @@ function PipelineView({ steps, hideFinal = false }: { steps: Step[]; hideFinal?:
 function FalconView({ falcon }: { falcon: FalconResult }) {
   return (
     <div className="falcon-rows">
-      <div className="falcon-row">
-        <span className="falcon-label">Auto-blitz (5 hits)</span>
-        <span className="falcon-value">{falcon.auto_blitz_total}</span>
-      </div>
+      {falcon.auto_blitz_hits >= 1 && (
+        <div className="falcon-row">
+          <span className="falcon-label">Auto-blitz ({falcon.auto_blitz_chance}% chance, {falcon.auto_blitz_hits} hit{falcon.auto_blitz_hits > 1 ? "s" : ""})</span>
+          <span className="falcon-value">{falcon.auto_blitz_total}</span>
+        </div>
+      )}
       {falcon.blitz_beat_total != null && (
         <div className="falcon-row">
           <span className="falcon-label">Blitz Beat Lv {falcon.blitz_beat_lv} ({falcon.blitz_beat_lv} × {falcon.per_hit})</span>

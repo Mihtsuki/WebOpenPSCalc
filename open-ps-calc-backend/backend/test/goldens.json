@@ -2625,6 +2625,92 @@
    }
   }
  },
+ "hunter-normal-attack-auto-blitz": {
+  "status": {
+   "str": 5,
+   "agi": 96,
+   "vit": 3,
+   "int_": 64,
+   "dex": 70,
+   "luk": 84,
+   "batk": 136,
+   "max_hp": 4881,
+   "max_sp": 665,
+   "aspd": 167.2,
+   "cri": 290,
+   "hit": 169,
+   "flee": 195,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 145,
+   "matk_max": 208
+  },
+  "result": {
+   "dps": 1104.97,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 29,
+   "period_ms": 656,
+   "normal": {
+    "min": 160,
+    "max": 184,
+    "avg": 172,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 186,
+    "max": 186,
+    "avg": 186,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "proc_branches": {
+    "auto_blitz": {
+     "min": 1960,
+     "max": 1960,
+     "avg": 1960,
+     "steps": [
+      "Auto Blitz Beat (5 hits)"
+     ]
+    }
+   }
+  }
+ },
  "ninja-shadow-slash-hiding": {
   "status": {
    "str": 96,

@@ -349,6 +349,13 @@ const scenarios = [
     skill: { name: "HT_BLITZBEAT", level: 5 },
     target: 1002,
   },
+  {
+    // Bow auto-attack auto-triggers Blitz Beat: ⌊LUK/3⌋% chance, min(BB lv, ⌊jobLv/10⌋+1) hits,
+    // folded into DPS as a proc (proc_branches.auto_blitz). Same build as manual above.
+    name: "hunter-normal-attack-auto-blitz",
+    build: { job_id: 11, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 90, vit: 1, int: 60, dex: 60, luk: 80 }, equipped: { right_hand: 1707 }, mastery_levels: { HT_FALCON: 1, HT_STEELCROW: 10, HT_BLITZBEAT: 5 } },
+    target: 1002,
+  },
 
   // --- Ninja Shadow Slash (NJ_KIRIKAGE) — from-Hiding ratio bonus --------------------------
   {

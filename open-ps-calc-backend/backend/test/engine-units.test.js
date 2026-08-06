@@ -267,6 +267,55 @@ test("Hindsight: gated to PS profile and the Sage line", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Auto Blitz Beat — a Falcon Hunter/Sniper's BOW auto-attack has a ⌊LUK/3⌋%
+// chance to auto-trigger Blitz Beat (min(BB lv, ⌊jobLv/10⌋+1) hits, capped 5),
+// folded into DPS as proc_branches.auto_blitz. wiki.payonstories.com/Blitz_Beat.
+// ---------------------------------------------------------------------------
+const FALCON_HUNTER = (opts = {}) => ({
+  build: {
+    server: "payon_stories", job_id: 11, base_level: 99, job_level: opts.jobLevel ?? 50,
+    base_stats: { str: 1, agi: 90, vit: 1, int: 60, dex: 60, luk: 80 },
+    equipped: { right_hand: opts.weapon ?? 1707 }, // 1707 Great Bow (default); 1101 Sword to test non-bow
+    mastery_levels: { HT_FALCON: 1, HT_STEELCROW: 10, ...(opts.bb === 0 ? {} : { HT_BLITZBEAT: opts.bb ?? 5 }) },
+  },
+  // no `skill` → normal attack
+  target: 1002,
+});
+
+test("Auto Blitz Beat: bow normal attack surfaces a proc branch at ⌊LUK/3⌋% chance", () => {
+  // Live engine — runScenario's serialization drops proc_chances, so read it here.
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 11, base_level: 99, job_level: 50,
+    base_stats: { str: 1, agi: 90, vit: 1, int: 60, dex: 60, luk: 80 },
+    equipped: { right_hand: 1707 }, mastery_levels: { HT_FALCON: 1, HT_STEELCROW: 10, HT_BLITZBEAT: 5 },
+  });
+  const [gb, eff, weapon, status] = resolvePlayerState(b, createBattleConfig(), getProfile("payon_stories"));
+  const r = new BattlePipeline(createBattleConfig()).calculate(
+    status, weapon, createSkillInstance({ id: 0, level: 1 }),
+    createTarget({ def_: 0, size: 1, race: 0, element: 0 }), eff, gb);
+  assert.ok(r.proc_branches?.auto_blitz, "expected proc_branches.auto_blitz for a Falcon bow Hunter");
+  assert.strictEqual(r.proc_chances.auto_blitz, Math.floor(status.luk / 3), "chance must be ⌊LUK/3⌋");
+});
+
+test("Auto Blitz Beat: raises DPS over the same build without Blitz Beat learned", () => {
+  const withBB = runScenario(FALCON_HUNTER({ bb: 5 })).result;
+  const without = runScenario(FALCON_HUNTER({ bb: 0 })).result;
+  assert.strictEqual(without.proc_branches, undefined, "no Blitz Beat ⇒ no auto-blitz branch");
+  assert.ok(withBB.dps > without.dps, `auto-blitz should raise DPS (${withBB.dps} !> ${without.dps})`);
+});
+
+test("Auto Blitz Beat: does not trigger on a non-bow weapon", () => {
+  assert.strictEqual(runScenario(FALCON_HUNTER({ weapon: 1101 })).result.proc_branches, undefined);
+});
+
+test("Auto Blitz Beat: hit count is capped by job level (⌊jobLv/10⌋+1), not always 5", () => {
+  const step20 = runScenario(FALCON_HUNTER({ jobLevel: 20 })).result.proc_branches.auto_blitz.steps[0];
+  const step50 = runScenario(FALCON_HUNTER({ jobLevel: 50 })).result.proc_branches.auto_blitz.steps[0];
+  assert.match(step20, /\(3 hits\)/, "jobLv20 (tier ⌊20/10⌋+1 = 3) → 3 hits even at Blitz Beat Lv5");
+  assert.match(step50, /\(5 hits\)/, "jobLv50 → capped at Blitz Beat Lv5 = 5 hits");
+});
+
+// ---------------------------------------------------------------------------
 // Improve Concentration (SC_CONCENTRATION) must not scale pet AGI/DEX — pet
 // loyalty stat bonuses are equipment-like (pc_bonus/param_bonus), which IC
 // excludes (status.c). Regression for the from_cards fix in buildApplicator.
