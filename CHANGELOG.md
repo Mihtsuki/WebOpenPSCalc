@@ -7,6 +7,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-06
 
+### Changed
+
+- **Clearer support wording.** The tip modal, the donation card under the results, and the
+  footer note now explain what a contribution goes toward — helping cover hosting costs and
+  keeping the (free) calc and its reworks going — instead of the milk-tea metaphor.
+
 ### Fixed
 
 - **Auto Blitz Beat now factors into a Falcon Hunter/Sniper's DPS.** The falcon's auto-triggered

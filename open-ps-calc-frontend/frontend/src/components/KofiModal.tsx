@@ -41,7 +41,7 @@ export default function KofiModal({ open, onClose }: Props) {
           <div className="kofi-modal-msg">
             <span className="kofi-modal-title">🍵 Enjoying the calc?</span>
             <span className="kofi-modal-sub">
-              A free fan project — milk tea keeps the server paid and new reworks coming. Thank you!
+              A free fan project — chipping in helps cover hosting costs and keeps new reworks coming. Thank you!
             </span>
           </div>
           <button ref={closeRef} className="kofi-modal-close" onClick={onClose} aria-label="Close">×</button>

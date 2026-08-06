@@ -2782,7 +2782,7 @@ export default function BuildEditor() {
           Not affiliated with or maintained by the Payon Stories staff. Numbers may be inaccurate; verify anything important in-game.
         </div>
         <div className="credits-support">
-          <span className="credits-support-text">A fan project, running on milk tea</span>
+          <span className="credits-support-text">A free fan project — donations help cover hosting costs</span>
         </div>
         <div className="credits-row">
           <span>Thanks to our testers:&nbsp;<span className="credits-names">Metan, hokageyyy, leafhill, knightzeroxx, kerfuffl, jenardpwet, halcyon02, Solepto, gibz0001</span></span>

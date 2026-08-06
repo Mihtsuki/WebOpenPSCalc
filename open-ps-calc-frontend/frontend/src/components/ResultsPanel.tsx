@@ -54,13 +54,13 @@ const ResultsPanel = forwardRef<HTMLDivElement, Props>(
               <span className="support-card-emoji">🍵</span>
               <div className="support-card-msg">
                 <span className="support-card-head">Enjoying the calc?</span>
-                <span className="support-card-sub">A fan project for the Payon Stories community — milk tea keeps it brewing.</span>
+                <span className="support-card-sub">A free fan project for the Payon Stories community — chip in to help cover hosting costs and keep it running.</span>
               </div>
               <button
                 className="support-card-cta"
                 onClick={() => { statsApi.trackDonateClick("results"); onOpenTip(); }}
               >
-                Buy me one
+                Chip in
               </button>
             </div>
           )}
