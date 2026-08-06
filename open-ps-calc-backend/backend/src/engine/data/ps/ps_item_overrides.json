@@ -4529,7 +4529,7 @@
   "13302": {
     "script": "bonus bUnbreakableWeapon,0;"
   },
-  "91136": {
+  "8269": {
     "_ps_custom": true,
     "name": "Ring of Peace",
     "description": "A ring that makes you feel calm. It is given to those who value peace above all else.<br/><font color='#FFFFFF'>_</font><br/>MaxHP +100<br/>MaxSP +10<br/>HP and SP Recovery Rates +5%<br/>Class:<font color='#6666CC'> Accessory</font><br/>Defense:<font color='#009900'> 0</font><br/>Weight:<font color='#009900'> 10</font><br/>Level Requirement:<font color='#009900'> 40</font><br/>Jobs:<font color='#777777'> All</font>"

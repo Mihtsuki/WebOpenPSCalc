@@ -1976,7 +1976,7 @@
     "refineable": false,
     "script": "bonus2 bSubEle,Ele_Water,3;"
   },
-  "91136": {
+  "8269": {
     "type": "IT_ARMOR",
     "loc": ["EQP_ACC"],
     "def": 0,

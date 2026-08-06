@@ -15,8 +15,11 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
-- **Ring of Peace now accepts a card.** The accessory was defined with 0 card slots, so the
-  editor never showed a card slot for it. It's now a 1-slot accessory, matching the in-game item.
+- **Ring of Peace now accepts a card, and uses its correct item id.** The accessory was defined
+  with 0 card slots, so the editor never showed a card slot for it — it's now a 1-slot accessory,
+  matching the in-game item. It was also mistakenly stored under item id 91136, which is actually
+  Frostfire Cartridge (a duplicate JSON key was silently shadowing the real cartridge); Ring of
+  Peace now lives under its real id 8269 and no longer collides.
 
 - **Auto Blitz Beat now factors into a Falcon Hunter/Sniper's DPS.** The falcon's auto-triggered
   Blitz Beat was displayed as a damage number but was never folded into the attack DPS or
