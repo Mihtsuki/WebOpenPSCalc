@@ -1980,7 +1980,7 @@
     "type": "IT_ARMOR",
     "loc": ["EQP_ACC"],
     "def": 0,
-    "slots": 0,
+    "slots": 1,
     "aegis_name": "Ring_of_Peace",
     "job": [],
     "equip_level": 40,
