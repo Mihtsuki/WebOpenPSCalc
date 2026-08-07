@@ -245,6 +245,16 @@ without re-auditing everything from scratch.
   no UI for), consumables, target selection, skill selection, and the
   damage breakdown — still not full parity (no combat-controls panel, no
   build-vs-build comparison).
+- **Incoming damage from the target monster's *skills*, not just its normal
+  attack.** The Survivability panel (`calculators/incomingPipeline.js`,
+  `components/SurvivabilityView.tsx`) computes a real damage-taken figure for the
+  mob's basic melee and its elemental `NPC_*ATTACK` skills, but for a picked cast
+  skill (the `mob_skill` param) it deliberately shows only element / physical-vs-
+  magic / hit count and **no damage number** — because PS tunes mob-skill power
+  beyond what `mob_skill_db.json` carries, so a naive computed figure would be
+  badly off. To model it we'd need PS-accurate per-skill power data (base
+  damage / ratio / level scaling) for those `NPC_*` skills, then run each cast
+  through the same incoming defense pipeline the basic attack already uses.
 
 ## Planned front-end features (product)
 
