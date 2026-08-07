@@ -15,7 +15,7 @@ interface IncomingResult {
 
 interface SkillDamage {
   modeled: boolean;
-  skill: { name: string; desc: string; attackType: string; elementInt: number; hits: number; ratio: number; ratioKnown: boolean };
+  skill: { name: string; desc: string; attackType: string; elementInt: number; hits: number; ratio: number; hasNumber: boolean; estimated: boolean; damageType: "damage" | "status" };
   result: { min_damage: number; max_damage: number; avg_damage: number } | null;
 }
 
@@ -66,25 +66,42 @@ function EleLine({ ele, taken, maxHp, isBasic }: { ele: number; taken: IncomingR
   );
 }
 
-// What a picked cast skill hits you WITH — element + physical/magic + hit count.
-// Deliberately no damage number: mob skill power is PS-tuned beyond the available
-// data, so a computed figure would be badly off (see the survivability note).
-function SkillDetail({ label, dmg }: { label: string; dmg: SkillDamage }) {
+// What a picked cast skill does to you. When the skill's ratio is known we price
+// it through the incoming pipeline and show the damage (per cast, all hits); NPC_*
+// skills use the Hercules-baseline ratio and are flagged as an estimate. Skills we
+// can't price as a ratio (flat/special) show element + type only.
+function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; maxHp: number }) {
   const s = dmg.skill;
   const magic = s.attackType === "Magic";
+  const r = dmg.result;
+  const hasNumber = !!r && s.hasNumber;
+  const range = r ? Math.round(r.min_damage) !== Math.round(r.max_damage) : false;
+  const hitsToKill = r && r.avg_damage > 0 ? Math.ceil(maxHp / r.avg_damage) : null;
   return (
     <div className="surv-skill-body">
       <div className="surv-line-head">
         <span className="surv-line-label">
-          {label}<span className="surv-tag surv-tag--skill"> {magic ? "Magic" : "Physical"} · {eleName(s.elementInt)}</span>
+          {label}
+          <span className="surv-tag surv-tag--skill"> {magic ? "Magic" : "Physical"} · {eleName(s.elementInt)}</span>
+          {hasNumber && s.estimated && <span className="surv-tag surv-tag--est"> ≈ est.</span>}
         </span>
-        <span className="surv-line-dmg surv-skill-hits">{s.hits > 1 ? `${s.hits} hits` : "1 hit"}</span>
+        {hasNumber && r ? (
+          <span className="surv-line-dmg">
+            {range ? `${n(r.min_damage)}–${n(r.max_damage)}` : n(r.avg_damage)}
+            <span className="surv-line-unit">{s.hits > 1 ? ` / cast (${s.hits} hits)` : " / hit"}</span>
+          </span>
+        ) : (
+          <span className="surv-line-dmg surv-skill-hits">{s.hits > 1 ? `${s.hits} hits` : "1 hit"}</span>
+        )}
       </div>
       <div className="surv-line-metrics">
+        {hasNumber && hitsToKill != null && <span className="surv-chip"><b>{hitsToKill}</b> casts to down you</span>}
         <span className="surv-chip">{magic ? "vs your MDEF" : "vs your DEF"}</span>
         <span className="surv-chip good">{eleName(s.elementInt)} resist reduces it</span>
       </div>
-      <p className="surv-skill-note">Exact damage isn't modelled — PS tunes mob skill power beyond the available data.</p>
+      {hasNumber
+        ? s.estimated && <p className="surv-skill-note">Estimate — Hercules-baseline ratio; PS may tune this skill's power.</p>
+        : <p className="surv-skill-note">Exact damage isn't modelled — PS tunes this skill's power beyond the available data. Use the element to pick resist gear.</p>}
     </div>
   );
 }
@@ -147,7 +164,7 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
 
       {kit.length > 0 && (
         <div className="surv-kit">
-          <span className="surv-kit-label">Damage skills it casts — tap for element &amp; type</span>
+          <span className="surv-kit-label">Damage skills it casts — tap for the damage it does to you</span>
           <div className="surv-kit-list">
             {kit.map((s) => (
               <button
@@ -163,13 +180,12 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
             <div className="surv-skill-detail">
               {loading ? (
                 <span className="surv-skill-msg">Loading {pickedSkill.d}…</span>
-              ) : dmg && dmg.modeled ? (
-                <SkillDetail label={pickedSkill.d} dmg={dmg} />
-              ) : dmg && !dmg.modeled ? (
+              ) : dmg && dmg.skill.damageType === "status" ? (
                 <span className="surv-skill-msg">
-                  {pickedSkill.d} — {dmg.skill.attackType === "Misc" ? "special / AoE skill" : "support / summon"};
-                  no direct damage.
+                  {pickedSkill.d} — inflicts a status / drain; no direct damage.
                 </span>
+              ) : dmg ? (
+                <SkillDetail label={pickedSkill.d} dmg={dmg} maxHp={maxHp} />
               ) : (
                 <span className="surv-skill-msg">Couldn't load {pickedSkill.d}.</span>
               )}
@@ -179,11 +195,11 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
       )}
 
       <p className="surv-note">
-        The damage figures above are the monster's weapon attack (Neutral basic melee plus any elemental
-        attack skills) vs your DEF and reduction gear — those are accurate. Its cast skills show only
-        element &amp; type (magic/physical): PS tunes mob skill power beyond the available data, so an exact
-        number would be unreliable — use the element to pick resist gear. Assumes single-target; Perfect
-        Dodge isn't folded into the dodge %.
+        The weapon-attack figures (Neutral basic melee plus any elemental attack skills) vs your DEF and
+        reduction gear are accurate. Cast-skill damage: player skills a mob casts (Fire Bolt, Bash, …) are
+        priced accurately; monster-native <b>NPC_</b> skills are marked <b>≈ est.</b> — a Hercules-baseline
+        ratio PS may tune beyond. A few flat/special skills show element &amp; type only. Assumes
+        single-target; Perfect Dodge isn't folded into the dodge %.
       </p>
     </div>
   );

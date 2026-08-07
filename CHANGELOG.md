@@ -7,6 +7,19 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-06
 
+### Added
+
+- **Monster cast-skill damage in the Survivability panel.** Tapping one of a
+  monster's damage skills now shows the damage it does to *you*, not just its
+  element and type. Player skills a monster casts (Fire Bolt, Bash, Meteor, …) are
+  priced accurately through the incoming-damage pipeline — damage per cast (all
+  hits), how many casts would down you, and which resist reduces it. Monster-native
+  `NPC_` skills are priced from the Hercules-baseline ratio and labelled **≈ est.**
+  (Payon Stories may tune their power beyond that). Skills that only inflict a
+  status or drain (Stone Curse, Decrease AGI, SP drains) correctly report "no direct
+  damage", and a few flat/special skills (Dark Breath, self-destruct) still show
+  element and type only.
+
 ### Changed
 
 - **Clearer support wording.** The tip modal, the donation card under the results, and the

@@ -14,9 +14,16 @@ const { calculateSkillTiming } = require("../engine/calculators/skillTiming");
 const { calculateHitChance } = require("../engine/calculators/modifiers/hitChance");
 
 // A monster casting a player/NPC skill at YOU. Resolve the skill's element, hit
-// count and %-ratio (from the engine's ratio maps) so the incoming pipeline can
-// price it. Only Magic/Weapon skills deal modellable damage; Misc/support (heals,
-// summons, ailments) return modeled:false so the UI lists them without a number.
+// count and %-ratio so the incoming pipeline can price it. Ratio precedence:
+//   1. player skills a mob casts (Fire Bolt, Bash, …) — from the outgoing ratio
+//      maps; these numbers are ACCURATE (estimated:false).
+//   2. monster-native NPC_* skills — from mobSkillRatios (Hercules baseline);
+//      these are ESTIMATES (estimated:true), PS may tune beyond them.
+//   3. status/drain skills that deal no HP damage -> hasNumber:false, damageType
+//      "status" (shown as "no direct damage").
+//   4. flat/special damage skills that don't fit ratio×ATK (Dark Breath, self-
+//      destruct) -> hasNumber:false, damageType "damage" (element/type only).
+const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS } = require("../engine/mobSkillRatios");
 const ELE_NAME_TO_INT: Record<string, number> = {
   Ele_Neutral: 0, Ele_Water: 1, Ele_Earth: 2, Ele_Fire: 3, Ele_Wind: 4,
   Ele_Poison: 5, Ele_Holy: 6, Ele_Dark: 7, Ele_Ghost: 8, Ele_Undead: 9,
@@ -33,13 +40,27 @@ function resolveMobSkillDamage(skillId: number, level: number) {
   const targetsFoe = Array.isArray(sk.skill_type)
     ? sk.skill_type.some((t: string) => t === "Enemy" || t === "Place")
     : true;
-  let ratio = 100, ratioKnown = false;
-  try {
+  const name: string = sk.name;
+
+  // A number is only meaningful for a foe-targeting physical/magic skill.
+  const isAttack = targetsFoe && (attackType === "Magic" || attackType === "Weapon");
+  let ratio = 100, hasNumber = false, estimated = false;
+  let damageType: "damage" | "status" = isAttack ? "damage" : "status";
+
+  if (NO_HP_DAMAGE_SKILLS.has(name)) {
+    damageType = "status";
+  } else {
     const map = attackType === "Magic" ? BF_MAGIC_RATIOS : attackType === "Weapon" ? BF_WEAPON_RATIOS : null;
-    if (map && typeof map[sk.name] === "function") { ratio = map[sk.name](lv, {}, {}); ratioKnown = true; }
-  } catch { ratio = 100; ratioKnown = false; }
-  const modeled = targetsFoe && (attackType === "Magic" || attackType === "Weapon");
-  return { name: sk.name, desc: sk.description || sk.name, attackType, elementInt, hits, ratio, ratioKnown, modeled, level: lv };
+    if (map && typeof map[name] === "function") {
+      try { ratio = map[name](lv, {}, {}); hasNumber = isAttack; estimated = false; } catch { hasNumber = false; }
+    } else if (typeof MOB_SKILL_RATIOS[name] === "function") {
+      try { ratio = MOB_SKILL_RATIOS[name](lv); hasNumber = isAttack; estimated = true; } catch { hasNumber = false; }
+    } else if (FLAT_UNMODELED_SKILLS.has(name)) {
+      damageType = "damage"; // it hurts, we just can't price it as a ratio
+    }
+  }
+
+  return { name, desc: sk.description || name, attackType, elementInt, hits, ratio, hasNumber, estimated, damageType, level: lv };
 }
 const gearBonusAggregator = require("../engine/gearBonusAggregator");
 const { applyPetBonuses } = require("../engine/buildApplicator");
@@ -272,14 +293,20 @@ router.post("/incoming", (req: Request, res: Response) => {
     if (mobSkill && mobSkill.id != null) {
       const spec = resolveMobSkillDamage(Number(mobSkill.id), Number(mobSkill.level) || 1);
       if (!spec) return res.status(404).json({ error: "Skill not found" });
-      if (!spec.modeled) {
-        // Support/ailment/summon or unmapped ratio — no direct damage number.
+      if (!spec.hasNumber) {
+        // Status/support (damageType "status") or a damage skill we can't price
+        // as a ratio (damageType "damage", e.g. Dark Breath) — no number, but the
+        // UI still shows element/type for the latter.
         return res.json({ status, mob, skill: spec, result: null, modeled: false });
       }
+      // Multi-hit skills: the ratio is per hit; scale the priced hit by the count.
       const skOpts = { ele_override: spec.elementInt, ratio_override: spec.ratio };
-      const result = spec.attackType === "Magic"
+      let result = spec.attackType === "Magic"
         ? calculateIncomingMagicDamage(mobId, effBuild, status, gearBonuses, weapon, skOpts)
         : calculateIncomingPhysicalDamage(mobId, effBuild, status, gearBonuses, weapon, config, skOpts);
+      if (spec.hits > 1) {
+        result = scaleDamageResult(result, spec.hits, `${spec.hits} hits`, `${spec.name} hits ${spec.hits}×`, "");
+      }
       return res.json({ status, mob, skill: spec, result, modeled: true });
     }
 

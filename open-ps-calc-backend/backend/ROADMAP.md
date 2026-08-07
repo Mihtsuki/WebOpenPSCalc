@@ -245,16 +245,19 @@ without re-auditing everything from scratch.
   no UI for), consumables, target selection, skill selection, and the
   damage breakdown — still not full parity (no combat-controls panel, no
   build-vs-build comparison).
-- **Incoming damage from the target monster's *skills*, not just its normal
-  attack.** The Survivability panel (`calculators/incomingPipeline.js`,
-  `components/SurvivabilityView.tsx`) computes a real damage-taken figure for the
-  mob's basic melee and its elemental `NPC_*ATTACK` skills, but for a picked cast
-  skill (the `mob_skill` param) it deliberately shows only element / physical-vs-
-  magic / hit count and **no damage number** — because PS tunes mob-skill power
-  beyond what `mob_skill_db.json` carries, so a naive computed figure would be
-  badly off. To model it we'd need PS-accurate per-skill power data (base
-  damage / ratio / level scaling) for those `NPC_*` skills, then run each cast
-  through the same incoming defense pipeline the basic attack already uses.
+- **Incoming damage from the target monster's *skills*** — _largely done_
+  (`mobSkillRatios.js`, `resolveMobSkillDamage` in `routes/calculate.ts`,
+  `components/SurvivabilityView.tsx`). A picked cast skill is now priced through
+  the incoming pipeline: player skills a mob casts (Fire Bolt, Bash, Meteor, …)
+  use the accurate outgoing ratio maps; monster-native `NPC_*` skills use a
+  Hercules-baseline ratio table and are flagged as **estimates**; status/drain
+  skills report "no direct damage". **Remaining:** (1) the flat/special skills in
+  `FLAT_UNMODELED_SKILLS` (Dark Breath, self-destruct) still show element/type only
+  — they need a flat-damage branch in the incoming pipeline, not a ratio; (2) the
+  `NPC_*` ratios are Hercules baselines, not PS-tuned — replace with PS-accurate
+  per-skill power if/when that data is sourced (in-game testing / PS wiki); (3)
+  monster-aliased player skills (`MS_BASH`, `ML_PIERCE`, `MA_SHARPSHOOTING`) aren't
+  aliased to their player-skill ratios yet, so they fall through to element/type.
 
 ## Planned front-end features (product)
 
