@@ -62,7 +62,9 @@ const MOB_SKILL_RATIOS = {
 // price them through the ACCURATE outgoing player ratio maps instead of the
 // NPC_* Hercules-baseline estimates, so they report estimated:false.
 //   MS_BASH          -> SM_BASH          (Bash; PS-vanilla-OK)
-//   ML_PIERCE        -> KN_PIERCE        (Pierce; PS-vanilla-OK, hits by size)
+//   ML_PIERCE        -> KN_PIERCE        (Pierce; PS-vanilla-OK, hits by size —
+//                                          resolved to 2 vs the Medium player by
+//                                          profile.weapon_hit_counts)
 //   ML_SPIRALPIERCE  -> LK_SPIRALPIERCE  (Spiral Pierce; no ratio modeled yet
 //                                          -> still falls through to element/type)
 //   MA_SHARPSHOOTING -> SN_SHARPSHOOTING (Sharp Shooting)
@@ -74,12 +76,6 @@ const MOB_SKILL_ALIASES = {
   ML_SPIRALPIERCE: "LK_SPIRALPIERCE",
   MA_SHARPSHOOTING: "SN_SHARPSHOOTING",
 };
-
-// Skills whose hit count scales by the TARGET's size (div_ = size + 1). In the
-// incoming (survivability) direction the target is always the player, who is
-// Medium (size int 1) -> 2 hits — NOT the flat 3 the vanilla skill_db lists.
-const PIERCE_FAMILY = new Set(["KN_PIERCE", "ML_PIERCE"]);
-const PLAYER_MEDIUM_PIERCE_HITS = 2;
 
 // Mob skills flagged as damage-dealing in the skill_db (Magic/Weapon, targets a
 // foe) that actually inflict a STATUS / drain and deal no HP damage. Surfaced as
@@ -102,15 +98,23 @@ const NO_HP_DAMAGE_SKILLS = new Set([
 ]);
 
 // Damage skills whose power is a flat/special formula that does NOT fit the
-// ratio × mob-ATK/MATK shape (e.g. fixed damage, or = caster HP). We know they
-// hurt but won't print a specific number — shown as element/type only.
+// ratio × mob-ATK/MATK shape. We know they hurt but won't print a specific
+// number — shown as element/type only — because the formula is either not
+// publicly documented or is PS-tuned beyond the emulator baseline (a computed
+// figure would be a fabricated number, which this calc deliberately avoids).
 const FLAT_UNMODELED_SKILLS = new Set([
-  "NPC_DARKBREATH",       // md.damage = 500 + (lv-1)*1000 + rnd(0..999), cap 9999
-  "NPC_SELFDESTRUCTION",  // md.damage = caster current HP
-  "NPC_SMOKING",          // md.damage = 3
+  // Shadow-property hit that ignores DEF/Flee. Sources disagree on the power:
+  // iRO describes it as a % of the target's max HP, while some emulators use a
+  // flat 500+(lv-1)*1000+rnd(0..999) capped at 9999. Unmodeled pending a
+  // PS-confirmed formula (divine-pride/RMS list no formula; PS tunes it).
+  "NPC_DARKBREATH",
+  // Splash for the caster's current HP. In the data these are target:self /
+  // dmg:false, so they never reach the damage path here anyway (kept for
+  // completeness — the incoming pipeline has no flat/self-HP branch).
+  "NPC_SELFDESTRUCTION",
+  "NPC_SMOKING",          // md.damage = 3 (negligible; also self-targeted)
 ]);
 
 module.exports = {
-  MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS,
-  MOB_SKILL_ALIASES, PIERCE_FAMILY, PLAYER_MEDIUM_PIERCE_HITS,
+  MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES,
 };

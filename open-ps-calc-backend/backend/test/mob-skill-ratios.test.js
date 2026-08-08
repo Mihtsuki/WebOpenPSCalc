@@ -9,7 +9,7 @@
 const test = require("node:test");
 const assert = require("node:assert");
 
-const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES, PIERCE_FAMILY, PLAYER_MEDIUM_PIERCE_HITS } = require("../src/engine/mobSkillRatios");
+const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES } = require("../src/engine/mobSkillRatios");
 const { BF_WEAPON_RATIOS } = require("../src/engine/calculators/modifiers/skillRatio");
 const { calculateIncomingPhysicalDamage } = require("../src/engine/calculators/incomingPipeline");
 const { buildFromSaveSchema } = require("../src/engine/buildManager");
@@ -72,9 +72,22 @@ test("monster-clone skills alias onto their canonical player skill", () => {
   assert.strictEqual(BF_WEAPON_RATIOS[MOB_SKILL_ALIASES.MS_BASH](5), 250);
 });
 
-test("Pierce family hits the (Medium) player twice, not the skill_db's flat 3", () => {
-  assert.ok(PIERCE_FAMILY.has("KN_PIERCE") && PIERCE_FAMILY.has("ML_PIERCE"));
-  assert.strictEqual(PLAYER_MEDIUM_PIERCE_HITS, 2);
+test("Pierce hit count resolves to 2 vs the Medium player (profile weapon_hit_counts)", () => {
+  // The mob-cast Pierce hit count is driven by the PS profile's size-based hit
+  // fn applied to the player-as-target (Medium) — so 2, not the skill_db's 3.
+  const p = getProfile("payon_stories");
+  const player = { size: "Medium", element: 0, race: "DemiHuman" };
+  assert.strictEqual(p.weapon_hit_counts.KN_PIERCE(10, player, { skill_levels: {} }), 2);
+  assert.strictEqual(p.weapon_hit_counts.ML_PIERCE(10, player, { skill_levels: {} }), 2);
+});
+
+test("PS profile ratios override vanilla for mob-cast player skills", () => {
+  // The precedence resolveMobSkillDamage relies on: a PS-reworked skill that the
+  // vanilla map lacks (Lord of Vermilion) must be priced from the PS profile.
+  const p = getProfile("payon_stories");
+  assert.strictEqual(typeof p.magic_ratios.WZ_VERMILION, "function");
+  assert.strictEqual(p.magic_ratios.WZ_VERMILION(10), 2000, "Vermilion = 200×lv total");
+  assert.strictEqual(typeof p.magic_ratios.WZ_FIREPILLAR, "function");
 });
 
 test("incoming pipeline scales damage monotonically with ratio_override", () => {

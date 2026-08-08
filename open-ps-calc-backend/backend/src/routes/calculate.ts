@@ -14,21 +14,29 @@ const { calculateSkillTiming } = require("../engine/calculators/skillTiming");
 const { calculateHitChance } = require("../engine/calculators/modifiers/hitChance");
 
 // A monster casting a player/NPC skill at YOU. Resolve the skill's element, hit
-// count and %-ratio so the incoming pipeline can price it. Ratio precedence:
-//   1. player skills a mob casts (Fire Bolt, Bash, …) — from the outgoing ratio
-//      maps; these numbers are ACCURATE (estimated:false).
-//   2. monster-native NPC_* skills — from mobSkillRatios (Hercules baseline);
-//      these are ESTIMATES (estimated:true), PS may tune beyond them.
-//   3. status/drain skills that deal no HP damage -> hasNumber:false, damageType
+// count and %-ratio so the incoming pipeline can price it. Ratio precedence
+// mirrors the OUTGOING pipeline so a mob's cast is priced with the same numbers
+// the player's own cast would be:
+//   1. PS profile ratio (profile.weapon_ratios / magic_ratios) — the PS-reworked
+//      value; ACCURATE (estimated:false). Also covers PS-only skills the vanilla
+//      maps lack (Lord of Vermilion, Fire Pillar).
+//   2. vanilla BF_WEAPON_RATIOS / BF_MAGIC_RATIOS — accurate only where PS is
+//      confirmed to match vanilla (the *_vanilla_ok sets); otherwise flagged
+//      estimated:true, same as the outgoing "PS unaudited" warning.
+//   3. monster-native NPC_* skills — from mobSkillRatios (Hercules baseline);
+//      ESTIMATES (estimated:true), PS may tune beyond them.
+//   4. status/drain skills that deal no HP damage -> hasNumber:false, damageType
 //      "status" (shown as "no direct damage").
-//   4. flat/special damage skills that don't fit ratio×ATK (Dark Breath, self-
-//      destruct) -> hasNumber:false, damageType "damage" (element/type only).
-const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES, PIERCE_FAMILY, PLAYER_MEDIUM_PIERCE_HITS } = require("../engine/mobSkillRatios");
+//   5. flat/special damage skills that don't fit ratio×ATK (Dark Breath) ->
+//      hasNumber:false, damageType "damage" (element/type only).
+// Monster-clone names (MS_/ML_/MA_) are resolved through MOB_SKILL_ALIASES to
+// their canonical player skill for the ratio/hit lookups.
+const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES } = require("../engine/mobSkillRatios");
 const ELE_NAME_TO_INT: Record<string, number> = {
   Ele_Neutral: 0, Ele_Water: 1, Ele_Earth: 2, Ele_Fire: 3, Ele_Wind: 4,
   Ele_Poison: 5, Ele_Holy: 6, Ele_Dark: 7, Ele_Ghost: 8, Ele_Undead: 9,
 };
-function resolveMobSkillDamage(skillId: number, level: number) {
+function resolveMobSkillDamage(skillId: number, level: number, profile: any, mob: any) {
   const sk = (loader as any).getSkill(skillId);
   if (!sk) return null;
   const lv = Math.max(1, Math.min(level || 1, sk.max_level || 10));
@@ -41,14 +49,25 @@ function resolveMobSkillDamage(skillId: number, level: number) {
   const name: string = sk.name;
 
   // Monster-clone skills (MS_/ML_/MA_) alias onto the canonical player skill for
-  // ratio lookup; the display name / element / target keep the mob-skill entry.
+  // ratio/hit lookup; the display name / element / target keep the mob-skill entry.
   const ratioName: string = MOB_SKILL_ALIASES[name] || name;
 
-  let hitsRaw = Array.isArray(sk.number_of_hits) ? sk.number_of_hits[lv - 1] : sk.number_of_hits;
-  let hits = Math.max(1, Math.abs(Number(hitsRaw) || 1));
-  // Pierce's hit count is target-size-driven (size+1); the target is the player
-  // (Medium) => 2, overriding the skill_db's flat 3 (which assumes Large).
-  if (PIERCE_FAMILY.has(ratioName)) hits = PLAYER_MEDIUM_PIERCE_HITS;
+  // The ratio/hit-count fns were written for the outgoing direction (their `tgt`
+  // is the skill's target). Here the mob's target is the player: Medium size,
+  // Neutral, DemiHuman PC — so size/element/race-dependent fns (Pierce's div_,
+  // Magnus's race check) resolve against the player. ctx carries the CASTER
+  // (mob) stats a few ratio fns read (base_level/str/dex for the ATK/base-level
+  // scalers); `skill_levels` is empty because a mob caster's own skill ranks
+  // (e.g. Fire Pillar reading Fire Wall) are unknown, so those secondary bonuses
+  // default to 0.
+  const playerTgt = { size: "Medium", element: 0, race: "DemiHuman", is_pc: true };
+  const mobStats = (mob && mob.stats) || {};
+  const ctx = {
+    skill_levels: {}, skill_params: {},
+    base_level: mob ? mob.level || 0 : 0,
+    base_str: mobStats.str || 0,
+    dex: mobStats.dex || 0,
+  };
 
   // A number is only meaningful for a foe-targeting physical/magic skill.
   const isAttack = targetsFoe && (attackType === "Magic" || attackType === "Weapon");
@@ -57,16 +76,46 @@ function resolveMobSkillDamage(skillId: number, level: number) {
 
   if (NO_HP_DAMAGE_SKILLS.has(name)) {
     damageType = "status";
-  } else {
-    const map = attackType === "Magic" ? BF_MAGIC_RATIOS : attackType === "Weapon" ? BF_WEAPON_RATIOS : null;
-    if (map && typeof map[ratioName] === "function") {
-      try { ratio = map[ratioName](lv, {}, {}); hasNumber = isAttack; estimated = false; } catch { hasNumber = false; }
-    } else if (typeof MOB_SKILL_RATIOS[ratioName] === "function") {
-      try { ratio = MOB_SKILL_RATIOS[ratioName](lv); hasNumber = isAttack; estimated = true; } catch { hasNumber = false; }
-    } else if (FLAT_UNMODELED_SKILLS.has(name)) {
-      damageType = "damage"; // it hurts, we just can't price it as a ratio
-    }
+  } else if (isAttack) {
+    const isMagic = attackType === "Magic";
+    const psMap = (isMagic ? profile?.magic_ratios : profile?.weapon_ratios) || {};
+    const bfMap = isMagic ? BF_MAGIC_RATIOS : BF_WEAPON_RATIOS;
+    const vanillaOk: Set<string> = (isMagic ? profile?.magic_vanilla_ok : profile?.weapon_vanilla_ok) || new Set();
+    try {
+      if (typeof psMap[ratioName] === "function") {
+        ratio = psMap[ratioName](lv, playerTgt, ctx); hasNumber = true; estimated = false;
+      } else if (typeof bfMap[ratioName] === "function") {
+        ratio = bfMap[ratioName](lv, playerTgt, ctx); hasNumber = true;
+        // Vanilla ratio is only trustworthy where PS is confirmed to match it.
+        estimated = !vanillaOk.has(ratioName);
+      } else if (typeof MOB_SKILL_RATIOS[ratioName] === "function") {
+        ratio = MOB_SKILL_RATIOS[ratioName](lv); hasNumber = true; estimated = true;
+      } else if (FLAT_UNMODELED_SKILLS.has(name)) {
+        damageType = "damage"; // it hurts, we just can't price it as a ratio
+      }
+    } catch { hasNumber = false; }
+    // A ratio fn reading a ctx field we don't supply could yield NaN/Infinity —
+    // never surface that as a number; fall back to element/type only.
+    if (hasNumber && !Number.isFinite(ratio)) { hasNumber = false; ratio = 100; }
   }
+
+  // Hit count mirrors the outgoing pipeline: a PS profile hit-count fn overrides
+  // the skills.json number_of_hits (which is sometimes wrong for PS multi-hit
+  // reworks and, importantly, encodes size-based counts like Pierce). A NEGATIVE
+  // number_of_hits is a cosmetic multi-hit (damage applied once) -> 1, NOT its
+  // absolute value — the PS "total ratio" skills (Vermilion −10, Fire Pillar −N)
+  // already fold every wave into the ratio, so multiplying would double-count.
+  let hits = 1;
+  const psHitMap = (attackType === "Magic" ? profile?.magic_hit_counts : profile?.weapon_hit_counts) || {};
+  if (typeof psHitMap[ratioName] === "function") {
+    const h = psHitMap[ratioName](lv, playerTgt, ctx);
+    hits = h && typeof h === "object" ? Number(h.max) || 1 : Number(h) || 1;
+  } else {
+    const hitsRaw = Array.isArray(sk.number_of_hits) ? sk.number_of_hits[lv - 1] : sk.number_of_hits;
+    const n = Number(hitsRaw) || 1;
+    hits = n > 0 ? n : 1; // negative = cosmetic multi-hit -> single damage instance
+  }
+  hits = Math.max(1, hits);
 
   return { name, desc: sk.description || name, attackType, elementInt, hits, ratio, hasNumber, estimated, damageType, level: lv };
 }
@@ -299,7 +348,7 @@ router.post("/incoming", (req: Request, res: Response) => {
 
     // A specific mob skill cast at the player (survivability "which skill hits me").
     if (mobSkill && mobSkill.id != null) {
-      const spec = resolveMobSkillDamage(Number(mobSkill.id), Number(mobSkill.level) || 1);
+      const spec = resolveMobSkillDamage(Number(mobSkill.id), Number(mobSkill.level) || 1, profile, mob);
       if (!spec) return res.status(404).json({ error: "Skill not found" });
       if (!spec.hasNumber) {
         // Status/support (damageType "status") or a damage skill we can't price

@@ -247,21 +247,30 @@ without re-auditing everything from scratch.
   build-vs-build comparison).
 - **Incoming damage from the target monster's *skills*** — _largely done_
   (`mobSkillRatios.js`, `resolveMobSkillDamage` in `routes/calculate.ts`,
-  `components/SurvivabilityView.tsx`). A picked cast skill is now priced through
-  the incoming pipeline: player skills a mob casts (Fire Bolt, Bash, Meteor, …)
-  use the accurate outgoing ratio maps; monster-native `NPC_*` skills use a
-  Hercules-baseline ratio table and are flagged as **estimates**; status/drain
-  skills report "no direct damage". Monster-clone skills (`MS_BASH`, `ML_PIERCE`,
-  `MA_SHARPSHOOTING`) now alias 1:1 onto their canonical player skill
-  (`MOB_SKILL_ALIASES`) and price through the accurate outgoing ratio maps —
-  Pierce's hit count is corrected to 2 vs the Medium player, not the skill_db's
-  flat 3. **Remaining:** (1) the flat/special skills in `FLAT_UNMODELED_SKILLS`
-  (Dark Breath, self-destruct) still show element/type only — they need a
-  flat-damage branch in the incoming pipeline, not a ratio; (2) the `NPC_*` ratios
-  are Hercules baselines, not PS-tuned — replace with PS-accurate per-skill power
-  if/when that data is sourced (in-game testing / PS wiki); (3) `ML_SPIRALPIERCE`
-  aliases to `LK_SPIRALPIERCE`, which has no modeled ratio yet, so Spiral Pierce
-  still falls through to element/type until that skill's ratio is added.
+  `components/SurvivabilityView.tsx`). A picked cast skill is priced through the
+  incoming pipeline with the SAME ratio/hit precedence as the outgoing pipeline:
+  `profile.weapon_ratios`/`magic_ratios` (PS-reworked, accurate) override the
+  vanilla `BF_*` maps, which are trusted only where the `*_vanilla_ok` sets confirm
+  PS matches vanilla (otherwise flagged **estimated**); monster-native `NPC_*`
+  skills use a Hercules-baseline table (**estimates**); status/drain skills report
+  "no direct damage". This picked up PS-only spells the vanilla maps lack
+  (Lord of Vermilion, Fire Pillar) and corrected several vanilla-overcounted
+  ratios (Meteor, Soul Strike, Napalm Vulcan). The size/element/race-dependent
+  ratio & hit fns are evaluated against the player-as-target (Medium/Neutral/
+  DemiHuman), so Pierce is 2 hits, and NEGATIVE `number_of_hits` (cosmetic
+  multi-hit, e.g. Vermilion's −10) collapses to 1 instead of multiplying a
+  total-ratio spell. Monster-clone skills (`MS_BASH`, `ML_PIERCE`,
+  `MA_SHARPSHOOTING`) alias 1:1 onto their canonical player skill
+  (`MOB_SKILL_ALIASES`). **Remaining (blocked on data, not code):** (1) Dark
+  Breath (`FLAT_UNMODELED_SKILLS`) — Shadow %-max-HP hit whose power is not
+  publicly documented (iRO says %HP, some emulators use a flat formula; RMS /
+  divine-pride list none) and is PS-tuned, so it stays element/type-only rather
+  than print a fabricated number; (2) the `NPC_*` native ratios are Hercules
+  baselines, not PS-tuned — replace with PS-accurate per-skill power if/when that
+  data is sourced (in-game testing; the PS wiki documents player skills, not
+  `NPC_*` internals); (3) `ML_SPIRALPIERCE`/`LK_SPIRALPIERCE` (Spiral Pierce) has
+  no modeled ratio on either the player or mob side yet, so it falls through to
+  element/type until that skill's ratio is added to the profile.
 
 ## Planned front-end features (product)
 

@@ -196,10 +196,11 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
 
       <p className="surv-note">
         The weapon-attack figures (Neutral basic melee plus any elemental attack skills) vs your DEF and
-        reduction gear are accurate. Cast-skill damage: player skills a mob casts (Fire Bolt, Bash, …) are
-        priced accurately; monster-native <b>NPC_</b> skills are marked <b>≈ est.</b> — a Hercules-baseline
-        ratio PS may tune beyond. A few flat/special skills show element &amp; type only. Assumes
-        single-target; Perfect Dodge isn't folded into the dodge %.
+        reduction gear are accurate. Cast-skill damage: PS-reworked skills a mob casts (Fire Bolt, Bash,
+        Lord of Vermilion, …) are priced with their Payon Stories formulas; skills using an unverified
+        baseline ratio — monster-native <b>NPC_</b> skills and a few unaudited vanilla skills — are marked
+        <b>≈ est.</b> and PS may tune them. A few flat/special skills (e.g. Dark Breath) show element &amp;
+        type only. Assumes single-target; Perfect Dodge isn't folded into the dodge %.
       </p>
     </div>
   );

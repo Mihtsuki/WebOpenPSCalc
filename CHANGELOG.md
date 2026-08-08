@@ -16,6 +16,18 @@ instead of release version. Dates are taken from actual git commit history.
   Pierce correctly counts as 2 hits against you (a Medium-size player), not the 3 it
   uses against large targets.
 
+### Fixed
+
+- **Monster cast-skill damage now uses Payon Stories' reworked numbers, not the
+  vanilla ones.** When a monster casts a player skill at you, the Survivability panel
+  prices it with the same PS-accurate formulas the calculator uses for your own casts.
+  This adds damage numbers for PS-only spells that were previously shown as element/type
+  only (Lord of Vermilion, Fire Pillar) and corrects several that were overstated by the
+  old vanilla values (Meteor Storm, Soul Strike, Napalm Vulcan). Multi-wave spells like
+  Lord of Vermilion no longer multiply their already-total damage by the wave count.
+  Skills whose Payon Stories power isn't publicly documented (e.g. Dark Breath) continue
+  to show element and type only rather than a guessed number.
+
 ## 2026-08-06
 
 ### Added
