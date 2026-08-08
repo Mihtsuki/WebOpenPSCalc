@@ -5,6 +5,18 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-08
+
+### Fixed
+
+- **Grand Cross now accounts for the target's defense.** Grand Cross damage is reduced by
+  the target's DEF (physical portion) and MDEF (magic portion) again, correcting a recent
+  change that had it ignore hard DEF/MDEF. Against low-DEF targets the numbers barely move;
+  against high-DEF monsters (e.g. Knight of Abyss) GC now reads lower — and, crucially,
+  **Provoke's DEF reduction meaningfully scales GC damage** (often the difference between a
+  clean one-shot and not), matching in-game behaviour. Weapon masteries and Demon Bane still
+  apply as before.
+
 ## 2026-08-06
 
 ### Changed
