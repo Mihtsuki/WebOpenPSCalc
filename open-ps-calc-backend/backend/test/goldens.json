@@ -1155,15 +1155,15 @@
    "matk_max": 235
   },
   "result": {
-   "dps": 2155.161,
+   "dps": 2501.025,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2926,
    "normal": {
-    "min": 5370,
-    "max": 7245,
-    "avg": 6306,
+    "min": 6165,
+    "max": 8475,
+    "avg": 7318,
     "steps": [
      "Weapon ATK Range",
      "Size Fix",
@@ -1210,15 +1210,15 @@
    "matk_max": 235
   },
   "result": {
-   "dps": 402.256,
+   "dps": 1384.142,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2926,
    "normal": {
-    "min": 510,
-    "max": 1830,
-    "avg": 1177,
+    "min": 2730,
+    "max": 5370,
+    "avg": 4050,
     "steps": [
      "Weapon ATK Range",
      "Size Fix",
