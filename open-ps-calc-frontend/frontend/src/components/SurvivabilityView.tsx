@@ -75,6 +75,11 @@ function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; m
   const magic = s.attackType === "Magic";
   const r = dmg.result;
   const hasNumber = !!r && s.hasNumber;
+  // Three states when there's no number: a status/support skill (no HP damage),
+  // vs a real damage skill we have no reliable formula for (Dark Breath, Spiral
+  // Pierce, 3rd-job mob skills) — the latter is shown as an explicit "not modeled".
+  const isStatus = s.damageType === "status";
+  const notModeled = !hasNumber && !isStatus;
   const range = r ? Math.round(r.min_damage) !== Math.round(r.max_damage) : false;
   const hitsToKill = r && r.avg_damage > 0 ? Math.ceil(maxHp / r.avg_damage) : null;
   return (
@@ -84,6 +89,8 @@ function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; m
           {label}
           <span className="surv-tag surv-tag--skill"> {magic ? "Magic" : "Physical"} · {eleName(s.elementInt)}</span>
           {hasNumber && s.estimated && <span className="surv-tag surv-tag--test"> for testing</span>}
+          {notModeled && <span className="surv-tag surv-tag--unmodeled"> not modeled yet</span>}
+          {isStatus && <span className="surv-tag surv-tag--status"> no direct damage</span>}
         </span>
         {hasNumber && r ? (
           <span className="surv-line-dmg">
@@ -91,17 +98,19 @@ function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; m
             <span className="surv-line-unit">{s.hits > 1 ? ` / cast (${s.hits} hits)` : " / hit"}</span>
           </span>
         ) : (
-          <span className="surv-line-dmg surv-skill-hits">{s.hits > 1 ? `${s.hits} hits` : "1 hit"}</span>
+          <span className="surv-line-dmg surv-skill-hits">{notModeled ? (s.hits > 1 ? `? × ${s.hits} hits` : "?") : (s.hits > 1 ? `${s.hits} hits` : "1 hit")}</span>
         )}
       </div>
       <div className="surv-line-metrics">
         {hasNumber && hitsToKill != null && <span className="surv-chip"><b>{hitsToKill}</b> casts to down you</span>}
-        <span className="surv-chip">{magic ? "vs your MDEF" : "vs your DEF"}</span>
-        <span className="surv-chip good">{eleName(s.elementInt)} resist reduces it</span>
+        {!isStatus && <span className="surv-chip">{magic ? "vs your MDEF" : "vs your DEF"}</span>}
+        {!isStatus && <span className="surv-chip good">{eleName(s.elementInt)} resist reduces it</span>}
       </div>
       {hasNumber
-        ? s.estimated && <p className="surv-skill-note">For testing — this figure uses a baseline ratio Payon Stories may have tuned. Verify it in-game before trusting the number.</p>
-        : <p className="surv-skill-note">Exact damage isn't modelled — PS tunes this skill's power beyond the available data. Use the element to pick resist gear.</p>}
+        ? s.estimated && <p className="surv-skill-note">For testing — this figure uses a pre-renewal baseline ratio (confirmed vs Hercules; PS could tune it beyond that). Treat the number as approximate.</p>
+        : notModeled
+          ? <p className="surv-skill-note">Damage isn't modeled yet — no reliable Payon Stories formula exists for this skill (e.g. Dark Breath, Spiral Pierce, monster-only 3rd-job skills), and it can't be measured in-game. The element &amp; type above still tell you which resist gear helps.</p>
+          : <p className="surv-skill-note">No direct damage — this is a status / support skill.</p>}
     </div>
   );
 }
@@ -196,12 +205,13 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
 
       <p className="surv-note">
         The weapon-attack figures (Neutral basic melee plus any elemental attack skills) vs your DEF and
-        reduction gear are accurate. Cast-skill damage: PS-reworked skills a mob casts (Fire Bolt, Bash,
-        Lord of Vermilion, …) are priced with their Payon Stories formulas; skills using an unverified
-        baseline ratio — monster-native <b>NPC_</b> skills and a few unaudited vanilla skills — are marked
-        <b>for testing</b>, meaning the number should be confirmed in-game before you trust it. A few
-        flat/special skills (e.g. Dark Breath) show element &amp; type only. Assumes single-target;
-        Perfect Dodge isn't folded into the dodge %.
+        reduction gear are accurate. Cast-skill damage falls into three buckets: PS-reworked skills a mob
+        casts (Fire Bolt, Bash, Lord of Vermilion, …) are priced with their Payon Stories formulas;
+        monster-native <b>NPC_</b> skills and a few unaudited vanilla skills use a pre-renewal baseline
+        ratio and are marked <b>for testing</b> (approximate — PS could tune them); and skills with no
+        reliable formula (Dark Breath, Spiral Pierce, monster-only 3rd-job skills) are marked
+        <b>not modeled yet</b> and show element &amp; type only. Assumes single-target; Perfect Dodge
+        isn't folded into the dodge %.
       </p>
     </div>
   );

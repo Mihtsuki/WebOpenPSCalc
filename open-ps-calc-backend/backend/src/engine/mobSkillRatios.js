@@ -18,6 +18,16 @@
  * Sources are cited inline as `battle.c` line references from the pre-renewal
  * (stable) branch fetched during authoring; cross-checkable against
  * HerculesWS/Hercules src/map/battle.c battle_calc_skill_ratio()/battle_calc_misc_attack().
+ *
+ * AUDIT (2026-08-08): re-verified the scaling entries against Hercules `battle.c`.
+ * All confirmed CORRECT for pre-renewal: NPC_BLOODDRAIN `+= 100*(lv-1)` (=100·lv),
+ * NPC_ENERGYDRAIN `+= 100*lv` (=100+100·lv), NPC_DARKCROSS `+= 35*lv` (=100+35·lv;
+ * the ×2 for a 2H-spear is RENEWAL- and player-only, so a mob caster never gets it).
+ * The remaining entries have no `case` → 100% (normal-attack-equivalent). Since PS
+ * is PRE-RENEWAL and these are stock monster skills (no PS rework / no wiki entry),
+ * the pre-re formula IS the correct value — but PS COULD still have tuned an
+ * individual one, and they can't be measured in-game (mob-cast), so they stay
+ * `estimated: true` ("for testing") rather than being asserted as PS-exact.
  */
 
 // name -> (skill_lv) => total skillratio %.  All physical unless noted; the

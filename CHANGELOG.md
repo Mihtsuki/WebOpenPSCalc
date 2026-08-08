@@ -13,6 +13,12 @@ instead of release version. Dates are taken from actual git commit history.
   priced from a baseline ratio Payon Stories may have tuned (monster-native `NPC_` skills
   and a few unaudited vanilla skills) are marked **for testing** in the Survivability panel
   — a clearer prompt to confirm the figure in-game — replacing the quieter "≈ est." tag.
+- **Skills that can't be modeled are now shown explicitly.** Monster damage skills with no
+  reliable Payon Stories formula (Dark Breath, Spiral Pierce, monster-only 3rd-job skills)
+  are now flagged **not modeled yet** in the Survivability panel instead of quietly showing
+  element and type only, so it's clear the missing number is a known gap rather than an
+  oversight. The `NPC_` "for testing" ratios were also re-audited against pre-renewal
+  Hercules and confirmed correct as pre-re baselines.
 
 ## 2026-08-07
 

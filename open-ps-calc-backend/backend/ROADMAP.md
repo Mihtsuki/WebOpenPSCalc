@@ -261,16 +261,22 @@ without re-auditing everything from scratch.
   multi-hit, e.g. Vermilion's −10) collapses to 1 instead of multiplying a
   total-ratio spell. Monster-clone skills (`MS_BASH`, `ML_PIERCE`,
   `MA_SHARPSHOOTING`) alias 1:1 onto their canonical player skill
-  (`MOB_SKILL_ALIASES`). **Remaining (blocked on data, not code):** (1) Dark
-  Breath (`FLAT_UNMODELED_SKILLS`) — Shadow %-max-HP hit whose power is not
-  publicly documented (iRO says %HP, some emulators use a flat formula; RMS /
-  divine-pride list none) and is PS-tuned, so it stays element/type-only rather
-  than print a fabricated number; (2) the `NPC_*` native ratios are Hercules
-  baselines, not PS-tuned — replace with PS-accurate per-skill power if/when that
-  data is sourced (in-game testing; the PS wiki documents player skills, not
-  `NPC_*` internals); (3) `ML_SPIRALPIERCE`/`LK_SPIRALPIERCE` (Spiral Pierce) has
-  no modeled ratio on either the player or mob side yet, so it falls through to
-  element/type until that skill's ratio is added to the profile.
+  (`MOB_SKILL_ALIASES`). The `NPC_*` scaling ratios were **audited (2026-08-08)
+  against Hercules `battle.c` and confirmed correct for pre-renewal** (Blood Drain
+  100·lv, Energy Drain 100+100·lv, Dark Cross 100+35·lv; the rest 100% = normal
+  attack). Since PS is pre-re and these are stock monster skills, the pre-re formula
+  IS the value — but PS could still tune an individual one and they can't be
+  measured in-game (mob-cast), so they remain flagged `estimated` ("for testing").
+  **The Survivability UI now shows three explicit states:** accurate (no tag),
+  **for testing** (pre-re baseline `NPC_*` / unaudited vanilla), and **not modeled
+  yet** (damage skills with no reliable formula). **Remaining (genuinely blocked):**
+  (1) Dark Breath (`FLAT_UNMODELED_SKILLS`) — Shadow %-max-HP hit whose power isn't
+  publicly documented and is PS-tuned → now surfaced as **not modeled yet** rather
+  than a fabricated number; (2) making the `NPC_*` estimates PS-*exact* is
+  impossible without data (untestable mob-cast + no PS docs) — the pre-re baseline
+  is the ceiling; (3) `ML_SPIRALPIERCE`/`LK_SPIRALPIERCE` (Spiral Pierce) has no
+  modeled ratio on either side → also surfaced as **not modeled yet** until a ratio
+  is added; likewise monster-cast 3rd-job skills (Crimson Rock, Sonic Wave, …).
 
 ## Planned front-end features (product)
 

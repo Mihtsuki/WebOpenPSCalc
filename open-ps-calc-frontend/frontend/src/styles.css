@@ -928,6 +928,8 @@ label {
 .surv-tag { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); border: 1px solid var(--border-soft); border-radius: 3px; padding: 0.02rem 0.28rem; margin-left: 0.4rem; vertical-align: middle; }
 .surv-tag--skill { color: var(--link); border-color: color-mix(in srgb, var(--link) 40%, transparent); }
 .surv-tag--test { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.surv-tag--unmodeled { color: var(--crit); border-color: color-mix(in srgb, var(--crit) 50%, transparent); border-style: dashed; }
+.surv-tag--status { color: var(--text-faint); border-style: dashed; }
 .surv-kit { margin-top: 0.55rem; padding-top: 0.5rem; border-top: 1px solid var(--border-soft); }
 .surv-kit-label { font-size: 0.72rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
 .surv-kit-list { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
