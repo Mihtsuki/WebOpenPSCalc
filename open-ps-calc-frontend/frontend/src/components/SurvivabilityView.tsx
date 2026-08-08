@@ -83,7 +83,7 @@ function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; m
         <span className="surv-line-label">
           {label}
           <span className="surv-tag surv-tag--skill"> {magic ? "Magic" : "Physical"} · {eleName(s.elementInt)}</span>
-          {hasNumber && s.estimated && <span className="surv-tag surv-tag--est"> ≈ est.</span>}
+          {hasNumber && s.estimated && <span className="surv-tag surv-tag--test"> for testing</span>}
         </span>
         {hasNumber && r ? (
           <span className="surv-line-dmg">
@@ -100,7 +100,7 @@ function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; m
         <span className="surv-chip good">{eleName(s.elementInt)} resist reduces it</span>
       </div>
       {hasNumber
-        ? s.estimated && <p className="surv-skill-note">Estimate — Hercules-baseline ratio; PS may tune this skill's power.</p>
+        ? s.estimated && <p className="surv-skill-note">For testing — this figure uses a baseline ratio Payon Stories may have tuned. Verify it in-game before trusting the number.</p>
         : <p className="surv-skill-note">Exact damage isn't modelled — PS tunes this skill's power beyond the available data. Use the element to pick resist gear.</p>}
     </div>
   );
@@ -199,8 +199,9 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
         reduction gear are accurate. Cast-skill damage: PS-reworked skills a mob casts (Fire Bolt, Bash,
         Lord of Vermilion, …) are priced with their Payon Stories formulas; skills using an unverified
         baseline ratio — monster-native <b>NPC_</b> skills and a few unaudited vanilla skills — are marked
-        <b>≈ est.</b> and PS may tune them. A few flat/special skills (e.g. Dark Breath) show element &amp;
-        type only. Assumes single-target; Perfect Dodge isn't folded into the dodge %.
+        <b>for testing</b>, meaning the number should be confirmed in-game before you trust it. A few
+        flat/special skills (e.g. Dark Breath) show element &amp; type only. Assumes single-target;
+        Perfect Dodge isn't folded into the dodge %.
       </p>
     </div>
   );

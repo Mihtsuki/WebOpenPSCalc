@@ -5,6 +5,15 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-08
+
+### Changed
+
+- **Unverified monster cast-skill numbers are now labelled "for testing".** Cast skills
+  priced from a baseline ratio Payon Stories may have tuned (monster-native `NPC_` skills
+  and a few unaudited vanilla skills) are marked **for testing** in the Survivability panel
+  — a clearer prompt to confirm the figure in-game — replacing the quieter "≈ est." tag.
+
 ## 2026-08-07
 
 ### Added
