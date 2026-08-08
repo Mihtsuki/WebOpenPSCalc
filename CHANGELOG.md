@@ -5,6 +5,17 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-07
+
+### Added
+
+- **Monster "clone" skills now show real damage too.** Some monsters cast copies of
+  player skills under their own internal names (an Eddga's Bash, a Lord Knight card's
+  Pierce or Sharp Shooting). The Survivability panel now prices these through the same
+  accurate ratios as the player versions instead of showing only element and type.
+  Pierce correctly counts as 2 hits against you (a Medium-size player), not the 3 it
+  uses against large targets.
+
 ## 2026-08-06
 
 ### Added

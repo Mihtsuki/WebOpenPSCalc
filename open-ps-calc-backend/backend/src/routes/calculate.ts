@@ -23,7 +23,7 @@ const { calculateHitChance } = require("../engine/calculators/modifiers/hitChanc
 //      "status" (shown as "no direct damage").
 //   4. flat/special damage skills that don't fit ratio×ATK (Dark Breath, self-
 //      destruct) -> hasNumber:false, damageType "damage" (element/type only).
-const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS } = require("../engine/mobSkillRatios");
+const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES, PIERCE_FAMILY, PLAYER_MEDIUM_PIERCE_HITS } = require("../engine/mobSkillRatios");
 const ELE_NAME_TO_INT: Record<string, number> = {
   Ele_Neutral: 0, Ele_Water: 1, Ele_Earth: 2, Ele_Fire: 3, Ele_Wind: 4,
   Ele_Poison: 5, Ele_Holy: 6, Ele_Dark: 7, Ele_Ghost: 8, Ele_Undead: 9,
@@ -35,12 +35,20 @@ function resolveMobSkillDamage(skillId: number, level: number) {
   const attackType: string = sk.attack_type; // "Magic" | "Weapon" | "Misc"
   const eleName = Array.isArray(sk.element) ? sk.element[lv - 1] : sk.element;
   const elementInt = ELE_NAME_TO_INT[eleName] ?? 0;
-  const hitsRaw = Array.isArray(sk.number_of_hits) ? sk.number_of_hits[lv - 1] : sk.number_of_hits;
-  const hits = Math.max(1, Math.abs(Number(hitsRaw) || 1));
   const targetsFoe = Array.isArray(sk.skill_type)
     ? sk.skill_type.some((t: string) => t === "Enemy" || t === "Place")
     : true;
   const name: string = sk.name;
+
+  // Monster-clone skills (MS_/ML_/MA_) alias onto the canonical player skill for
+  // ratio lookup; the display name / element / target keep the mob-skill entry.
+  const ratioName: string = MOB_SKILL_ALIASES[name] || name;
+
+  let hitsRaw = Array.isArray(sk.number_of_hits) ? sk.number_of_hits[lv - 1] : sk.number_of_hits;
+  let hits = Math.max(1, Math.abs(Number(hitsRaw) || 1));
+  // Pierce's hit count is target-size-driven (size+1); the target is the player
+  // (Medium) => 2, overriding the skill_db's flat 3 (which assumes Large).
+  if (PIERCE_FAMILY.has(ratioName)) hits = PLAYER_MEDIUM_PIERCE_HITS;
 
   // A number is only meaningful for a foe-targeting physical/magic skill.
   const isAttack = targetsFoe && (attackType === "Magic" || attackType === "Weapon");
@@ -51,10 +59,10 @@ function resolveMobSkillDamage(skillId: number, level: number) {
     damageType = "status";
   } else {
     const map = attackType === "Magic" ? BF_MAGIC_RATIOS : attackType === "Weapon" ? BF_WEAPON_RATIOS : null;
-    if (map && typeof map[name] === "function") {
-      try { ratio = map[name](lv, {}, {}); hasNumber = isAttack; estimated = false; } catch { hasNumber = false; }
-    } else if (typeof MOB_SKILL_RATIOS[name] === "function") {
-      try { ratio = MOB_SKILL_RATIOS[name](lv); hasNumber = isAttack; estimated = true; } catch { hasNumber = false; }
+    if (map && typeof map[ratioName] === "function") {
+      try { ratio = map[ratioName](lv, {}, {}); hasNumber = isAttack; estimated = false; } catch { hasNumber = false; }
+    } else if (typeof MOB_SKILL_RATIOS[ratioName] === "function") {
+      try { ratio = MOB_SKILL_RATIOS[ratioName](lv); hasNumber = isAttack; estimated = true; } catch { hasNumber = false; }
     } else if (FLAT_UNMODELED_SKILLS.has(name)) {
       damageType = "damage"; // it hurts, we just can't price it as a ratio
     }

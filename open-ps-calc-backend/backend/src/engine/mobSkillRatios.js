@@ -55,6 +55,32 @@ const MOB_SKILL_RATIOS = {
   NPC_DARKTHUNDER:   () => 100, // magic, Wind
 };
 
+// Monster-clone skill names (the MS_/ML_/MA_ prefixes carried by mob copies of
+// player jobs — e.g. an Eddga's MS_BASH) alias 1:1 onto the canonical player
+// skill in Hercules `battle.c` (each shares that skill's `case` in
+// battle_calc_skill_ratio()). Resolving the alias lets the incoming pipeline
+// price them through the ACCURATE outgoing player ratio maps instead of the
+// NPC_* Hercules-baseline estimates, so they report estimated:false.
+//   MS_BASH          -> SM_BASH          (Bash; PS-vanilla-OK)
+//   ML_PIERCE        -> KN_PIERCE        (Pierce; PS-vanilla-OK, hits by size)
+//   ML_SPIRALPIERCE  -> LK_SPIRALPIERCE  (Spiral Pierce; no ratio modeled yet
+//                                          -> still falls through to element/type)
+//   MA_SHARPSHOOTING -> SN_SHARPSHOOTING (Sharp Shooting)
+// (ML_AUTOGUARD is a Self-target buff and MA_SANDMAN a Misc sleep trap — both
+// already classify as non-damage, so they are intentionally NOT aliased here.)
+const MOB_SKILL_ALIASES = {
+  MS_BASH: "SM_BASH",
+  ML_PIERCE: "KN_PIERCE",
+  ML_SPIRALPIERCE: "LK_SPIRALPIERCE",
+  MA_SHARPSHOOTING: "SN_SHARPSHOOTING",
+};
+
+// Skills whose hit count scales by the TARGET's size (div_ = size + 1). In the
+// incoming (survivability) direction the target is always the player, who is
+// Medium (size int 1) -> 2 hits — NOT the flat 3 the vanilla skill_db lists.
+const PIERCE_FAMILY = new Set(["KN_PIERCE", "ML_PIERCE"]);
+const PLAYER_MEDIUM_PIERCE_HITS = 2;
+
 // Mob skills flagged as damage-dealing in the skill_db (Magic/Weapon, targets a
 // foe) that actually inflict a STATUS / drain and deal no HP damage. Surfaced as
 // "no direct damage" rather than a fabricated number.
@@ -84,4 +110,7 @@ const FLAT_UNMODELED_SKILLS = new Set([
   "NPC_SMOKING",          // md.damage = 3
 ]);
 
-module.exports = { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS };
+module.exports = {
+  MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS,
+  MOB_SKILL_ALIASES, PIERCE_FAMILY, PLAYER_MEDIUM_PIERCE_HITS,
+};

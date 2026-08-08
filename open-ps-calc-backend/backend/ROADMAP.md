@@ -251,13 +251,17 @@ without re-auditing everything from scratch.
   the incoming pipeline: player skills a mob casts (Fire Bolt, Bash, Meteor, …)
   use the accurate outgoing ratio maps; monster-native `NPC_*` skills use a
   Hercules-baseline ratio table and are flagged as **estimates**; status/drain
-  skills report "no direct damage". **Remaining:** (1) the flat/special skills in
-  `FLAT_UNMODELED_SKILLS` (Dark Breath, self-destruct) still show element/type only
-  — they need a flat-damage branch in the incoming pipeline, not a ratio; (2) the
-  `NPC_*` ratios are Hercules baselines, not PS-tuned — replace with PS-accurate
-  per-skill power if/when that data is sourced (in-game testing / PS wiki); (3)
-  monster-aliased player skills (`MS_BASH`, `ML_PIERCE`, `MA_SHARPSHOOTING`) aren't
-  aliased to their player-skill ratios yet, so they fall through to element/type.
+  skills report "no direct damage". Monster-clone skills (`MS_BASH`, `ML_PIERCE`,
+  `MA_SHARPSHOOTING`) now alias 1:1 onto their canonical player skill
+  (`MOB_SKILL_ALIASES`) and price through the accurate outgoing ratio maps —
+  Pierce's hit count is corrected to 2 vs the Medium player, not the skill_db's
+  flat 3. **Remaining:** (1) the flat/special skills in `FLAT_UNMODELED_SKILLS`
+  (Dark Breath, self-destruct) still show element/type only — they need a
+  flat-damage branch in the incoming pipeline, not a ratio; (2) the `NPC_*` ratios
+  are Hercules baselines, not PS-tuned — replace with PS-accurate per-skill power
+  if/when that data is sourced (in-game testing / PS wiki); (3) `ML_SPIRALPIERCE`
+  aliases to `LK_SPIRALPIERCE`, which has no modeled ratio yet, so Spiral Pierce
+  still falls through to element/type until that skill's ratio is added.
 
 ## Planned front-end features (product)
 
