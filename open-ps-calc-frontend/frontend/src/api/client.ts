@@ -79,7 +79,7 @@ export const api = {
     request("/calculate/incoming", { method: "POST", body: { build, target: { mob_id: mobId }, mob_skill: { id: skillId, level } } }) as Promise<{
       status: { max_hp: number; [k: string]: any };
       modeled: boolean;
-      skill: { name: string; desc: string; attackType: string; elementInt: number; hits: number; ratio: number; ratioKnown: boolean; level: number };
+      skill: { name: string; desc: string; attackType: string; elementInt: number; hits: number; ratio: number; hasNumber: boolean; estimated: boolean; damageType: "damage" | "status"; level: number };
       result: { min_damage: number; max_damage: number; avg_damage: number } | null;
     }>,
   importJaludev: (url: string, server: string) =>

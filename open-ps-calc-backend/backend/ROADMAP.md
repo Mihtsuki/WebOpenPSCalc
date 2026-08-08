@@ -245,16 +245,38 @@ without re-auditing everything from scratch.
   no UI for), consumables, target selection, skill selection, and the
   damage breakdown — still not full parity (no combat-controls panel, no
   build-vs-build comparison).
-- **Incoming damage from the target monster's *skills*, not just its normal
-  attack.** The Survivability panel (`calculators/incomingPipeline.js`,
-  `components/SurvivabilityView.tsx`) computes a real damage-taken figure for the
-  mob's basic melee and its elemental `NPC_*ATTACK` skills, but for a picked cast
-  skill (the `mob_skill` param) it deliberately shows only element / physical-vs-
-  magic / hit count and **no damage number** — because PS tunes mob-skill power
-  beyond what `mob_skill_db.json` carries, so a naive computed figure would be
-  badly off. To model it we'd need PS-accurate per-skill power data (base
-  damage / ratio / level scaling) for those `NPC_*` skills, then run each cast
-  through the same incoming defense pipeline the basic attack already uses.
+- **Incoming damage from the target monster's *skills*** — _largely done_
+  (`mobSkillRatios.js`, `resolveMobSkillDamage` in `routes/calculate.ts`,
+  `components/SurvivabilityView.tsx`). A picked cast skill is priced through the
+  incoming pipeline with the SAME ratio/hit precedence as the outgoing pipeline:
+  `profile.weapon_ratios`/`magic_ratios` (PS-reworked, accurate) override the
+  vanilla `BF_*` maps, which are trusted only where the `*_vanilla_ok` sets confirm
+  PS matches vanilla (otherwise flagged **estimated**); monster-native `NPC_*`
+  skills use a Hercules-baseline table (**estimates**); status/drain skills report
+  "no direct damage". This picked up PS-only spells the vanilla maps lack
+  (Lord of Vermilion, Fire Pillar) and corrected several vanilla-overcounted
+  ratios (Meteor, Soul Strike, Napalm Vulcan). The size/element/race-dependent
+  ratio & hit fns are evaluated against the player-as-target (Medium/Neutral/
+  DemiHuman), so Pierce is 2 hits, and NEGATIVE `number_of_hits` (cosmetic
+  multi-hit, e.g. Vermilion's −10) collapses to 1 instead of multiplying a
+  total-ratio spell. Monster-clone skills (`MS_BASH`, `ML_PIERCE`,
+  `MA_SHARPSHOOTING`) alias 1:1 onto their canonical player skill
+  (`MOB_SKILL_ALIASES`). The `NPC_*` scaling ratios were **audited (2026-08-08)
+  against Hercules `battle.c` and confirmed correct for pre-renewal** (Blood Drain
+  100·lv, Energy Drain 100+100·lv, Dark Cross 100+35·lv; the rest 100% = normal
+  attack). Since PS is pre-re and these are stock monster skills, the pre-re formula
+  IS the value — but PS could still tune an individual one and they can't be
+  measured in-game (mob-cast), so they remain flagged `estimated` ("for testing").
+  **The Survivability UI now shows three explicit states:** accurate (no tag),
+  **for testing** (pre-re baseline `NPC_*` / unaudited vanilla), and **not modeled
+  yet** (damage skills with no reliable formula). **Remaining (genuinely blocked):**
+  (1) Dark Breath (`FLAT_UNMODELED_SKILLS`) — Shadow %-max-HP hit whose power isn't
+  publicly documented and is PS-tuned → now surfaced as **not modeled yet** rather
+  than a fabricated number; (2) making the `NPC_*` estimates PS-*exact* is
+  impossible without data (untestable mob-cast + no PS docs) — the pre-re baseline
+  is the ceiling; (3) `ML_SPIRALPIERCE`/`LK_SPIRALPIERCE` (Spiral Pierce) has no
+  modeled ratio on either side → also surfaced as **not modeled yet** until a ratio
+  is added; likewise monster-cast 3rd-job skills (Crimson Rock, Sonic Wave, …).
 
 ## Planned front-end features (product)
 

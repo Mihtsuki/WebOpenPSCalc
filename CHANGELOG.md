@@ -17,7 +17,56 @@ instead of release version. Dates are taken from actual git commit history.
   clean one-shot and not). Against low-DEF targets the numbers barely move. Weapon masteries
   and Demon Bane still apply as before.
 
+### Changed
+
+- **Unverified monster cast-skill numbers are now labelled "for testing".** Cast skills
+  priced from a baseline ratio Payon Stories may have tuned (monster-native `NPC_` skills
+  and a few unaudited vanilla skills) are marked **for testing** in the Survivability panel
+  — a clearer prompt to confirm the figure in-game — replacing the quieter "≈ est." tag.
+- **Skills that can't be modeled are now shown explicitly.** Monster damage skills with no
+  reliable Payon Stories formula (Dark Breath, Spiral Pierce, monster-only 3rd-job skills)
+  are now flagged **not modeled yet** in the Survivability panel instead of quietly showing
+  element and type only, so it's clear the missing number is a known gap rather than an
+  oversight. The `NPC_` "for testing" ratios were also re-audited against pre-renewal
+  Hercules and confirmed correct as pre-re baselines.
+
+## 2026-08-07
+
+### Added
+
+- **Monster "clone" skills now show real damage too.** Some monsters cast copies of
+  player skills under their own internal names (an Eddga's Bash, a Lord Knight card's
+  Pierce or Sharp Shooting). The Survivability panel now prices these through the same
+  accurate ratios as the player versions instead of showing only element and type.
+  Pierce correctly counts as 2 hits against you (a Medium-size player), not the 3 it
+  uses against large targets.
+
+### Fixed
+
+- **Monster cast-skill damage now uses Payon Stories' reworked numbers, not the
+  vanilla ones.** When a monster casts a player skill at you, the Survivability panel
+  prices it with the same PS-accurate formulas the calculator uses for your own casts.
+  This adds damage numbers for PS-only spells that were previously shown as element/type
+  only (Lord of Vermilion, Fire Pillar) and corrects several that were overstated by the
+  old vanilla values (Meteor Storm, Soul Strike, Napalm Vulcan). Multi-wave spells like
+  Lord of Vermilion no longer multiply their already-total damage by the wave count.
+  Skills whose Payon Stories power isn't publicly documented (e.g. Dark Breath) continue
+  to show element and type only rather than a guessed number.
+
 ## 2026-08-06
+
+### Added
+
+- **Monster cast-skill damage in the Survivability panel.** Tapping one of a
+  monster's damage skills now shows the damage it does to *you*, not just its
+  element and type. Player skills a monster casts (Fire Bolt, Bash, Meteor, …) are
+  priced accurately through the incoming-damage pipeline — damage per cast (all
+  hits), how many casts would down you, and which resist reduces it. Monster-native
+  `NPC_` skills are priced from the Hercules-baseline ratio and labelled **≈ est.**
+  (Payon Stories may tune their power beyond that). Skills that only inflict a
+  status or drain (Stone Curse, Decrease AGI, SP drains) correctly report "no direct
+  damage", and a few flat/special skills (Dark Breath, self-destruct) still show
+  element and type only.
 
 ### Changed
 

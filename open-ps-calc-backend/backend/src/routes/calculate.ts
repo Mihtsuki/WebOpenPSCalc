@@ -14,32 +14,110 @@ const { calculateSkillTiming } = require("../engine/calculators/skillTiming");
 const { calculateHitChance } = require("../engine/calculators/modifiers/hitChance");
 
 // A monster casting a player/NPC skill at YOU. Resolve the skill's element, hit
-// count and %-ratio (from the engine's ratio maps) so the incoming pipeline can
-// price it. Only Magic/Weapon skills deal modellable damage; Misc/support (heals,
-// summons, ailments) return modeled:false so the UI lists them without a number.
+// count and %-ratio so the incoming pipeline can price it. Ratio precedence
+// mirrors the OUTGOING pipeline so a mob's cast is priced with the same numbers
+// the player's own cast would be:
+//   1. PS profile ratio (profile.weapon_ratios / magic_ratios) — the PS-reworked
+//      value; ACCURATE (estimated:false). Also covers PS-only skills the vanilla
+//      maps lack (Lord of Vermilion, Fire Pillar).
+//   2. vanilla BF_WEAPON_RATIOS / BF_MAGIC_RATIOS — accurate only where PS is
+//      confirmed to match vanilla (the *_vanilla_ok sets); otherwise flagged
+//      estimated:true, same as the outgoing "PS unaudited" warning.
+//   3. monster-native NPC_* skills — from mobSkillRatios (Hercules baseline);
+//      ESTIMATES (estimated:true), PS may tune beyond them.
+//   4. status/drain skills that deal no HP damage -> hasNumber:false, damageType
+//      "status" (shown as "no direct damage").
+//   5. flat/special damage skills that don't fit ratio×ATK (Dark Breath) ->
+//      hasNumber:false, damageType "damage" (element/type only).
+// Monster-clone names (MS_/ML_/MA_) are resolved through MOB_SKILL_ALIASES to
+// their canonical player skill for the ratio/hit lookups.
+const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES } = require("../engine/mobSkillRatios");
 const ELE_NAME_TO_INT: Record<string, number> = {
   Ele_Neutral: 0, Ele_Water: 1, Ele_Earth: 2, Ele_Fire: 3, Ele_Wind: 4,
   Ele_Poison: 5, Ele_Holy: 6, Ele_Dark: 7, Ele_Ghost: 8, Ele_Undead: 9,
 };
-function resolveMobSkillDamage(skillId: number, level: number) {
+function resolveMobSkillDamage(skillId: number, level: number, profile: any, mob: any) {
   const sk = (loader as any).getSkill(skillId);
   if (!sk) return null;
   const lv = Math.max(1, Math.min(level || 1, sk.max_level || 10));
   const attackType: string = sk.attack_type; // "Magic" | "Weapon" | "Misc"
   const eleName = Array.isArray(sk.element) ? sk.element[lv - 1] : sk.element;
   const elementInt = ELE_NAME_TO_INT[eleName] ?? 0;
-  const hitsRaw = Array.isArray(sk.number_of_hits) ? sk.number_of_hits[lv - 1] : sk.number_of_hits;
-  const hits = Math.max(1, Math.abs(Number(hitsRaw) || 1));
   const targetsFoe = Array.isArray(sk.skill_type)
     ? sk.skill_type.some((t: string) => t === "Enemy" || t === "Place")
     : true;
-  let ratio = 100, ratioKnown = false;
-  try {
-    const map = attackType === "Magic" ? BF_MAGIC_RATIOS : attackType === "Weapon" ? BF_WEAPON_RATIOS : null;
-    if (map && typeof map[sk.name] === "function") { ratio = map[sk.name](lv, {}, {}); ratioKnown = true; }
-  } catch { ratio = 100; ratioKnown = false; }
-  const modeled = targetsFoe && (attackType === "Magic" || attackType === "Weapon");
-  return { name: sk.name, desc: sk.description || sk.name, attackType, elementInt, hits, ratio, ratioKnown, modeled, level: lv };
+  const name: string = sk.name;
+
+  // Monster-clone skills (MS_/ML_/MA_) alias onto the canonical player skill for
+  // ratio/hit lookup; the display name / element / target keep the mob-skill entry.
+  const ratioName: string = MOB_SKILL_ALIASES[name] || name;
+
+  // The ratio/hit-count fns were written for the outgoing direction (their `tgt`
+  // is the skill's target). Here the mob's target is the player: Medium size,
+  // Neutral, DemiHuman PC — so size/element/race-dependent fns (Pierce's div_,
+  // Magnus's race check) resolve against the player. ctx carries the CASTER
+  // (mob) stats a few ratio fns read (base_level/str/dex for the ATK/base-level
+  // scalers); `skill_levels` is empty because a mob caster's own skill ranks
+  // (e.g. Fire Pillar reading Fire Wall) are unknown, so those secondary bonuses
+  // default to 0.
+  const playerTgt = { size: "Medium", element: 0, race: "DemiHuman", is_pc: true };
+  const mobStats = (mob && mob.stats) || {};
+  const ctx = {
+    skill_levels: {}, skill_params: {},
+    base_level: mob ? mob.level || 0 : 0,
+    base_str: mobStats.str || 0,
+    dex: mobStats.dex || 0,
+  };
+
+  // A number is only meaningful for a foe-targeting physical/magic skill.
+  const isAttack = targetsFoe && (attackType === "Magic" || attackType === "Weapon");
+  let ratio = 100, hasNumber = false, estimated = false;
+  let damageType: "damage" | "status" = isAttack ? "damage" : "status";
+
+  if (NO_HP_DAMAGE_SKILLS.has(name)) {
+    damageType = "status";
+  } else if (isAttack) {
+    const isMagic = attackType === "Magic";
+    const psMap = (isMagic ? profile?.magic_ratios : profile?.weapon_ratios) || {};
+    const bfMap = isMagic ? BF_MAGIC_RATIOS : BF_WEAPON_RATIOS;
+    const vanillaOk: Set<string> = (isMagic ? profile?.magic_vanilla_ok : profile?.weapon_vanilla_ok) || new Set();
+    try {
+      if (typeof psMap[ratioName] === "function") {
+        ratio = psMap[ratioName](lv, playerTgt, ctx); hasNumber = true; estimated = false;
+      } else if (typeof bfMap[ratioName] === "function") {
+        ratio = bfMap[ratioName](lv, playerTgt, ctx); hasNumber = true;
+        // Vanilla ratio is only trustworthy where PS is confirmed to match it.
+        estimated = !vanillaOk.has(ratioName);
+      } else if (typeof MOB_SKILL_RATIOS[ratioName] === "function") {
+        ratio = MOB_SKILL_RATIOS[ratioName](lv); hasNumber = true; estimated = true;
+      } else if (FLAT_UNMODELED_SKILLS.has(name)) {
+        damageType = "damage"; // it hurts, we just can't price it as a ratio
+      }
+    } catch { hasNumber = false; }
+    // A ratio fn reading a ctx field we don't supply could yield NaN/Infinity —
+    // never surface that as a number; fall back to element/type only.
+    if (hasNumber && !Number.isFinite(ratio)) { hasNumber = false; ratio = 100; }
+  }
+
+  // Hit count mirrors the outgoing pipeline: a PS profile hit-count fn overrides
+  // the skills.json number_of_hits (which is sometimes wrong for PS multi-hit
+  // reworks and, importantly, encodes size-based counts like Pierce). A NEGATIVE
+  // number_of_hits is a cosmetic multi-hit (damage applied once) -> 1, NOT its
+  // absolute value — the PS "total ratio" skills (Vermilion −10, Fire Pillar −N)
+  // already fold every wave into the ratio, so multiplying would double-count.
+  let hits = 1;
+  const psHitMap = (attackType === "Magic" ? profile?.magic_hit_counts : profile?.weapon_hit_counts) || {};
+  if (typeof psHitMap[ratioName] === "function") {
+    const h = psHitMap[ratioName](lv, playerTgt, ctx);
+    hits = h && typeof h === "object" ? Number(h.max) || 1 : Number(h) || 1;
+  } else {
+    const hitsRaw = Array.isArray(sk.number_of_hits) ? sk.number_of_hits[lv - 1] : sk.number_of_hits;
+    const n = Number(hitsRaw) || 1;
+    hits = n > 0 ? n : 1; // negative = cosmetic multi-hit -> single damage instance
+  }
+  hits = Math.max(1, hits);
+
+  return { name, desc: sk.description || name, attackType, elementInt, hits, ratio, hasNumber, estimated, damageType, level: lv };
 }
 const gearBonusAggregator = require("../engine/gearBonusAggregator");
 const { applyPetBonuses } = require("../engine/buildApplicator");
@@ -270,16 +348,22 @@ router.post("/incoming", (req: Request, res: Response) => {
 
     // A specific mob skill cast at the player (survivability "which skill hits me").
     if (mobSkill && mobSkill.id != null) {
-      const spec = resolveMobSkillDamage(Number(mobSkill.id), Number(mobSkill.level) || 1);
+      const spec = resolveMobSkillDamage(Number(mobSkill.id), Number(mobSkill.level) || 1, profile, mob);
       if (!spec) return res.status(404).json({ error: "Skill not found" });
-      if (!spec.modeled) {
-        // Support/ailment/summon or unmapped ratio — no direct damage number.
+      if (!spec.hasNumber) {
+        // Status/support (damageType "status") or a damage skill we can't price
+        // as a ratio (damageType "damage", e.g. Dark Breath) — no number, but the
+        // UI still shows element/type for the latter.
         return res.json({ status, mob, skill: spec, result: null, modeled: false });
       }
+      // Multi-hit skills: the ratio is per hit; scale the priced hit by the count.
       const skOpts = { ele_override: spec.elementInt, ratio_override: spec.ratio };
-      const result = spec.attackType === "Magic"
+      let result = spec.attackType === "Magic"
         ? calculateIncomingMagicDamage(mobId, effBuild, status, gearBonuses, weapon, skOpts)
         : calculateIncomingPhysicalDamage(mobId, effBuild, status, gearBonuses, weapon, config, skOpts);
+      if (spec.hits > 1) {
+        result = scaleDamageResult(result, spec.hits, `${spec.hits} hits`, `${spec.name} hits ${spec.hits}×`, "");
+      }
       return res.json({ status, mob, skill: spec, result, modeled: true });
     }
 
