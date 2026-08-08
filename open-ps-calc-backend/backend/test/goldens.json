@@ -1155,15 +1155,70 @@
    "matk_max": 235
   },
   "result": {
-   "dps": 2563.568,
+   "dps": 2501.025,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 2926,
    "normal": {
-    "min": 6345,
-    "max": 8655,
-    "avg": 7501,
+    "min": 6165,
+    "max": 8475,
+    "avg": 7318,
+    "steps": [
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Defense Fix",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Base MATK",
+     "Magic Defense Fix",
+     "ATK part + MATK part",
+     "Attr Fix",
+     "Grand Cross Ratio (Lv 10)",
+     "Card Fix",
+     "Per-Wave Damage",
+     "Grand Cross Total (3 waves)"
+    ]
+   },
+   "self_damage": {
+    "total_min": 2879,
+    "total_max": 3764,
+    "total_avg": 3320
+   }
+  }
+ },
+ "crusader-grand-cross-high-def": {
+  "status": {
+   "str": 67,
+   "agi": 32,
+   "vit": 77,
+   "int_": 66,
+   "dex": 43,
+   "luk": 15,
+   "batk": 114,
+   "max_hp": 10122,
+   "max_sp": 756,
+   "aspd": 158.5,
+   "cri": 60,
+   "hit": 138,
+   "flee": 127,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 147,
+   "matk_max": 235
+  },
+  "result": {
+   "dps": 1384.142,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 2926,
+   "normal": {
+    "min": 2730,
+    "max": 5370,
+    "avg": 4050,
     "steps": [
      "Weapon ATK Range",
      "Size Fix",

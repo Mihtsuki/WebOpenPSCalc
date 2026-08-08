@@ -146,6 +146,14 @@ const scenarios = [
     target: 1036,
   },
   {
+    // GC vs a HIGH-DEF target (Knight of Abyss: DEF 55 / MDEF 50) — locks in that GC
+    // APPLIES the target's DEF/MDEF (regression guard against re-introducing ignore-DEF).
+    name: "crusader-grand-cross-high-def",
+    build: { job_id: 14, base_level: 95, job_level: 50, base_stats: { str: 60, agi: 30, vit: 70, int: 60, dex: 40, luk: 10 }, equipped: { right_hand: 1101 } },
+    skill: { name: "CR_GRANDCROSS", level: 10 },
+    target: 1219,
+  },
+  {
     name: "crusader-shield-boomerang",
     build: { job_id: 14, base_level: 95, job_level: 50, base_stats: { str: 60, agi: 30, vit: 70, int: 60, dex: 40, luk: 10 }, equipped: { right_hand: 1101, left_hand: 2116 }, refine: { left_hand: 5 } },
     skill: { name: "CR_SHIELDBOOMERANG", level: 5 },

@@ -480,16 +480,15 @@ class BattlePipeline {
       const [mn, mx, av] = pmfStats(atkPmf);
       result.add_step({ name: "bAtkRate", value: av, min_value: mn, max_value: mx, multiplier: (100 + gearBonuses.atk_rate) / 100, note: `bAtkRate +${gearBonuses.atk_rate}%`, formula: `dmg*(100+${gearBonuses.atk_rate})//100`, hercules_ref: "battle.c:5330" });
     }
-    // Grand Cross ignores the target's HARD DEF/MDEF. The PS wiki damage formula is
-    // literally "(ATK + MATK) × (100% + 40×lvl%)" with no defense term
-    // (wiki.payonstories.com/Grand_Cross), and RateMyServer (skid=254) states the
-    // skill "ignores target's defense" — confirmed in-game on Payon Stories, where GC
-    // does ~10-19k on Knight of Abyss (DEF 55 / MDEF 50) vs the ~6k a full DEF/MDEF
-    // cut would give. The soft (VIT/INT-based) DEF2/MDEF2 still applies, matching the
-    // observed magnitude. This deviates from the older "with-DEF" ROADMAP audit; the
-    // authoritative PS-wiki formula + live in-game data win. `ignore_hard_def` zeroes
-    // hard DEF but keeps the soft Soft-DEF subtraction (no ignore-def cards here).
-    atkPmf = calculateDefenseFix(target, { ...build, ignore_hard_def: true }, gearBonuses, atkPmf, this.config, result, { is_crit: false, skill });
+    // Grand Cross applies the target's DEF to the PHYSICAL part (hard + soft DEF),
+    // matching the PDF-verified Crusader-rework audit (ROADMAP: "with-DEF") and
+    // confirmed by PS in-game data — a Provoke DEF cut measurably scales GC, and
+    // dropping hard DEF matched the observed base magnitude far better than the
+    // earlier ignore-DEF reading of the terse wiki formula. NB: the magic part
+    // (below) is ASYMMETRIC — it takes soft MDEF only, NOT hard MDEF (see there).
+    // Weapon masteries + refine still apply after DEF and are amplified by the
+    // ratio (applied last).
+    atkPmf = calculateDefenseFix(target, build, gearBonuses, atkPmf, this.config, result, { is_crit: false, skill });
     atkPmf = calculateRefineFix(weapon, skill, atkPmf, result);
     const ctx = createCalcContext({
       skill_levels: gearBonuses.effective_mastery,
@@ -512,9 +511,13 @@ class BattlePipeline {
     const matkHi = Math.max(matkLo, status.matk_max);
     let matkPmf = uniformPmf(matkLo, matkHi);
     { const [mn, mx, av] = pmfStats(matkPmf); result.add_step({ name: "Base MATK", value: av, min_value: mn, max_value: mx, note: `INT=${status.int_} — resolved MATK ${matkLo}-${matkHi} (incl. gear/buff MATK%)`, formula: "int+(int/7)^2 to int+(int/5)^2, × MATK% bonuses", hercules_ref: "status.c status_calc_matk" }); }
-    // GC ignores the target's HARD MDEF too (see the DEF note above): pass a target
-    // clone with mdef_ = 0 so the ×(100−MDEF)% step is skipped, while soft MDEF2
-    // (INT + VIT/2) still subtracts.
+    // Magic part: soft MDEF2 (INT + VIT/2) only — GC does NOT apply the target's
+    // HARD MDEF. Verified against in-game screenshots: an INT-based GC on Knight of
+    // Abyss (hard MDEF 50) is NOT halved — it reads ~14.2k, matching soft-MDEF-only
+    // (~14.9k), not full-MDEF (~8.5k). (The physical part above DOES take hard DEF —
+    // a Provoke DEF cut measurably scales GC, and dropping hard DEF matched the base
+    // magnitude far better than keeping it. So GC is asymmetric: hard DEF yes, hard
+    // MDEF no.) `mdef_: 0` skips the ×(100−MDEF)% step while keeping soft MDEF2.
     matkPmf = calculateMagicDefenseFix({ ...target, mdef_: 0 }, gearBonuses || {}, matkPmf, result);
 
     // ── Sum (wd + ad) → Holy element → × ratio (applied LAST, per Hercules) ──
