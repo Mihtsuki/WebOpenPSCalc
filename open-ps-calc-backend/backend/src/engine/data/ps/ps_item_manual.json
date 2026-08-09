@@ -2008,24 +2008,24 @@
     "script": "bonus bMaxHP,100; bonus bMaxSP,10; bonus bHPrecovRate,5; bonus bSPrecovRate,5;"
   },
 
-  "_comment_95xxx": "PROVISIONAL IDs. Items from the 2026-08-09 PS rework PDFs that tools.payonstories.com/api/pc/item still returns 'No data' for (re-checked 2026-08-09 after the GM notes), so no real item ID is available to key them by. They live in a reserved 95xxx block; re-key them to the published IDs once the API indexes them (a share link that equips one will need re-picking). NB Whirling Hammer IS already obtainable in-game via a Blacksmith quest per the GM notes — it is the public item API that has not caught up, not the item that is missing.",
-
-  "95001": {
+  "8429": {
     "type": "IT_WEAPON",
     "loc": ["EQP_WEAPON"],
     "weapon_type": "2HMace",
     "slots": 1,
     "name": "Whirling Hammer",
     "aegis_name": "Whirling_Hammer",
-    "job": [5, 10, 18, 4011, 4019],
+    "job": [10, 4011],
     "atk": 190,
     "weight": 350,
     "weapon_level": 4,
-    "equip_level": 70,
+    "equip_level": 60,
     "refineable": true,
-    "_note": "PS Blacksmith rework 2026-08-09. 'Gain 1 SP on Kill' is not a damage term and is not modeled.",
+    "_note": "PS Blacksmith rework 2026-08-09. Id, level requirement and job list taken from the in-game client tooltip (2026-08-09 screenshot: 'Whirling_Hammer' / 'Whirling Hammer [1]' (8429), Level Requirement 60, Jobs: Blacksmith), which OVERRIDES the rework PDF on two points — the PDF said level 70 and did not restrict the job. tools.payonstories.com/api/pc/item still returns 'No data' for it, so the client is the authoritative source here. 'Gain 1 SP each time a monster is killed by a physical melee attack' is not a damage term and is not modeled.",
     "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,getrefine();"
   },
+
+  "_comment_95xxx": "PROVISIONAL ID. Giant Pestle is announced in the 2026-08-09 Alchemist rework PDF but is not obtainable yet and tools.payonstories.com/api/pc/item returns 'No data' for it, so there is no real item ID to key it by. It sits in a reserved 95xxx block; re-key it to the published id once it lands (a share link that equips it will need the weapon re-picked). Whirling Hammer already made that move — it is now keyed by its real client id 8429 above.",
 
   "95002": {
     "type": "IT_WEAPON",

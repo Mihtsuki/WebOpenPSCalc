@@ -524,10 +524,14 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
   - **Skeleton Pirate respawn timers cut to 45–60 s**: no calculator surface. Spawn/respawn
     timers are not part of the bundled mob data and nothing in the UI reports them. Relevant
     only as farming context for the reworked Pirate Skel Card.
-  - **Whirling Hammer is obtainable in-game via a Blacksmith quest**: the item exists, but
-    `tools.payonstories.com/api/pc/item` still returns `No data` for it (re-checked after the
-    GM notes), so there is still no published id to key it by — it keeps its provisional 95001
-    until the API indexes it. Same for Giant Pestle (95002).
+  - **Whirling Hammer is obtainable in-game via a Blacksmith quest**: now keyed by its REAL id
+    **8429**, read off the in-game client tooltip (the public item API still returns `No data`,
+    so the client is the authoritative source here — as it will be for anything else that ships
+    before the API catches up). The client **disagrees with the rework PDF on two points** and
+    wins: **Level Requirement 60** (PDF said 70) and **Jobs: Blacksmith** → `[10, 4011]` (the
+    PDF gave no job restriction, so it had been modeled as all Merchant classes). ATK 190 /
+    weight 350 / weapon level 4 / 1 slot / `Whirling_Hammer` / +1% Cart Revolution per refine
+    all match the PDF. Giant Pestle is still provisional (95002) — not obtainable yet.
 - Magic pipeline (#1 above moved to "Fully ported").
 - Card slots on equipment — up to 4 per item, read from `item.slots`,
   written to `equipped["<slot>_cardN"]`, already consumed by

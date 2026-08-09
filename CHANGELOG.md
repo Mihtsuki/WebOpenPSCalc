@@ -57,8 +57,10 @@ instead of release version. Dates are taken from actual git commit history.
   Smith Weapon skills, doubling at base DEX and LUK 80+), **Whirling Hammer [1]** (two-handed
   mace, ATK 190, +1% Cart Revolution damage per refine) and **Giant Pestle** (Alchemist
   one-handed mace, ATK 100, +3 ATK per Pharmacy level at base DEX/LUK 60+, +12 at 80+).
-  The two brand-new weapons are not live on the server yet, so they carry provisional item
-  IDs — a build that equips one may need the weapon re-picked once the patch ships.
+  **Whirling Hammer** is already obtainable in game and is listed with its real stats —
+  note it needs **base level 60** and is **Blacksmith/Whitesmith only**, which differs from
+  the rework notes. **Giant Pestle** isn't obtainable yet, so it carries a provisional item
+  ID — a build that equips it may need the weapon re-picked once it ships.
 
 - **Crescent Scythe now shows the HP it heals you.** Both the plain and the slotted version
   heal **0.1% of the damage dealt per refine** on a critical hit — so a +10 one returns 1% of
