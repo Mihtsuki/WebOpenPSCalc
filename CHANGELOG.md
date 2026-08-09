@@ -7,6 +7,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-09
 
+### Fixed
+
+- **Skills your job can't learn no longer inflate your stats.** Switching jobs in the build
+  editor left the previous job's passive levels behind in the build, and the calculator kept
+  applying them — so a build that had once been a Monk carried Martial Arts into an Assassin
+  and read **+20 FLEE** that the character doesn't have in game (207 shown vs 187 actual).
+  Passive levels are now checked against the selected job's own skill tree, which also
+  repairs builds already saved or shared with the stale data — just reload the link. Skills
+  **granted by gear** are unaffected: a card really can give you a skill outside your tree.
+
 ### Added
 
 - **The Merchant, Blacksmith and Alchemist reworks are in.** Every damage-relevant change

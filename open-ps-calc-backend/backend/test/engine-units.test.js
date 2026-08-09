@@ -643,6 +643,62 @@ test("Smith Weapon skills master at rank 4; Smith Two-Handed Sword is gone", () 
   assert.ok(!("BS_TWOHANDSWORD" in byName), "Smith Two-Handed Sword folded into Smith Sword");
 });
 
+// ---------------------------------------------------------------------------
+// Masteries the selected job cannot learn must never be applied. `mastery_levels`
+// is free-form and the editor does not clear it on a job change, so levels from a
+// previous job linger in the state and in every share URL made from it.
+//
+// Reported case (share UBxQXSC): an Assassin carrying a leftover Martial Arts
+// (MO_IRONHAND) Lv10 read 207 FLEE in the calculator against 187 in-game — exactly
+// the +2 FLEE/lv x 10 that PS's Martial Arts grants a Monk.
+// ---------------------------------------------------------------------------
+test("mastery levels the job cannot learn are stripped (Assassin FLEE regression)", () => {
+  const cfg = createBattleConfig();
+  const SHARED = {
+    server: "payon_stories", job_id: 12, base_level: 61, job_level: 26,
+    base_stats: { str: 61, agi: 53, dex: 30 },
+    equipped: {
+      armor: 2302, garment: 2504, shoes: 2402, accessory_left: 2618,
+      accessory_right: 2618, right_hand: 13048, left_hand: 13048,
+      head_top: 2280, garment_card1: 4102, // Whisper Card = +20 Flee
+    },
+    refine: { right_hand: 0 },
+    consumable_buffs: { aspd_potion: 2 },
+    // NJ_/MO_ entries are stale: an Assassin can learn neither.
+    mastery_levels: {
+      NJ_TOBIDOUGU: 10, MO_IRONHAND: 10, MO_TRIPLEATTACK: 5,
+      AS_LEFT: 5, AS_RIGHT: 5, TF_DOUBLE: 10, TF_MISS: 10,
+    },
+  };
+  const [, eff, , status] = resolvePlayerState(buildFromSaveSchema(SHARED), cfg, PS);
+  assert.equal(status.flee, 187, "FLEE must match the in-game 187, not 207");
+  assert.deepEqual(Object.keys(eff.mastery_levels).sort(),
+    ["AS_LEFT", "AS_RIGHT", "TF_DOUBLE", "TF_MISS"],
+    "only skills in the Assassin tree survive");
+
+  const { dropped } = loader.filterMasteryLevelsForJob(12, SHARED.mastery_levels);
+  assert.deepEqual(dropped.sort(), ["MO_IRONHAND", "MO_TRIPLEATTACK", "NJ_TOBIDOUGU"]);
+
+  // The same masteries must still work for the jobs that DO own them.
+  assert.deepEqual(loader.filterMasteryLevelsForJob(15, { MO_IRONHAND: 10 }).dropped, [],
+    "a Monk keeps Martial Arts");
+  assert.deepEqual(loader.filterMasteryLevelsForJob(25, { NJ_TOBIDOUGU: 10 }).dropped, [],
+    "a Ninja keeps Throwing Mastery");
+
+  // Masteries the engine reads but the passive PICKER never lists must survive —
+  // filtering against the job's full skill tree is what makes this safe.
+  for (const [job, name] of [[10, "MC_MAMMONITE"], [10, "PS_BS_ZENYPINCHER"], [10, "BS_SKINTEMPER"],
+    [14, "AL_DP"], [9, "WZ_ESTIMATION"], [25, "NJ_NINPOU"], [4013, "ASC_KATAR"]]) {
+    assert.deepEqual(loader.filterMasteryLevelsForJob(job, { [name]: 1 }).dropped, [],
+      `${name} must survive for job ${job}`);
+  }
+  // Blade Mastery is listed as SM_TWOHAND in the tree but stored as SM_TWOHANDSWORD.
+  assert.deepEqual(loader.filterMasteryLevelsForJob(7, { SM_TWOHANDSWORD: 10 }).dropped, [],
+    "the mastery-key alias must be recognised");
+  // An unknown job has no tree to check against — fail open rather than wipe.
+  assert.deepEqual(loader.filterMasteryLevelsForJob(99999, { MO_IRONHAND: 10 }).dropped, []);
+});
+
 test("card autocast (Pirate Skel to Mammonite) surfaces as a proc branch on auto-attacks only", () => {
   const cfg = createBattleConfig();
   const run = (skillId) => {

@@ -16,6 +16,16 @@ const { loader } = require("./dataLoader");
 function resolvePlayerState(build, config, profile = null) {
   if (profile == null) profile = getProfile(build.server);
 
+  // Strip mastery levels the selected job cannot learn. `mastery_levels` is a
+  // free-form map that the editor does not clear on a job change, so levels from a
+  // previously selected job survive in the state (and in every share URL made from
+  // it) and get applied silently — a leftover Martial Arts Lv10 was adding +20 FLEE
+  // to an Assassin. Done once here, at the single funnel every route goes through,
+  // so old share links are corrected on load too. Gear-GRANTED skills are added
+  // later inside gearBonusAggregator and are deliberately not filtered.
+  const { levels: legalMastery, dropped } = loader.filterMasteryLevelsForJob(build.job_id, build.mastery_levels);
+  if (dropped.length) build = { ...build, mastery_levels: legalMastery };
+
   function onePass(status) {
     const ctx = gearBonusAggregator.scriptCtxFromBuild(build, status);
     const gb = gearBonusAggregator.compute(build.equipped, build.refine_levels, ctx, build.force_procs);

@@ -995,6 +995,14 @@ export default function BuildEditor() {
   // max levels/names vs vanilla -- e.g. Advanced Book) changes
   useEffect(() => {
     if (!data.job_id) { setPassiveSkills([]); return; }
+    // NB: mastery_levels is deliberately NOT pruned against this list on a job
+    // change. Levels left over from a previously selected job ARE a real bug (a
+    // stale Martial Arts Lv10 was adding +20 FLEE to an Assassin), but the picker
+    // only lists damage-relevant passives — several masteries the engine reads
+    // (MC_MAMMONITE, PS_BS_ZENYPINCHER, BS_SKINTEMPER, AL_DP, WZ_ESTIMATION…) never
+    // appear here, so pruning to this list would delete legitimate levels. The
+    // backend strips them against the job's full skill tree instead
+    // (dataLoader.filterMasteryLevelsForJob), which also repairs existing share URLs.
     api.getJobPassives(data.job_id, data.server).then(setPassiveSkills).catch(() => setPassiveSkills([]));
   }, [data.job_id, data.server]);
 

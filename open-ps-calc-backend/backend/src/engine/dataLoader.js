@@ -541,6 +541,66 @@ class DataLoader {
     }
   }
 
+  /**
+   * Every skill NAME a job can learn: its vanilla skill tree, plus the mastery-key
+   * aliases the engine stores under (SM_TWOHAND is listed in the tree but read as
+   * SM_TWOHANDSWORD), plus any PS-custom skill whose ps_custom_constants.json job
+   * list includes this job. Memoized per job.
+   */
+  _learnableSkillNames(jobId) {
+    if (this.__learnable == null) this.__learnable = new Map();
+    const cacheKey = `${jobId}:${this._usePsData ? "ps" : "std"}`;
+    if (this.__learnable.has(cacheKey)) return this.__learnable.get(cacheKey);
+
+    let names = [];
+    try {
+      const treeData = this._loadJson("tables/skill_tree.json");
+      names = (treeData.jobs || {})[String(jobId)] || [];
+    } catch {
+      names = [];
+    }
+    const set = new Set(names);
+    // Tree name -> the key masteryFix.js/statusCalculator.js actually look up.
+    if (set.has("SM_TWOHAND")) set.add("SM_TWOHANDSWORD");
+    if (this._usePsData) {
+      for (const rec of this.getPsCustomSkills()) {
+        if ((rec.job || []).includes(jobId)) set.add(rec.constant);
+      }
+    }
+    this.__learnable.set(cacheKey, set);
+    return set;
+  }
+
+  /**
+   * Drop mastery/passive levels the job cannot actually learn.
+   *
+   * A build's `mastery_levels` map is free-form (share URLs, the API, and the
+   * editor's own state all write to it), and the editor does not clear it when the
+   * job changes — so levels from a previously selected job linger and get applied
+   * silently. That is a real damage/stat bug, not a cosmetic one: e.g. a leftover
+   * Martial Arts (MO_IRONHAND) Lv10 adds +20 FLEE on PS to a character that can
+   * never have the skill.
+   *
+   * Fails OPEN: if the job has no known skill tree (an unmapped job id) the
+   * map is returned untouched rather than emptied. Gear-granted skills are NOT
+   * affected — those are merged into effective_mastery later, by design (a card
+   * really can grant a skill outside your tree).
+   *
+   * Returns { levels, dropped } — `dropped` lists the removed skill names.
+   */
+  filterMasteryLevelsForJob(jobId, masteryLevels) {
+    const levels = masteryLevels || {};
+    const learnable = this._learnableSkillNames(jobId);
+    if (learnable.size === 0) return { levels, dropped: [] };
+    const out = {};
+    const dropped = [];
+    for (const [name, lv] of Object.entries(levels)) {
+      if (learnable.has(name)) out[name] = lv;
+      else dropped.push(name);
+    }
+    return dropped.length ? { levels: out, dropped } : { levels, dropped: [] };
+  }
+
   getSkillIdByName(name) {
     if (this._skillNameToId == null) {
       const mapping = {};
