@@ -60,6 +60,11 @@ instead of release version. Dates are taken from actual git commit history.
   The two brand-new weapons are not live on the server yet, so they carry provisional item
   IDs — a build that equips one may need the weapon re-picked once the patch ships.
 
+- **Crescent Scythe now shows the HP it heals you.** Both the plain and the slotted version
+  heal **0.1% of the damage dealt per refine** on a critical hit — so a +10 one returns 1% of
+  the crit, ten times what a flat 0.1% would give. The crit breakdown shows the HP restored,
+  clearly kept out of the damage total and DPS since it's healing, not damage.
+
 ### Changed
 
 - **FUEL Card** now adds **+10%** to Acid Terror and Demonstration (was +30%), and **Pill

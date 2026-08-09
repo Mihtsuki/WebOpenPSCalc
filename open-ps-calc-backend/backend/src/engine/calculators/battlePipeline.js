@@ -1633,6 +1633,22 @@ class BattlePipeline {
     const normal = this._runBranch(status, weapon, skill, target, build, false, { profile, gear_bonuses: gearBonuses });
     const crit = isEligible ? this._runBranch(status, weapon, skill, target, build, true, { profile, gear_bonuses: gearBonuses }) : null;
 
+    // Crit lifesteal (bCritHeal — Crescent Scythe heals 0.1% of the damage dealt per
+    // refine on a critical hit). Attached to the crit branch as its own field, NOT
+    // folded into damage or DPS: it is HP returned to you, not damage to the target.
+    // Rides on the main crit branch only — the dual-wield off-hand and katar second
+    // hits are separate rolls this doesn't attempt to price.
+    if (crit && gearBonuses.crit_heal_permille > 0) {
+      const permille = gearBonuses.crit_heal_permille;
+      const heal = (d) => Math.floor(d * permille / 1000);
+      crit.crit_heal = {
+        permille,
+        min: heal(crit.min_damage),
+        max: heal(crit.max_damage),
+        avg: heal(crit.avg_damage),
+      };
+    }
+
     let period, dpsValid;
     if (skill.id === 0) {
       period = adelay;

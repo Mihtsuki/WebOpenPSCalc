@@ -39,6 +39,9 @@ interface DamageBranch {
   max_damage: number;
   steps: Step[];
   self_damage?: SelfDamage;   // Grand Cross blowback (self-recoil) — only present for CR_GRANDCROSS
+  // Crit lifesteal (bCritHeal — Crescent Scythe). HP returned to you on a crit,
+  // not damage: never folded into the damage total or DPS.
+  crit_heal?: { permille: number; min: number; max: number; avg: number };
 }
 
 interface FalconResult {
@@ -471,6 +474,10 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
   // no crit/falcon/katar branches, so surface it whenever it's present.
   const selfDamage = (hasSkill ? skillResult! : normal_attack).result.normal.self_damage ?? null;
 
+  // Crit lifesteal (Crescent Scythe): only meaningful on the crit view, since it is
+  // paid out per critical hit. Shown under the breakdown, clearly marked as healing.
+  const critHeal = activeBranch === "crit" ? (primary.result.crit?.crit_heal ?? null) : null;
+
   // Combined DW damage range for the headline (PS mode, normal/crit branch)
   const showDwCombined = hasDualWield && dwMode === "ps" && !!dwLhNormal && (activeBranch === "normal" || activeBranch === "crit");
   const dwRhBranch = activeBranch === "crit" ? (normal_attack.result.crit ?? normal_attack.result.normal) : normal_attack.result.normal;
@@ -749,6 +756,22 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
                 {finalRange ? `${nfmt(killMin!)}–${nfmt(killMax!)}` : nfmt(killAvg)}
               </span>
             </div>
+          )}
+          {critHeal && (
+            <>
+              <div className="breakdown-total">
+                <span className="breakdown-total-label">HP healed on this crit</span>
+                <span className="breakdown-total-val">
+                  +{critHeal.min !== critHeal.max ? `${nfmt(critHeal.min)}–${nfmt(critHeal.max)}` : nfmt(critHeal.avg)}
+                </span>
+              </div>
+              <div className="self-damage-resists" style={{ marginTop: "0.5rem" }}>
+                <span className="self-damage-chip muted">
+                  {(critHeal.permille / 10).toFixed(1)}% of the damage dealt (0.1% per refine)
+                </span>
+                <span className="self-damage-chip muted">healing, not damage — not in the total or DPS</span>
+              </div>
+            </>
           )}
         </div>
       )}

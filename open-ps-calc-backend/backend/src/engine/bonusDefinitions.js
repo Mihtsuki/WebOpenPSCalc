@@ -129,6 +129,11 @@ const BONUS1 = {
   bUseSPrate: def((v) => `SP consumption ${v < 0 ? "reduced" : "increased"} by ${Math.abs(v)}%.`),
   bHealPower: def((v) => `Heal effectiveness +${v}%.`, "heal_power"),
   bHealBombFull: def(() => `Offensive Heal deals full (100%) value as damage to Undead.`, "heal_bomb_full", "assign"),
+  // PS-specific, like bHealBombFull above: not a Hercules bonus. Crescent Scythe
+  // (and its slotted variant) heal the wielder for 0.1% of the damage dealt PER
+  // REFINE on a critical hit, so the item script passes getrefine() and the value
+  // is read as PER MILLE of the crit damage (refine 10 => 1%).
+  bCritHeal: def((v) => `Critical hits heal you for ${(v / 10).toFixed(1)}% of the damage dealt.`, "crit_heal_permille"),
   bSpeedRate: def((v) => (v > 0 ? `Movement speed +${v}%.` : `Movement speed ${v}%.`)),
   bSplashRange: def((v) => `Attack splash range +${v} cells.`),
   bSPDrainValue: def((v) => `Drains ${v} SP per physical hit.`),

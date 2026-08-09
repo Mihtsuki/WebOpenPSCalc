@@ -643,6 +643,42 @@ test("Smith Weapon skills master at rank 4; Smith Two-Handed Sword is gone", () 
   assert.ok(!("BS_TWOHANDSWORD" in byName), "Smith Two-Handed Sword folded into Smith Sword");
 });
 
+test("Crescent Scythe heals 0.1% of crit damage PER REFINE, and never counts as damage", () => {
+  const cfg = createBattleConfig();
+  const run = (itemId, refine) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 7, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 70, vit: 40, int: 1, dex: 60, luk: 80 },
+      equipped: { right_hand: itemId }, refine: { right_hand: refine },
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    const res = new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }),
+      createTarget({ def_: 0, vit: 0, size: 1, race: 0, element: 0 }), eff, gb);
+    return { gb, res };
+  };
+  // Unrefined: the bonus is getrefine(), so there is nothing to heal.
+  assert.equal(run(1466, 0).gb.crit_heal_permille, 0);
+  assert.equal(run(1466, 0).res.crit.crit_heal, undefined);
+
+  for (const itemId of [1466, 1476]) {           // plain and slotted variant
+    for (const refine of [4, 7, 10]) {
+      const { gb, res } = run(itemId, refine);
+      assert.equal(gb.crit_heal_permille, refine, `id ${itemId} +${refine}: per-mille tracks refine`);
+      const ch = res.crit.crit_heal;
+      // 0.1% per refine => permille === refine. NOT a flat 0.1%.
+      assert.equal(ch.permille, refine);
+      assert.equal(ch.avg, Math.floor(res.crit.avg_damage * refine / 1000));
+      // Healing must never leak into the damage numbers.
+      assert.ok(!res.crit.steps.some((s) => /heal/i.test(s.name)), "no heal step in the damage pipeline");
+      assert.equal(res.normal.crit_heal, undefined, "non-crit hits heal nothing");
+    }
+  }
+  // A +10 Crescent Scythe heals 1% of the crit, an order of magnitude more than
+  // the flat 0.1% the patch notes originally said.
+  const ten = run(1466, 10);
+  assert.equal(ten.res.crit.crit_heal.avg, Math.floor(ten.res.crit.avg_damage / 100));
+});
+
 // ---------------------------------------------------------------------------
 // Masteries the selected job cannot learn must never be applied. `mastery_levels`
 // is free-form and the editor does not clear it on a job change, so levels from a

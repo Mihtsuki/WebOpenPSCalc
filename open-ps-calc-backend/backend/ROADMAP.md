@@ -508,6 +508,26 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
     Bug Card (+8%), Pirate Skel Card (Discount 5) and Flame Beetle Card (20%) — i.e. this patch
     is modeled from the rework PDFs ahead of the server deploy, and a re-scrape after the deploy
     should confirm rather than contradict these values.
+- **PS 2026-08-09 GM follow-up notes** (posted after the rework PDFs) — triaged:
+  - **Crescent Scythe (1466) and its slotted variant (1476)**: crit lifesteal, **0.1% of the
+    damage dealt PER REFINE**, not a flat 0.1% (the GM corrected their own patch note). Modeled
+    via a new PS-specific `bCritHeal` bonus read as PER MILLE, so the script is literally
+    `bonus bCritHeal,getrefine()`. Computed on the main crit branch only
+    (`crit.crit_heal`) and deliberately kept out of `avg_damage`/DPS — it is HP returned, not
+    damage. The dual-wield off-hand and katar second hits are separate rolls it doesn't price.
+  - **Ice Titan Card DEF now applies while under attack** (previously suppressed by the
+    Overcrowding penalty): **no code change needed, and the note confirms current behaviour.**
+    This calculator does not model Overcrowding (a 23+-enemy DEF penalty; it appears only in a
+    PS skill description), so gear DEF was already treated as always-on. Ice Titan's +10 DEF is
+    an `autobonus2`, i.e. a proc, so it still only shows under the "always proc" toggle — that
+    is about proc modeling, not about Overcrowding.
+  - **Skeleton Pirate respawn timers cut to 45–60 s**: no calculator surface. Spawn/respawn
+    timers are not part of the bundled mob data and nothing in the UI reports them. Relevant
+    only as farming context for the reworked Pirate Skel Card.
+  - **Whirling Hammer is obtainable in-game via a Blacksmith quest**: the item exists, but
+    `tools.payonstories.com/api/pc/item` still returns `No data` for it (re-checked after the
+    GM notes), so there is still no published id to key it by — it keeps its provisional 95001
+    until the API indexes it. Same for Giant Pestle (95002).
 - Magic pipeline (#1 above moved to "Fully ported").
 - Card slots on equipment — up to 4 per item, read from `item.slots`,
   written to `equipped["<slot>_cardN"]`, already consumed by
