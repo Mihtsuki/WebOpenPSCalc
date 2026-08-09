@@ -508,6 +508,48 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
     Bug Card (+8%), Pirate Skel Card (Discount 5) and Flame Beetle Card (20%) — i.e. this patch
     is modeled from the rework PDFs ahead of the server deploy, and a re-scrape after the deploy
     should confirm rather than contradict these values.
+- **PS 2026-08-09 patch notes** (the GM announcement — carries changes the four rework PDFs
+  do NOT mention; the PDFs are Merchant/Blacksmith/Alchemist only). Verified line by line:
+  - **Crusader — Reflect Shield new formula**: `SkillLevel × ((SoftDef/2) + ⌊VIT/10⌋²) ×
+    (100 + 2×Def) / 1000`, replacing the earlier PS rework's `SoftDEF × (1 + 1.75×HardDEF/100)
+    × lv/10`. VIT is now QUADRATIC, which changes the stat priority for the skill entirely.
+    Written with a single final floor (the notes floor only the VIT/10 term); ≤1 damage apart
+    from flooring each step. Verified by hand: VIT 87 / SoftDEF 87 / HardDEF 0 / Lv5 →
+    5 × (43.5 + 64) × 100/1000 = 53.75 → 53.
+  - **Swordsman — Magnum Break's lingering effect now covers Magnum Break as well as auto
+    attacks.** Acting on this exposed two problems. (1) The effect **was never modeled at
+    all** — Hercules implements it as `SC_SUB_WEAPONPROPERTY` (skill.c SM_MAGNUM:
+    `sc_start4(..., 3 /* Ele_Fire */, 20, ...)`), and pre-re battle.c adds it at the END of
+    `battle_calc_elefix`: `temp = calc_base_damage2(rhw) × val2/100; damage += attr_fix(temp,
+    Fire)`. So it is an extra chunk built from a fresh NORMAL-ATTACK base damage (not the
+    skill's ratio'd damage) that lands AFTER defenseFix and therefore bypasses DEF. Now
+    implemented at exactly that position in `_runBranch`, behind an
+    `active_buffs.SC_SUB_WEAPONPROPERTY` toggle. (2) `SM_MAGNUM_ENDOW_ATTACK_ONLY` was a
+    **no-op**: it rewrote `build.weapon_element` in `calculate()`, but the endow is already
+    baked into the resolved `weapon` back in `resolvePlayerState`, so it changed nothing —
+    and it keyed off `support_buffs.weapon_endow_sc`, which is the SAGE endow / Aspersio
+    selector, not Magnum Break's buff (a Sage's Endow legitimately does apply to skills). The
+    flag now scopes the real lingering-fire component instead: auto attacks + SM_MAGNUM.
+  - **Wootan Fighter Card 20% → 30%** lingering effect: new PS-specific `bMagnumLinger`
+    bonus, `assign` mode so two copies cap at 30 rather than stacking to 40.
+  - **Skeleton Pirate Card** (the notes' name for Pirate Skel Card): the Lv10 auto-Mammonite
+    upgrade is tagged `[Blacksmith]` in BOTH the PDF and the notes, so it is gated on JOB
+    (`Class==10 || Class==4011`), not on the skill level alone — a Merchant or Alchemist can
+    also master Mammonite and would otherwise wrongly proc Lv10.
+  - **Crescent Scythe**: the announcement says a flat "0.1% of the damage", but the GM's own
+    follow-up explicitly corrects it to **0.1% PER REFINE** ("I blame whoever told me to put
+    that in the patch notes"). The follow-up wins; implemented per refine.
+  - **Flame Beetle Card 20% → 50%** zero-zeny Mammonite chance: zeny economy, no damage term.
+  - **Fruit Mix removed**: it exists in the item DB (12063 / 14565, a +3 DEX food) but is not
+    reachable from any picker — the equipment pickers query IT_WEAPON/IT_ARMOR/IT_CARD and the
+    consumables panel is a fixed list. No calculator surface, so nothing to hide.
+  - **Freebreeze additions**: Frostfire Violin (8353) and Gangster Scarf (5361) already exist
+    with correct scripts — these were availability changes (weapon box / shard shop), not item
+    changes. The costumes and Ardent Helm are cosmetic (no combat stats). Antiquarian is an NPC.
+  - **No calculator surface**: Gatling Fever's toggle removal (modeled as a buff either way),
+    Setting Dirk's movement-buff fix, Reflect Shield gaining autocast/Hunter Fly leech
+    (neither is a damage-formula term), reflect delay removal, monster/skill-unit interval
+    changes, `@mi` Hit/Flee display fix, quest fixes, `@goal`.
 - **PS 2026-08-09 GM follow-up notes** (posted after the rework PDFs) — triaged:
   - **Crescent Scythe (1466) and its slotted variant (1476)**: crit lifesteal, **0.1% of the
     damage dealt PER REFINE**, not a flat 0.1% (the GM corrected their own patch note). Modeled

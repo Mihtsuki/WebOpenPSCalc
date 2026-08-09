@@ -465,6 +465,44 @@ const scenarios = [
     target: 1036,
   },
 
+  // --- PS 2026-08-09 patch notes (GM announcement, beyond the four PDFs) ------------------
+  {
+    // Reflect Shield's new formula is quadratic in VIT and scales with HARD DEF, so
+    // pair the existing 0-DEF scenario with one wearing real armour.
+    name: "crusader-reflect-shield-lv10-armored",
+    build: { job_id: 14, base_level: 99, job_level: 50, base_stats: { str: 60, agi: 1, vit: 90, int: 40, dex: 40, luk: 1 }, equipped: { right_hand: 1104, armor: 2314, head_top: 2258, garment: 2506, shoes: 2406 }, refine: { armor: 7 } },
+    skill: { name: "CR_REFLECTSHIELD", level: 10 },
+    target: 1002,
+  },
+  {
+    // Magnum Break's lingering fire: +20% of a NORMAL ATTACK as Fire, added after
+    // defense. Ghoul is Undead 1, which Fire beats — the added chunk is visible.
+    name: "swordman-magnum-lingering-auto-attack",
+    build: { job_id: 7, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 80, int: 20, dex: 60, luk: 20 }, equipped: { right_hand: 1101, left_hand: 2101 }, active_buffs: { SC_SUB_WEAPONPROPERTY: 1 } },
+    target: 1036,
+  },
+  {
+    // Same buff on Magnum Break itself — the 2026-08-09 Swordsman change. (Bash and
+    // every other skill stay excluded; covered by an invariant, not a golden.)
+    name: "swordman-magnum-lingering-on-magnum-break",
+    build: { job_id: 7, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 80, int: 20, dex: 60, luk: 20 }, equipped: { right_hand: 1101, left_hand: 2101 }, active_buffs: { SC_SUB_WEAPONPROPERTY: 1 } },
+    skill: { name: "SM_MAGNUM", level: 10 },
+    target: 1036,
+  },
+  {
+    // Wootan Fighter Card raises the lingering effect 20% → 30%.
+    name: "swordman-magnum-lingering-wootan-fighter",
+    build: { job_id: 7, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 80, int: 20, dex: 60, luk: 20 }, equipped: { right_hand: 1101, left_hand: 2101, armor: 2302, armor_card1: 4261 }, active_buffs: { SC_SUB_WEAPONPROPERTY: 1 } },
+    target: 1036,
+  },
+  {
+    // Crescent Scythe crit lifesteal: +9 refine → 0.9% of the crit healed back.
+    // The crit branch damage must be unchanged by it.
+    name: "knight-crescent-scythe-crit-heal",
+    build: { job_id: 7, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 70, vit: 40, int: 1, dex: 60, luk: 80 }, equipped: { right_hand: 1466 }, refine: { right_hand: 9 } },
+    target: 1036,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

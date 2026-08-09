@@ -896,14 +896,23 @@ class BattlePipeline {
 
     const softDef = status.def2;
     const hardDef = status.def_;
-    const baseDmg = Math.floor(softDef * (1 + 1.75 * hardDef / 100) * skill.level / 10);
+    const vit = status.vit;
+    // PS 2026-08-09 patch notes (GM announcement, Crusader section): Reflect Shield's
+    // additional damage was given a new formula —
+    //   SkillLevel × ((SoftDef / 2) + floor(VIT / 10)²) × (100 + 2 × Def) / 1000
+    // replacing the earlier PS rework's SoftDEF × (1 + 1.75 × HardDEF/100) × lv/10.
+    // VIT now contributes quadratically, so it is the dominant term on a high-VIT
+    // Crusader. Written with a single final floor (the notes floor only the VIT/10
+    // term explicitly); at most 1 damage separates that from flooring each step.
+    const vitTerm = Math.floor(vit / 10) ** 2;
+    const baseDmg = Math.floor(skill.level * (softDef / 2 + vitTerm) * (100 + 2 * hardDef) / 1000);
     let pmf = uniformPmf(baseDmg, baseDmg);
     result.add_step({
       name: "Reflect Shield Base",
       value: baseDmg, min_value: baseDmg, max_value: baseDmg,
-      note: `Soft DEF ${softDef} × (1 + 1.75 × ${hardDef}/100) × Lv${skill.level}/10`,
-      formula: "floor(SoftDEF × (1 + 1.75 × HardDEF/100) × SkillLvl/10)",
-      hercules_ref: "wiki.payonstories.com/Reflect_Shield — PS rework",
+      note: `Lv${skill.level} × (SoftDEF ${softDef}/2 + ⌊VIT ${vit}/10⌋² = ${vitTerm}) × (100 + 2×HardDEF ${hardDef})/1000`,
+      formula: "floor(SkillLvl × (SoftDEF/2 + ⌊VIT/10⌋²) × (100 + 2×HardDEF) / 1000)",
+      hercules_ref: "PS patch notes 2026-08-09 — Crusader: Reflect Shield",
     });
 
     // Ignores target DEF — no defenseFix step.
@@ -1255,6 +1264,54 @@ class BattlePipeline {
       result.add_step({ name: "Element (AttrFix)", value: avE, min_value: mnE, max_value: mxE, multiplier: 1.0, note: "BYPASSED — NK_IGNORE_ELEMENT", formula: "no change", hercules_ref: "battle.c NK_IGNORE_ELEMENT" });
     }
 
+    // Magnum Break's lingering fire enchantment (Hercules SC_SUB_WEAPONPROPERTY:
+    // `sc_start4(..., 3 /* Ele_Fire */, 20, ...)` in skill.c's SM_MAGNUM case).
+    // Pre-renewal battle.c adds it at the END of battle_calc_elefix — i.e. right
+    // here, straight after AttrFix and AFTER defense:
+    //     temp = calc_base_damage2(rhw) * val2 / 100;
+    //     damage += attr_fix(temp, Ele_Fire, target);
+    // Two consequences worth being precise about: the added chunk is computed from a
+    // fresh NORMAL-ATTACK base damage (not the skill's ratio'd damage), and because
+    // it lands after defenseFix it bypasses the target's DEF entirely.
+    //
+    // PS restricts which attacks get it (patch notes 2026-08-09, Swordsman): auto
+    // attacks AND Magnum Break itself. Vanilla applies it to every skill bar
+    // ASC_METEORASSAULT — that difference is what SM_MAGNUM_ENDOW_ATTACK_ONLY gates.
+    const magnumPct = Number(build.active_status_levels?.SC_SUB_WEAPONPROPERTY || 0) > 0
+      ? Math.max(20, gearBonuses.magnum_linger_pct || 0)
+      : 0;
+    if (magnumPct > 0) {
+      const psScoped = profile.mechanic_flags.has("SM_MAGNUM_ENDOW_ATTACK_ONLY");
+      const eligible = !psScoped || skill.id === 0 || skill.name === "SM_MAGNUM";
+      if (eligible) {
+        const ELE_FIRE = 3;
+        const scratch = createDamageResult();
+        // Same normal-attack base damage the swing itself starts from: no skill
+        // ratio, no crit flag (Hercules passes the plain rhw base damage).
+        let add = calculateBaseDamage(status, weapon, build, target, { id: 0, name: "", level: 1 }, scratch, {
+          gear_bonuses: gearBonuses, is_crit: false, is_ranged: isRanged,
+        });
+        add = scaleFloor(add, magnumPct, 100);
+        add = calculateAttrFix(weapon, target, add, scratch, build, ELE_FIRE);
+        pmf = convolve(pmf, add);
+        const [mnM, mxM, avM] = pmfStats(pmf);
+        const [, , addAv] = pmfStats(add);
+        result.add_step({
+          name: "Magnum Break (lingering fire)", value: avM, min_value: mnM, max_value: mxM, multiplier: 1.0,
+          note: `+${magnumPct}% of a normal attack as FIRE damage (avg +${Math.round(addAv)}) — bypasses DEF`,
+          formula: `dmg + attr_fix(base_attack × ${magnumPct}%, Fire)`,
+          hercules_ref: "battle.c battle_calc_elefix (SC_SUB_WEAPONPROPERTY, pre-re)",
+        });
+      } else {
+        const [mnM, mxM, avM] = pmfStats(pmf);
+        result.add_step({
+          name: "Magnum Break (lingering fire)", value: avM, min_value: mnM, max_value: mxM, multiplier: 1.0,
+          note: "BYPASSED — on Payon Stories the lingering fire applies to auto attacks and Magnum Break only",
+          formula: "no change", hercules_ref: "PS patch notes 2026-08-09 — Swordsman",
+        });
+      }
+    }
+
     // PS rework: Enchant Poison passive — +2%/lv vs Poison element targets.
     const ELE_POISON = 5;
     // PS caps Enchant Poison at level 5, so the passive bonus tops out at +10%.
@@ -1342,15 +1399,13 @@ class BattlePipeline {
 
     const profile = getProfile(build.server);
 
-    // SM_MAGNUM_ENDOW_ATTACK_ONLY (Crusader rework): Magnum Break's fire semi-endow
-    // applies only to auto attacks on PS — strip it from skill damage calculations.
-    if (
-      skill.id > 0 && skillName !== "SM_MAGNUM" &&
-      profile.mechanic_flags.has("SM_MAGNUM_ENDOW_ATTACK_ONLY") &&
-      build.support_buffs?.weapon_endow_sc
-    ) {
-      build = { ...build, weapon_element: weapon ? (weapon.element ?? 0) : 0 };
-    }
+    // NB: SM_MAGNUM_ENDOW_ATTACK_ONLY used to be applied here, by rewriting
+    // build.weapon_element for non-Magnum skills. That never did anything — the
+    // endow is baked into the resolved `weapon` back in resolvePlayerState, so
+    // reassigning build.weapon_element after the fact changed no damage — and it
+    // keyed off support_buffs.weapon_endow_sc, which is the SAGE endow / Aspersio
+    // selector, not Magnum Break's own buff (a Sage's Endow does apply to skills).
+    // The flag now scopes the real lingering-fire component in _runBranch instead.
 
     skill.name = skillName;
     const damageType = skillData ? skillData.damage_type || [] : [];

@@ -643,6 +643,96 @@ test("Smith Weapon skills master at rank 4; Smith Two-Handed Sword is gone", () 
   assert.ok(!("BS_TWOHANDSWORD" in byName), "Smith Two-Handed Sword folded into Smith Sword");
 });
 
+// ---------------------------------------------------------------------------
+// PS patch notes 2026-08-09 (GM announcement) — changes beyond the four PDFs.
+// ---------------------------------------------------------------------------
+test("Reflect Shield uses the new VIT-quadratic formula", () => {
+  const cfg = createBattleConfig();
+  const dmg = (vit, lv, armor) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 14, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 1, vit, int: 40, dex: 40, luk: 1 },
+      equipped: { right_hand: 1104, ...(armor ? { armor } : {}) },
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    const res = new BattlePipeline(cfg).calculate(status, weapon,
+      createSkillInstance({ id: loader.getSkillIdByName("CR_REFLECTSHIELD"), level: lv }),
+      createTarget({ def_: 0, vit: 0, size: 1, race: 0, element: 0, element_level: 1 }), eff, gb);
+    return { dmg: res.normal.avg_damage, status };
+  };
+  // Exact formula check: SkillLv × (SoftDEF/2 + ⌊VIT/10⌋²) × (100 + 2×HardDEF) / 1000
+  for (const [vit, lv] of [[80, 5], [90, 10], [40, 3]]) {
+    const { dmg: d, status } = dmg(vit, lv, null);
+    const expected = Math.floor(lv * (status.def2 / 2 + Math.floor(status.vit / 10) ** 2) * (100 + 2 * status.def_) / 1000);
+    assert.equal(d, expected, `VIT ${vit} Lv${lv}`);
+  }
+  // VIT now enters quadratically, so it must outrun a linear response.
+  const lo = dmg(40, 10, null).dmg, hi = dmg(80, 10, null).dmg;
+  assert.ok(hi > 2 * lo, `doubling VIT should more than double reflect damage (${lo} -> ${hi})`);
+  // Hard DEF multiplies via (100 + 2×Def)/1000, so armour raises it too.
+  assert.ok(dmg(80, 10, 2314).dmg > dmg(80, 10, null).dmg, "hard DEF must raise reflect damage");
+});
+
+test("Magnum Break's lingering fire hits auto-attacks and Magnum Break only, and bypasses DEF", () => {
+  const cfg = createBattleConfig();
+  const run = (skillName, opts = {}) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 7, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 40, vit: 80, int: 20, dex: 60, luk: 20 },
+      equipped: { right_hand: 1101, ...(opts.wootan ? { armor: 2302, armor_card1: 4261 } : {}) },
+      active_buffs: opts.lingering ? { SC_SUB_WEAPONPROPERTY: 1 } : {},
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    const id = skillName ? loader.getSkillIdByName(skillName) : 0;
+    const res = new BattlePipeline(cfg).calculate(status, weapon,
+      createSkillInstance({ id, level: skillName ? 10 : 1 }),
+      // Ghoul-like: Undead element, which Fire beats — makes the added chunk visible.
+      createTarget({ def_: opts.def ?? 0, vit: 0, size: 1, race: 0, element: 9, element_level: 1 }), eff, gb);
+    return { dmg: res.normal.avg_damage, gb, steps: res.normal.steps };
+  };
+  // Auto attack and Magnum Break gain it; every other skill does not (PS scope).
+  for (const sk of [null, "SM_MAGNUM"]) {
+    assert.ok(run(sk, { lingering: true }).dmg > run(sk, {}).dmg,
+      `${sk || "auto attack"} should gain the lingering fire`);
+  }
+  for (const sk of ["SM_BASH", "KN_BOWLINGBASH"]) {
+    assert.equal(run(sk, { lingering: true }).dmg, run(sk, {}).dmg,
+      `${sk} must NOT gain the lingering fire on PS`);
+    assert.ok(run(sk, { lingering: true }).steps.some((s) => /Magnum Break/.test(s.name) && /BYPASSED/.test(s.note)),
+      `${sk} should show the bypass explicitly`);
+  }
+  // Wootan Fighter Card takes the effect from 20% to 30%: the ADDED chunk grows ×1.5.
+  const base = run(null, {}).dmg;
+  const at20 = run(null, { lingering: true }).dmg - base;
+  const at30 = run(null, { lingering: true, wootan: true }).dmg - base;
+  assert.equal(run(null, { wootan: true }).gb.magnum_linger_pct, 30, "card sets the effect to 30%");
+  assert.ok(at20 > 0 && Math.abs(at30 / at20 - 1.5) < 0.05, `20% -> 30% should scale the add ×1.5 (${at20} -> ${at30})`);
+  // Added after defenseFix, so the chunk is the same size against a high-DEF target.
+  const addLowDef = run(null, { lingering: true }).dmg - run(null, {}).dmg;
+  const addHighDef = run(null, { lingering: true, def: 90 }).dmg - run(null, { def: 90 }).dmg;
+  assert.equal(addLowDef, addHighDef, "the lingering chunk must bypass the target's DEF");
+});
+
+test("auto-Mammonite casts Lv10 only for the Blacksmith line", () => {
+  const cfg = createBattleConfig();
+  const castLv = (jobId, mammoniteLv) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: jobId, base_level: 95, job_level: 50,
+      base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
+      equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073 },
+      mastery_levels: { MC_MAMMONITE: mammoniteLv },
+    });
+    return resolvePlayerState(b, cfg, PS)[0].autocast_on_attack[0].skill_level;
+  };
+  // The [Blacksmith] tag gates the upgrade, not the skill level on its own — a
+  // Merchant or Alchemist can master Mammonite too.
+  assert.equal(castLv(10, 10), 10, "Blacksmith with Mammonite 10");
+  assert.equal(castLv(4011, 10), 10, "Whitesmith with Mammonite 10");
+  assert.equal(castLv(10, 5), 1, "Blacksmith without mastery");
+  assert.equal(castLv(5, 10), 1, "Merchant with Mammonite 10 still casts Lv1");
+  assert.equal(castLv(18, 10), 1, "Alchemist with Mammonite 10 still casts Lv1");
+});
+
 test("Crescent Scythe heals 0.1% of crit damage PER REFINE, and never counts as damage", () => {
   const cfg = createBattleConfig();
   const run = (itemId, refine) => {

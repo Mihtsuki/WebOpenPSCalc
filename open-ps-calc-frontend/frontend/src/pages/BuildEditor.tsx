@@ -300,6 +300,11 @@ const SELF_BUFFS = [
   // self Provoke Lv10 (+32% base ATK, −55% self-DEF). Presence-only. Jobs
   // derived from skill_tree.json: Swordman / Knight / Crusader / LK / Paladin.
   { key: "SC_AUTOBERSERK",     label: "Auto Berserk (self Provoke 10)", max: 1, jobs: [1, 7, 14, 4008, 4015] },
+  // Magnum Break's lingering fire enchantment (10 s after casting it): adds 20% of a
+  // normal attack as FIRE damage on top of the hit, bypassing DEF. Wootan Fighter Card
+  // raises it to 30%. On PS it rides auto-attacks and Magnum Break only. Super Novice
+  // (23) is included — its tree carries every 1st-class skill, Magnum Break included.
+  { key: "SC_SUB_WEAPONPROPERTY", label: "Magnum Break (lingering fire)", max: 1, jobs: [1, 7, 14, 23, 4008, 4015] },
   // Knight / Lord Knight
   { key: "SC_TWOHANDQUICKEN",  label: "Sword Quickening",      max: 10, jobs: [7, 4008] },
   { key: "SC_ONEHANDQUICKEN",  label: "One-Hand Quicken",      max: 10, jobs: [7, 4008] },
@@ -1583,7 +1588,8 @@ export default function BuildEditor() {
                   {classReworksOpen && (
                     <ul className="reworks-detail-list">
                       <li>Knight — Sword Quickening CRIT, Blade Mastery covers 1H Sword, Spear Stab max level 5</li>
-                      <li>Crusader — Grand Cross (physical + magic summed, weapon masteries &amp; Demon Bane apply, ratio applied last), Holy Cross, Reflect Shield formula, Spear Quicken (Hit/Flee), Magnum endow restricted to auto-attacks</li>
+                      <li>Crusader — Grand Cross (physical + magic summed, weapon masteries &amp; Demon Bane apply, ratio applied last), Holy Cross, Reflect Shield (VIT-quadratic formula), Spear Quicken (Hit/Flee)</li>
+                      <li>Swordman — Magnum Break's lingering fire (+20% of a normal attack as Fire, bypasses DEF; 30% with Wootan Fighter Card), on auto-attacks and Magnum Break only</li>
                       <li>Merchant / Whitesmith — Mammonite (100+50×lv, Zeny Pincher 40%), Cart Revolution 250%, Over Thrust full party bonus</li>
                       <li>Alchemist — Acid Terror (100+80×lv, ignores armor DEF), Acid Demonstration (200+40×lv), Axe Mastery</li>
                       <li>Assassin / Thief — dual-wield 3-hit model, Enchant Poison bonus, Katar second hit, Envenom element</li>

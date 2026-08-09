@@ -34,12 +34,18 @@ const BRANCH_KEYS = [
 
 function normalizeBranch(br) {
   if (!br) return null;
-  return {
+  const out = {
     min: r3(br.min_damage),
     max: r3(br.max_damage),
     avg: r3(br.avg_damage),
     steps: (br.steps || []).map((s) => s.name), // step NAMES only — values are covered by min/max/avg
   };
+  // Crit lifesteal (bCritHeal) rides on the crit branch and is NOT part of the
+  // damage numbers, so freeze it separately or a regression there would be invisible.
+  if (br.crit_heal) {
+    out.crit_heal = { permille: br.crit_heal.permille, min: r3(br.crit_heal.min), max: r3(br.crit_heal.max), avg: r3(br.crit_heal.avg) };
+  }
+  return out;
 }
 
 function normalizeStatus(st) {

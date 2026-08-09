@@ -2546,9 +2546,9 @@
    "crit_chance": 0,
    "period_ms": 473,
    "normal": {
-    "min": 43,
-    "max": 43,
-    "avg": 43,
+    "min": 53,
+    "max": 53,
+    "avg": 53,
     "steps": [
      "Reflect Shield Base",
      "Attr Fix",
@@ -3643,6 +3643,337 @@
      "× 10 hits",
      "Final Damage"
     ]
+   }
+  }
+ },
+ "crusader-reflect-shield-lv10-armored": {
+  "status": {
+   "str": 67,
+   "agi": 3,
+   "vit": 97,
+   "int_": 46,
+   "dex": 43,
+   "luk": 6,
+   "batk": 112,
+   "max_hp": 12168,
+   "max_sp": 693,
+   "aspd": 152.7,
+   "cri": 30,
+   "hit": 142,
+   "flee": 102,
+   "def_": 27,
+   "mdef": 0,
+   "matk_min": 82,
+   "matk_max": 127
+  },
+  "result": {
+   "dps": 0,
+   "dps_valid": false,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 473,
+   "normal": {
+    "min": 199,
+    "max": 199,
+    "avg": 199,
+    "steps": [
+     "Reflect Shield Base",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "swordman-magnum-lingering-auto-attack": {
+  "status": {
+   "str": 98,
+   "agi": 42,
+   "vit": 90,
+   "int_": 20,
+   "dex": 66,
+   "luk": 24,
+   "batk": 196,
+   "max_hp": 15158,
+   "max_sp": 368,
+   "aspd": 161.7,
+   "cri": 90,
+   "hit": 165,
+   "flee": 141,
+   "def_": 3,
+   "mdef": 0,
+   "matk_min": 24,
+   "matk_max": 36
+  },
+  "result": {
+   "dps": 325.966,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 9,
+   "period_ms": 766,
+   "normal": {
+    "min": 246,
+    "max": 246,
+    "avg": 246,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Magnum Break (lingering fire)",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 287,
+    "max": 287,
+    "avg": 287,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Magnum Break (lingering fire)",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "swordman-magnum-lingering-on-magnum-break": {
+  "status": {
+   "str": 98,
+   "agi": 42,
+   "vit": 90,
+   "int_": 20,
+   "dex": 66,
+   "luk": 24,
+   "batk": 196,
+   "max_hp": 15158,
+   "max_sp": 368,
+   "aspd": 161.7,
+   "cri": 90,
+   "hit": 165,
+   "flee": 141,
+   "def_": 3,
+   "mdef": 0,
+   "matk_min": 24,
+   "matk_max": 36
+  },
+  "result": {
+   "dps": 483,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 2000,
+   "normal": {
+    "min": 966,
+    "max": 966,
+    "avg": 966,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 7 Lv 10)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Magnum Break (lingering fire)",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "swordman-magnum-lingering-wootan-fighter": {
+  "status": {
+   "str": 98,
+   "agi": 42,
+   "vit": 90,
+   "int_": 20,
+   "dex": 66,
+   "luk": 24,
+   "batk": 196,
+   "max_hp": 15158,
+   "max_sp": 368,
+   "aspd": 161.7,
+   "cri": 90,
+   "hit": 165,
+   "flee": 141,
+   "def_": 5,
+   "mdef": 0,
+   "matk_min": 24,
+   "matk_max": 36
+  },
+  "result": {
+   "dps": 369.047,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 9,
+   "period_ms": 766,
+   "normal": {
+    "min": 279,
+    "max": 279,
+    "avg": 279,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Magnum Break (lingering fire)",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 320,
+    "max": 320,
+    "avg": 320,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Magnum Break (lingering fire)",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "knight-crescent-scythe-crit-heal": {
+  "status": {
+   "str": 98,
+   "agi": 72,
+   "vit": 50,
+   "int_": 1,
+   "dex": 66,
+   "luk": 84,
+   "batk": 208,
+   "max_hp": 11967,
+   "max_sp": 310,
+   "aspd": 161.2,
+   "cri": 590,
+   "hit": 175,
+   "flee": 171,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 1,
+   "matk_max": 1
+  },
+  "result": {
+   "dps": 524.807,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 59,
+   "period_ms": 776,
+   "normal": {
+    "min": 306,
+    "max": 420,
+    "avg": 363,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 407,
+    "max": 471,
+    "avg": 438,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ],
+    "crit_heal": {
+     "permille": 9,
+     "min": 3,
+     "max": 4,
+     "avg": 3
+    }
    }
   }
  },

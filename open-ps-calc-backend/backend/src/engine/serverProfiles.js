@@ -252,8 +252,11 @@ const PS_MECHANIC_FLAGS = new Set([
   "DUAL_WIELD_PS_THREE_HIT",
   // +10% bonus applied to the combined three-hit total on PS (Class_Rebalance).
   "DUAL_WIELD_PS_DAMAGE_BONUS",
-  // PS Crusader rework (PSRO_Crusader_Rework_2026.pdf): Magnum Break semi-endow
-  // applies to auto attacks only; skill damage ignores the weapon_endow_sc element.
+  // Magnum Break's lingering fire enchantment (Hercules SC_SUB_WEAPONPROPERTY —
+  // +20% of a normal attack dealt as Fire, for 10 s). Vanilla grants it on every
+  // skill except ASC_METEORASSAULT; PS scopes it to AUTO ATTACKS and MAGNUM BREAK
+  // ITSELF (PSRO_Crusader_Rework_2026.pdf, extended to Magnum Break by the
+  // 2026-08-09 patch notes' Swordsman section). Consumed in _runBranch.
   "SM_MAGNUM_ENDOW_ATTACK_ONLY",
   // PS Rogue rework (Rogue_Patchnotes_PayonStories.pdf)
   // Backstab +40% multiplicative bonus when monster is not targeting the Rogue

@@ -134,6 +134,10 @@ const BONUS1 = {
   // REFINE on a critical hit, so the item script passes getrefine() and the value
   // is read as PER MILLE of the crit damage (refine 10 => 1%).
   bCritHeal: def((v) => `Critical hits heal you for ${(v / 10).toFixed(1)}% of the damage dealt.`, "crit_heal_permille"),
+  // PS-specific: Wootan Fighter Card raises Magnum Break's lingering fire enchantment
+  // from its base 20% to this value. "assign" (not additive) so two copies of the card
+  // still cap at the stated figure rather than stacking to 40%.
+  bMagnumLinger: def((v) => `Magnum Break's lingering fire effect becomes ${v}% (base 20%).`, "magnum_linger_pct", "assign"),
   bSpeedRate: def((v) => (v > 0 ? `Movement speed +${v}%.` : `Movement speed ${v}%.`)),
   bSplashRange: def((v) => `Attack splash range +${v} cells.`),
   bSPDrainValue: def((v) => `Drains ${v} SP per physical hit.`),

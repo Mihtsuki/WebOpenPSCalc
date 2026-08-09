@@ -50,6 +50,7 @@ const BUFF_SKILL = {
   SC_PROVIDENCE: "CR_PROVIDENCE",             // Providence
   SC_MAXIMIZEPOWER: "BS_MAXIMIZE",            // Maximize Power
   SC_ADRENALINE_SELF: "BS_ADRENALINE",        // Adrenaline Rush (self-cast; party version is SC_ADRENALINE)
+  SC_SUB_WEAPONPROPERTY: "SM_MAGNUM",         // Magnum Break's lingering fire enchantment
   SC_SHOUT: "MC_LOUD",                        // Crazy Uproar (self + party soft-DEF entries)
   SC_GS_MADNESSCANCEL: "GS_MADNESSCANCEL",    // Barrage (PS rename, in DB)
   SC_GS_ADJUSTMENT: "GS_ADJUSTMENT",          // Run and Gun (PS rename, in DB)

@@ -62,6 +62,13 @@ instead of release version. Dates are taken from actual git commit history.
   the rework notes. **Giant Pestle** isn't obtainable yet, so it carries a provisional item
   ID — a build that equips it may need the weapon re-picked once it ships.
 
+- **Magnum Break's lingering fire is now modeled.** For 10 seconds after casting it, part
+  of your damage becomes Fire — worth **+20% of a normal attack, dealt as Fire damage on top
+  of the hit and bypassing the target's DEF**. It's a toggle in the Buffs panel for the
+  Swordman line (and Super Novice), and it applies to **auto-attacks and Magnum Break itself**,
+  matching the 9 August change. **Wootan Fighter Card** raises it to 30%. This was previously
+  missing from the calculator entirely, so Swordman-line auto-attack DPS was understated
+  whenever the buff was up — expect a visible jump against Fire-weak targets.
 - **Crescent Scythe now shows the HP it heals you.** Both the plain and the slotted version
   heal **0.1% of the damage dealt per refine** on a critical hit — so a +10 one returns 1% of
   the crit, ten times what a flat 0.1% would give. The crit breakdown shows the HP restored,
@@ -69,9 +76,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Changed
 
+- **Reflect Shield uses its new formula.** Damage is now
+  `SkillLevel × (SoftDEF/2 + ⌊VIT/10⌋²) × (100 + 2×DEF) / 1000`. **VIT now counts
+  quadratically**, so it's far and away the most valuable stat for it — doubling VIT more
+  than doubles the reflected damage — and hard DEF from armour scales it as well.
 - **FUEL Card** now adds **+10%** to Acid Terror and Demonstration (was +30%), and **Pill
   Bug Card** adds **+10%** to Cart Revolution (was +8%), matching the rework notes. Acid
   Terror's higher base damage more than covers the FUEL nerf.
+- **Pirate Skel Card's auto-Mammonite casts at level 10 only for Blacksmiths and
+  Whitesmiths.** A Merchant or Alchemist who has mastered Mammonite still procs level 1,
+  per the `[Blacksmith]` tag on the card.
 
 ### Fixed
 
