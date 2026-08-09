@@ -470,6 +470,44 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
   now functional: `bSkillAtk` for RG_BACKSTAP/RG_RAID (+10% each) and +5 HIT.
   `bSkillAtk` bonuses are applied once, inside `calculateSkillRatio()` (a later
   fix removed a duplicate re-application in `_runBranch` that double-counted them).
+- **PS Merchant / Blacksmith / Alchemist rework 2026-08-09** (`PayonStories Merchant`,
+  `PayonStories Blacksmith`, `PayonStories Alchemist Rework`, `PayonStories Burning`, all
+  dated 2026-08-09) — see per-class audit items 10 & 11 below for the full formula list.
+  Implementation notes worth keeping in view:
+  - `skill_level_cap_overrides` now **SETS** a skill's PS max level instead of only clamping
+    it downward (`dataLoader._applySkillCap`). Cart Revolution 1→5, Crazy Uproar 1→4 and the
+    Smith Weapon skills 3→4 all need it to raise; `BS_TWOHANDSWORD: 0` is how a removed skill
+    disappears from the pickers. It is also applied in `getPassiveSkillsForJob` now, which
+    previously trusted `ps_skill_db.json`'s scraped max and so could not see a post-scrape rework.
+  - `mastery_prefer_fallback` values may be an **array** — first mastery the character has
+    ranks in wins. Mace routes to `["MO_IRONHAND", "PS_MC_TOOLMASTERY"]` (Monk vs Merchant).
+  - `passive_overrides` entries accept `weapon_types` (gate) and `matk_pct_per_lv`
+    (Transmutation is the first passive granting %MATK; applied next to gear `bMatkRate`,
+    before Amplify).
+  - **PS-custom PASSIVES** now reach the picker: `ps_skill_desc_overrides.json` can ADD a
+    constant the scrape doesn't know (that is how `PS_MC_TOOLMASTERY` exists at all), and
+    `getPassiveSkillsForJob` appends any entry in its `PS_CUSTOM_PASSIVES` set whose
+    `ps_custom_constants.json` job list matches. **Tool Mastery's id 2637 is provisional.**
+  - **Card autocast on attack** (`_runCardAutocastBranches`, flag `PS_CARD_AUTOCAST_ON_ATTACK`):
+    `gearBonuses.autocast_on_attack` was parsed but never consumed by any pipeline. It now
+    produces a `proc_branches.card_autocast_<SKILL>` entry on **auto-attacks only**, priced
+    through the same `_runBranch`/`_runMagicBranch` the player's own cast uses. Extending it to
+    skill casts needs an attack-period model for the proc; deliberately left out for now.
+  - **`itemScriptParser` fix**: `safeEvalInt`'s `compare()` returned a boolean `1` even when no
+    comparison operator was present, so any arithmetic reaching it collapsed to 1. Hercules
+    scripts embed comparisons inside arithmetic (`1+9*(getskilllv(X)==10)` = the cast level),
+    which is exactly what the auto-Mammonite / auto-Bash cards need. It now returns the value
+    when nothing was compared. (`evalArithmetic` still handles the comparison-free fast path.)
+  - **New items** live in `ps_item_manual.json`; each carries a `_note` explaining the deviation
+    (`_note` is stripped in `_applyPsItemLayers`, never reaching the item object). Veteran Axe
+    reuses its real id **1384**; **Whirling Hammer (95001)** and **Giant Pestle (95002)** sit in a
+    reserved provisional block because `tools.payonstories.com/api/pc/item` returns `No data` for
+    both — **re-key them to the published ids once the patch ships** (share links that equip one
+    will need the weapon re-picked). Verified against the live PS item API on 2026-08-09: it
+    still serves the PRE-rework text for Veteran Axe (ATK 250 / req 80), FUEL Card (+30%), Pill
+    Bug Card (+8%), Pirate Skel Card (Discount 5) and Flame Beetle Card (20%) — i.e. this patch
+    is modeled from the rework PDFs ahead of the server deploy, and a re-scrape after the deploy
+    should confirm rather than contradict these values.
 - Magic pipeline (#1 above moved to "Fully ported").
 - Card slots on equipment — up to 4 per item, read from `item.slots`,
   written to `equipped["<slot>_cardN"]`, already consumed by
@@ -609,18 +647,55 @@ brackets are the number of PS-custom entries found across those tables.
    HP-sacrifice formula (STR×40 + HP×8%×lv, Neutral, auto-hit, DEF+cards apply) via a dedicated
    `_runKillingStrokeBranch`; was computing a flat 100% ATK. (Mirror Image +10–30% bonus not
    modeled.) Nen/Ki are buffs (out of scope).
-10. **Alchemist / Creator [3]** — ✅ done (PS wiki, with-DEF). All correct, no code changes: Acid
-    Terror (100+80×lv = 180→500%, ranged physical, auto-hit/IgnoreFlee, DEF applies), Axe Mastery
-    (+5 ATK/lv, ASPD buff at Lv10), Acid Demonstration (200+40×lv = 240→400%, weapon-ATK-based with
-    size penalty, DEF applies, ignores %-cards but +ATK cards apply — matches the PS wiki's simplified
-    ATK% table, not the classic VIT-based Acid Bomb formula). Summons (Bio Cannibalize, Sphere Mine)
-    are out of a damage calculator's scope.
-11. **Merchant / Whitesmith [3]** — ✅ done (PS wiki, with-DEF). All correct, no code changes:
-    Mammonite (100+50×lv = 150→600%; Zeny Pincher toggle → 40% damage / no zeny cost, matches),
-    Cart Revolution (250% of normal attack, weapon element), Over Thrust / Power-Thrust (+5%/lv ATK
-    to caster AND party — PS grants the party the full bonus — added additively to the skill
-    multiplier, per the wiki). Cart Termination isn't a PS skill (the wiki's only "Cart" skill is
-    Cart Revolution), so its vanilla-fallback ratio is moot.
+10. **Alchemist / Creator [3]** — ✅ done (PS wiki, with-DEF), **re-audited 2026-08-09 against
+    `PayonStories Alchemist Rework 2026-08-09.pdf`**. Acid Demonstration unchanged (200+40×lv =
+    240→400%, weapon-ATK-based with size penalty, DEF applies, ignores %-cards but +ATK cards
+    apply). **Changed by the rework:** Acid Terror is now `(100+100×lv)%` = 200→**600%** at its
+    rank-5 max (was 100+80×lv = 180→500%); **Axe Mastery became Transmutation** — no flat ATK at
+    all, instead +1% ASPD **and +1% MATK** per level while wielding an Axe **or a Sword** (this is
+    why `passive_overrides.AM_AXEMASTERY` carries `aspd_pct_per_lv`/`matk_pct_per_lv`/`weapon_types`
+    instead of `atk_per_lv`, and why its old `lv10_rate` ASPD entry was dropped); Chemical
+    Protections cap at rank 3. **FUEL Card** cut to +10% on both skills (was +30%). **New item:**
+    Giant Pestle (1H Mace, ATK 100, Alchemist-only, +3/+12 ATK per Pharmacy level at base DEX &
+    LUK 60+/80+). **Not modeled (no damage surface):** Demonstration's SP cost 14→20 and FUEL's
+    −2 s Demonstration cooldown (the calc models neither SP cost nor cooldowns); Bio Cannibalize's
+    plant INT/AGI/HIT retune, Learning Potion's potion-conservation chance, the Potion Pitcher
+    effect table, Tengu Card, Plant Bottle (summons/support); Remote Detonator itself — it is the
+    *applier* of Burning, which IS modeled as a target debuff (see below).
+11. **Merchant / Whitesmith [3]** — ✅ done (PS wiki, with-DEF), **re-audited 2026-08-09 against
+    `PayonStories Merchant 2026-08-09.pdf` + `PayonStories Blacksmith 2026-08-09.pdf`**. Over Thrust
+    / Power-Thrust unchanged (+5%/lv ATK to caster AND party, additive on the skill multiplier).
+    Cart Termination still isn't a PS skill. **Changed by the rework:** **Cart Revolution** is a
+    5-rank tree skill at `50×lv%` (50→250%; the old flat 250% was right only at max rank) and deals
+    full damage regardless of cart weight; **Zeny Pincher** halves only the per-level term —
+    `100+25×lv` = 350% at Lv10, replacing the old ×0.4-of-the-whole-ratio model (240%) — and is now
+    reachable as the `SC_PS_ZENYPINCHER` self-buff toggle (before this it was an unreachable
+    `skill_param` no UI ever set); **Tool Mastery** (new, `PS_MC_TOOLMASTERY`) gives +4 ATK/lv with
+    Axes and Maces and is routed via `mastery_prefer_fallback` so it wins over the now-ATK-less Axe
+    Mastery and over the Priest's Mace Mastery; **Crazy Uproar** is 4 ranks giving +1 STR/+1 VIT per
+    level and 3×lv (self) / 2×lv (party) soft DEF; **Adrenaline Rush** covers every melee weapon at
+    30%/20% (Axe·Mace, self/party) and 20%/10% (other melee) — the previous code passed the raw buff
+    VALUE (the UI sent `2`) straight in as a per-mille amotion cut, so the buff was worth 0.2% ASPD;
+    **Smith Weapon** skills master at rank 4 with Smith Two-Handed Sword folded into Smith Sword.
+    **Cards:** Pill Bug +10% Cart Revolution (was 8%); Pirate Skel Card became a 5% auto-Mammonite
+    (Lv10 once mastered), which drove the new generic card-autocast proc branch. **New items:**
+    Veteran Axe [2] retuned (ATK 155, level 60, scaling per MASTERED Smith Weapon skill, doubled at
+    base DEX & LUK 80+), Whirling Hammer [1] (2H Mace, ATK 190, +1% Cart Revolution per refine).
+    **Not modeled (no damage surface):** Barter (the merged Discount/Overcharge — zeny economy),
+    Pushcart's movement speed (rank cap applied anyway), Hilt Binding no longer extending buff
+    durations (durations aren't modeled), Flame Beetle Card and Mammonite's zeny cost, Sasquatch /
+    Grizzly card status procs (freeze/blind chances).
+
+    **New cross-class mechanic — Burning** (`PayonStories Burning 2026-08-09.pdf`): a 5-second
+    debuff stacking to 5, each stack −2 hard MDEF and 60 Fire MAGIC damage/second, refreshed (not
+    re-timed per stack) on reapplication. The MDEF cut is applied as a target mod
+    (`target_mods.burning`, profile constants in `PAYON_STORIES.burning`) so it feeds the magic
+    branch like any other MDEF change. The tick itself is surfaced in the UI as a raw
+    60×stacks/second figure **explicitly labelled as pre-mitigation** — it is Fire magic damage
+    subject to the target's Fire resist / MDEF / armour element, and it is the debuff's damage
+    rather than part of the player's hit, so pricing it inside the attack breakdown would be
+    misleading. Applied by Alchemist Remote Detonator (with a Marine Sphere Bottle) today; the PDF
+    says it will be core to another class, so keep the profile constants as the single source.
 12. **Archer / Hunter [3]** — ✅ done (Hunter Rework PDF, with-DEF). All correct, no code changes:
     the PS INT/DEX trap formulas were already implemented and match the PDF's comparison table exactly
     (Land Mine SkillLv×(JobLv+Dex)×(BaseLv+Int)/45, Blast Mine .../45 with Dex/Int roles swapped,

@@ -11,7 +11,10 @@ const { createStatusData } = require("../models");
 const { getProfile } = require("../serverProfiles");
 
 const GUN_WEAPON_TYPES = new Set(["Revolver", "Rifle", "Gatling", "Shotgun", "Grenade"]);
-const ADRENALINE_WEAPONS = new Set(["1HAxe", "2HAxe", "Mace"]);
+// Weapons Adrenaline Rush was restricted to in vanilla, and the classes that still
+// get its FULL bonus after the PS rework (30% self / 20% party; every other melee
+// weapon gets 20%/10%).
+const ADRENALINE_WEAPONS = new Set(["1HAxe", "2HAxe", "Mace", "2HMace"]);
 const BOW_GUN_WEAPONS = new Set(["Bow", "Revolver", "Rifle", "Gatling", "Shotgun", "Grenade"]);
 const TF_MISS_JOBL2 = new Set([12, 17, 4013, 4018]);
 const DUAL_WIELD_JOBS = new Set([12, 4013]);
@@ -58,7 +61,18 @@ class StatusCalculator {
     if (acOwlLv) status.dex += acOwlLv;
 
     // === SC STAT MODIFIERS ===
-    if ("SC_SHOUT" in activeSc) status.str += 4;
+    // Crazy Uproar (MC_LOUD). Vanilla: a 1-rank +4 STR shout. PS Merchant rework
+    // (Merchant 2026-08-09 PDF): 4 ranks granting +1 STR **and +1 VIT** per level to
+    // the caster (the soft-DEF half is in the DEFENSE block below).
+    const shoutLv = Number(activeSc.SC_SHOUT || 0);
+    if (shoutLv) {
+      if (profile.mechanic_flags.has("MC_LOUD_PS_REWORK")) {
+        status.str += shoutLv;
+        status.vit += shoutLv;
+      } else {
+        status.str += 4;
+      }
+    }
 
     if ("SC_NJ_NEN" in activeSc) {
       const lv = activeSc.SC_NJ_NEN;
@@ -157,6 +171,14 @@ class StatusCalculator {
     const angelusLv = Number(support.SC_ANGELUS || 0);
     status.def2 += 3 * angelusLv;                   // PS: flat +3 per level applied first
     status.def_percent = 100 + 10 * angelusLv;      // PS: +10% per level (max lv5 = +50%)
+
+    // Crazy Uproar soft DEF (PS Merchant rework): 3 × level to the caster, 2 × level
+    // to party members standing in the buff. Flat, applied alongside Angelus's flat
+    // part (before the def_percent multiplier).
+    if (profile.mechanic_flags.has("MC_LOUD_PS_REWORK")) {
+      if (shoutLv) status.def2 += 3 * shoutLv;
+      else status.def2 += 2 * Number(support.SC_SHOUT || 0);
+    }
 
     if ("SC_POISON" in playerScs) {
       const penalty = build.server === "payon_stories" ? 50 : 25;
@@ -340,8 +362,25 @@ class StatusCalculator {
       }
     }
 
-    const adrenalineVal = Number(support.SC_ADRENALINE || 0);
-    if (adrenalineVal && ADRENALINE_WEAPONS.has(weapon.weapon_type)) scAspdMax = Math.max(scAspdMax, adrenalineVal);
+    // Adrenaline Rush. PS Blacksmith rework (Blacksmith 2026-08-09 PDF): it now works
+    // on ALL melee weapons (bows and guns still excluded), and the magnitude depends
+    // on the weapon class AND on whether you cast it yourself or received it —
+    // "User/Party members Maces, and Axes have ASPD increased by 30%/20%, other
+    // weapons ASPD increased by 20%/10%". scAspdMax is in per-mille of amotion, so a
+    // 30% bonus is 300. Self-cast lives on active_status_levels.SC_ADRENALINE_SELF;
+    // the party-received version stays on support_buffs.SC_ADRENALINE.
+    if (profile.mechanic_flags.has("BS_ADRENALINE_ALL_MELEE")) {
+      const selfAdrenaline = "SC_ADRENALINE_SELF" in activeSc;
+      const partyAdrenaline = Number(support.SC_ADRENALINE || 0) > 0;
+      if ((selfAdrenaline || partyAdrenaline) && !BOW_GUN_WEAPONS.has(weapon.weapon_type)) {
+        const axeOrMace = ADRENALINE_WEAPONS.has(weapon.weapon_type);
+        const pct = selfAdrenaline ? (axeOrMace ? 30 : 20) : (axeOrMace ? 20 : 10);
+        scAspdMax = Math.max(scAspdMax, pct * 10);
+      }
+    } else {
+      const adrenalineVal = Number(support.SC_ADRENALINE || 0);
+      if (adrenalineVal && ADRENALINE_WEAPONS.has(weapon.weapon_type)) scAspdMax = Math.max(scAspdMax, adrenalineVal);
+    }
     const adrenaline2Val = Number(support.SC_ADRENALINE2 || 0);
     if (adrenaline2Val && !BOW_GUN_WEAPONS.has(weapon.weapon_type)) scAspdMax = Math.max(scAspdMax, adrenaline2Val);
 
@@ -403,6 +442,9 @@ class StatusCalculator {
     for (const [apKey, apSpec] of Object.entries(profile.passive_overrides || {})) {
       const apPct = apSpec.aspd_pct_per_lv;
       if (apPct && !Array.isArray(apPct)) {
+        // A passive may be gated to specific weapon types (Transmutation only
+        // applies its ASPD/MATK while an Axe or a Sword is equipped).
+        if (apSpec.weapon_types && !apSpec.weapon_types.includes(weapon.weapon_type)) continue;
         const apLv = mastery[apKey] || 0;
         if (apLv) scAspdRate -= apPct * apLv * 10;
       }
@@ -475,6 +517,20 @@ class StatusCalculator {
 
     if (build.bonus_matk_rate) {
       const pct = 100 + build.bonus_matk_rate;
+      status.matk_min = Math.floor(status.matk_min * pct / 100);
+      status.matk_max = Math.floor(status.matk_max * pct / 100);
+    }
+
+    // Passive MATK% from a weapon mastery — PS Alchemist rework's Transmutation
+    // (reworked Axe Mastery): +1% MATK per level while wielding an Axe or a Sword,
+    // up to +10% at Lv10. Treated like gear bMatkRate: applied before Amplify.
+    for (const [mpKey, mpSpec] of Object.entries(profile.passive_overrides || {})) {
+      const perLv = mpSpec.matk_pct_per_lv;
+      if (!perLv) continue;
+      if (mpSpec.weapon_types && !mpSpec.weapon_types.includes(weapon.weapon_type)) continue;
+      const mpLv = mastery[mpKey] || 0;
+      if (!mpLv) continue;
+      const pct = 100 + perLv * mpLv;
       status.matk_min = Math.floor(status.matk_min * pct / 100);
       status.matk_max = Math.floor(status.matk_max * pct / 100);
     }

@@ -488,3 +488,183 @@ test("magic bMatkRate is applied once, not double-counted", () => {
   assert.ok(!r.steps.some((s) => /bMatkRate/.test(s.name)),
     "bMatkRate must not be a separate step — it's already baked into Base MATK");
 });
+
+// ---------------------------------------------------------------------------
+// PS Merchant / Blacksmith / Alchemist rework (2026-08-09 PDFs).
+// Properties that must hold regardless of later tuning.
+// ---------------------------------------------------------------------------
+const PS = getProfile("payon_stories");
+
+test("Cart Revolution scales 50% per rank and caps at 5", () => {
+  const fn = PS.weapon_ratios.MC_CARTREVOLUTION;
+  for (let lv = 1; lv <= 5; lv++) assert.equal(fn(lv), 50 * lv, `Lv${lv}`);
+  assert.equal(PS.skill_level_cap_overrides.MC_CARTREVOLUTION, 5);
+  assert.equal(loader.getSkill(153).max_level, 5, "picker must offer 5 ranks");
+});
+
+test("Zeny Pincher halves Mammonite's PER-LEVEL term, not the whole ratio", () => {
+  const fn = PS.weapon_ratios.MC_MAMMONITE;
+  const ctxOff = createCalcContext({ skill_params: {}, skill_levels: {} });
+  const ctxOn = createCalcContext({ skill_params: { PS_BS_ZENYPINCHER_active: true }, skill_levels: {} });
+  for (let lv = 1; lv <= 10; lv++) {
+    assert.equal(fn(lv, null, ctxOff), 100 + 50 * lv, `plain Lv${lv}`);
+    assert.equal(fn(lv, null, ctxOn), 100 + 25 * lv, `pincher Lv${lv}`);
+  }
+  // The old model was x0.4 of the full ratio (240% at Lv10); the rework is 350%.
+  assert.equal(fn(10, null, ctxOn), 350);
+  // Learning the skill (mastery level) is equivalent to the skill_param toggle.
+  const ctxLearned = createCalcContext({ skill_params: {}, skill_levels: { PS_BS_ZENYPINCHER: 1 } });
+  assert.equal(fn(10, null, ctxLearned), 350);
+});
+
+test("Acid Terror is (100 + 100xlv)% and tops out at 600% (rank 5)", () => {
+  const fn = PS.weapon_ratios.AM_ACIDTERROR;
+  for (let lv = 1; lv <= 5; lv++) assert.equal(fn(lv), 100 + 100 * lv, `Lv${lv}`);
+  assert.equal(fn(5), 600);
+  assert.equal(loader.getSkill(230).max_level, 5);
+});
+
+test("Tool Mastery gives +4 ATK/lv on Axes and Maces, and wins over the reworked masteries", () => {
+  assert.deepEqual(PS.passive_overrides.PS_MC_TOOLMASTERY.atk_per_lv,
+    [4, 8, 12, 16, 20, 24, 28, 32, 36, 40]);
+  // Transmutation (reworked Axe Mastery) grants NO flat ATK any more.
+  assert.ok(!("atk_per_lv" in PS.passive_overrides.AM_AXEMASTERY),
+    "Axe Mastery must no longer add flat ATK — that is Tool Mastery's job now");
+  assert.ok([].concat(PS.mastery_prefer_fallback.AM_AXEMASTERY).includes("PS_MC_TOOLMASTERY"));
+  assert.ok([].concat(PS.mastery_prefer_fallback.PR_MACEMASTERY).includes("PS_MC_TOOLMASTERY"));
+
+  const cfg = createBattleConfig();
+  const withTool = (mastery) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 95, job_level: 50,
+      base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
+      equipped: { right_hand: 1504 }, mastery_levels: mastery, // 1504 = Mace
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }),
+      createTarget({ def_: 0, vit: 0, size: 1, race: 0, element: 0 }), eff, gb).normal.avg_damage;
+  };
+  assert.equal(withTool({ PS_MC_TOOLMASTERY: 10 }) - withTool({}), 40,
+    "Tool Mastery Lv10 with a Mace must add exactly +40 flat");
+});
+
+test("Transmutation's ASPD/MATK apply only with an Axe or a Sword", () => {
+  const spec = PS.passive_overrides.AM_AXEMASTERY;
+  assert.equal(spec.aspd_pct_per_lv, 1);
+  assert.equal(spec.matk_pct_per_lv, 1);
+  const cfg = createBattleConfig();
+  const stat = (rh, mastery) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 18, base_level: 90, job_level: 50,
+      base_stats: { str: 80, agi: 50, vit: 40, int: 60, dex: 60, luk: 10 },
+      equipped: { right_hand: rh }, mastery_levels: mastery,
+    });
+    return resolvePlayerState(b, cfg, PS)[3];
+  };
+  // 1301 Axe / 1101 Sword are gated in; 1504 Mace / 1601 Rod are not.
+  for (const [rh, gated] of [[1301, true], [1101, true], [1504, false], [1601, false]]) {
+    const off = stat(rh, {}), on = stat(rh, { AM_AXEMASTERY: 10 });
+    if (gated) {
+      assert.ok(on.aspd > off.aspd, `weapon ${rh}: Transmutation should raise ASPD`);
+      assert.equal(on.matk_max, Math.floor(off.matk_max * 110 / 100), `weapon ${rh}: +10% MATK`);
+    } else {
+      assert.equal(on.aspd, off.aspd, `weapon ${rh}: Transmutation must not touch ASPD`);
+      assert.equal(on.matk_max, off.matk_max, `weapon ${rh}: Transmutation must not touch MATK`);
+    }
+  }
+});
+
+test("Adrenaline Rush: all melee weapons, 30/20% self and 20/10% party", () => {
+  const cfg = createBattleConfig();
+  const aspd = (rh, buffs) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 95, job_level: 50,
+      base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
+      equipped: { right_hand: rh }, ...buffs,
+    });
+    return resolvePlayerState(b, cfg, PS)[3].aspd;
+  };
+  const SELF = { active_buffs: { SC_ADRENALINE_SELF: 1 } };
+  const PARTY = { support_buffs: { SC_ADRENALINE: 1 } };
+  // amotion = base x (1000 - bonus)/1000, so a bigger bonus means higher ASPD.
+  for (const rh of [1504, 1101]) {           // Mace (full tier) and Sword (lesser tier)
+    assert.ok(aspd(rh, SELF) > aspd(rh, PARTY), `weapon ${rh}: self-cast must beat party-cast`);
+    assert.ok(aspd(rh, PARTY) > aspd(rh, {}), `weapon ${rh}: party-cast must still help`);
+  }
+  // A Sword got NOTHING in vanilla; the rework must give it the lesser tier.
+  assert.ok(aspd(1101, SELF) > aspd(1101, {}), "non-Axe/Mace melee must now benefit");
+  // Bows stay excluded.
+  assert.equal(aspd(1707, SELF), aspd(1707, {}), "bows must remain excluded");
+});
+
+test("Crazy Uproar grants STR, VIT and soft DEF per level (self); party gets soft DEF only", () => {
+  const cfg = createBattleConfig();
+  const st = (buffs) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 95, job_level: 50,
+      base_stats: { str: 50, agi: 50, vit: 50, int: 1, dex: 50, luk: 1 },
+      equipped: { right_hand: 1504 }, ...buffs,
+    });
+    return resolvePlayerState(b, cfg, PS)[3];
+  };
+  const off = st({}), self = st({ active_buffs: { SC_SHOUT: 4 } }), party = st({ support_buffs: { SC_SHOUT: 4 } });
+  assert.equal(self.str - off.str, 4, "+1 STR per level");
+  assert.equal(self.vit - off.vit, 4, "+1 VIT per level");
+  // Self soft DEF = 3xlv on top of the VIT the buff itself added.
+  assert.equal(self.def2 - off.def2, 4 + 3 * 4, "self: +VIT and +3xlv soft DEF");
+  assert.equal(party.str, off.str, "party members get no STR");
+  assert.equal(party.def2 - off.def2, 2 * 4, "party: +2xlv soft DEF only");
+  assert.equal(loader.getSkill(155).max_level, 4, "picker must offer 4 ranks");
+});
+
+test("Burning cuts hard MDEF by 2 per stack and raises magic damage", () => {
+  assert.equal(PS.burning.max_stacks, 5);
+  assert.equal(PS.burning.mdef_per_stack, 2);
+  assert.equal(PS.burning.dmg_per_stack_per_sec, 60);
+  const cfg = createBattleConfig();
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 9, base_level: 99, job_level: 50,
+    base_stats: { str: 1, agi: 30, vit: 30, int: 99, dex: 70, luk: 1 },
+    equipped: { right_hand: 1601 },
+  });
+  const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+  const dmg = (mdef) => new BattlePipeline(cfg).calculate(
+    status, weapon, createSkillInstance({ id: 19, level: 10 }),
+    createTarget({ def_: 0, mdef_: mdef, int_: 10, vit: 10, size: 1, race: 0, element: 0 }), eff, gb
+  ).normal.avg_damage;
+  assert.ok(dmg(20 - 2 * 5) > dmg(20), "5 Burning stacks must raise magic damage");
+});
+
+test("Smith Weapon skills master at rank 4; Smith Two-Handed Sword is gone", () => {
+  const byName = Object.fromEntries(loader.getPassiveSkillsForJob(10).map((s) => [s.name, s]));
+  for (const n of ["BS_DAGGER", "BS_SWORD", "BS_KNUCKLE", "BS_SPEAR", "BS_AXE", "BS_MACE"]) {
+    assert.equal(byName[n] && byName[n].max_level, 4, `${n} should offer 4 ranks`);
+  }
+  assert.ok(!("BS_TWOHANDSWORD" in byName), "Smith Two-Handed Sword folded into Smith Sword");
+});
+
+test("card autocast (Pirate Skel to Mammonite) surfaces as a proc branch on auto-attacks only", () => {
+  const cfg = createBattleConfig();
+  const run = (skillId) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 95, job_level: 50,
+      base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
+      equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073 },
+      mastery_levels: { MC_MAMMONITE: 10 },
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    // Mammonite is mastered, so the card's 1+9*(getskilllv==10) must resolve to 10.
+    assert.equal(gb.autocast_on_attack[0].skill_level, 10, "auto-Mammonite should cast at Lv10");
+    assert.equal(gb.autocast_on_attack[0].chance_per_mille, 50, "5% = 50 per mille");
+    return new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: skillId, level: 1 }),
+      createTarget({ def_: 0, vit: 0, size: 1, race: 0, element: 0 }), eff, gb);
+  };
+  const auto = run(0);
+  assert.ok(auto.proc_branches.card_autocast_MC_MAMMONITE, "auto-attack must surface the proc");
+  assert.equal(auto.proc_chances.card_autocast_MC_MAMMONITE, 5);
+  assert.ok(auto.proc_branches.card_autocast_MC_MAMMONITE.avg_damage > auto.normal.avg_damage,
+    "Mammonite Lv10 (600%) must out-damage the auto-attack it rides on");
+  const onSkill = run(41); // Bash - a skill cast, not an auto-attack
+  assert.ok(!onSkill.proc_branches.card_autocast_MC_MAMMONITE,
+    "card autocast is modeled on auto-attacks only");
+});

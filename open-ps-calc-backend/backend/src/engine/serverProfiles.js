@@ -64,6 +64,7 @@ function emptyProfile(name, overrides = {}) {
     param_skill_flat_adds: {},
     weapon_avg_hits_by_zone: {},
     pet_bonuses: {},
+    burning: null,
     ...overrides,
   };
 }
@@ -96,7 +97,17 @@ const PS_PASSIVE_OVERRIDES = {
   SA_FREECAST:       { flee_per_lv: 4 }, // PS: Free Cast grants +4 FLEE/lv (max Lv5 → +20). wiki.payonstories.com/Free_Cast
   SC_NJ_NEN:         { str_per_lv: 2, int_per_lv: 2 }, // Ninja Aura (NJ_NEN): +2 STR/INT per level, max Lv5 → +10 each. wiki.payonstories.com/Ninja_Aura
   PR_MACEMASTERY:    { atk_per_lv: [4,  8, 12, 16, 20, 24, 28, 32, 36, 40] },                  // +4 ATK/lv
-  AM_AXEMASTERY:     { atk_per_lv: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] },                  // +5 ATK/lv
+  // PS Merchant rework (PayonStories Merchant 2026-08-09 PDF): NEW Tool Mastery —
+  // +4 ATK per level with Axes and Maces, for the whole Merchant line. It is the
+  // Merchant line's flat-ATK weapon mastery now that Axe Mastery became
+  // Transmutation (below), so mastery_prefer_fallback routes 1H/2H Axe AND Mace
+  // to it when the character has learned it.
+  PS_MC_TOOLMASTERY: { atk_per_lv: [4,  8, 12, 16, 20, 24, 28, 32, 36, 40] },                  // +4 ATK/lv (Axe/Mace)
+  // PS Alchemist rework (PayonStories Alchemist Rework 2026-08-09 PDF): Axe Mastery
+  // is REWORKED into "Transmutation" — it no longer grants flat ATK at all. Instead,
+  // while wielding an Axe or a Sword it grants +1% ASPD and +1% MATK per level
+  // (max +10%/+10% at Lv10). Flat Axe ATK for Merchants now comes from Tool Mastery.
+  AM_AXEMASTERY:     { aspd_pct_per_lv: 1, matk_pct_per_lv: 1, weapon_types: ["1HAxe", "2HAxe", "1HSword", "2HSword"] },
   AS_KATAR:          { atk_per_lv: [4,  8, 12, 16, 20, 24, 28, 32, 36, 40], cri_per_lv: 5 },  // +4 ATK/lv, +0.5% CRIT/lv
   // PS dual-wield mastery factors (wiki.payonstories.com/Class_Rebalance#Assassin).
   // rh_factors[lv-1] is the per-hit multiplier applied to each of the 2 RH hits.
@@ -143,7 +154,8 @@ const PS_ASPD_BUFFS = {
   SC_TWOHANDQUICKEN: { quicken: { "2HSword": () => 300, "1HSword": () => 100 } },
   SC_SPEARQUICKEN: { quicken: { "2HSpear": (lv) => 200 + 15 * lv, "1HSpear": (lv) => 75 + 5 * lv } },
   BA_MUSICALLESSON: { lv10_rate: { MusicalInstrument: -100 } },
-  AM_AXEMASTERY: { lv10_rate: { Axe: -80, "2HAxe": -80 } },
+  // AM_AXEMASTERY's ASPD is no longer an at-Lv10 lump — the Alchemist rework made it
+  // a per-level +1% on Axes AND Swords (passive_overrides.AM_AXEMASTERY.aspd_pct_per_lv).
   PR_MACEMASTERY: { lv10_rate: { Mace: -120, Book: -120 } },
   SC_GS_GATLINGFEVER: { sc_quicken: { flee_suppress: true } },
   SC_GS_MADNESSCANCEL: { sc_quicken: { quicken_floor: 20 } },
@@ -274,7 +286,33 @@ const PS_MECHANIC_FLAGS = new Set([
   // Mystical Amplification scales with skill level on PS: +10% MATK per level
   // (lv1=10%, lv2=20%, …, lv5=50%). Vanilla gives flat 50% at any level.
   "SC_AMPLIFYMAGICPOWER_SCALING",
+  // PS Blacksmith rework (Blacksmith 2026-08-09 PDF): Adrenaline Rush works on ALL
+  // melee weapons, not just Axes/Maces, and its magnitude splits by weapon class and
+  // by who cast it — user/party 30%/20% ASPD with a Mace or Axe, 20%/10% with any
+  // other melee weapon. (Vanilla: Axe/Mace only, flat 30%/20%.)
+  "BS_ADRENALINE_ALL_MELEE",
+  // PS Merchant rework (Merchant 2026-08-09 PDF): Crazy Uproar is a 4-rank buff
+  // granting +1 STR and +1 VIT per level (plus 3×lv soft DEF to the caster, 2×lv to
+  // party members). Vanilla SC_SHOUT was a 1-rank +4 STR buff with no VIT or DEF.
+  "MC_LOUD_PS_REWORK",
+  // PS Merchant/Blacksmith rework: cards that autocast a skill on a physical attack
+  // (Pirate Skel Card's auto-Mammonite, Rekenber Mercenary Card's auto-Bash) are
+  // surfaced as their own proc branch on auto-attacks. See _runCardAutocastBranches.
+  "PS_CARD_AUTOCAST_ON_ATTACK",
+  // PS Burning (Burning 2026-08-09 PDF): a stacking debuff (max 5) that deals
+  // 60 Fire MAGIC damage per second per stack and cuts the target's MDEF by 2 per
+  // stack, for 5 s. Introduced by the Alchemist's Remote Detonator (with a Marine
+  // Sphere Bottle) and slated to be a core mechanic for another class.
+  "PS_BURNING_STATUS",
 ]);
+
+// PS Burning (Burning 2026-08-09 PDF / Alchemist Rework p.4).
+const PS_BURNING = {
+  max_stacks: 5,
+  mdef_per_stack: 2,       // −2 hard MDEF per stack
+  dmg_per_stack_per_sec: 60, // 60 Fire (magic) damage per second per stack
+  duration_s: 5,
+};
 
 // Helper arrays for NJ_KASUMIKIRI / NJ_KIRIKAGE (core/server_profiles.py).
 const NJ_KASUMIKIRI_RATIOS = [100, 125, 150, 175, 200, 250, 275, 300, 325, 375];
@@ -302,7 +340,10 @@ const PS_BF_WEAPON_RATIOS = {
   KN_SPEARSTAB: (lv) => 100 + 40 * lv, // 100 + 40×lv, capped at L5 (300%) — PDF-verified prior audit
   CR_HOLYCROSS: (lv) => 300 + 25 * lv,
   RG_RAID: (lv) => 100 + 100 * lv,
-  AM_ACIDTERROR: (lv) => 100 + 80 * lv,
+  // PS Alchemist rework (PayonStories Alchemist Rework 2026-08-09 PDF): Acid Terror's
+  // formula became (100 + 100×SkillLv)% ATK — 200% @Lv1 → 600% @Lv5 (its PS max rank),
+  // up from the old 100+80×lv (180%→500%). Buffed to compensate the FUEL Card nerf.
+  AM_ACIDTERROR: (lv) => 100 + 100 * lv,
   RG_BACKSTAP: (lv) => 200 + 30 * lv, // 200 + 30×lv — PDF-verified prior audit (Rogue Patchnotes)
   AS_SPLASHER: (lv, tgt, ctx) => {
     const poisonLv = ctx ? (ctx.skill_params.AS_SPLASHER_poison_react_lv ?? 0) : 0;
@@ -310,10 +351,22 @@ const PS_BF_WEAPON_RATIOS = {
   },
   CR_SHIELDBOOMERANG: (lv) => 100 + 40 * lv,
   CR_SHIELDCHARGE: (lv) => 200 + 20 * lv,
-  MC_CARTREVOLUTION: () => 250,
+  // PS Merchant rework (PayonStories Merchant 2026-08-09 PDF): Cart Revolution moved
+  // from a platinum quest skill to a regular 5-rank skill in the tree, scaling
+  // 50/100/150/200/250% ATK, and it now deals FULL damage regardless of cart weight
+  // (so there is no cart-weight parameter to model). The old flat 250% was only
+  // correct at what is now rank 5.
+  MC_CARTREVOLUTION: (lv) => 50 * lv,
+  // PS Merchant rework: Zeny Pincher HALVES Mammonite's per-level term rather than
+  // scaling the whole ratio — 100 + 25×lv (125%→350%) instead of the old flat ×0.4 of
+  // 100+50×lv (60%→240%). A small buff on manual casts, and the reason Pirate Skel
+  // Card's auto-Mammonite still beats a plain auto-attack.
   MC_MAMMONITE: (lv, tgt, ctx) => {
-    const zenyPincher = !!(ctx && ctx.skill_params.PS_BS_ZENYPINCHER_active);
-    return Math.trunc((100 + 50 * lv) * (zenyPincher ? 0.4 : 1.0));
+    const zenyPincher = !!(ctx && (
+      ctx.skill_params.PS_BS_ZENYPINCHER_active ||
+      (ctx.skill_levels && ctx.skill_levels.PS_BS_ZENYPINCHER)
+    ));
+    return 100 + (zenyPincher ? 25 : 50) * lv;
   },
   MO_TRIPLEATTACK: (lv) => 100 + 40 * lv,   // PS rework: 5 levels → 140/180/220/260/300%
   MO_CHAINCOMBO:   (lv) => 200 + 60 * lv,   // PS rework: 260/320/380/440/500%
@@ -498,10 +551,39 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
   // covers One-Hand Swords too. That mastery is SM_TWOHAND, stored under the mastery
   // key SM_TWOHANDSWORD — so a 1H-sword swing prefers it over the (removed) Sword
   // Mastery. SM_SWORD is still used when a Knight lacks Blade Mastery (e.g. Swordman).
-  mastery_prefer_fallback: { PR_MACEMASTERY: "MO_IRONHAND", SM_SWORD: "SM_TWOHANDSWORD" },
+  // PS Merchant rework: Tool Mastery is the Merchant line's flat-ATK mastery for both
+  // Axes and Maces, so an Axe swing prefers it over Axe Mastery (now Transmutation,
+  // which grants no ATK) and a Mace swing prefers it over the Priest's Mace Mastery.
+  // Values may be an ARRAY — the first entry the character actually has a level in wins
+  // (a character is never both a Monk and a Merchant, so the order is a formality).
+  mastery_prefer_fallback: {
+    PR_MACEMASTERY: ["MO_IRONHAND", "PS_MC_TOOLMASTERY"],
+    AM_AXEMASTERY: "PS_MC_TOOLMASTERY",
+    SM_SWORD: "SM_TWOHANDSWORD",
+  },
+  burning: PS_BURNING,
+  // PS max level per skill — SETS the value (raises or lowers the DB max).
   skill_level_cap_overrides: {
     KN_SPEARSTAB: 5,
     MO_TRIPLEATTACK: 5, // PS Monk rework: 5 levels (140/180/220/260/300%), not 10
+
+    // ── PS Merchant rework (Merchant 2026-08-09 PDF) ──────────────────────────
+    // Cart Revolution and Crazy Uproar left the platinum-quest list and became
+    // regular tree skills with real rank tables (Gershuan/Necko retired).
+    MC_CARTREVOLUTION: 5,  // 50/100/150/200/250% ATK
+    MC_LOUD: 4,            // +1 STR/VIT per level, +3×lv soft DEF (self)
+    MC_PUSHCART: 5,        // condensed 10 → 5 ranks (movement speed only)
+    // ── PS Blacksmith rework (Blacksmith 2026-08-09 PDF) ─────────────────────
+    // Every Smith Weapon skill gains a 4th rank (success rate 4×lv → 16% at max);
+    // Smith Two-Handed Sword is folded into Smith Sword, so BS_TWOHANDSWORD is
+    // gone (max level 0 hides it from the pickers).
+    BS_DAGGER: 4, BS_SWORD: 4, BS_KNUCKLE: 4, BS_SPEAR: 4, BS_AXE: 4, BS_MACE: 4,
+    BS_TWOHANDSWORD: 0,
+    BS_ADRENALINE: 5,      // 60/120/180/240/300 s (was 5 already; kept explicit)
+    // ── PS Alchemist rework (Alchemist Rework 2026-08-09 PDF) ────────────────
+    // Chemical Protections are now independent of each other and max rank 3.
+    AM_CP_ARMOR: 3, AM_CP_HELM: 3, AM_CP_SHIELD: 3, AM_CP_WEAPON: 3,
+    AM_ACIDTERROR: 5,      // 200%→600% ATK under the new (100+100×lv)% formula
 
     WZ_FROSTNOVA: 5,
     WZ_FIREPILLAR: 5,

@@ -248,6 +248,20 @@ router.post("/", (req: Request, res: Response) => {
       if (targetModsInput.sleep)  sc.SC_SLEEP  = true;
       if (targetModsInput.stun)   sc.SC_STUN   = true;
       target.target_active_scs = sc;
+      // Burning (PS, Burning 2026-08-09 PDF): a 5-second stacking debuff — the
+      // Alchemist's Remote Detonator applies 5 stacks at once with a Marine Sphere
+      // Bottle. Each stack cuts the target's HARD MDEF by 2 (raising every magic hit
+      // you land while it is up) and ticks 60 Fire magic damage per second. Only the
+      // MDEF cut belongs in the damage pipeline; the tick is reported separately
+      // because it is the Burning's own damage, not the player's attack.
+      const burnStacks = Math.max(0, Math.min(
+        (profile.burning?.max_stacks ?? 5),
+        Number(targetModsInput.burning) || 0,
+      ));
+      if (burnStacks > 0) {
+        const perStack = profile.burning?.mdef_per_stack ?? 2;
+        target.mdef_ = Math.max(0, target.mdef_ - perStack * burnStacks);
+      }
       // Signum Crucis (PS, AL_CRUCIS): reduces the target's HARD DEF by a
       // level-scaled %. The PS Priest/Acolyte rework capped it at level 5 with the
       // table −14/−23/−32/−41/−50% for Lv1–5, i.e. 5 + 9×lv (−50% at Lv5, the max).
@@ -299,6 +313,12 @@ router.post("/", (req: Request, res: Response) => {
     }
     // PS Ninja: casting Shadow Slash (NJ_KIRIKAGE) or Haze Slash (NJ_KASUMIKIRI)
     // from Hiding boosts their ratio — the profile ratio fns read these flags.
+    // Zeny Pincher (PS_BS_ZENYPINCHER, Blacksmith toggle): halves Mammonite's
+    // per-level term (100 + 25×lv instead of 100 + 50×lv) and removes its zeny cost.
+    // The profile's MC_MAMMONITE ratio fn reads this skill_param.
+    if (effBuild.active_status_levels?.SC_PS_ZENYPINCHER) {
+      effBuild.skill_params = { ...(effBuild.skill_params || {}), PS_BS_ZENYPINCHER_active: true };
+    }
     if (effBuild.support_buffs?.ninja_hiding) {
       effBuild.skill_params = { ...(effBuild.skill_params || {}), NJ_KIRIKAGE_hiding: true, NJ_KASUMIKIRI_hiding: true };
     }

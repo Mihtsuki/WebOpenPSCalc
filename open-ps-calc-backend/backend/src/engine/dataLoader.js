@@ -89,7 +89,9 @@ class DataLoader {
   }
 
   _applyPsItemLayers(strId, base) {
-    const STRIP = new Set(["_ps_custom", "_renewal_base", "description"]);
+    // `_note` is a maintainer comment on a ps_item_manual entry (why a script
+    // deviates from the scraped text) — never part of the item itself.
+    const STRIP = new Set(["_ps_custom", "_renewal_base", "description", "_note"]);
     const REMAP = { weapon_level: "level" };
 
     if (!this._usePsData) return base;
@@ -368,11 +370,16 @@ class DataLoader {
   // Apply the active profile's per-skill level cap to max_level so the UI's
   // level selector matches the engine clamp (e.g. WZ_FROSTNOVA max 5 on PS, 10
   // in vanilla). Without this the picker offers levels the engine silently caps.
+  // `skill_level_cap_overrides` SETS a skill's PS max level — it can raise as well as
+  // lower the DB value. Most entries lower it (PS retunes a 10-rank skill to 5), but
+  // reworks also promote skills upward: the 2026-08 Merchant rework turned the 1-rank
+  // quest skills Cart Revolution / Crazy Uproar into 5- and 4-rank tree skills, and
+  // the Blacksmith rework gave every Smith Weapon skill a 4th rank.
   _applySkillCap(skill) {
     if (!skill) return skill;
     const caps = this._profile && this._profile.skill_level_cap_overrides;
     const cap = caps ? caps[skill.name] : null;
-    return cap != null && skill.max_level > cap ? { ...skill, max_level: cap } : skill;
+    return cap != null && skill.max_level !== cap ? { ...skill, max_level: cap } : skill;
   }
 
   getSkill(skillId) {
@@ -459,13 +466,23 @@ class DataLoader {
       // Part 1 (up to −50% at Lv10), the MaxHP raises the fixed 20%-MaxHP Part 2.
       // The PS wiki confirms it "will also reduce the recoil damage from Grand Cross."
       "CR_TRUST",
+      // PS Blacksmith rework (Blacksmith 2026-08-09 PDF): the Smith Weapon skills went
+      // to 4 ranks and the new Veteran Axe scales its ATK / Perfect Dodge / ASPD with
+      // how many of them are MASTERED — so their levels must be reachable from the
+      // build editor (item scripts read them via getskilllv()).
+      "BS_DAGGER", "BS_SWORD", "BS_KNUCKLE", "BS_SPEAR", "BS_AXE", "BS_MACE",
+      // PS Alchemist: Pharmacy level scales Giant Pestle's flat ATK bonus.
+      "AM_PHARMACY",
     ]);
+    // PS-custom passives (constants that exist only on Payon Stories, so they are
+    // absent from the vanilla skill tree/DB) offered for the jobs that can learn them.
+    const PS_CUSTOM_PASSIVES = new Set(["PS_MC_TOOLMASTERY"]);
     // Some skill DB names differ from the key masteryFix.js looks up.
     const MASTERY_KEY_OVERRIDE = { "SM_TWOHAND": "SM_TWOHANDSWORD" };
     // These are active (non-passive) skills, normally excluded by the
     // skill_type check below -- carved out because their level still feeds
     // into a damage formula (see DAMAGE_RELEVANT comment above).
-    const ACTIVE_SKILL_TYPE_EXCEPTIONS = new Set(["MG_FROSTDIVER", "MG_FIREWALL", "HT_BLITZBEAT", "AS_ENCHANTPOISON", "MO_TRIPLEATTACK", "HW_SOULDRAIN", "GS_DUST", "GS_FULLBUSTER", "GS_SPREADATTACK"]);
+    const ACTIVE_SKILL_TYPE_EXCEPTIONS = new Set(["MG_FROSTDIVER", "MG_FIREWALL", "HT_BLITZBEAT", "AS_ENCHANTPOISON", "MO_TRIPLEATTACK", "HW_SOULDRAIN", "GS_DUST", "GS_FULLBUSTER", "GS_SPREADATTACK", "AM_PHARMACY"]);
 
     try {
       const treeData = this._loadJson("tables/skill_tree.json");
@@ -476,24 +493,49 @@ class DataLoader {
       for (const s of Object.values(skillData.skills || {})) {
         if (s && s.name) byName[s.name] = s;
       }
-      return skillNames
+      const entries = skillNames
         .filter((n) => DAMAGE_RELEVANT.has(n))
         .map((n) => byName[n])
-        .filter((s) => s && s.max_level > 0 && (ACTIVE_SKILL_TYPE_EXCEPTIONS.has(s.name) || (Array.isArray(s.skill_type) && s.skill_type.length === 0)))
+        .filter((s) => s && (ACTIVE_SKILL_TYPE_EXCEPTIONS.has(s.name) || (Array.isArray(s.skill_type) && s.skill_type.length === 0)))
         .map((s) => {
           // PS sometimes retunes a vanilla passive's max level (e.g.
           // SA_ADVANCEDBOOK is max 5 on PS vs vanilla's 10) and/or renames it
           // for display (vanilla calls it "Study", PS calls it "Advanced
           // Book") -- ps_skill_db.json carries both; apply them the same way
-          // getSkillDisplayName does for any other skill.
+          // getSkillDisplayName does for any other skill. The profile's PS max
+          // level (skill_level_cap_overrides, via _applySkillCap) wins over both:
+          // it is the only source that knows about post-scrape reworks, and it can
+          // raise a max (Smith Weapon 3 → 4) as well as lower one.
           const psEntry = this._usePsData ? this.getPsSkill(s.name) : null;
+          const capped = this._applySkillCap(s);
+          const psMax = capped.max_level !== s.max_level
+            ? capped.max_level
+            : (psEntry && psEntry.max_level) || s.max_level;
           return {
             name: s.name,
             mastery_key: MASTERY_KEY_OVERRIDE[s.name] ?? s.name,
             description: (psEntry && psEntry.name) || s.description || s.name,
-            max_level: (psEntry && psEntry.max_level) || s.max_level,
+            max_level: psMax,
           };
-        });
+        })
+        // max_level 0 = removed on PS (Smith Two-Handed Sword folded into Smith Sword).
+        .filter((s) => s.max_level > 0);
+
+      // PS-custom passives aren't in the vanilla skill tree — pull them from the PS
+      // skill DB, gated by the job list in ps_custom_constants.json.
+      if (this._usePsData) {
+        for (const rec of this.getPsCustomSkills()) {
+          if (!PS_CUSTOM_PASSIVES.has(rec.constant)) continue;
+          if (!(rec.job || []).includes(jobId)) continue;
+          entries.push({
+            name: rec.constant,
+            mastery_key: rec.constant,
+            description: rec.name || rec.constant,
+            max_level: rec.max_level || 1,
+          });
+        }
+      }
+      return entries;
     } catch {
       return [];
     }

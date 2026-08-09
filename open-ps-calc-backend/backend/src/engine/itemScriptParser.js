@@ -89,7 +89,9 @@ function parseAndEval(tokens, context) {
   function compare() {
     let left = add();
     const ops = ["==", "!=", "<=", ">=", "<", ">"];
+    let compared = false;
     while (ops.includes(peek())) {
+      compared = true;
       const op = next();
       const right = add();
       let ok;
@@ -102,7 +104,11 @@ function parseAndEval(tokens, context) {
       if (!ok) return 0;
       left = right;
     }
-    return 1;
+    // With no comparison operator this is just an arithmetic expression — yield its
+    // VALUE, not a boolean 1. Hercules scripts embed comparisons inside arithmetic
+    // (Rekenber Mercenary / Pirate Skel: `1+9*(getskilllv(X)==10)` = the cast level),
+    // and returning 1 there silently collapsed every such value to 1.
+    return compared ? 1 : left;
   }
   function add() {
     let v = mul();

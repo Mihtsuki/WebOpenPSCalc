@@ -109,6 +109,7 @@ export interface TargetMods {
   provoke: number; // SC_PROVOKE level 0–10 (0 = off). Legacy shared URLs may carry a boolean.
   sleep: boolean;
   stun: boolean;
+  burning: number; // Burning stacks 0–5 (0 = off): −2 hard MDEF per stack, plus 60 Fire magic damage/s per stack.
 }
 
 export interface UrlEditorState {

@@ -53,8 +53,13 @@ function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, o
     masteryKey = profile.ps_mastery_weapon_map[weapon.weapon_type];
   }
   if (masteryKey && profile.mastery_prefer_fallback) {
+    // A weapon type can have more than one PS replacement mastery (Mace: the Monk's
+    // Martial Arts, or the Merchant line's Tool Mastery) — take the first the
+    // character actually has ranks in.
     const pref = profile.mastery_prefer_fallback[masteryKey];
-    if (pref && (mastery[pref] || 0) > 0) masteryKey = pref;
+    const candidates = Array.isArray(pref) ? pref : pref ? [pref] : [];
+    const chosen = candidates.find((k) => (mastery[k] || 0) > 0);
+    if (chosen) masteryKey = chosen;
   }
   if (
     profile.mechanic_flags.has("PR_MACEMASTERY_EXPANDED_WEAPON_TYPES") &&

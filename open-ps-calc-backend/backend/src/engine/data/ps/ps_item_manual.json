@@ -1,4 +1,14 @@
 {
+  "1384": {
+    "_note": "PS Blacksmith rework 2026-08-09 (Veteran Axe [2]): retuned to ATK 155 / level req 60 and rebuilt around the Smith Weapon skills, which now master at rank 4. Base DEX AND base LUK 60-79 give +5 ATK / +4 Perfect Dodge / +1% ASPD per MASTERED Smith Weapon skill; 80+ doubles that to +10 / +8 / +2%. Six skills qualify (Smith Two-Handed Sword was folded into Smith Sword). Live PS item API still returns the pre-rework text (ATK 250, req 80) as of 2026-08-09.",
+    "atk": 155,
+    "equip_level": 60,
+    "script": "if(readparam(bDex)>=80 && readparam(bLuk)>=80) { if(getskilllv(BS_DAGGER)==4){ bonus bBaseAtk,10; bonus bFlee2,8; bonus bAspdRate,2; } if(getskilllv(BS_SWORD)==4){ bonus bBaseAtk,10; bonus bFlee2,8; bonus bAspdRate,2; } if(getskilllv(BS_KNUCKLE)==4){ bonus bBaseAtk,10; bonus bFlee2,8; bonus bAspdRate,2; } if(getskilllv(BS_SPEAR)==4){ bonus bBaseAtk,10; bonus bFlee2,8; bonus bAspdRate,2; } if(getskilllv(BS_AXE)==4){ bonus bBaseAtk,10; bonus bFlee2,8; bonus bAspdRate,2; } if(getskilllv(BS_MACE)==4){ bonus bBaseAtk,10; bonus bFlee2,8; bonus bAspdRate,2; } } else { if(readparam(bDex)>=60 && readparam(bLuk)>=60) { if(getskilllv(BS_DAGGER)==4){ bonus bBaseAtk,5; bonus bFlee2,4; bonus bAspdRate,1; } if(getskilllv(BS_SWORD)==4){ bonus bBaseAtk,5; bonus bFlee2,4; bonus bAspdRate,1; } if(getskilllv(BS_KNUCKLE)==4){ bonus bBaseAtk,5; bonus bFlee2,4; bonus bAspdRate,1; } if(getskilllv(BS_SPEAR)==4){ bonus bBaseAtk,5; bonus bFlee2,4; bonus bAspdRate,1; } if(getskilllv(BS_AXE)==4){ bonus bBaseAtk,5; bonus bFlee2,4; bonus bAspdRate,1; } if(getskilllv(BS_MACE)==4){ bonus bBaseAtk,5; bonus bFlee2,4; bonus bAspdRate,1; } } }"
+  },
+  "4073": {
+    "_note": "PS Merchant rework 2026-08-09: Pirate Skel Card stops granting Discount 5 and becomes the auto-Mammonite card — 5% chance on a physical attack to autocast Mammonite Lv1, or Lv10 if the wearer has mastered it. Same shape as Rekenber Mercenary Card's auto-Bash (id 90009). Zeny cost and Zeny Pincher apply in-game; neither is a damage term here.",
+    "script": "bonus3 bAutoSpell,MC_MAMMONITE,1+9*(getskilllv(MC_MAMMONITE)==10),50;"
+  },
   "2111": {
     "script": "bonus bInt,3; bonus bVit,3; bonus bMdef,3; bonus bBaseAtk,20; bonus bUnbreakableShield,0; bonus2 bSkillAtk,CR_SHIELDBOOMERANG,30;"
   },
@@ -1097,7 +1107,8 @@
     ],
     "slots": 0,
     "aegis_name": "FUEL_Card",
-    "script": "bonus bFlee,5; bonus2 bSkillAtk,AM_DEMONSTRATION,30; bonus2 bSkillAtk,AM_ACIDTERROR,30;"
+    "_note": "PS Alchemist rework 2026-08-09: skill damage cut 30% -> 10% (compensated by Acid Terror's new 100+100*lv ratio); keeps Flee +5 and gains -2s Demonstration cooldown (cooldowns are not modeled by this calculator).",
+    "script": "bonus bFlee,5; bonus2 bSkillAtk,AM_DEMONSTRATION,10; bonus2 bSkillAtk,AM_ACIDTERROR,10;"
   },
   "90008": {
     "type": "IT_CARD",
@@ -1166,7 +1177,8 @@
     ],
     "slots": 0,
     "aegis_name": "PILL_BUG_Card",
-    "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,8;"
+    "_note": "PS Merchant rework 2026-08-09: Cart Revolution damage 8% -> 10%, to line up with the other +% skill-damage shoe cards. (The no-knockback rider is not a damage effect.)",
+    "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,10;"
   },
   "90015": {
     "type": "IT_CARD",
@@ -1986,5 +1998,41 @@
     "equip_level": 40,
     "refineable": false,
     "script": "bonus bMaxHP,100; bonus bMaxSP,10; bonus bHPrecovRate,5; bonus bSPrecovRate,5;"
+  },
+
+  "_comment_95xxx": "PROVISIONAL IDs. Items announced in the 2026-08-09 PS rework PDFs that are not live yet — tools.payonstories.com/api/pc/item returns 'No data' for both (checked 2026-08-09), so no real item ID exists to key them by. They live in a reserved 95xxx block; re-key them to the published IDs once the patch lands (a share link that equips one will need re-picking).",
+
+  "95001": {
+    "type": "IT_WEAPON",
+    "loc": ["EQP_WEAPON"],
+    "weapon_type": "2HMace",
+    "slots": 1,
+    "name": "Whirling Hammer",
+    "aegis_name": "Whirling_Hammer",
+    "job": [5, 10, 18, 4011, 4019],
+    "atk": 190,
+    "weight": 350,
+    "weapon_level": 4,
+    "equip_level": 70,
+    "refineable": true,
+    "_note": "PS Blacksmith rework 2026-08-09. 'Gain 1 SP on Kill' is not a damage term and is not modeled.",
+    "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,getrefine();"
+  },
+
+  "95002": {
+    "type": "IT_WEAPON",
+    "loc": ["EQP_WEAPON"],
+    "weapon_type": "Mace",
+    "slots": 1,
+    "name": "Giant Pestle",
+    "aegis_name": "Giant_Pestle",
+    "job": [18, 4019],
+    "atk": 100,
+    "weight": 130,
+    "weapon_level": 3,
+    "equip_level": 58,
+    "refineable": true,
+    "_note": "PS Alchemist rework 2026-08-09. Base LUK and base DEX 60-79 give +3 ATK per Pharmacy level; 80+ raises that to +12 per level (the PDF states the 80+ figure is the TOTAL bonus, not an addition). The Potion Pitcher extra-target chance (5% / 20%) is a support effect with no damage term.",
+    "script": "if(readparam(bLuk)>=80 && readparam(bDex)>=80) { bonus bBaseAtk,12*getskilllv(AM_PHARMACY); } else { if(readparam(bLuk)>=60 && readparam(bDex)>=60) { bonus bBaseAtk,3*getskilllv(AM_PHARMACY); } }"
   }
 }

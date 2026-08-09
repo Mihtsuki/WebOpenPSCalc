@@ -5,6 +5,64 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-09
+
+### Added
+
+- **The Merchant, Blacksmith and Alchemist reworks are in.** Every damage-relevant change
+  from the 2026-08-09 rework notes is modeled:
+  - **Cart Revolution** is a normal 5-rank skill now — **50% ATK per rank** (250% at rank 5),
+    full damage no matter how heavy your cart is. Previously the calculator only knew the
+    flat 250%, so ranks 1–4 were badly overstated.
+  - **Tool Mastery**, the Merchant line's new weapon mastery: **+4 ATK per level with Axes
+    and Maces**. It appears in the passive picker for Merchant, Blacksmith, Alchemist and
+    their transcendent forms.
+  - **Zeny Pincher** now halves only Mammonite's *per-rank* term — **100 + 25×level**
+    (350% at Lv10, up from the old 240%). It's a self-buff toggle in the Buffs panel.
+  - **Crazy Uproar** is a 4-rank buff: **+1 STR and +1 VIT per level** plus soft DEF
+    (3×level for you, 2×level for party members). Both the caster and the party version
+    are toggles.
+  - **Adrenaline Rush works with every melee weapon.** Maces and Axes get **+30% ASPD**
+    self-cast / **+20%** from a party Blacksmith; every other melee weapon gets **+20% /
+    +10%** where it used to get nothing. Bows and guns are still excluded. (The old
+    Adrenaline Rush checkbox was effectively doing nothing — it now moves ASPD properly.)
+  - **Acid Terror** is **(100 + 100×level)% ATK** — 600% at its rank-5 max, up from 500%.
+  - **Transmutation** replaces Axe Mastery: it no longer gives flat ATK, and instead grants
+    **+1% ASPD and +1% MATK per level while wielding an Axe or a Sword** (+10%/+10% at
+    Lv10). Alchemists wanting flat Axe/Mace ATK take Tool Mastery instead.
+  - **Smith Weapon skills** master at rank 4, and Smith Two-Handed Sword is folded into
+    Smith Sword. Their levels are now in the passive picker because the new Veteran Axe
+    scales off how many you have mastered.
+  - **Chemical Protections** cap at rank 3, **Pushcart** at rank 5.
+- **Burning** — the new stacking Fire debuff — is a target toggle. Each of the up-to-5
+  stacks cuts the target's **hard MDEF by 2**, so your magic damage rises accordingly. The
+  debuff's own 60 Fire magic damage per second per stack is shown alongside, labelled as a
+  pre-mitigation figure since it is Burning's damage, not your hit's.
+- **Cards that autocast a skill on a physical attack now show their damage.** The reworked
+  **Pirate Skel Card** (5% auto-Mammonite, cast at Lv10 once you have mastered Mammonite)
+  and the **Rekenber Mercenary Card** (auto-Bash) each get their own breakdown panel with
+  the per-proc damage and the DPS they add. Shown on auto-attacks, where these cards are used.
+- **New weapons from the rework notes**, with full stats and bonuses: **Veteran Axe [2]**
+  (retuned to ATK 155 / level 60; scales ATK, Perfect Dodge and ASPD with your mastered
+  Smith Weapon skills, doubling at base DEX and LUK 80+), **Whirling Hammer [1]** (two-handed
+  mace, ATK 190, +1% Cart Revolution damage per refine) and **Giant Pestle** (Alchemist
+  one-handed mace, ATK 100, +3 ATK per Pharmacy level at base DEX/LUK 60+, +12 at 80+).
+  The two brand-new weapons are not live on the server yet, so they carry provisional item
+  IDs — a build that equips one may need the weapon re-picked once the patch ships.
+
+### Changed
+
+- **FUEL Card** now adds **+10%** to Acid Terror and Demonstration (was +30%), and **Pill
+  Bug Card** adds **+10%** to Cart Revolution (was +8%), matching the rework notes. Acid
+  Terror's higher base damage more than covers the FUEL nerf.
+
+### Fixed
+
+- **Item scripts that multiply by a condition now compute the right number.** An expression
+  like `1 + 9 × (skill level == 10)` was collapsing to 1, which capped every such bonus at
+  its minimum value. This is what makes the auto-Mammonite / auto-Bash cards cast at level
+  10 for a character who has mastered the skill.
+
 ## 2026-08-08
 
 ### Fixed

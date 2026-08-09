@@ -374,6 +374,97 @@ const scenarios = [
     target: 1002,
   },
 
+  // --- PS Merchant / Blacksmith / Alchemist rework (2026-08-09 PDFs) ----------------------
+  {
+    // Cart Revolution is now a 5-rank tree skill: 50 × lv% ATK (250% at Lv5, i.e.
+    // exactly the old flat value only at max rank), full damage at any cart weight.
+    name: "merchant-cart-revolution-lv5",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504 } },
+    skill: { name: "MC_CARTREVOLUTION", level: 5 },
+    target: 1036,
+  },
+  {
+    // Rank 2 (100% ATK) — guards the per-level scaling, not just the max rank.
+    name: "merchant-cart-revolution-lv2",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504 } },
+    skill: { name: "MC_CARTREVOLUTION", level: 2 },
+    target: 1036,
+  },
+  {
+    // Zeny Pincher halves Mammonite's per-level term: 100 + 25×lv (350% at Lv10)
+    // instead of 100 + 50×lv (600%). Compare against "whitesmith-mammonite".
+    name: "whitesmith-mammonite-zeny-pincher",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504 }, active_buffs: { SC_PS_ZENYPINCHER: 1 } },
+    skill: { name: "MC_MAMMONITE", level: 10 },
+    zeny_pincher: true,
+    target: 1036,
+  },
+  {
+    // Tool Mastery: +4 ATK/lv with an Axe or Mace for the whole Merchant line.
+    // Mace (1504) + Tool Mastery 10 → +40 flat at the Mastery Fix step.
+    name: "merchant-tool-mastery-mace",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504 }, mastery_levels: { PS_MC_TOOLMASTERY: 10 } },
+    target: 1036,
+  },
+  {
+    // Crazy Uproar Lv4 self-cast: +4 STR / +4 VIT (BATK and soft DEF both move).
+    name: "merchant-crazy-uproar-lv4",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504 }, active_buffs: { SC_SHOUT: 4 } },
+    target: 1036,
+  },
+  {
+    // Adrenaline Rush self-cast with a Mace: +30% ASPD (period drops, DPS rises).
+    name: "blacksmith-adrenaline-self-mace",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504 }, active_buffs: { SC_ADRENALINE_SELF: 1 } },
+    target: 1036,
+  },
+  {
+    // Same buff with a NON Axe/Mace melee weapon (Sword): the rework's lesser tier,
+    // +20% ASPD — vanilla gave this weapon nothing at all.
+    name: "blacksmith-adrenaline-self-sword",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1101 }, active_buffs: { SC_ADRENALINE_SELF: 1 } },
+    target: 1036,
+  },
+  {
+    // Party-received Adrenaline Rush with a Mace: +20% (half the self-cast tier).
+    name: "blacksmith-adrenaline-party-mace",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504 }, support_buffs: { SC_ADRENALINE: 1 } },
+    target: 1036,
+  },
+  {
+    // Pirate Skel Card auto-Mammonite: 5% per physical attack, Lv10 because
+    // Mammonite is mastered — surfaces as a card_autocast_MC_MAMMONITE proc branch
+    // and folds into DPS. Accessory card slot on an accessory (2615 Clip).
+    name: "blacksmith-pirate-skel-auto-mammonite",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073 }, mastery_levels: { MC_MAMMONITE: 10 } },
+    target: 1036,
+  },
+  {
+    // Transmutation (reworked Axe Mastery) on an Alchemist with an Axe: no flat ATK
+    // any more, but +10% ASPD and +10% MATK at Lv10. Normal attack shows the ASPD
+    // half (period/DPS) and the status block shows the MATK half.
+    name: "alchemist-transmutation-axe",
+    build: { job_id: 18, base_level: 90, job_level: 50, base_stats: { str: 80, agi: 50, vit: 40, int: 60, dex: 60, luk: 10 }, equipped: { right_hand: 1301 }, mastery_levels: { AM_AXEMASTERY: 10 } },
+    target: 1867,
+  },
+  {
+    // Acid Terror with the nerfed FUEL Card (+10%, was +30%) — the pair of changes
+    // the Alchemist PDF explicitly balances against each other.
+    name: "alchemist-acid-terror-fuel-card",
+    build: { job_id: 18, base_level: 90, job_level: 50, base_stats: { str: 80, agi: 50, vit: 40, int: 40, dex: 60, luk: 10 }, equipped: { right_hand: 1201, shoes: 2405, shoes_card1: 90007 } },
+    skill: { name: "AM_ACIDTERROR", level: 5 },
+    target: 1867,
+  },
+  {
+    // Burning 5 stacks: −10 hard MDEF on the target, so a magic hit lands harder.
+    // Ghoul (1036) carries MDEF, which is what makes the debuff visible here.
+    name: "wizard-firebolt-vs-burning-target",
+    build: { job_id: 9, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 30, vit: 30, int: 99, dex: 70, luk: 1 }, equipped: { right_hand: 1601 } },
+    skill: { name: "MG_FIREBOLT", level: 10 },
+    burning: 5,
+    target: 1036,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

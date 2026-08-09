@@ -306,9 +306,21 @@ const SELF_BUFFS = [
   // Crusader / Paladin
   { key: "SC_SPEARQUICKEN",    label: "Spear Quicken",         max: 10, jobs: [14, 4015] },
   { key: "SC_PROVIDENCE",      label: "Providence",            max: 5,  jobs: [14, 4015] },
-  // Blacksmith / Whitesmith — SC_SHOUT adds STR+4 in statusCalculator.js
+  // Blacksmith / Whitesmith
   { key: "SC_MAXIMIZEPOWER",   label: "Maximize Power",        max: 1,  jobs: [10, 4011] },
-  { key: "SC_SHOUT",           label: "Loud Exclamation",      max: 1,  jobs: [10, 4011] },
+  // Adrenaline Rush cast on YOURSELF (PS Blacksmith rework): +30% ASPD with a Mace
+  // or Axe, +20% with any other melee weapon. The party-received version (20%/10%)
+  // is the SC_ADRENALINE entry under Party buffs. Level only sets duration, so this
+  // is presence-only. Kept on its own SC key so the two never overwrite each other.
+  { key: "SC_ADRENALINE_SELF", label: "Adrenaline Rush (self)", max: 1, jobs: [10, 4011] },
+  // Zeny Pincher (PS_BS_ZENYPINCHER, quest skill, toggled): Mammonite costs no zeny
+  // and, after the PS Merchant rework, deals 100 + 25×lv% instead of 100 + 50×lv%
+  // (350% vs 600% at Lv10). Only affects Mammonite.
+  { key: "SC_PS_ZENYPINCHER", label: "Zeny Pincher", max: 1, jobs: [10, 4011] },
+  // Crazy Uproar (MC_LOUD) — PS Merchant rework: 4 ranks, +1 STR / +1 VIT per level
+  // and +3×lv soft DEF to the caster. Merchant line (Merchant/Blacksmith/Alchemist
+  // and their transcendent forms) — it is a Merchant tree skill, not a Blacksmith one.
+  { key: "SC_SHOUT",           label: "Crazy Uproar",          max: 4,  jobs: [5, 10, 18, 4011, 4019] },
   // Monk / Champion
   { key: "SC_EXPLOSIONSPIRITS", label: "Critical Explosion",                 max: 5,  jobs: [15, 4016] },
   // Gunslinger — SC_GS_ACCURACY adds AGI+4/DEX+4 in statusCalculator.js.
@@ -353,7 +365,13 @@ const PARTY_BUFFS = [
   { key: "SC_ANGELUS", label: "Angelus", max: 5, source: "Priest" },
   { key: "SC_OVERTHRUST", label: "Over Thrust", max: 10, source: "Blacksmith" },
   { key: "SC_OVERTHRUSTMAX", label: "Maximum Over Thrust", max: 5, source: "Blacksmith" },
-  { key: "SC_ADRENALINE", label: "Adrenaline Rush", max: 2, source: "Blacksmith" },
+  // Adrenaline Rush received from a party Blacksmith: PS rework gives +20% ASPD with
+  // a Mace/Axe and +10% with any other melee weapon (bows and guns excluded). Level
+  // only sets duration; the self-cast version lives in SELF_BUFFS.
+  { key: "SC_ADRENALINE", label: "Adrenaline Rush", max: 1, source: "Blacksmith" },
+  // Crazy Uproar from a party Merchant: soft DEF only (2 × level) — the +STR/+VIT
+  // half is caster-only, which is why the self-cast entry lives in SELF_BUFFS.
+  { key: "SC_SHOUT", label: "Crazy Uproar (party soft DEF)", max: 4, source: "Merchant" },
 ] as const;
 
 const SONG_BUFFS = [
@@ -414,7 +432,9 @@ function computeBuffStatBonuses(
     b.dex += Math.floor((preTotals.dex + b.dex) * pct);
   }
   // Buffs applied AFTER Concentration (not scaled by it) — order per statusCalculator.js.
-  if (activeSc.SC_SHOUT) b.str_ += 4;
+  // Crazy Uproar (PS Merchant rework): +1 STR and +1 VIT per level to the caster.
+  const shoutLv = (activeSc.SC_SHOUT as number) || 0;
+  if (shoutLv) { b.str_ += shoutLv; b.vit += shoutLv; }
   const njNenLv = (activeSc.SC_NJ_NEN as number) || 0;
   if (njNenLv) { b.str_ += 2 * njNenLv; b.int_ += 2 * njNenLv; } // Ninja Aura: +2 STR/INT per level
   if (activeSc.SC_GS_ACCURACY) { b.agi += 4; b.dex += 4; }
@@ -450,6 +470,7 @@ const DEFAULT_TARGET_MODS: TargetMods = {
   provoke: 0,
   sleep: false,
   stun: false,
+  burning: 0,
 };
 
 // Compact URL state (z2_): before compressing, drop every value that equals its
@@ -542,6 +563,7 @@ const Z3_KEYS: string[] = [
   ...Z3_CARD_SLOTS.flatMap((s) => [1, 2, 3, 4].map((i) => `${s}_card${i}`)),
   // Appended (keep at the end — Z3 codes are positional and must stay stable).
   "forge", "sc", "ranked",
+  "burning",
 ];
 const Z3_ENC: Record<string, string> = {};
 const Z3_DEC: Record<string, string> = {};
@@ -749,6 +771,8 @@ export default function BuildEditor() {
   const quagmireLv = (targetMods.quagmire as unknown) === true ? 5 : (Number(targetMods.quagmire) || 0);
   // Provoke level (0–10). Legacy boolean from older shared URLs maps true → max 10.
   const provokeLv = (targetMods.provoke as unknown) === true ? 10 : (Number(targetMods.provoke) || 0);
+  // Burning stacks (0–5). Absent in shared URLs made before Burning existed.
+  const burningStacks = Math.max(0, Math.min(5, Number(targetMods.burning) || 0));
 
   // FLEE needed to dodge the selected monster 95% of the time. Incoming hit% =
   // 80 + mobHIT − FLEE, floored at 5% (→ 95% is the dodge ceiling), and a mob's
@@ -2409,6 +2433,27 @@ export default function BuildEditor() {
                   </div>
 
                   <div className="buff-group">
+                    <span className="buff-group-label">Merchant</span>
+                    <div className="passive-grid">
+                      {PARTY_BUFFS.filter((b) => b.source === "Merchant").map((b) => {
+                        const current = (data.support_buffs as Record<string, number> | undefined)?.[b.key] ?? 0;
+                        return (
+                          <div className="field field-checkbox" key={b.key}>
+                            <label title={b.key}>
+                              <input
+                                type="checkbox"
+                                checked={current > 0}
+                                onChange={(e) => updateBuffField("support_buffs", b.key, e.target.checked ? b.max : 0)}
+                              />
+                              <span>{b.label}</span>
+                            </label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="buff-group">
                     <span className="buff-group-label">Sage</span>
                     <div className="passive-grid">
                       <div className="field">
@@ -2759,6 +2804,27 @@ export default function BuildEditor() {
                   <option key={lv} value={lv}>Lv {lv}{lv === 10 ? " (max)" : ""}</option>
                 ))}
               </select>
+            </div>
+            <div className="field debuff-field">
+              <label title="Burning (PS): a 5-second stacking debuff — the Alchemist's Remote Detonator applies all 5 stacks at once when a Marine Sphere Bottle is carried. Each stack cuts the target's hard MDEF by 2 (which is what raises your magic damage here) and ticks 60 Fire magic damage per second.">
+                Burning (−2 MDEF per stack)
+              </label>
+              <select
+                value={burningStacks}
+                onChange={(e) => setTargetMods((m) => ({ ...m, burning: Number(e.target.value) }))}
+              >
+                <option value={0}>Off</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>{n} stack{n > 1 ? "s" : ""}{n === 5 ? " (max)" : ""}</option>
+                ))}
+              </select>
+              {burningStacks > 0 && (
+                <div className="hint-text">
+                  −{2 * burningStacks} hard MDEF for 5s. The Burning itself also ticks{" "}
+                  {60 * burningStacks} Fire magic damage/s — that figure is before the target's
+                  Fire resistance and MDEF, and it is the debuff's own damage, not part of your hit.
+                </div>
+              )}
             </div>
             <div className="field field-checkbox">
               <label title="SC_SLEEP: target cannot evade (auto-hit) and crit rate is doubled">

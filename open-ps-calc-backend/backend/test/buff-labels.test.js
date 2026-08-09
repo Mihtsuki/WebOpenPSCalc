@@ -49,6 +49,8 @@ const BUFF_SKILL = {
   SC_SPEARQUICKEN: "CR_SPEARQUICKEN",         // Spear Quicken
   SC_PROVIDENCE: "CR_PROVIDENCE",             // Providence
   SC_MAXIMIZEPOWER: "BS_MAXIMIZE",            // Maximize Power
+  SC_ADRENALINE_SELF: "BS_ADRENALINE",        // Adrenaline Rush (self-cast; party version is SC_ADRENALINE)
+  SC_SHOUT: "MC_LOUD",                        // Crazy Uproar (self + party soft-DEF entries)
   SC_GS_MADNESSCANCEL: "GS_MADNESSCANCEL",    // Barrage (PS rename, in DB)
   SC_GS_ADJUSTMENT: "GS_ADJUSTMENT",          // Run and Gun (PS rename, in DB)
   SC_GS_GATLINGFEVER: "GS_GATLINGFEVER",      // Gatling Fever
@@ -83,7 +85,8 @@ const INTENTIONAL_LABELS = {
 // Buffs with no confirmable skill constant (ambiguous / PS-specific status with
 // no matching skill DB entry). Documented so the coverage check doesn't flag them.
 const NO_SKILL_MAPPING = new Set([
-  "SC_SHOUT",        // +4 STR status; DB skill name is ambiguous (Crazy Uproar vs Loud Exclamation)
+  "SC_PS_ZENYPINCHER", // PS-custom skill (PS_BS_ZENYPINCHER, id 2627) — lives in
+                       // ps_skill_db.json, not the vanilla skill DB this check reads.
   "SC_GS_ACCURACY",  // removed on PS (folded into Single Action); hidden in UI
   "SC_DRUMBATTLE",   // ensemble song; no single confirmed skill constant
   "SC_NIBELUNGEN",   // ensemble song; no single confirmed skill constant

@@ -1105,6 +1105,70 @@ class BattlePipeline {
    * Mirrors BattlePipeline._run_branch in the Python source (trimmed scope —
    * see file header).
    */
+  /**
+   * Card autocasts on a physical attack (`bonus3 bAutoSpell,<skill>,<lv>,<rate>`).
+   * PS Merchant rework: Pirate Skel Card autocasts Mammonite (Lv1, or Lv10 once
+   * Mammonite is mastered) at 5% per physical attack; Rekenber Mercenary Card does
+   * the same with Bash. Each spec becomes its own proc branch, priced with the very
+   * same pipeline the player's own cast of that skill would use — weapon skills
+   * through _runBranch, spells through _runMagicBranch.
+   *
+   * Restricted to AUTO-ATTACKS. In-game these fire off skill hits too, but pricing a
+   * skill-on-skill proc would need its own attack-period model, and the cards exist
+   * for auto-attack builds — so a skill cast simply doesn't show the branch rather
+   * than showing a number we can't stand behind.
+   *
+   * Returns [{ key, label, chance, branch }], at most one entry per autocast skill
+   * (duplicate cards keep the best rate rather than stacking into >100%).
+   */
+  _runCardAutocastBranches(status, weapon, target, build, opts) {
+    const { profile = STANDARD, gear_bonuses: gearBonuses } = opts;
+    if (!profile.mechanic_flags.has("PS_CARD_AUTOCAST_ON_ATTACK")) return [];
+    const specs = (gearBonuses && gearBonuses.autocast_on_attack) || [];
+    if (!specs.length) return [];
+
+    const best = new Map(); // skill_id -> spec with the highest level, then rate
+    for (const spec of specs) {
+      const prev = best.get(spec.skill_id);
+      if (!prev
+        || spec.skill_level > prev.skill_level
+        || (spec.skill_level === prev.skill_level && spec.chance_per_mille > prev.chance_per_mille)) {
+        best.set(spec.skill_id, spec);
+      }
+    }
+
+    const out = [];
+    for (const spec of best.values()) {
+      const sd = loader.getSkill(spec.skill_id);
+      if (!sd) continue;
+      const dt = sd.damage_type || [];
+      const level = Math.max(1, Math.min(spec.skill_level || 1, sd.max_level || 10));
+      const castSkill = {
+        id: spec.skill_id, name: sd.name, level,
+        nk_ignore_def: dt.includes("IgnoreDefense"),
+        nk_ignore_flee: dt.includes("IgnoreFlee"),
+        nk_ignore_ele: dt.includes("IgnoreElement"),
+        nk_ignore_cards: dt.includes("IgnoreCards"),
+      };
+      let branch;
+      try {
+        branch = sd.attack_type === "Magic"
+          ? this._runMagicBranch(status, weapon, castSkill, target, build, opts)
+          : this._runBranch(status, weapon, castSkill, target, build, false, opts);
+      } catch {
+        continue; // an autocast we can't price never blocks the main result
+      }
+      if (!branch) continue;
+      out.push({
+        key: `card_autocast_${sd.name}`,
+        label: `${loader.getSkillDisplayName(sd.name, profile) || sd.name} Lv${level}`,
+        chance: spec.chance_per_mille / 10,
+        branch,
+      });
+    }
+    return out;
+  }
+
   _runBranch(status, weapon, skill, target, build, isCrit, opts = {}) {
     const { profile = STANDARD, gear_bonuses: gearBonuses } = opts;
     const result = createDamageResult();
@@ -1833,6 +1897,19 @@ class BattlePipeline {
       }
     }
 
+    // Card autocasts on a physical attack (Pirate Skel → Mammonite, Rekenber
+    // Mercenary → Bash). Like the two procs above, the expected value rides on the
+    // swing with no added attack time, and each proc surfaces its own branch.
+    const cardAutocasts = skill.id === 0
+      ? this._runCardAutocastBranches(status, weapon, target, build, { profile, gear_bonuses: gearBonuses })
+      : [];
+    for (const ac of cardAutocasts) {
+      attacks.push(createAttackDefinition(ac.branch.avg_damage, 0.0, 0.0, ac.chance / 100.0));
+    }
+    const cardAutocastBranches = Object.fromEntries(cardAutocasts.map((a) => [a.key, a.branch]));
+    const cardAutocastChances = Object.fromEntries(cardAutocasts.map((a) => [a.key, a.chance]));
+    const cardAutocastLabels = Object.fromEntries(cardAutocasts.map((a) => [a.key, a.label]));
+
     const dps = calculateDps(attacks);
 
     return createBattleResult({
@@ -1853,9 +1930,9 @@ class BattlePipeline {
       ta_proc: taProc,
       ta_crit_proc: taCritProc,
       ta_proc_chance: taProcChance,
-      proc_branches: { ...(autoSpellBranch ? { autospell: autoSpellBranch } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzBranch } : {}) },
-      proc_chances: { ...(autoSpellBranch ? { autospell: autoSpellChance } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzChance } : {}) },
-      proc_labels: { ...(autoSpellBranch ? { autospell: autoSpellLabel } : {}), ...(autoBlitzBranch ? { auto_blitz: "Auto Blitz Beat" } : {}) },
+      proc_branches: { ...(autoSpellBranch ? { autospell: autoSpellBranch } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzBranch } : {}), ...cardAutocastBranches },
+      proc_chances: { ...(autoSpellBranch ? { autospell: autoSpellChance } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzChance } : {}), ...cardAutocastChances },
+      proc_labels: { ...(autoSpellBranch ? { autospell: autoSpellLabel } : {}), ...(autoBlitzBranch ? { auto_blitz: "Auto Blitz Beat" } : {}), ...cardAutocastLabels },
       dw_lh_normal:    dualWield ? dualWield.lhNormal        : null,
       dw_lh_crit:      dualWield ? dualWield.lhCrit          : null,
       dw_rh_factor:    dualWield ? dualWield.rhFactor         : null,

@@ -84,6 +84,8 @@ function normalizeBattleResult(res) {
  *   skill:      { name, level } | null (null / omitted = normal attack)
  *   target:     mob id (number) | custom-target object | undefined (status-only)
  *   performing: true → skill_params.PS_PERFORMING_active (as calculate.ts does)
+ *   zeny_pincher: true → skill_params.PS_BS_ZENYPINCHER_active (Mammonite ratio)
+ *   burning:    1–5 → Burning stacks on the target (−2 hard MDEF each)
  *   incoming:   "physical" | "magic" → run the incoming (survivability) pipeline
  *               against target mob id instead of the outgoing one
  * }
@@ -119,6 +121,17 @@ function runScenario(sc) {
     }
     if (sc.ninja_hiding) {
       effBuild.skill_params = { ...(effBuild.skill_params || {}), NJ_KIRIKAGE_hiding: true, NJ_KASUMIKIRI_hiding: true };
+    }
+    if (sc.zeny_pincher) {
+      effBuild.skill_params = { ...(effBuild.skill_params || {}), PS_BS_ZENYPINCHER_active: true };
+    }
+    // Burning stacks on the target: −(profile.burning.mdef_per_stack) hard MDEF each,
+    // exactly as routes/calculate.ts applies the target_mods.burning field.
+    if (sc.burning) {
+      const perStack = (profile.burning && profile.burning.mdef_per_stack) || 2;
+      const maxStacks = (profile.burning && profile.burning.max_stacks) || 5;
+      const stacks = Math.max(0, Math.min(maxStacks, Number(sc.burning) || 0));
+      target.mdef_ = Math.max(0, target.mdef_ - perStack * stacks);
     }
 
     const skill = sc.skill
