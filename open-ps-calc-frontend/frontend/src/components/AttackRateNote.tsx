@@ -1,35 +1,37 @@
 interface Props {
   /** The attack/cast cycle in ms — period_ms from the result, or the ASPD attack delay. */
   periodMs: number;
-  /** The ASPD-derived attack delay, 2 × (2000 − ASPD×10) ms — the floor a swing imposes. */
+  /** Animation delay: 2 × (2000 − ASPD×10) ms. The time one swing occupies. */
   adelayMs: number;
   /** A skill's cadence rather than a plain swing: changes what binds it, and the wording. */
   isSkill?: boolean;
-  /** A magic cast: its period never floors at the swing, whatever the two values are. */
+  /** A magic cast — the engine does not floor those at the animation delay (see below). */
   isMagic?: boolean;
+}
+
+/** "0.57 s (566 ms)" — the two units players actually quote these timings in. */
+function fmtTime(ms: number) {
+  return `${(ms / 1000).toFixed(2)} s (${Math.round(ms)} ms)`;
 }
 
 /**
  * The attack/cast rate explainer, shared by the damage panel's ASPD metric and the
  * Combat stats ASPD card so the two can never drift apart.
  *
- * A normal attack lands every attack-delay = 2 × (2000 − ASPD×10) ms, i.e.
- * 50 ÷ (200 − ASPD) per second. The damage panel passes the result's period_ms and
- * Combat stats the ASPD-derived delay; for an auto-attack they are the same number.
+ * Two representations, because those are the two players look for: attacks per second,
+ * and the time between attacks (2 atk/s = 0.5 s). The second is what skill users line
+ * up against a skill's after-cast delay: you fire on whichever is SLOWER, so a 0.5 s
+ * after-cast delay under a 1 s animation still only casts once a second.
  *
- * For a skill, battlePipeline uses max(cast + after-cast delay, adelay) — so ASPD is
- * the limiter whenever the skill's own delay is shorter than a swing (Bash runs at
- * exactly adelay), and magic is the one case that ignores the swing floor entirely.
- * Which of the three binds is the useful thing to say, because it answers "will more
- * ASPD speed this up?".
+ * That is exactly battlePipeline's max(cast + after-cast delay, adelay) for a physical
+ * skill. Magic is the exception in the engine — its period is max(cast + delay, spam
+ * cap) with no animation floor — so the magic note says so rather than claiming casts
+ * are never gated by animation.
  */
 export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, isMagic = false }: Props) {
   const perSec = 1000 / periodMs;
-  // A magic cast never floors at the swing, so it is bound by its own timing even when
-  // it happens to be the slower of the two — saying "longer than a swing" there would
-  // give the right answer for the wrong reason.
-  const ignoresSwing = isMagic || periodMs < adelayMs - 1;
-  const aspdBound = !ignoresSwing && Math.abs(periodMs - adelayMs) <= 1;
+  const aspdBound = !isMagic && Math.abs(periodMs - adelayMs) <= 1;
+  const delayBound = !isMagic && periodMs > adelayMs + 1;
 
   return (
     <>
@@ -43,28 +45,32 @@ export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, is
       </div>
       <div className="tooltip-row">
         <span>Between {isSkill ? "casts" : "attacks"}</span>
-        <span>{Math.round(periodMs)} ms</span>
+        <span>{fmtTime(periodMs)}</span>
       </div>
       {isSkill ? (
-        <div className="tooltip-row">
-          <span>Limited by</span>
-          <span>
-            {ignoresSwing ? "cast + after-cast delay"
-              : aspdBound ? `your attack speed (${Math.round(adelayMs)} ms swing)`
-              : `the skill's delay (swing: ${Math.round(adelayMs)} ms)`}
-          </span>
-        </div>
+        <>
+          <div className="tooltip-row">
+            <span>Limited by</span>
+            <span>{aspdBound ? "your animation delay" : "the after-cast delay"}</span>
+          </div>
+          <div className="tooltip-row">
+            <span>Animation delay</span>
+            <span>{fmtTime(adelayMs)}</span>
+          </div>
+        </>
       ) : (
         <div className="tooltip-row"><span>Formula</span><span>50 ÷ (200 − ASPD)</span></div>
       )}
       <div className="tooltip-note">
-        {isSkill
-          ? (ignoresSwing
-              ? "A cast isn't gated by the attack animation, so ASPD doesn't change this."
-              : aspdBound
-                ? "This skill's delay is shorter than a swing, so your attack speed sets the pace — more ASPD casts it more often."
-                : "More ASPD won't speed this up: the skill's own delay is already longer than a swing.")
-          : "Attack cycles, not hits — a katar's second hit, dual-wield's third hit and multi-hit skills all land inside one cycle."}
+        {!isSkill
+          ? "Attack cycles, not hits — a katar's second hit, dual-wield's third hit and multi-hit skills all land inside one cycle."
+          : isMagic
+            ? "A cast fires on whichever is slower, its after-cast delay or your animation — but this calculator does not yet floor magic at the animation delay, so a Bragi-fast caster can read faster here than in game."
+            : aspdBound
+              ? "The after-cast delay is shorter than your animation, so ASPD sets the pace — AGI, Increase AGI, a Dancer's song or speed potions all cast it more often."
+              : delayBound
+                ? "The after-cast delay is longer than your animation, so more ASPD won't speed this up."
+                : ""}
       </div>
     </>
   );
