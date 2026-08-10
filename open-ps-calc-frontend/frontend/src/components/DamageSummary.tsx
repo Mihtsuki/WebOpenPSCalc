@@ -607,20 +607,20 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
             <div className="value good">{(successChance as number).toFixed(1)}<span className="unit">%</span></div>
           </div>
         )}
-        <div className="metric">
+        <div className="metric" title={attackRate
+          ? `${attackRate.perSec.toFixed(2)} attacks/sec · ${attackRate.per5s.toFixed(1)} per 5 s — 50 ÷ (200 − ASPD). `
+            + "These are attack CYCLES, not hits: a katar's second hit, dual-wield's third hit and "
+            + "multi-hit skills all land inside one cycle, so hits per second can be higher. "
+            + "Normal attacks only — a skill's rate is set by its cast and after-cast delay, not by ASPD."
+          : undefined}>
           <div className="label">ASPD</div>
-          <div className="value">{status.aspd.toFixed(1)}</div>
-          {attackRate && (
-            <div
-              className="metric-sub"
-              title={"Attack CYCLES per second — 50 ÷ (200 − ASPD). Extra hits ride on the same swing: "
-                + "a katar's second hit, dual-wield's third hit and multi-hit skills all land inside one "
-                + "cycle, so hits per second can be higher than this. Shown for normal attacks only — "
-                + "a skill's rate is set by its cast and after-cast delay, not by ASPD."}
-            >
-              {attackRate.perSec.toFixed(2)} atk/s · {attackRate.per5s.toFixed(1)} per 5s
-            </div>
-          )}
+          {/* The rate rides on the value line as a unit rather than its own row: a
+              second line inside one metric raises the height of the entire headline
+              row, which already carries up to eight cards. */}
+          <div className="value">
+            {status.aspd.toFixed(1)}
+            {attackRate && <span className="unit unit-rate">·{attackRate.perSec.toFixed(2)}/s</span>}
+          </div>
         </div>
         {showDwCombined ? (
           <div className="metric metric-range">

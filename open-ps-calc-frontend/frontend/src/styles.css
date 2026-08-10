@@ -744,13 +744,11 @@ label {
 .metric .value.crit { color: var(--crit); }
 .metric .value.good { color: var(--good); }
 .metric .unit { font-size: 0.85rem; color: var(--text-dim); margin-left: 0.2rem; }
-/* Derived sub-line under a metric (attack rate under ASPD). Dotted underline marks
-   it as carrying a hover note, like the other explained figures. */
-.metric-sub {
-  font-family: var(--mono); font-size: 0.7rem; color: var(--text-faint);
-  white-space: nowrap; margin-top: 0.1rem; cursor: help;
-  border-bottom: 1px dotted var(--border); display: inline-block;
-}
+/* A derived figure carried on the value line (attacks/sec beside ASPD) — smaller and
+   dimmer than a real unit so it reads as secondary, and it keeps the metric one line
+   tall: a second row inside any card raises the whole headline row. */
+.metric .unit-rate { font-size: 0.72rem; color: var(--text-faint); white-space: nowrap; }
+.metric[title] { cursor: help; }
 
 .metric-range { min-width: 160px; }
 .metric-range .value.range { font-size: 1.35rem; white-space: nowrap; }
