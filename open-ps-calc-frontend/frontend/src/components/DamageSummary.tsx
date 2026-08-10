@@ -497,10 +497,6 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
   // no meaningful period (Reflect Shield fires on the enemy's timing, not yours).
   const rateIsSkill = activeResult !== normal_attack;
   const aspdDelayMs = 2 * Math.max(100, Math.round(2000 - status.aspd * 10));
-  // A magic cast is priced by max(cast + after-cast delay, min cast period) — it never
-  // floors at the swing. The magic branch is the one that rolls MATK, so its presence
-  // in the pipeline is what identifies it.
-  const rateIsMagic = !!activeDamage?.steps?.some((s) => s.name === "Base MATK");
   const attackRate = activeBranch !== "falcon" && result.dps_valid && (result.period_ms ?? 0) > 0
     ? { perSec: 1000 / result.period_ms!, periodMs: result.period_ms! }
     : null;
@@ -621,7 +617,7 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
         {attackRate ? (
           <HoverNote
             className="metric"
-            note={<AttackRateNote periodMs={attackRate.periodMs} adelayMs={aspdDelayMs} isSkill={rateIsSkill} isMagic={rateIsMagic} />}
+            note={<AttackRateNote periodMs={attackRate.periodMs} adelayMs={aspdDelayMs} isSkill={rateIsSkill} />}
           >
             <div className="label">ASPD</div>
             <div className="value">
