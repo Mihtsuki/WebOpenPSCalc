@@ -38,5 +38,10 @@
   {
     "items": ["Snake_Card", "Cave_Viper_Card"],
     "script": "bonus2 bAddEff,Eff_Poison,1500; bonus bBaseAtk,20;"
+  },
+  {
+    "_note": "PS Merchant rework 2026-08-09, read off the live item API on 2026-08-10: 'Autocast Mammonite does not consume zeny and is unaffected by Zeny Pincher.' Zeny Pincher is a DAMAGE term on PS (it halves Mammonite's per-level ratio term, 100+50×lv → 100+25×lv), so exempting the autocast restores its full ratio — 600% instead of 350% at Lv10. Only Pirate Skel Card's autocast is exempt; a manual Mammonite still takes the Zeny Pincher cut.",
+    "items": ["Pirate_Skel_Card", "FLAME_BEETLE_Card"],
+    "script": "bonus bAutoMammoniteNoZeny,1;"
   }
 ]

@@ -197,6 +197,7 @@ function createGearBonuses(overrides = {}) {
     heal_power: 0, // bHealPower — % boost to Heal (and offensive Heal / heal bomb)
     crit_heal_permille: 0, // bCritHeal — per-mille of a CRIT's damage healed back (Crescent Scythe: 1 per refine)
     magnum_linger_pct: 0,  // bMagnumLinger — Magnum Break lingering fire % (Wootan Fighter Card raises 20 → 30)
+    auto_mammonite_no_zeny: 0, // bAutoMammoniteNoZeny — Pirate Skel + Flame Beetle combo: the autocast Mammonite ignores Zeny Pincher
     sp_recov_rate: 0,
     hp_recov_rate: 0,
     res_eff: {},

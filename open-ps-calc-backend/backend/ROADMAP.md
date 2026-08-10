@@ -500,14 +500,32 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
     when nothing was compared. (`evalArithmetic` still handles the comparison-free fast path.)
   - **New items** live in `ps_item_manual.json`; each carries a `_note` explaining the deviation
     (`_note` is stripped in `_applyPsItemLayers`, never reaching the item object). Veteran Axe
-    reuses its real id **1384**; **Whirling Hammer (95001)** and **Giant Pestle (95002)** sit in a
-    reserved provisional block because `tools.payonstories.com/api/pc/item` returns `No data` for
-    both — **re-key them to the published ids once the patch ships** (share links that equip one
-    will need the weapon re-picked). Verified against the live PS item API on 2026-08-09: it
-    still serves the PRE-rework text for Veteran Axe (ATK 250 / req 80), FUEL Card (+30%), Pill
-    Bug Card (+8%), Pirate Skel Card (Discount 5) and Flame Beetle Card (20%) — i.e. this patch
-    is modeled from the rework PDFs ahead of the server deploy, and a re-scrape after the deploy
-    should confirm rather than contradict these values.
+    reuses its real id **1384**; Whirling Hammer and Giant Pestle first sat in a reserved
+    provisional 95xxx block because `tools.payonstories.com/api/pc/item` returned `No data` for
+    both. **Both have since been re-keyed to their published ids — Whirling Hammer 8429**
+    (in-game client tooltip, 2026-08-09) **and Giant Pestle 8430** (item API, 2026-08-10); the
+    95xxx block is now empty (share links made before the re-key need the weapon re-picked).
+    The API served PRE-rework text on 2026-08-09 for Veteran Axe (ATK 250 / req 80), FUEL Card
+    (+30%), Pill Bug Card (+8%), Pirate Skel Card (Discount 5) and Flame Beetle Card (20%), so
+    the patch was modeled from the rework PDFs ahead of the server deploy.
+  - **API re-check 2026-08-10** (the day after the deploy — the API has caught up). Every
+    reworked item now confirms what the PDFs gave us: Veteran Axe 1384 (ATK 155 / wlv 3 / req 60
+    / 2 slots, +5·+4·+1% per mastered Smith Weapon skill, doubled at base DEX & LUK 80+),
+    Crescent Scythe 1466 + slotted **1476** (0.1% crit leech PER REFINE — the GM's follow-up
+    correction, not the flat 0.1% of the original notes), Whirling Hammer 8429 (ATK 190 / req 60
+    / Blacksmith / +1% Cart Revolution per refine), Giant Pestle 8430 (Mace, ATK 100, wlv 3,
+    req 58, Alchemist, +3/+12 ATK per Pharmacy level), Wootan Fighter 4261 (Magnum Break effect
+    → 30%), Pirate Skel 4073 (5% auto-Mammonite, Lv10 for Blacksmiths), FUEL 90007 (+10% both
+    skills, Flee +5), Pill Bug 90014 (+10% Cart Revolution). **One thing the PDFs did not carry:**
+    Flame Beetle Card 8237's new combo line — see below.
+  - **Pirate Skel + Flame Beetle Card combo** (`ps_item_combo_db.json`, surfaced by the
+    2026-08-10 API re-check): *"Autocast Mammonite does not consume zeny and is unaffected by
+    Zeny Pincher."* That IS a damage term here, because PS' Zeny Pincher halves Mammonite's
+    per-level ratio term — so with both cards the proc keeps **600% at Lv10 instead of 350%**.
+    Modeled as the PS-custom `bAutoMammoniteNoZeny` (→ `gear_bonuses.auto_mammonite_no_zeny`),
+    which `_runCardAutocastBranches` turns into a `MC_MAMMONITE_zeny_exempt` skill_param on the
+    PROC's build only; a manual Mammonite on the same character is still pinched. Flame Beetle's
+    own 50% zero-zeny chance remains unmodeled (zeny economy, no damage surface).
 - **PS 2026-08-09 patch notes** (the GM announcement — carries changes the four rework PDFs
   do NOT mention; the PDFs are Merchant/Blacksmith/Alchemist only). Verified line by line:
   - **Crusader — Reflect Shield new formula**: `SkillLevel × ((SoftDef/2) + ⌊VIT/10⌋²) ×
@@ -573,7 +591,8 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
     wins: **Level Requirement 60** (PDF said 70) and **Jobs: Blacksmith** → `[10, 4011]` (the
     PDF gave no job restriction, so it had been modeled as all Merchant classes). ATK 190 /
     weight 350 / weapon level 4 / 1 slot / `Whirling_Hammer` / +1% Cart Revolution per refine
-    all match the PDF. Giant Pestle is still provisional (95002) — not obtainable yet.
+    all match the PDF. Giant Pestle followed on 2026-08-10, re-keyed from the provisional 95002
+    to its published id **8430** once the item API listed it (all of its stats matched).
 - Magic pipeline (#1 above moved to "Fully ported").
 - Card slots on equipment — up to 4 per item, read from `item.slots`,
   written to `equipped["<slot>_cardN"]`, already consumed by
@@ -749,8 +768,10 @@ brackets are the number of PS-custom entries found across those tables.
     base DEX & LUK 80+), Whirling Hammer [1] (2H Mace, ATK 190, +1% Cart Revolution per refine).
     **Not modeled (no damage surface):** Barter (the merged Discount/Overcharge — zeny economy),
     Pushcart's movement speed (rank cap applied anyway), Hilt Binding no longer extending buff
-    durations (durations aren't modeled), Flame Beetle Card and Mammonite's zeny cost, Sasquatch /
-    Grizzly card status procs (freeze/blind chances).
+    durations (durations aren't modeled), Flame Beetle Card's own 50% zero-zeny chance and
+    Mammonite's zeny cost, Sasquatch / Grizzly card status procs (freeze/blind chances).
+    (Flame Beetle's *combo* with Pirate Skel Card IS modeled — it exempts the autocast from
+    Zeny Pincher, which is a ratio term; see the 2026-08-10 API re-check above.)
 
     **New cross-class mechanic — Burning** (`PayonStories Burning 2026-08-09.pdf`): a 5-second
     debuff stacking to 5, each stack −2 hard MDEF and 60 Fire MAGIC damage/second, refreshed (not

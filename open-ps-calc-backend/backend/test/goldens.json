@@ -3539,6 +3539,110 @@
    }
   }
  },
+ "blacksmith-pirate-skel-flame-beetle-zeny-pincher": {
+  "status": {
+   "str": 101,
+   "agi": 62,
+   "vit": 56,
+   "int_": 3,
+   "dex": 72,
+   "luk": 22,
+   "batk": 219,
+   "max_hp": 7205,
+   "max_sp": 401,
+   "aspd": 154.1,
+   "cri": 83,
+   "hit": 167,
+   "flee": 157,
+   "def_": 0,
+   "mdef": 6,
+   "matk_min": 3,
+   "matk_max": 3
+  },
+  "result": {
+   "dps": 314.8,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 8.3,
+   "period_ms": 918,
+   "normal": {
+    "min": 214,
+    "max": 214,
+    "avg": 214,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 256,
+    "max": 256,
+    "avg": 256,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "proc_branches": {
+    "card_autocast_MC_MAMMONITE": {
+     "min": 1430,
+     "max": 1430,
+     "avg": 1430,
+     "steps": [
+      "Status BATK",
+      "Weapon ATK",
+      "Weapon ATK Range",
+      "Size Fix",
+      "Status BATK Added",
+      "Overrefine Bonus",
+      "Base Damage",
+      "Skill Ratio (ID 42 Lv 10)",
+      "Defense Fix",
+      "Active Status Bonuses",
+      "Refine Bonus",
+      "Mastery Fix",
+      "Attr Fix",
+      "Card Fix",
+      "Final Rate Bonus (Short)",
+      "Final Rate Bonus (Weapon)",
+      "Final Damage"
+     ]
+    }
+   }
+  }
+ },
  "alchemist-transmutation-axe": {
   "status": {
    "str": 85,

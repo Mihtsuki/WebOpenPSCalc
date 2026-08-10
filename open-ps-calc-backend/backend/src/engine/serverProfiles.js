@@ -365,7 +365,11 @@ const PS_BF_WEAPON_RATIOS = {
   // 100+50×lv (60%→240%). A small buff on manual casts, and the reason Pirate Skel
   // Card's auto-Mammonite still beats a plain auto-attack.
   MC_MAMMONITE: (lv, tgt, ctx) => {
-    const zenyPincher = !!(ctx && (
+    // Pirate Skel + Flame Beetle Card: the AUTOCAST Mammonite consumes no zeny and
+    // is "unaffected by Zeny Pincher" (live item API, 2026-08-10) — so it keeps the
+    // full per-level term. _runCardAutocastBranches sets this param on the proc only.
+    const zenyExempt = !!(ctx && ctx.skill_params && ctx.skill_params.MC_MAMMONITE_zeny_exempt);
+    const zenyPincher = !zenyExempt && !!(ctx && (
       ctx.skill_params.PS_BS_ZENYPINCHER_active ||
       (ctx.skill_levels && ctx.skill_levels.PS_BS_ZENYPINCHER)
     ));

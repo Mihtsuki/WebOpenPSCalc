@@ -2029,9 +2029,9 @@
     "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,getrefine();"
   },
 
-  "_comment_95xxx": "PROVISIONAL ID. Giant Pestle is announced in the 2026-08-09 Alchemist rework PDF but is not obtainable yet and tools.payonstories.com/api/pc/item returns 'No data' for it, so there is no real item ID to key it by. It sits in a reserved 95xxx block; re-key it to the published id once it lands (a share link that equips it will need the weapon re-picked). Whirling Hammer already made that move — it is now keyed by its real client id 8429 above.",
+  "_comment_95xxx": "The reserved 95xxx block is currently EMPTY. It exists for items announced in a rework PDF that are not obtainable yet and that tools.payonstories.com/api/pc/item returns 'No data' for, so there is no real id to key them by; re-key them to the published id once they land (a share link that equips one will need the item re-picked). Both 2026-08-09 weapons have now made that move: Whirling Hammer to 8429 (in-game client tooltip) and Giant Pestle to 8430 (item API, 2026-08-10).",
 
-  "95002": {
+  "8430": {
     "type": "IT_WEAPON",
     "loc": ["EQP_WEAPON"],
     "weapon_type": "Mace",
@@ -2044,7 +2044,7 @@
     "weapon_level": 3,
     "equip_level": 58,
     "refineable": true,
-    "_note": "PS Alchemist rework 2026-08-09. Base LUK and base DEX 60-79 give +3 ATK per Pharmacy level; 80+ raises that to +12 per level (the PDF states the 80+ figure is the TOTAL bonus, not an addition). The Potion Pitcher extra-target chance (5% / 20%) is a support effect with no damage term.",
+    "_note": "PS Alchemist rework 2026-08-09. Base LUK and base DEX 60-79 give +3 ATK per Pharmacy level; 80+ raises that to +12 per level (the PDF states the 80+ figure is the TOTAL bonus, not an addition). The Potion Pitcher extra-target chance (5% / 20%) is a support effect with no damage term. Re-keyed 2026-08-10 from the provisional 95002 to its real id 8430, published by tools.payonstories.com/api/pc/item; every stat here (Mace, ATK 100, weight 130, weapon level 3, level req 58, 1 slot, Alchemist) matches that entry.",
     "script": "if(readparam(bLuk)>=80 && readparam(bDex)>=80) { bonus bBaseAtk,12*getskilllv(AM_PHARMACY); } else { if(readparam(bLuk)>=60 && readparam(bDex)>=60) { bonus bBaseAtk,3*getskilllv(AM_PHARMACY); } }"
   }
 }

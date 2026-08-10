@@ -7,6 +7,17 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-10
 
+### Added
+
+- **Pirate Skel Card + Flame Beetle Card is now a real combo.** The pair makes your autocast
+  Mammonite cost no zeny *and* ignore Zeny Pincher — and since Zeny Pincher trades damage for
+  the zeny discount, that means the proc hits for the full **600% at Lv10 instead of 350%**
+  while Zeny Pincher is on. A Mammonite you cast yourself is still pinched.
+- **Giant Pestle is now a real item.** It had a placeholder id while it was unobtainable; the
+  PS item database published it as **8430**, so it's keyed properly and searchable by name.
+  (If you saved a build with it before today, re-pick the weapon.) Its stats — Mace, ATK 100,
+  weapon level 3, level 58, Alchemist, +3/+12 ATK per Pharmacy level — all confirmed unchanged.
+
 ### Fixed
 
 - **The damage breakdown no longer shows phantom negative steps on unrefined weapons.**

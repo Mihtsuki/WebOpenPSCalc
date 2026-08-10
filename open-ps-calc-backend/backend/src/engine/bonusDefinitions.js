@@ -138,6 +138,11 @@ const BONUS1 = {
   // from its base 20% to this value. "assign" (not additive) so two copies of the card
   // still cap at the stated figure rather than stacking to 40%.
   bMagnumLinger: def((v) => `Magnum Break's lingering fire effect becomes ${v}% (base 20%).`, "magnum_linger_pct", "assign"),
+  // PS-specific: the Pirate Skel + Flame Beetle card combo makes the AUTOCAST
+  // Mammonite cost no zeny and be "unaffected by Zeny Pincher" — and Zeny Pincher
+  // is a damage term here (it halves Mammonite's per-level ratio term), so the
+  // proc keeps the full 100+50×lv ratio. Manual casts are NOT exempt.
+  bAutoMammoniteNoZeny: def(() => "Autocast Mammonite costs no zeny and is unaffected by Zeny Pincher (full damage).", "auto_mammonite_no_zeny", "assign"),
   bSpeedRate: def((v) => (v > 0 ? `Movement speed +${v}%.` : `Movement speed ${v}%.`)),
   bSplashRange: def((v) => `Attack splash range +${v} cells.`),
   bSPDrainValue: def((v) => `Drains ${v} SP per physical hit.`),

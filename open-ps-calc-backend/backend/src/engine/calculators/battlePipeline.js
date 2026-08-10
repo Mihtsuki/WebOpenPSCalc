@@ -1165,11 +1165,18 @@ class BattlePipeline {
         nk_ignore_ele: dt.includes("IgnoreElement"),
         nk_ignore_cards: dt.includes("IgnoreCards"),
       };
+      // Pirate Skel + Flame Beetle Card: the autocast Mammonite costs no zeny and is
+      // "unaffected by Zeny Pincher", which on PS is a damage term (Zeny Pincher halves
+      // Mammonite's per-level ratio term). Exempt the PROC only — a manual Mammonite,
+      // priced by the main branch off the unmodified build, still takes the cut.
+      const castBuild = (sd.name === "MC_MAMMONITE" && gearBonuses && gearBonuses.auto_mammonite_no_zeny)
+        ? { ...build, skill_params: { ...(build.skill_params || {}), MC_MAMMONITE_zeny_exempt: true } }
+        : build;
       let branch;
       try {
         branch = sd.attack_type === "Magic"
-          ? this._runMagicBranch(status, weapon, castSkill, target, build, opts)
-          : this._runBranch(status, weapon, castSkill, target, build, false, opts);
+          ? this._runMagicBranch(status, weapon, castSkill, target, castBuild, opts)
+          : this._runBranch(status, weapon, castSkill, target, castBuild, false, opts);
       } catch {
         continue; // an autocast we can't price never blocks the main result
       }

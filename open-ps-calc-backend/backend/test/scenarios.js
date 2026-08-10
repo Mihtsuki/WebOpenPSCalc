@@ -440,6 +440,17 @@ const scenarios = [
     target: 1036,
   },
   {
+    // Pirate Skel + Flame Beetle Card, with Zeny Pincher active: the combo makes the
+    // AUTOCAST Mammonite cost no zeny and be "unaffected by Zeny Pincher", so the proc
+    // keeps the full 100+50×lv ratio (600% at Lv10) instead of the pinched 350%.
+    // A manual Mammonite on the same build is still pinched (see
+    // whitesmith-mammonite-zeny-pincher).
+    name: "blacksmith-pirate-skel-flame-beetle-zeny-pincher",
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073, accessory_right: 2615, accessory_right_card1: 8237 }, mastery_levels: { MC_MAMMONITE: 10 } },
+    zeny_pincher: true,
+    target: 1036,
+  },
+  {
     // Transmutation (reworked Axe Mastery) on an Alchemist with an Axe: no flat ATK
     // any more, but +10% ASPD and +10% MATK at Lv10. Normal attack shows the ASPD
     // half (period/DPS) and the status block shows the MATK half.

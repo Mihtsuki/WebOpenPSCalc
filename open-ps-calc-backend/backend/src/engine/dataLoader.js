@@ -173,8 +173,12 @@ class DataLoader {
       this.__aegisToItem = {};
       try {
         const data = this._loadJson("db/item_db.json");
-        for (const v of Object.values(data.items || {})) {
-          if (v && v.aegis_name) this.__aegisToItem[v.aegis_name] = v;
+        // Resolve through getItem(id) so the entry carries the PS layers — the raw
+        // vanilla record often has no `name` at all (the PS name lives in
+        // ps_item_overrides.json), which left combo labels showing the aegis
+        // string, e.g. "FLAME_BEETLE_Card" instead of "Flame Beetle Card".
+        for (const [id, v] of Object.entries(data.items || {})) {
+          if (v && v.aegis_name) this.__aegisToItem[v.aegis_name] = this.getItem(Number(id)) || v;
         }
       } catch {
         this.__aegisToItem = {};
@@ -183,8 +187,10 @@ class DataLoader {
     if (this.__aegisToItem[aegisName]) return this.__aegisToItem[aegisName];
     if (this._usePsData) {
       const manual = this._loadPsItemManual();
-      for (const item of Object.values(manual)) {
-        if (item && item.aegis_name === aegisName) return item;
+      for (const [id, item] of Object.entries(manual)) {
+        // Same reason as above: a PS-only entry carries no `name` of its own
+        // (it comes from ps_item_overrides.json), so resolve it by id.
+        if (item && item.aegis_name === aegisName) return this.getItem(Number(id)) || item;
       }
     }
     return null;

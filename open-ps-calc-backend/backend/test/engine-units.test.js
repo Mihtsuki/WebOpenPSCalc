@@ -850,3 +850,42 @@ test("card autocast (Pirate Skel to Mammonite) surfaces as a proc branch on auto
   assert.ok(!onSkill.proc_branches.card_autocast_MC_MAMMONITE,
     "card autocast is modeled on auto-attacks only");
 });
+
+test("Pirate Skel + Flame Beetle exempts the AUTOCAST Mammonite from Zeny Pincher", () => {
+  const cfg = createBattleConfig();
+  // Zeny Pincher is a damage term on PS: it halves Mammonite's per-level ratio term
+  // (100+50×lv → 100+25×lv). The card combo says the autocast "does not consume zeny
+  // and is unaffected by Zeny Pincher", so the PROC keeps the full ratio while a
+  // manual cast on the same build stays pinched.
+  const run = ({ beetle = false, pincher = false, skillId = 0 } = {}) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 95, job_level: 50,
+      base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
+      equipped: {
+        right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073,
+        ...(beetle ? { accessory_right: 2615, accessory_right_card1: 8237 } : {}),
+      },
+      mastery_levels: { MC_MAMMONITE: 10 },
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    if (pincher) eff.skill_params = { ...(eff.skill_params || {}), PS_BS_ZENYPINCHER_active: true };
+    const res = new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: skillId, level: 10 }),
+      createTarget({ def_: 0, vit: 0, size: 1, race: 0, element: 0 }), eff, gb);
+    return { res, gb, proc: res.proc_branches.card_autocast_MC_MAMMONITE };
+  };
+
+  assert.equal(run({ beetle: true }).gb.auto_mammonite_no_zeny, 1, "the combo must register");
+  assert.equal(run({}).gb.auto_mammonite_no_zeny, 0, "Pirate Skel alone is not the combo");
+
+  // Without the combo the proc takes the cut; with it, the proc is untouched.
+  const plain = run({}).proc.avg_damage;
+  assert.ok(run({ pincher: true }).proc.avg_damage < plain, "Zeny Pincher must cut the un-combo'd proc");
+  assert.equal(run({ beetle: true, pincher: true }).proc.avg_damage, plain,
+    "the combo'd autocast must ignore Zeny Pincher");
+
+  // A MANUAL Mammonite is still pinched even with both cards on.
+  const mammoniteId = loader.getSkillIdByName("MC_MAMMONITE");
+  const manualPinched = run({ beetle: true, pincher: true, skillId: mammoniteId }).res.normal.avg_damage;
+  const manualFull = run({ beetle: true, skillId: mammoniteId }).res.normal.avg_damage;
+  assert.ok(manualPinched < manualFull, "the combo must not exempt a manual cast");
+});
