@@ -13,12 +13,10 @@ instead of release version. Dates are taken from actual git commit history.
   ASPD number actually buys you. Hover it for the attacks per second, the time between attacks
   in milliseconds, the formula, and the caveat that these are attack *cycles*: a katar's second
   hit, dual-wield's third hit and multi-hit skills all land inside one cycle.
-- **Skills show their cast rate too, and what limits it** — the question that actually matters
-  when you're deciding whether to buy more AGI. A skill fires on whichever is slower, its
-  after-cast delay or your animation delay, so the panel names the one that binds and shows
-  both: Bash at 1.77 casts/s is limited by *your animation delay* (AGI, Increase AGI, a
-  Dancer's song or speed potions all cast it more often), Sonic Blow at 0.50 casts/s by *the
-  after-cast delay* (more ASPD won't speed it up).
+- **Skills show their cast rate too, next to your animation delay** — a skill fires on
+  whichever is slower, its after-cast delay or your animation, so the two timings sit side by
+  side for you to compare: Bash at 1.77 casts/s against a 0.57 s animation, Sonic Blow at
+  0.50 casts/s (2.00 s) against the same animation.
 - Timings are given both ways players quote them — `1.77 atk/s` and `0.57 s (566 ms)` between
   attacks — so a skill's after-cast delay can be lined up against your animation delay directly.
 - The **ASPD card in Combat stats** carries the same panel, so you can read your attack rate

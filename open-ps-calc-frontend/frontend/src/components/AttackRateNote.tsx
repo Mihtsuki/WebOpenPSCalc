@@ -25,8 +25,9 @@ function fmtTime(ms: number) {
  *
  * That is exactly battlePipeline's max(cast + after-cast delay, adelay) for a physical
  * skill. Magic is the exception in the engine — its period is max(cast + delay, spam
- * cap) with no animation floor — so the magic note says so rather than claiming casts
- * are never gated by animation.
+ * cap), with no animation floor — so no verdict is printed for a cast: the panel shows
+ * both timings and leaves the comparison to the reader rather than asserting a winner
+ * the engine can't stand behind.
  */
 export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, isMagic = false }: Props) {
   const perSec = 1000 / periodMs;
@@ -48,16 +49,13 @@ export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, is
         <span>{fmtTime(periodMs)}</span>
       </div>
       {isSkill ? (
-        <>
-          <div className="tooltip-row">
-            <span>Limited by</span>
-            <span>{aspdBound ? "your animation delay" : "the after-cast delay"}</span>
-          </div>
-          <div className="tooltip-row">
-            <span>Animation delay</span>
-            <span>{fmtTime(adelayMs)}</span>
-          </div>
-        </>
+        // The two timings side by side, with no verdict on which one won: the engine
+        // can't back that claim for magic, and putting the numbers next to each other
+        // is what players do with them anyway.
+        <div className="tooltip-row">
+          <span>Animation delay</span>
+          <span>{fmtTime(adelayMs)}</span>
+        </div>
       ) : (
         <div className="tooltip-row"><span>Formula</span><span>50 ÷ (200 − ASPD)</span></div>
       )}
@@ -65,7 +63,7 @@ export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, is
         {!isSkill
           ? "Attack cycles, not hits — a katar's second hit, dual-wield's third hit and multi-hit skills all land inside one cycle."
           : isMagic
-            ? "A cast fires on whichever is slower, its after-cast delay or your animation — but this calculator does not yet floor magic at the animation delay, so a Bragi-fast caster can read faster here than in game."
+            ? ""
             : aspdBound
               ? "The after-cast delay is shorter than your animation, so ASPD sets the pace — AGI, Increase AGI, a Dancer's song or speed potions all cast it more often."
               : delayBound
