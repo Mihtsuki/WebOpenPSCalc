@@ -489,11 +489,13 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
   const notImplemented = activeDamage?.steps?.length === 1 && activeDamage.steps[0].name === "Not yet implemented";
   const { result, status } = activeResult;
 
-  // Attack rate, shown under ASPD for the AUTO-ATTACK only. A skill's period is
-  // max(cast + after-cast delay, attack delay) — usually delay-bound, not ASPD-bound
-  // (Sonic Blow sits at 2 s however fast you swing) — so an ASPD-derived rate would
-  // be wrong there. Derived from period_ms rather than re-deriving 50/(200−ASPD) so
-  // it can never disagree with the DPS above it (for an auto-attack they're equal).
+  // Attack rate, shown beside ASPD for the AUTO-ATTACK only. A skill's period is
+  // max(cast + after-cast delay, attack delay): ASPD still floors it (Bash runs at
+  // exactly the attack delay), but a slow skill is bound by its own delay instead
+  // (Sonic Blow sits at 2 s however fast you swing), so a figure sitting under the
+  // ASPD label would be read as ASPD-derived when it isn't. Taken from period_ms
+  // rather than re-deriving 50/(200−ASPD), so it can never disagree with the DPS
+  // beside it (for an auto-attack the two are equal).
   const showAttackRate = activeResult === normal_attack && activeBranch !== "falcon";
   const attackRate = showAttackRate && (result.period_ms ?? 0) > 0
     ? { perSec: 1000 / result.period_ms!, per5s: 5000 / result.period_ms! }
