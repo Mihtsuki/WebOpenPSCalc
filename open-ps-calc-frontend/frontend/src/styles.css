@@ -486,6 +486,25 @@ label {
   font-size: 0.95rem;
   margin-bottom: 0.4rem;
 }
+/* Same bubble, attached to an existing element (a stat card) instead of an "i" icon —
+   see components/HoverNote.tsx. Keeps every explained figure on one hover design. */
+.hover-note { position: relative; cursor: help; outline: none; }
+.hover-note:hover > .info-tooltip-bubble,
+.hover-note:focus-visible > .info-tooltip-bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.hover-note:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); border-radius: var(--radius); }
+/* Trailing caveat under the label/value rows — same weight as the rows, no divider. */
+.info-tooltip-bubble .tooltip-note {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-faint);
+  font-size: 0.76rem;
+}
 .info-tooltip-bubble a { font-family: var(--mono); font-size: 0.78rem; }
 .info-tooltip-bubble .tooltip-row {
   display: flex;
@@ -744,10 +763,10 @@ label {
 .metric .value.crit { color: var(--crit); }
 .metric .value.good { color: var(--good); }
 .metric .unit { font-size: 0.85rem; color: var(--text-dim); margin-left: 0.2rem; }
-/* A derived figure carried on the value line (attacks/sec beside ASPD) — smaller and
-   dimmer than a real unit so it reads as secondary, and it keeps the metric one line
-   tall: a second row inside any card raises the whole headline row. */
-.metric .unit-rate { font-size: 0.72rem; color: var(--text-faint); white-space: nowrap; }
+/* A derived figure carried on the value line (attacks/sec beside ASPD): same size as a
+   real unit so it stays readable, and it keeps the metric one line tall — a second row
+   inside any card raises the whole headline row. */
+.metric .unit-rate { font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; margin-left: 0.35rem; }
 .metric[title] { cursor: help; }
 
 .metric-range { min-width: 160px; }
@@ -1222,9 +1241,12 @@ label {
 }
 /* A stat card that carries a hover note (ASPD → attacks per second): mark it so
    the note is discoverable instead of hidden behind an unhinted hover. */
-.sec-stat-card--note { cursor: help; }
 .sec-stat-card--note .sec-stat-label { border-bottom: 1px dotted var(--border); }
-.sec-stat-card--note:hover { border-color: var(--border); }
+.sec-stat-card--note:hover { border-color: var(--accent-dim); }
+/* ASPD sits in the grid's RIGHTMOST column, so anchor its bubble (and arrow) to the
+   right edge — left-anchored it would hang 200px outside the panel. */
+.sec-stat-card--note > .info-tooltip-bubble { left: auto; right: 0; }
+.sec-stat-card--note > .info-tooltip-bubble::before { left: auto; right: 0.55rem; }
 .sec-stat-label {
   font-size: 0.72rem;
   color: var(--text-dim);
