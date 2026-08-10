@@ -103,12 +103,25 @@ function beacon(payload: Record<string, unknown>) {
   fetch("/api/calculate/track", { method: "POST", headers, body: JSON.stringify(payload), keepalive: true }).catch(() => {});
 }
 
+// The page view is the one event that dedupes: React's mount effect fires twice
+// under StrictMode in dev, and an SPA remount would count a second view for the
+// same visit. Everything else records every occurrence.
+let pageViewSent = false;
+
 export const statsApi = {
-  recordPageView: () => beacon({ ev: "view" }),
+  recordPageView: () => {
+    if (pageViewSent) return;
+    pageViewSent = true;
+    beacon({ ev: "view" });
+  },
   trackDonateClick: (target: string) => beacon({ ev: "donate", target }),
   // Records use of a named feature so the stats page can rank functionality.
-  // Deduped client-side (once per feature per session) to avoid spammy counts.
-  trackFeature: (() => {
+  // Every use counts — the stats page sums raw events, so these are uses, not sessions.
+  trackFeature: (name: string) => beacon({ ev: "feature", name }),
+  // For signals that fire on their own rather than on a click: BreakpointsView
+  // recomputes on a debounce every time the build changes, so counting each refresh
+  // would bury the user-initiated features under one panel's auto-updates.
+  trackFeatureOnce: (() => {
     const seen = new Set<string>();
     return (name: string) => {
       if (seen.has(name)) return;

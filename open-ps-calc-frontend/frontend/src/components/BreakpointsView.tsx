@@ -23,7 +23,9 @@ export function BreakpointsView({ payload, targetName, skillLabel, skillLevel }:
       setLoading(true);
       try {
         const r = await api.breakpoints(payload);
-        if (reqId.current === id) { setBp(r.breakpoints); setErr(""); statsApi.trackFeature("breakpoints"); }
+        // Once per session: this effect re-runs on every build change, so tracking
+        // each refresh would count keystrokes rather than use of the feature.
+        if (reqId.current === id) { setBp(r.breakpoints); setErr(""); statsApi.trackFeatureOnce("breakpoints"); }
       } catch (e: any) {
         if (reqId.current === id) setErr(String(e?.message || e));
       } finally {

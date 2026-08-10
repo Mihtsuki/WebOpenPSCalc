@@ -1529,7 +1529,7 @@ export default function BuildEditor() {
             </button>
             <button onClick={() => { setImportOpen(true); setMenuOpen(false); }}>Import</button>
             <button onClick={() => { onNewBuild(); setMenuOpen(false); }}>Start over</button>
-            <button onClick={() => { setChangelogOpen(true); setMenuOpen(false); }}>Changelog</button>
+            <button onClick={() => { statsApi.trackFeature("changelog_open"); setChangelogOpen(true); setMenuOpen(false); }}>Changelog</button>
             <button onClick={() => { onCopyLink(); setMenuOpen(false); }}>{copied ? "Copied!" : "Copy share link"}</button>
             <button type="button" className="topbar-kofi-btn" onClick={() => { statsApi.trackDonateClick("topbar"); setMenuOpen(false); setTipOpen(true); }}>🍵 Support the calc</button>
           </div>
@@ -1559,8 +1559,8 @@ export default function BuildEditor() {
           onClose={() => setSavedBuildsOpen(false)}
           currentName={data.name}
           currentState={currentEditorState}
-          onLoad={onLoadSavedState}
-          onSave={(name) => { setData((prev) => ({ ...prev, name })); writeStateToUrl({ name }); }}
+          onLoad={(state) => { statsApi.trackFeature("build_load"); onLoadSavedState(state); }}
+          onSave={(name) => { statsApi.trackFeature("build_save"); setData((prev) => ({ ...prev, name })); writeStateToUrl({ name }); }}
         />
         <ImportJaludevModal
           open={importOpen}
