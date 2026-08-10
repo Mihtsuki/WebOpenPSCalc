@@ -487,6 +487,16 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
   const notImplemented = activeDamage?.steps?.length === 1 && activeDamage.steps[0].name === "Not yet implemented";
   const { result, status } = activeResult;
 
+  // Attack rate, shown under ASPD for the AUTO-ATTACK only. A skill's period is
+  // max(cast + after-cast delay, attack delay) — usually delay-bound, not ASPD-bound
+  // (Sonic Blow sits at 2 s however fast you swing) — so an ASPD-derived rate would
+  // be wrong there. Derived from period_ms rather than re-deriving 50/(200−ASPD) so
+  // it can never disagree with the DPS above it (for an auto-attack they're equal).
+  const showAttackRate = activeResult === normal_attack && activeBranch !== "falcon";
+  const attackRate = showAttackRate && (result.period_ms ?? 0) > 0
+    ? { perSec: 1000 / result.period_ms!, per5s: 5000 / result.period_ms! }
+    : null;
+
   // Grand Cross blowback (self-recoil): lives on the skill's normal branch. GC has
   // no crit/falcon/katar branches, so surface it whenever it's present.
   const selfDamage = (hasSkill ? skillResult! : normal_attack).result.normal.self_damage ?? null;
@@ -600,6 +610,17 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
         <div className="metric">
           <div className="label">ASPD</div>
           <div className="value">{status.aspd.toFixed(1)}</div>
+          {attackRate && (
+            <div
+              className="metric-sub"
+              title={"Attack CYCLES per second — 50 ÷ (200 − ASPD). Extra hits ride on the same swing: "
+                + "a katar's second hit, dual-wield's third hit and multi-hit skills all land inside one "
+                + "cycle, so hits per second can be higher than this. Shown for normal attacks only — "
+                + "a skill's rate is set by its cast and after-cast delay, not by ASPD."}
+            >
+              {attackRate.perSec.toFixed(2)} atk/s · {attackRate.per5s.toFixed(1)} per 5s
+            </div>
+          )}
         </div>
         {showDwCombined ? (
           <div className="metric metric-range">
