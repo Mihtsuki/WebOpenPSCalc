@@ -146,7 +146,7 @@ function PipelineView({ steps, hideFinal = false }: { steps: Step[]; hideFinal?:
       {chips.length > 0 && (
         <div className="pipeline-inputs">
           {chips.map((s, i) => (
-            <span key={i} className="pipeline-chip">
+            <span key={i} className="pipeline-chip" title={s.note || undefined}>
               <span className="pipeline-chip-label">{s.name}</span>
               <span className="pipeline-chip-val">{stepDisplayVal(s)}</span>
             </span>

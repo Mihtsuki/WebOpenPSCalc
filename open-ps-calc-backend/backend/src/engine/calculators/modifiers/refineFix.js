@@ -11,16 +11,23 @@ const { addFlat, pmfStats } = require("../../pmf");
 // previously suppressed refine on the wrong skills. masteryFix/defenseFix also key by name.
 const REFINE_SKIP_SKILLS = new Set(["MO_INVESTIGATE", "MO_EXTREMITYFIST"]);
 
+// A no-op step still has to report the RUNNING TOTAL (unchanged) — the frontend
+// derives its +/− connector badge from the difference against the previous step,
+// so a literal 0 here rendered as a huge negative on every unrefined weapon.
+function noChangeStep(pmf, result, note) {
+  const [mn, mx, av] = pmfStats(pmf);
+  result.add_step({ name: "Refine Bonus", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note, formula: "atk2 = 0", hercules_ref: "battle.c:5803-5805" });
+  return pmf;
+}
+
 function calculateRefineFix(weapon, skill, pmf, result) {
   if (REFINE_SKIP_SKILLS.has(skill.name)) {
-    result.add_step({ name: "Refine Bonus", value: 0, note: "Suppressed for MO_INVESTIGATE/MO_EXTREMITYFIST", formula: "0", hercules_ref: "battle.c:5372" });
-    return pmf;
+    return noChangeStep(pmf, result, "Suppressed for MO_INVESTIGATE/MO_EXTREMITYFIST");
   }
 
   const refineBonus = loader.getRefineBonus(weapon.level, weapon.refine);
   if (refineBonus === 0) {
-    result.add_step({ name: "Refine Bonus", value: 0, note: "No refine bonus", formula: "atk2 = 0", hercules_ref: "battle.c:5803-5805" });
-    return pmf;
+    return noChangeStep(pmf, result, "No refine bonus");
   }
 
   pmf = addFlat(pmf, refineBonus);

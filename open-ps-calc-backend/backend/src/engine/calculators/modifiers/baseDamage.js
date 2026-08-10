@@ -19,33 +19,33 @@ function calculateBaseDamage(status, weapon, build, target, skill, result, opts 
   if (build.support_buffs.endow_lv1) impLvEff = Math.max(impLvEff, 5);
   if (impLvEff) {
     atkmax += impLvEff * 5;
-    result.add_step({ name: "SC_IMPOSITIO", value: impLvEff * 5, note: `SC_IMPOSITIO Lv${impLvEff}: +${impLvEff * 5} weapon ATK`, formula: `level * 5 = ${impLvEff} * 5`, hercules_ref: "status.c ~4562" });
+    result.add_step({ name: "SC_IMPOSITIO", value: impLvEff * 5, note: `SC_IMPOSITIO Lv${impLvEff}: +${impLvEff * 5} weapon ATK`, formula: `level * 5 = ${impLvEff} * 5`, hercules_ref: "status.c ~4562", info: true });
   }
 
   const drumLv = Number(build.song_state.SC_DRUMBATTLE || 0);
   if (drumLv) {
     const drumBonus = (drumLv + 1) * 25;
     atkmax += drumBonus;
-    result.add_step({ name: "SC_DRUMBATTLE", value: drumBonus, note: `Battle Theme Lv${drumLv}: +${drumBonus} weapon ATK`, formula: `(lv+1)*25`, hercules_ref: "status.c:4564" });
+    result.add_step({ name: "SC_DRUMBATTLE", value: drumBonus, note: `Battle Theme Lv${drumLv}: +${drumBonus} weapon ATK`, formula: `(lv+1)*25`, hercules_ref: "status.c:4564", info: true });
   }
 
   const nibelLv = Number(build.song_state.SC_NIBELUNGEN || 0);
   if (nibelLv && weapon.level === 4) {
     const nibelBonus = (nibelLv + 2) * 25;
     atkmax += nibelBonus;
-    result.add_step({ name: "SC_NIBELUNGEN", value: nibelBonus, note: `Nibelungen Lv${nibelLv}: +${nibelBonus} weapon ATK (wlv 4)`, formula: `(lv+2)*25`, hercules_ref: "status.c:4589" });
+    result.add_step({ name: "SC_NIBELUNGEN", value: nibelBonus, note: `Nibelungen Lv${nibelLv}: +${nibelBonus} weapon ATK (wlv 4)`, formula: `(lv+2)*25`, hercules_ref: "status.c:4589", info: true });
   }
 
   if (build.support_buffs.ground_effect === "SC_VOLCANO") {
     const volLv = Number(build.support_buffs.ground_effect_lv || 1);
     const volBonus = volLv * 10;
     atkmax += volBonus;
-    result.add_step({ name: "SC_VOLCANO", value: volBonus, note: `Volcano Lv${volLv}: +${volBonus} weapon ATK`, formula: `lv*10`, hercules_ref: "status.c:4570" });
+    result.add_step({ name: "SC_VOLCANO", value: volBonus, note: `Volcano Lv${volLv}: +${volBonus} weapon ATK`, formula: `lv*10`, hercules_ref: "status.c:4570", info: true });
   }
 
   if (gearBonuses && gearBonuses.weapon_atk_flat) {
     atkmax += gearBonuses.weapon_atk_flat;
-    result.add_step({ name: "bAtk", value: gearBonuses.weapon_atk_flat, note: `Equipment: +${gearBonuses.weapon_atk_flat} weapon ATK`, formula: `atkmax += ${gearBonuses.weapon_atk_flat}`, hercules_ref: "status_calc_pc" });
+    result.add_step({ name: "bAtk", value: gearBonuses.weapon_atk_flat, note: `Equipment: +${gearBonuses.weapon_atk_flat} weapon ATK`, formula: `atkmax += ${gearBonuses.weapon_atk_flat}`, hercules_ref: "status_calc_pc", info: true });
   }
 
   let arrowAtk = 0;
@@ -103,19 +103,35 @@ function calculateBaseDamage(status, weapon, build, target, skill, result, opts 
   });
 
   pmf = addFlat(pmf, status.batk);
+  {
+    // Explicit row for the status ATK addition: without it the +BATK jump lands on
+    // whichever row happens to follow (the overrefine roll), which read as a bogus
+    // "+352 Overrefine Bonus" in the breakdown.
+    const [bkMin, bkMax, bkAvg] = pmfStats(pmf);
+    result.add_step({
+      name: "Status BATK Added", value: bkAvg, min_value: bkMin, max_value: bkMax,
+      note: `+${status.batk} status ATK (STR/DEX/LUK + gear)`,
+      formula: `damage + batk(${status.batk})`, hercules_ref: "battle.c battle_calc_base_damage2",
+    });
+  }
 
+  // Every step carries the RUNNING TOTAL (the frontend derives its +/− connector
+  // badge from the difference against the previous step) — a no-op step must
+  // report the unchanged total, not 0, or it reads as a huge negative hit.
   let overrefine = 0;
   if (weapon.refineable) {
     overrefine = loader.getOverrefine(weapon.level, weapon.refine);
     if (overrefine > 0) {
-      const orAvg = Math.floor((overrefine + 1) / 2);
       pmf = convolve(pmf, uniformPmf(1, overrefine));
-      result.add_step({ name: "Overrefine Bonus", value: orAvg, min_value: 1, max_value: overrefine, note: `rnd()%${overrefine}+1`, formula: `rnd()%${overrefine}+1`, hercules_ref: "battle.c battle_calc_base_damage2" });
+      const [orMin, orMax, orAvg] = pmfStats(pmf);
+      result.add_step({ name: "Overrefine Bonus", value: orAvg, min_value: orMin, max_value: orMax, note: `rnd()%${overrefine}+1`, formula: `rnd()%${overrefine}+1`, hercules_ref: "battle.c battle_calc_base_damage2" });
     } else {
-      result.add_step({ name: "Overrefine Bonus", value: 0, note: "No overrefine", formula: "0", hercules_ref: "battle.c" });
+      const [orMin, orMax, orAvg] = pmfStats(pmf);
+      result.add_step({ name: "Overrefine Bonus", value: orAvg, min_value: orMin, max_value: orMax, multiplier: 1.0, note: "No overrefine", formula: "0", hercules_ref: "battle.c" });
     }
   } else {
-    result.add_step({ name: "Overrefine Bonus", value: 0, note: "Suppressed — weapon not refineable", formula: "0", hercules_ref: "battle.c" });
+    const [orMin, orMax, orAvg] = pmfStats(pmf);
+    result.add_step({ name: "Overrefine Bonus", value: orAvg, min_value: orMin, max_value: orMax, multiplier: 1.0, note: "Suppressed — weapon not refineable", formula: "0", hercules_ref: "battle.c" });
   }
 
   const [bdMin, bdMax, bdAvg] = pmfStats(pmf);

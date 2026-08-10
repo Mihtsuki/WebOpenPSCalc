@@ -5,6 +5,24 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-10
+
+### Fixed
+
+- **The damage breakdown no longer shows phantom negative steps on unrefined weapons.**
+  The Refine Bonus and Overrefine Bonus rows reported "0" instead of the running damage
+  total when there was nothing to add, so the breakdown read them as huge losses
+  (e.g. "−351 Refine Bonus"). Rows that change nothing now carry the running total, and
+  the breakdown simply hides them. Final damage was always correct — only the step
+  display was wrong.
+- **The step where your status ATK is added is now its own row** ("Status BATK Added").
+  It used to be silently folded into whichever row came next, which is what made the
+  Overrefine row look like it added a few hundred damage out of nowhere.
+- Weapon-ATK inputs (Impositio Manus, Battle Theme, Nibelungen, Volcano, equipment
+  +ATK) and Turn Undead's instant-kill chance are shown as input chips rather than
+  pipeline steps — they aren't stages of the running total, and rendering them as such
+  produced meaningless +/− badges.
+
 ## 2026-08-09
 
 ### Added

@@ -738,6 +738,9 @@ class BattlePipeline {
     successPct = Math.max(0, Math.min(100, successPct));
     result.success_chance = successPct;
     result.add_step({
+      // Not a damage figure — shown as an input chip so it doesn't read as a
+      // (huge, negative) step on the running damage total.
+      info: true,
       name: "Instant-Kill Success Chance", value: successPct, min_value: successPct, max_value: successPct, multiplier: 1.0,
       note: `${successPct.toFixed(1)}% — LUK ${status.luk}, INT ${status.int_}, BaseLv ${build.base_level}, SkillLv ${skill.level}` +
         (baseIntLow ? `; base INT ${build.base_int} < 40 → halved` : "") + "; target at full HP",
