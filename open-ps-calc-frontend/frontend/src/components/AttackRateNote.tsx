@@ -12,7 +12,7 @@ export default function AttackRateNote({ perSec }: { perSec: number }) {
       <strong>Attack rate</strong>
       What your ASPD actually buys you, for a normal attack.
       <div className="tooltip-row"><span>Per second</span><span>{perSec.toFixed(2)} atk/s</span></div>
-      <div className="tooltip-row"><span>Per 5 seconds</span><span>{(perSec * 5).toFixed(1)} atk</span></div>
+      <div className="tooltip-row"><span>Per 5 seconds</span><span>{(perSec * 5).toFixed(1)} atk/5 sec</span></div>
       <div className="tooltip-row"><span>Formula</span><span>50 ÷ (200 − ASPD)</span></div>
       <div className="tooltip-note">
         Attack cycles, not hits — a katar's second hit, dual-wield's third hit and multi-hit
