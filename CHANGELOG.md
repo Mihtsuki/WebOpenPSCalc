@@ -13,7 +13,9 @@ instead of release version. Dates are taken from actual git commit history.
   what an ASPD number actually buys you. It appears for normal attacks only: a skill's rate is
   set by its cast and after-cast delay, not by ASPD (Sonic Blow sits at 2 s however fast you
   swing). Hover it for the caveat that these are attack *cycles*: a katar's second hit,
-  dual-wield's third hit and multi-hit skills all land inside one cycle.
+  dual-wield's third hit and multi-hit skills all land inside one cycle. The **ASPD card in
+  Combat stats** carries the same figure and caveat on hover, so you can read your attack rate
+  while tuning AGI without having to run a calculation first.
 - **Pirate Skel Card + Flame Beetle Card is now a real combo.** The pair makes your autocast
   Mammonite cost no zeny *and* ignore Zeny Pincher — and since Zeny Pincher trades damage for
   the zeny discount, that means the proc hits for the full **600% at Lv10 instead of 350%**

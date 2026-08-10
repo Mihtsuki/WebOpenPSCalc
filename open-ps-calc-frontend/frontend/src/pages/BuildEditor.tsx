@@ -1083,6 +1083,20 @@ export default function BuildEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(sanitizedBuild)]);
 
+  // What that ASPD number actually buys you, as a hover note on the ASPD stat card.
+  // A normal attack lands every attack-delay = 2 × (2000 − ASPD×10) ms, i.e.
+  // 50 ÷ (200 − ASPD) per second — the same figure the damage panel derives from
+  // the result's period_ms. ASPD is capped at 190, so the divisor can't reach 0.
+  const aspdRateTitle = (() => {
+    const aspd = charStatus?.aspd;
+    if (aspd == null || aspd >= 200) return undefined;
+    const perSec = 50 / (200 - aspd);
+    return `${perSec.toFixed(2)} attacks/sec · ${(perSec * 5).toFixed(1)} per 5 s — 50 ÷ (200 − ASPD). `
+      + "These are attack CYCLES, not hits: a katar's second hit, dual-wield's third hit and "
+      + "multi-hit skills all land inside one cycle, so hits per second can be higher. "
+      + "Normal attacks only — a skill's rate comes from its cast and after-cast delay, not ASPD.";
+  })();
+
   // Hiding a self-buff from the panel on job change isn't enough on its own --
   // a stale value left in active_buffs from a previous job would still be
   // sent to the backend and silently applied. Strip anything that doesn't
@@ -1866,12 +1880,12 @@ export default function BuildEditor() {
                 { label: "MATK",     value: charStatus ? `${charStatus.matk_min}–${charStatus.matk_max}` : undefined },
                 { label: "DEF",      value: charStatus ? `${charStatus.hard_def}+${charStatus.soft_def}` : undefined },
                 { label: "MDEF",     value: charStatus ? `${charStatus.hard_mdef}+${charStatus.soft_mdef}` : undefined },
-                { label: "ASPD",     value: charStatus?.aspd?.toFixed(1) },
+                { label: "ASPD",     value: charStatus?.aspd?.toFixed(1), title: aspdRateTitle },
                 { label: "HIT",      value: charStatus?.hit?.toLocaleString() },
                 { label: "Flee",     value: charStatus?.flee?.toLocaleString() },
                 { label: "Critical", value: charStatus ? `${(charStatus.cri / 10).toFixed(1)}%` : undefined },
-              ] as { label: string; value?: string }[]).map(({ label, value }) => (
-                <div key={label} className="sec-stat-card">
+              ] as { label: string; value?: string; title?: string }[]).map(({ label, value, title }) => (
+                <div key={label} className={`sec-stat-card${title ? " sec-stat-card--note" : ""}`} title={title}>
                   <div className="sec-stat-label">{label}</div>
                   <div className="sec-stat-value">{value ?? "—"}</div>
                 </div>

@@ -1222,6 +1222,11 @@ label {
   border: 1px solid var(--border-soft);
   border-radius: var(--radius);
 }
+/* A stat card that carries a hover note (ASPD → attacks per second): mark it so
+   the note is discoverable instead of hidden behind an unhinted hover. */
+.sec-stat-card--note { cursor: help; }
+.sec-stat-card--note .sec-stat-label { border-bottom: 1px dotted var(--border); }
+.sec-stat-card--note:hover { border-color: var(--border); }
 .sec-stat-label {
   font-size: 0.72rem;
   color: var(--text-dim);
