@@ -99,15 +99,55 @@ motivated several changes beyond a straight 1:1 port:
   since the key ships in the public frontend bundle.
 - **PS Crusader rework** — changes from `PSRO_Crusader_Rework_2026.pdf` are
   modelled: Spear Quicken now grants Hit/Flee instead of Crit; Providence
-  grants MDEF +2×SkillLvl (self-cast); Reflect Shield uses the PS rework
-  formula (`SoftDEF × (1 + 1.75 × HardDEF/100) × SkillLvl/10`, DEF-ignoring,
-  hit-checked, element- and card-enhanced); Magnum Break's fire semi-endow
-  is restricted to auto attacks (`SM_MAGNUM_ENDOW_ATTACK_ONLY` mechanic flag
-  — skill calculations ignore the weapon endow when this flag is active and
-  the skill is not SM_MAGNUM itself); Stone Discus now only boosts Shield
+  grants MDEF +2×SkillLvl (self-cast); Stone Discus now only boosts Shield
   Boomerang by 5% per refine (was erroneously also boosting Shield Charge);
   Stalactic Golem Card grants Soft DEF +10 (+10 more if VIT > 77) instead
-  of the stun resistance.
+  of the stun resistance. **Reflect Shield** was re-derived again by the
+  2026-08-09 patch notes and now uses
+  `SkillLevel × (SoftDEF/2 + ⌊VIT/10⌋²) × (100 + 2×HardDEF) / 1000` —
+  DEF-ignoring, hit-checked, element- and card-enhanced. VIT enters
+  **quadratically**, so it dominates the result.
+- **Magnum Break's lingering fire enchantment** — Hercules'
+  `SC_SUB_WEAPONPROPERTY`: for 10s after casting Magnum Break, an extra
+  chunk worth **20% of a *normal attack*** (not of the skill's damage) is
+  dealt as **Fire**, added at the end of `battle_calc_elefix` and therefore
+  **after** defense, so it bypasses the target's DEF. Wootan Fighter Card
+  raises it to 30%. Payon Stories scopes it to **auto attacks and Magnum
+  Break itself** (`SM_MAGNUM_ENDOW_ATTACK_ONLY`), where vanilla grants it to
+  every skill bar `ASC_METEORASSAULT`. Exposed as a Buffs-panel toggle.
+- **PS Merchant / Blacksmith / Alchemist rework (2026-08-09)** — the four
+  rework PDFs plus the GM patch notes, modelled end to end: Cart Revolution
+  as a 5-rank tree skill (`50×lv%`), Zeny Pincher as `100+25×lv`, the new
+  **Tool Mastery** (+4 ATK/lv with Axes and Maces, a PS-custom passive that
+  the picker surfaces via `ps_skill_desc_overrides.json`), Crazy Uproar at 4
+  ranks (+1 STR/VIT per level plus soft DEF), Adrenaline Rush across every
+  melee weapon (30/20% Axe·Mace, 20/10% otherwise), Acid Terror at
+  `100+100×lv`, **Transmutation** replacing Axe Mastery's flat ATK with
+  +1% ASPD and +1% MATK per level on Axes and Swords, Smith Weapon skills at
+  4 ranks, and the reworked FUEL / Pill Bug / Pirate Skel cards.
+- **Burning** (`PS_BURNING_STATUS`) — the new stacking Fire debuff: up to 5
+  stacks, each cutting the target's hard MDEF by 2 (fed through
+  `target_mods.burning` so it reaches the magic branch like any other MDEF
+  change) and ticking 60 Fire magic damage per second. The tick is reported
+  separately and labelled pre-mitigation rather than being priced inside the
+  attack breakdown — it is the debuff's damage, not the player's hit.
+- **Card autocasts on a physical attack** (`PS_CARD_AUTOCAST_ON_ATTACK`) —
+  `bonus3 bAutoSpell,...` was parsed into `gearBonuses.autocast_on_attack`
+  but no pipeline ever consumed it. Cards like Pirate Skel (auto-Mammonite)
+  and Rekenber Mercenary (auto-Bash) now surface a proc branch on
+  auto-attacks, priced through the same `_runBranch` / `_runMagicBranch` the
+  player's own cast would use.
+- **Crit lifesteal** (`bCritHeal`, a PS-specific bonus) — Crescent Scythe
+  heals 0.1% of the damage dealt **per refine** on a critical hit. Reported
+  on the crit branch as its own field and deliberately kept out of
+  `avg_damage`/DPS: it is HP returned, not damage dealt.
+- **Job-illegal passives are ignored** — `mastery_levels` is a free-form map
+  and the editor does not clear it when the job changes, so levels from a
+  previously selected job used to linger in the state (and in every share URL
+  made from it) and get applied silently. `resolvePlayerState` now filters it
+  against the job's own skill tree, which repairs existing links on load. Gear
+  **granted** skills are deliberately exempt — a card really can grant a skill
+  outside your tree.
 - **PS Monk rework — Triple Attack proc** — `MO_TRIPLEATTACK` now procs on
   auto-attacks for Monk/Champion on Payon Stories (28/26/24/22/20 % at levels
   1–5, with Knuckle weapon bonus). When **Fury** (SC_EXPLOSIONSPIRITS) is

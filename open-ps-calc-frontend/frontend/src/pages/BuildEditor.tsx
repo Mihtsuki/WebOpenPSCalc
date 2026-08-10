@@ -1590,8 +1590,8 @@ export default function BuildEditor() {
                       <li>Knight — Sword Quickening CRIT, Blade Mastery covers 1H Sword, Spear Stab max level 5</li>
                       <li>Crusader — Grand Cross (physical + magic summed, weapon masteries &amp; Demon Bane apply, ratio applied last), Holy Cross, Reflect Shield (VIT-quadratic formula), Spear Quicken (Hit/Flee)</li>
                       <li>Swordman — Magnum Break's lingering fire (+20% of a normal attack as Fire, bypasses DEF; 30% with Wootan Fighter Card), on auto-attacks and Magnum Break only</li>
-                      <li>Merchant / Whitesmith — Mammonite (100+50×lv, Zeny Pincher 40%), Cart Revolution 250%, Over Thrust full party bonus</li>
-                      <li>Alchemist — Acid Terror (100+80×lv, ignores armor DEF), Acid Demonstration (200+40×lv), Axe Mastery</li>
+                      <li>Merchant / Blacksmith — Mammonite (100+50×lv; Zeny Pincher 100+25×lv), Cart Revolution 5 ranks at 50×lv%, Tool Mastery +4 ATK/lv (Axe &amp; Mace), Crazy Uproar 4 ranks (+1 STR/VIT per level), Adrenaline Rush on all melee (30/20% Axe·Mace, 20/10% others), Over Thrust full party bonus, Smith Weapon skills at 4 ranks</li>
+                      <li>Alchemist — Acid Terror (100+100×lv → 600%), Acid Demonstration (200+40×lv), Transmutation (+1% ASPD &amp; MATK per level with an Axe or Sword), Chemical Protections max rank 3</li>
                       <li>Assassin / Thief — dual-wield 3-hit model, Enchant Poison bonus, Katar second hit, Envenom element</li>
                       <li>Rogue — Backstab formula (200+30×lv, +40% opportunity bonus), Trick Arrow 2-hit 200%, Raid 600%, Vulture's Eye enables bow Double Attack, Yser Card functional</li>
                       <li>Acolyte / Priest — Holy Light (LUK% chance for +60% damage), offensive Heal (heal-bomb vs Undead, higher with Purifying Ring + Rosary), Turn Undead instant-kill chance, Holy Strike proc (101 + baseSTR + baseLevel)%, Magnus Exorcismus (full vs Undead/Demon), Signum Crucis −50% DEF</li>
@@ -1610,6 +1610,9 @@ export default function BuildEditor() {
                 <li>Disambiguated damage, hit, and dodge against the exact monster you pick</li>
                 <li>Survivability panel — how hard monsters hit you (incoming damage, effective HP, dodge / FLEE)</li>
                 <li>Grand Cross self-damage (recoil) modeling</li>
+                <li>Burning — the stacking Fire debuff (−2 MDEF per stack, up to 5) applied to your target</li>
+                <li>Cards that autocast a skill when you attack (auto-Mammonite, auto-Bash) — per-proc damage and the DPS they add</li>
+                <li>Crescent Scythe's crit lifesteal — HP healed per critical hit (0.1% of the damage per refine)</li>
                 <li>Forged weapons — Star Crumb (VS / VVS / VVVS) and ranked-forge seeking damage on blacksmith-forgeable weapons</li>
                 <li>Build-vs-build comparison</li>
                 <li>Starter build templates from the PS wiki — load a class build (stats + a signature skill) for any of 16 classes and tweak it</li>
