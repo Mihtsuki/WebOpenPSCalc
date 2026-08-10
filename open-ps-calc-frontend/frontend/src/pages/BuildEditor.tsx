@@ -1089,8 +1089,8 @@ export default function BuildEditor() {
   // A normal attack lands every attack-delay = 2 × (2000 − ASPD×10) ms, i.e.
   // 50 ÷ (200 − ASPD) per second — the same figure the damage panel derives from
   // the result's period_ms. ASPD is capped at 190, so the divisor can't reach 0.
-  const aspdPerSec = charStatus?.aspd != null && charStatus.aspd < 200
-    ? 50 / (200 - charStatus.aspd)
+  const aspdDelayMs = charStatus?.aspd != null && charStatus.aspd < 200
+    ? 2 * Math.max(100, Math.round(2000 - charStatus.aspd * 10))
     : null;
 
   // Hiding a self-buff from the panel on job change isn't enough on its own --
@@ -1876,7 +1876,7 @@ export default function BuildEditor() {
                 { label: "MATK",     value: charStatus ? `${charStatus.matk_min}–${charStatus.matk_max}` : undefined },
                 { label: "DEF",      value: charStatus ? `${charStatus.hard_def}+${charStatus.soft_def}` : undefined },
                 { label: "MDEF",     value: charStatus ? `${charStatus.hard_mdef}+${charStatus.soft_mdef}` : undefined },
-                { label: "ASPD",     value: charStatus?.aspd?.toFixed(1), note: aspdPerSec != null ? <AttackRateNote perSec={aspdPerSec} /> : undefined },
+                { label: "ASPD",     value: charStatus?.aspd?.toFixed(1), note: aspdDelayMs != null ? <AttackRateNote periodMs={aspdDelayMs} adelayMs={aspdDelayMs} /> : undefined },
                 { label: "HIT",      value: charStatus?.hit?.toLocaleString() },
                 { label: "Flee",     value: charStatus?.flee?.toLocaleString() },
                 { label: "Critical", value: charStatus ? `${(charStatus.cri / 10).toFixed(1)}%` : undefined },

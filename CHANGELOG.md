@@ -10,12 +10,16 @@ instead of release version. Dates are taken from actual git commit history.
 ### Added
 
 - **Your attack rate is shown beside ASPD** — `171.7 · 1.77 atk/s` — so you can see what an
-  ASPD number actually buys you. Hover the ASPD figure for a panel with the attacks per second,
-  the time between attacks in milliseconds, the formula, and the caveat that these are attack
-  *cycles*: a katar's second hit, dual-wield's third hit and multi-hit skills all land inside
-  one cycle. Shown for normal attacks, where the figure is purely ASPD; a skill takes whichever
-  is slower, its own cast + after-cast delay or a swing, so ASPD still sets the floor there.
-  The **ASPD card in Combat stats** carries the same panel, so you can read your attack rate
+  ASPD number actually buys you. Hover it for the attacks per second, the time between attacks
+  in milliseconds, the formula, and the caveat that these are attack *cycles*: a katar's second
+  hit, dual-wield's third hit and multi-hit skills all land inside one cycle.
+- **Skills show their cast rate too, and what limits it** — the question that actually matters
+  when you're deciding whether to buy more AGI. A skill fires on whichever is slower, its own
+  cast + after-cast delay or a swing, so the panel names the one that binds: Bash at 1.77
+  casts/s is limited by *your attack speed* (more ASPD casts it more often), Sonic Blow at
+  0.50 casts/s by *the skill's delay* (more ASPD won't speed it up), and Storm Gust by its
+  *cast + after-cast delay* (a cast isn't gated by the attack animation at all).
+- The **ASPD card in Combat stats** carries the same panel, so you can read your attack rate
   while tuning AGI without running a calculation first.
 - **Pirate Skel Card + Flame Beetle Card is now a real combo.** The pair makes your autocast
   Mammonite cost no zeny *and* ignore Zeny Pincher — and since Zeny Pincher trades damage for

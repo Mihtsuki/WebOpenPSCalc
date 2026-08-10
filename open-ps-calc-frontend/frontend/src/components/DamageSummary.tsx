@@ -489,16 +489,20 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
   const notImplemented = activeDamage?.steps?.length === 1 && activeDamage.steps[0].name === "Not yet implemented";
   const { result, status } = activeResult;
 
-  // Attack rate, shown beside ASPD for the AUTO-ATTACK only. A skill's period is
-  // max(cast + after-cast delay, attack delay): ASPD still floors it (Bash runs at
-  // exactly the attack delay), but a slow skill is bound by its own delay instead
-  // (Sonic Blow sits at 2 s however fast you swing), so a figure sitting under the
-  // ASPD label would be read as ASPD-derived when it isn't. Taken from period_ms
-  // rather than re-deriving 50/(200−ASPD), so it can never disagree with the DPS
-  // beside it (for an auto-attack the two are equal).
-  const showAttackRate = activeResult === normal_attack && activeBranch !== "falcon";
-  const attackRate = showAttackRate && (result.period_ms ?? 0) > 0
-    ? { perSec: 1000 / result.period_ms!, per5s: 5000 / result.period_ms! }
+  // Attack/cast rate beside ASPD. Always taken from period_ms — the very number the
+  // DPS divides by — so the two can't disagree; for an auto-attack that equals the
+  // ASPD delay, and for a skill it's max(cast + after-cast delay, attack delay). The
+  // note names which of those binds, since that answers "will more ASPD speed this
+  // up?". Skipped on the falcon tab (a proc, not a cycle) and whenever the branch has
+  // no meaningful period (Reflect Shield fires on the enemy's timing, not yours).
+  const rateIsSkill = activeResult !== normal_attack;
+  const aspdDelayMs = 2 * Math.max(100, Math.round(2000 - status.aspd * 10));
+  // A magic cast is priced by max(cast + after-cast delay, min cast period) — it never
+  // floors at the swing. The magic branch is the one that rolls MATK, so its presence
+  // in the pipeline is what identifies it.
+  const rateIsMagic = !!activeDamage?.steps?.some((s) => s.name === "Base MATK");
+  const attackRate = activeBranch !== "falcon" && result.dps_valid && (result.period_ms ?? 0) > 0
+    ? { perSec: 1000 / result.period_ms!, periodMs: result.period_ms! }
     : null;
 
   // Grand Cross blowback (self-recoil): lives on the skill's normal branch. GC has
@@ -615,11 +619,16 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
             inside one metric raises the height of the entire headline row, which
             already carries up to eight cards. */}
         {attackRate ? (
-          <HoverNote className="metric" note={<AttackRateNote perSec={attackRate.perSec} />}>
+          <HoverNote
+            className="metric"
+            note={<AttackRateNote periodMs={attackRate.periodMs} adelayMs={aspdDelayMs} isSkill={rateIsSkill} isMagic={rateIsMagic} />}
+          >
             <div className="label">ASPD</div>
             <div className="value">
               {status.aspd.toFixed(1)}
-              <span className="unit unit-rate">· {attackRate.perSec.toFixed(2)} atk/s</span>
+              <span className="unit unit-rate">
+                · {attackRate.perSec.toFixed(2)} {rateIsSkill ? "casts/s" : "atk/s"}
+              </span>
             </div>
           </HoverNote>
         ) : (
