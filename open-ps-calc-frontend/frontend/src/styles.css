@@ -792,6 +792,15 @@ label {
   display: flex; align-items: baseline; gap: 0.5rem;
   padding: 0.24rem 0.35rem; border-radius: 5px;
 }
+/* Column legend: the breakdown's two numeric columns mean different things
+   (what the step changed vs. the running total after it) — say so once. */
+.pl-legend {
+  display: flex; align-items: baseline; gap: 0.5rem;
+  padding: 0 0.35rem 0.2rem; font-size: 0.66rem; letter-spacing: 0.03em;
+  text-transform: uppercase; color: var(--text-faint);
+}
+.pl-legend .pl-name, .pl-legend .pl-val { font-size: inherit; color: inherit; font-family: inherit; }
+.pl-legend .pl-badge { font-size: inherit; font-family: inherit; }
 .pl-row--note { cursor: pointer; }
 .pl-row--note:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
 .pl-badge {

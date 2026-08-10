@@ -9,6 +9,7 @@ interface Step {
   note?: string;
   formula?: string;
   info?: boolean;
+  track_start?: boolean;  // opens a separate sub-track (Grand Cross' magic half) — no delta badge
 }
 
 interface SelfDamageRange { min: number; avg: number; max: number; }
@@ -110,7 +111,13 @@ function stepDisplayVal(step: Step): string {
 
 // Compact inline badge showing what this step did to the running total: a ×multiplier
 // (boost/reduce) or a +/− flat delta. Empty for pure passthroughs.
+//
+// The right-hand column is ALWAYS the running total after the step (the engine
+// guarantees it), so the delta below is meaningful — except where a step opens a
+// separate sub-track (Grand Cross' magic half starts over at Base MATK), which is
+// flagged with track_start so we don't badge a jump that isn't a change.
 function connectorInfo(step: Step, prev: Step): { badge: string; cls: string } {
+  if (step.track_start) return { badge: "", cls: "conn-pass" };
   const m = step.multiplier ?? 1.0;
   if (Math.abs(m - 1.0) > 0.001) {
     return { badge: `×${m % 1 === 0 ? m.toFixed(0) : m.toFixed(2)}`, cls: m >= 1 ? "conn-boost" : "conn-reduce" };
@@ -121,7 +128,7 @@ function connectorInfo(step: Step, prev: Step): { badge: string; cls: string } {
   return { badge: "", cls: "conn-pass" };
 }
 
-function PipelineView({ steps, hideFinal = false }: { steps: Step[]; hideFinal?: boolean }) {
+function PipelineView({ steps, hideFinal = false, legend = true }: { steps: Step[]; hideFinal?: boolean; legend?: boolean }) {
   // Notes are hidden by default (hover reveals, tap pins) to keep the breakdown compact.
   const [open, setOpen] = useState<Set<number>>(() => new Set());
   const toggle = (i: number) => setOpen((prev) => {
@@ -154,6 +161,16 @@ function PipelineView({ steps, hideFinal = false }: { steps: Step[]; hideFinal?:
         </div>
       )}
       <div className="pl-track">
+        {/* Column legend — the left badge is what the step CHANGED, the right number
+            is the running damage total after it (a range when the roll isn't fixed). */}
+        {legend && (
+          <div className="pl-legend">
+            <span className="pl-badge">change</span>
+            <span className="pl-name">step</span>
+            <span className="pl-dots" aria-hidden="true" />
+            <span className="pl-val">running total</span>
+          </div>
+        )}
         {nodes.map((step, i) => {
           const prev = nodes[i - 1];
           const conn = prev ? connectorInfo(step, prev) : null;
@@ -367,7 +384,7 @@ function DualWieldStepList({ rh, lh, rhFactor, lhFactor, isCrit, psBonusPct }: {
       <div className="dw-section-label">Hit 1 &amp; 2 — RH {isCrit ? "crit" : "hit"} × {rhPct}% each</div>
       <PipelineView steps={rh.steps} />
       <div className="dw-section-label" style={{ marginTop: "0.75rem" }}>Hit 3 — LH {isCrit ? "crit" : "hit"} × {lhPct}%</div>
-      <PipelineView steps={lh.steps} />
+      <PipelineView steps={lh.steps} legend={false} />
       {psBonusPct != null && psBonusPct > 0 && (
         <div className="dw-ps-bonus-row">
           <span className="dw-ps-bonus-label">PS Dual-Wield Bonus</span>

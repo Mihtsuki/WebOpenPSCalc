@@ -510,7 +510,10 @@ class BattlePipeline {
     const matkLo = Math.max(1, status.matk_min);
     const matkHi = Math.max(matkLo, status.matk_max);
     let matkPmf = uniformPmf(matkLo, matkHi);
-    { const [mn, mx, av] = pmfStats(matkPmf); result.add_step({ name: "Base MATK", value: av, min_value: mn, max_value: mx, note: `INT=${status.int_} — resolved MATK ${matkLo}-${matkHi} (incl. gear/buff MATK%)`, formula: "int+(int/7)^2 to int+(int/5)^2, × MATK% bonuses", hercules_ref: "status.c status_calc_matk" }); }
+    // Opens the magic half of Grand Cross — a separate sub-track, so its value is
+    // NOT a continuation of the physical running total above it (track_start tells
+    // the frontend not to badge the jump as a change).
+    { const [mn, mx, av] = pmfStats(matkPmf); result.add_step({ name: "Base MATK", value: av, min_value: mn, max_value: mx, track_start: true, note: `INT=${status.int_} — resolved MATK ${matkLo}-${matkHi} (incl. gear/buff MATK%) — start of the MAGIC half`, formula: "int+(int/7)^2 to int+(int/5)^2, × MATK% bonuses", hercules_ref: "status.c status_calc_matk" }); }
     // Magic part: soft MDEF2 (INT + VIT/2) only — GC does NOT apply the target's
     // HARD MDEF. Verified against in-game screenshots: an INT-based GC on Knight of
     // Abyss (hard MDEF 50) is NOT halved — it reads ~14.2k, matching soft-MDEF-only

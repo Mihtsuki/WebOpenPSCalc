@@ -328,6 +328,10 @@ function createDamageStep(opts) {
     formula: opts.formula ?? "",
     hercules_ref: opts.hercules_ref ?? "",
     info: opts.info ?? false,
+    // Every step's value/min/max is the RUNNING TOTAL after that step. A step that
+    // opens a separate sub-track (Grand Cross' magic half) sets track_start so the
+    // frontend doesn't read the jump as a change to the previous total.
+    track_start: opts.track_start ?? false,
   };
   if (step.min_value === 0 && step.max_value === 0) {
     step.min_value = step.value;

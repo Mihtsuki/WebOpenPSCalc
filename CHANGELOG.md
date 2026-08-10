@@ -23,6 +23,16 @@ instead of release version. Dates are taken from actual git commit history.
   pipeline steps — they aren't stages of the running total, and rendering them as such
   produced meaningless +/− badges.
 
+### Changed
+
+- **The damage breakdown now labels its two columns** — the left badge is what that
+  step *changed*, the right number is the *running total* after it. Every step follows
+  that convention now; the Overrefine row used to show the size of its own roll (e.g.
+  "1–5") instead of the total, which is what made the columns look inconsistent.
+- **Grand Cross' magic half is marked as a fresh sub-track.** Its Base MATK row opens a
+  separate calculation that is later summed with the physical half, so it no longer
+  displays a (meaningless) change against the physical running total.
+
 ## 2026-08-09
 
 ### Added
