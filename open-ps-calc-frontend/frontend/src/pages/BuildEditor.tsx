@@ -315,6 +315,12 @@ const SELF_BUFFS = [
   { key: "SC_PROVIDENCE",      label: "Providence",            max: 5,  jobs: [14, 4015] },
   // Blacksmith / Whitesmith
   { key: "SC_MAXIMIZEPOWER",   label: "Maximize Power",        max: 1,  jobs: [10, 4011] },
+  // Maximum Over Thrust (WS_OVERTHRUSTMAX, +20% ATK per level) is SELF-ONLY and
+  // Whitesmith-only: skills.json types it "Self", the PS skill DB spells it out
+  // ("Cannot be activated to anyone beside the caster"), and 4011 is the only job
+  // whose tree carries it. It used to sit under Party buffs, where it also had no
+  // effect at all — the ratio reads active_status_levels, never support_buffs.
+  { key: "SC_OVERTHRUSTMAX",   label: "Maximum Over Thrust",   max: 5,  jobs: [4011] },
   // Adrenaline Rush cast on YOURSELF (PS Blacksmith rework): +30% ASPD with a Mace
   // or Axe, +20% with any other melee weapon. The party-received version (20%/10%)
   // is the SC_ADRENALINE entry under Party buffs. Level only sets duration, so this
@@ -370,8 +376,9 @@ const PARTY_BUFFS = [
   { key: "SC_INC_AGI", label: "Increase Agility", max: 10, source: "Priest" },
   { key: "SC_GLORIA", label: "Gloria", max: 1, source: "Priest" },
   { key: "SC_ANGELUS", label: "Angelus", max: 5, source: "Priest" },
+  // Over Thrust IS castable on the party; Maximum Over Thrust is not (it lives in
+  // SELF_BUFFS, Whitesmith only).
   { key: "SC_OVERTHRUST", label: "Over Thrust", max: 10, source: "Blacksmith" },
-  { key: "SC_OVERTHRUSTMAX", label: "Maximum Over Thrust", max: 5, source: "Blacksmith" },
   // Adrenaline Rush received from a party Blacksmith: PS rework gives +20% ASPD with
   // a Mace/Axe and +10% with any other melee weapon (bows and guns excluded). Level
   // only sets duration; the self-cast version lives in SELF_BUFFS.

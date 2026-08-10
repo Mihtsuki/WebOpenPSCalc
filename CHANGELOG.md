@@ -32,6 +32,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Maximum Over Thrust is a self buff, and it now actually does something.** It sat under
+  Party buffs, which was wrong twice over: the skill is Whitesmith-only and self-cast
+  ("cannot be activated to anyone beside the caster"), and the party checkbox had no effect
+  at all, because the damage ratio only ever reads self-cast buffs. It's now in Self buffs
+  for Whitesmiths, where its +20% ATK per level lands — a Lv5 Mammonite goes from 1,559 to
+  1,819 on the same build. Over Thrust, which *is* castable on the party, stays where it was.
 - **The damage breakdown no longer shows phantom negative steps on unrefined weapons.**
   The Refine Bonus and Overrefine Bonus rows reported "0" instead of the running damage
   total when there was nothing to add, so the breakdown read them as huge losses
