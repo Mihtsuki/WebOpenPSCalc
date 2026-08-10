@@ -9,7 +9,10 @@ interface SkillEntry{ skill_id: number; name: string; count: number; }
 interface TargetEntry { mob_id: number; name: string; count: number; }
 interface RegionEntry { region: string; count: number; }
 interface CountryEntry { country: string; count: number; regions?: RegionEntry[]; }
-interface FeatureEntry { name: string; count: number; }
+// count = raw uses (sessions-that-used-it for events logged before 2026-08-10, when
+// the client deduped per session); visitor_days = distinct ip+day, the one series
+// that means the same thing across the whole history. See routes/stats.ts.
+interface FeatureEntry { name: string; count: number; visitor_days?: number; }
 interface DonateTarget { target: string; count: number; }
 interface RankEntry { name: string; count: number; }
 interface StatsData {
@@ -41,7 +44,17 @@ const FEATURE_LABELS: Record<string, string> = {
   target_pick: "Pick a monster target",
   breakpoints: "View breakpoints",
   donate_nudge_shown: "Donate nudge shown",
+  changelog_open: "Open the changelog",
+  build_save: "Save a build",
+  build_load: "Load a saved build",
 };
+
+// Feature events were deduped once per session until this date, so raw "uses" from
+// before it are really session counts. The visitor-days column is the comparable one.
+const FEATURE_DEDUPE_CUTOVER = "2026-08-10";
+// Still deduped per session by the client (it auto-refreshes, so raw uses would be
+// keystrokes) — its Uses column keeps the old meaning.
+const SESSION_DEDUPED_FEATURES = new Set(["breakpoints"]);
 
 type Preset = "1" | "7" | "30" | "0" | "custom";
 
@@ -412,16 +425,36 @@ export default function StatsPage() {
               {(!data.top_features || data.top_features.length === 0)
                 ? <p className="stats-empty">No feature usage recorded yet.</p>
                 : (
-                  <table className="stats-table">
-                    <tbody>
-                      {data.top_features.map((f) => (
-                        <tr key={f.name}>
-                          <td className="stats-table-name">{FEATURE_LABELS[f.name] || f.name}</td>
-                          <td className="stats-table-count">{f.count}</td>
+                  <>
+                    <table className="stats-table">
+                      <thead>
+                        <tr>
+                          <th />
+                          <th className="stats-table-count" title={`Raw events. Before ${FEATURE_DEDUPE_CUTOVER} the app sent one per session, so uses spanning that date are not comparable — the missing ones were never recorded.`}>Uses</th>
+                          <th className="stats-table-count" title="Distinct visitor-days (one IP, one day, one feature). The same rule is applied to the whole history, so this column is comparable across the tracking change.">Visitor-days</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {data.top_features.map((f) => (
+                          <tr key={f.name}>
+                            <td className="stats-table-name">
+                              {FEATURE_LABELS[f.name] || f.name}
+                              {SESSION_DEDUPED_FEATURES.has(f.name) && (
+                                <span className="stats-table-tag" title="Auto-refreshing panel — still counted once per session, so its Uses column reads like the pre-cutover numbers.">1×/session</span>
+                              )}
+                            </td>
+                            <td className="stats-table-count">{f.count}</td>
+                            <td className="stats-table-count">{f.visitor_days ?? "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p className="stats-section-hint stats-section-hint--after">
+                      Uses were deduped once per session before {FEATURE_DEDUPE_CUTOVER}; those
+                      lost events can't be recovered, so compare across that date with
+                      visitor-days, which applies one rule to all of the history.
+                    </p>
+                  </>
                 )}
             </div>
 

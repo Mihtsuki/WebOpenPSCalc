@@ -220,14 +220,27 @@ router.get("/data", async (req: Request, res: Response) => {
     }));
 
   // Most-used functionality (build comparison, breakpoints, templates, …).
+  //
+  // Two numbers, because the client changed what it sends. Until 2026-08-10 the
+  // frontend deduped feature events once per name per session, so `count` there is
+  // sessions-that-used-it; after that it sends every use. Raw counts either side of
+  // that date are NOT comparable, and the missing uses can't be recovered — they were
+  // never sent. `visitor_days` applies the OLD (deduped) semantics to ALL the data —
+  // distinct ip+day per feature — which is the one series that spans the whole
+  // history. It undercounts a visitor who used a feature across several sessions in
+  // one day, on both sides of the change, so at least it's wrong the same way.
   const featureCounts: Record<string, number> = {};
+  const featureVisitorDays: Record<string, Set<string>> = {};
   for (const e of featureEvents) {
     const n = (e.name as string) || "unknown";
     featureCounts[n] = (featureCounts[n] || 0) + 1;
+    const day = new Date(e.ts).toISOString().slice(0, 10);
+    if (!featureVisitorDays[n]) featureVisitorDays[n] = new Set<string>();
+    featureVisitorDays[n].add(`${e.ip}|${day}`);
   }
   const topFeatures = Object.entries(featureCounts)
     .sort((a, b) => (b[1] as number) - (a[1] as number))
-    .map(([name, count]) => ({ name, count }));
+    .map(([name, count]) => ({ name, count, visitor_days: featureVisitorDays[name].size }));
 
   // Donation-link clicks (Ko-fi), for the visits → calcs → donations funnel.
   const donateTargetCounts: Record<string, number> = {};

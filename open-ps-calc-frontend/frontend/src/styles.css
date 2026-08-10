@@ -1335,6 +1335,19 @@ label {
 .stats-error   { color: #e55; font-size: 0.85rem; }
 .stats-empty   { color: var(--text-faint); font-size: 0.82rem; margin: 0.25rem 0; }
 .stats-section-hint { color: var(--text-faint); font-size: 0.72rem; margin: -0.4rem 0 0.55rem; }
+.stats-section-hint--after { margin: 0.5rem 0 0; line-height: 1.45; }
+/* Column headers, needed once a table carries two different count columns. */
+.stats-table th {
+  text-align: left; font-size: 0.66rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-faint); padding: 0 0.25rem 0.3rem;
+  border-bottom: 1px solid var(--border-soft); cursor: help;
+}
+.stats-table th.stats-table-count { text-align: right; width: auto; font-family: var(--sans); color: var(--text-faint); }
+/* Marks a row whose Uses column still means "sessions" (auto-refreshing panel). */
+.stats-table-tag {
+  margin-left: 0.4rem; font-size: 0.62rem; letter-spacing: 0.03em; color: var(--text-faint);
+  border: 1px solid var(--border-soft); border-radius: 3px; padding: 0.02rem 0.28rem; cursor: help;
+}
 .stats-row--drill { cursor: pointer; }
 .stats-row--drill:hover .stats-table-name { color: var(--accent); }
 .stats-drill-caret { color: var(--text-faint); font-size: 0.68rem; display: inline-block; width: 0.9rem; }
