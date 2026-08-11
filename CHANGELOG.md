@@ -9,6 +9,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Forged weapons no longer take cards.** A forge fills the weapon's card slots with the
+  crafter's signature and the Star Crumb / element data, so there's no room for a card — the
+  calculator was happily pricing builds that can't exist. Marking a weapon forged now hides its
+  card pickers and clears anything already slotted, and a build shared before this is corrected
+  when it loads. Cards in your other gear are untouched, and a weapon that isn't blacksmith-
+  forgeable keeps its cards as before.
 - **Forged weapons can carry their element.** The forge control took Star Crumbs and a ranked
   forge, but the weapon was always Neutral — so a **VVS Fire Katana** was priced as a plain one.
   Pick the elemental stone it was forged with (**Flame Heart / Mystic Frozen / Rough Wind / Great

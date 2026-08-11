@@ -190,6 +190,35 @@ test("an elemental forge sets the weapon's element, and an endow still beats it"
   assert.ok(dmg({ right_hand: { ele: 3 } }) > dmg({}), "Fire must beat Neutral vs Undead");
 });
 
+test("a forged weapon carries no cards", () => {
+  // The forge writes the crafter's signature and the crumb/element data into the
+  // item's card slots, so a forged weapon physically has no room for a card. The
+  // editor hides the pickers; this is the funnel that also fixes builds shared
+  // before it did, and any API caller.
+  const eq = {
+    right_hand: 1101, right_hand_card1: 4035, right_hand_card2: 4035,
+    armor: 2302, armor_card1: 4035,
+  };
+  const mk = (forge, equipped = eq) => buildFromSaveSchema({
+    server: "payon_stories", job_id: 10, base_level: 99, job_level: 50,
+    base_stats: { str: 90, agi: 40, vit: 40, int: 1, dex: 60, luk: 20 },
+    equipped, forge,
+  }).equipped;
+
+  assert.equal(mk({}).right_hand_card1, 4035, "unforged keeps its cards");
+  for (const forge of [{ sc: 1 }, { ranked: true }, { ele: 3 }]) {
+    const out = mk({ right_hand: forge });
+    assert.equal(out.right_hand_card1, undefined, `${JSON.stringify(forge)} must clear weapon cards`);
+    assert.equal(out.right_hand_card2, undefined);
+    assert.equal(out.right_hand, 1101, "the weapon itself stays");
+    assert.equal(out.armor_card1, 4035, "other slots are untouched");
+  }
+  // A weapon that can't be forged never loses anything — the forge fields are inert
+  // there in the first place (Fire Brand is not on the blacksmith forge list).
+  const named = mk({ right_hand: { sc: 2 } }, { right_hand: 1133, right_hand_card1: 4035 });
+  assert.equal(named.right_hand_card1, 4035);
+});
+
 test("fire arrow feeds weapon element via its bAtkEle script (no override)", () => {
   const build = buildFromSaveSchema({
     job_id: 19, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 1, vit: 1, int: 1, dex: 1, luk: 1 },

@@ -1179,6 +1179,25 @@ export default function BuildEditor() {
     });
   }, []);
 
+  // Forge properties for a weapon slot. A forged weapon has NO usable card slots —
+  // the forge writes the crafter's signature (and the crumb/element data) into them
+  // — so turning any forge property on clears whatever was slotted there, real cards
+  // and wildcard mix alike. The backend enforces the same rule for shared builds.
+  const setForge = useCallback((slotKey: string, patch: { sc?: number; ranked?: boolean; ele?: number }) => {
+    setData((prev) => {
+      const forge = { ...(prev.forge || {}) };
+      const next = { sc: 0, ranked: false, ele: 0, ...(forge[slotKey] || {}), ...patch };
+      forge[slotKey] = next;
+      const forged = next.sc > 0 || next.ranked || (next.ele ?? 0) > 0;
+      if (!forged) return { ...prev, forge };
+      const equipped = { ...prev.equipped };
+      for (let i = 1; i <= 4; i++) delete equipped[`${slotKey}_card${i}`];
+      const wildcard_slots = { ...(prev.wildcard_slots || {}) };
+      delete wildcard_slots[slotKey];
+      return { ...prev, forge, equipped, wildcard_slots };
+    });
+  }, []);
+
   const updateWildcardSlot = useCallback((slotKey: string, idx: number, patch: Partial<WildcardSlot>) => {
     setData((prev) => {
       const existing = (prev.wildcard_slots?.[slotKey] || [])[idx] ?? { type: "race" as const, bonus: 20 };
@@ -1950,6 +1969,12 @@ export default function BuildEditor() {
                 const isForgeableWeapon = slot.key === "right_hand"
                   && equippedId != null
                   && FORGEABLE_WEAPON_IDS.has(equippedId);
+                // A forged weapon's card slots hold the crafter's signature and the
+                // crumb/element data, so no cards can go in it — hide the pickers
+                // rather than letting a build claim something that can't exist.
+                const forgeState = data.forge?.[slot.key];
+                const isForged = !!forgeState
+                  && ((forgeState.sc ?? 0) > 0 || !!forgeState.ranked || (forgeState.ele ?? 0) > 0);
                 const isInvalid = invalidSlots.has(slot.key);
                 const cardLoc = slot.key === "left_hand" && item?.type === "IT_WEAPON"
                   ? "EQP_WEAPON"
@@ -2015,14 +2040,7 @@ export default function BuildEditor() {
                         <select
                           value={data.forge?.[slot.key]?.sc ?? 0}
                           title="Forged Star Crumbs — seeking damage that ignores DEF and can't miss (per hit)"
-                          onChange={(e) => {
-                            const sc = Number(e.target.value);
-                            setData((prev) => {
-                              const forge = { ...(prev.forge || {}) };
-                              forge[slot.key] = { ranked: false, ...(forge[slot.key] || {}), sc };
-                              return { ...prev, forge };
-                            });
-                          }}
+                          onChange={(e) => setForge(slot.key, { sc: Number(e.target.value) })}
                         >
                           <option value={0}>Not forged</option>
                           <option value={1}>Very Strong (+5)</option>
@@ -2039,14 +2057,7 @@ export default function BuildEditor() {
                           style={{ marginTop: "0.35rem" }}
                           value={data.forge?.[slot.key]?.ele ?? 0}
                           title="Elemental forge — the weapon's element comes from the elemental stone it was forged with. An active endow overrides it."
-                          onChange={(e) => {
-                            const ele = Number(e.target.value);
-                            setData((prev) => {
-                              const forge = { ...(prev.forge || {}) };
-                              forge[slot.key] = { sc: 0, ranked: false, ...(forge[slot.key] || {}), ele };
-                              return { ...prev, forge };
-                            });
-                          }}
+                          onChange={(e) => setForge(slot.key, { ele: Number(e.target.value) })}
                         >
                           <option value={0}>Neutral (no stone)</option>
                           <option value={3}>Fire (Flame Heart)</option>
@@ -2059,21 +2070,20 @@ export default function BuildEditor() {
                             <input
                               type="checkbox"
                               checked={!!data.forge?.[slot.key]?.ranked}
-                              onChange={(e) => {
-                                const ranked = e.target.checked;
-                                setData((prev) => {
-                                  const forge = { ...(prev.forge || {}) };
-                                  forge[slot.key] = { sc: 0, ...(forge[slot.key] || {}), ranked };
-                                  return { ...prev, forge };
-                                });
-                              }}
+                              onChange={(e) => setForge(slot.key, { ranked: e.target.checked })}
                             />
                             <span>Ranked forge (+10)</span>
                           </label>
                         </div>
                       </>
                     )}
-                    {cardSlotCount > 0 && (
+                    {cardSlotCount > 0 && isForged && (
+                      <p style={{ fontSize: "0.75rem", color: "var(--text-muted, #888)", marginTop: "0.5rem" }}>
+                        Forged weapons take no cards — the forge fills the slots with the
+                        crafter's signature.
+                      </p>
+                    )}
+                    {cardSlotCount > 0 && !isForged && (
                       <>
                         {isWeaponSlot && (
                           <div className="card-mode-toggle">

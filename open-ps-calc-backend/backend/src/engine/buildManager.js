@@ -96,7 +96,7 @@ function buildFromSaveSchema(data) {
   const bs = data.base_stats || {};
   const bn = data.bonus_stats || {};
   const flags = data.flags || {};
-  const equipped = data.equipped || {};
+  let equipped = data.equipped || {};
   // Forged-weapon Star Crumb bonus on the right-hand weapon (VS/VVS/VVVS = 1/2/3
   // crumbs). Fed to the engine's forge fields; the raw map round-trips via save.
   const rhForge = (data.forge || {}).right_hand || {};
@@ -109,6 +109,15 @@ function buildFromSaveSchema(data) {
   // ordinary Neutral forge. An element ALONE makes the weapon forged: you can
   // forge a plain Fire Katana with no Star Crumbs in it at all.
   const rhForgeEle = Math.max(0, Math.min(4, Number(rhForge.ele) || 0));
+  // A forged weapon cannot hold cards: the forge writes the crafter's signature and
+  // the crumb/element data into the item's card slots, so there is no room for one.
+  // The editor hides the pickers, but a build shared before that (or an API caller)
+  // can still arrive carrying both — drop the cards rather than price a weapon that
+  // can't exist. Only the right hand is forgeable here, matching the editor.
+  if ((rhForgeSc > 0 || rhForgeRanked || rhForgeEle > 0) && FORGEABLE_WEAPON_IDS.has(equipped.right_hand)) {
+    equipped = { ...equipped };
+    for (let i = 1; i <= 4; i++) delete equipped[`right_hand_card${i}`];
+  }
 
   let activeBuffs = { ...(data.active_buffs || {}) };
   let supportBuffs = { ...(data.support_buffs || {}) };
