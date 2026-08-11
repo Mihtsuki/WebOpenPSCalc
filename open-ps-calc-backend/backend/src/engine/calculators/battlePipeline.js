@@ -1128,18 +1128,20 @@ class BattlePipeline {
    * same pipeline the player's own cast of that skill would use — weapon skills
    * through _runBranch, spells through _runMagicBranch.
    *
-   * Restricted to AUTO-ATTACKS. In-game these fire off skill hits too, but pricing a
-   * skill-on-skill proc would need its own attack-period model, and the cards exist
-   * for auto-attack builds — so a skill cast simply doesn't show the branch rather
-   * than showing a number we can't stand behind.
+   * The on-ATTACK specs are restricted to auto-attacks: in-game they fire off skill
+   * hits too, but pricing that would need its own attack-period model, so a skill
+   * cast simply doesn't show the branch rather than showing a number we can't stand
+   * behind. `bonus4 bAutoSpellOnSkill` is the exception and IS priced on a cast —
+   * it names the skill that triggers it, so the trigger's own period is the period,
+   * exactly as an auto-attack's is (Elemental Sword's bolts, Dagger of Hunter's Bash).
    *
    * Returns [{ key, label, chance, branch }], at most one entry per autocast skill
    * (duplicate cards keep the best rate rather than stacking into >100%).
    */
-  _runCardAutocastBranches(status, weapon, target, build, opts) {
+  _runCardAutocastBranches(status, weapon, target, build, opts, specsOverride = null) {
     const { profile = STANDARD, gear_bonuses: gearBonuses } = opts;
     if (!profile.mechanic_flags.has("PS_CARD_AUTOCAST_ON_ATTACK")) return [];
-    const specs = (gearBonuses && gearBonuses.autocast_on_attack) || [];
+    const specs = specsOverride || (gearBonuses && gearBonuses.autocast_on_attack) || [];
     if (!specs.length) return [];
 
     // A spec tagged ATF_SHORT/ATF_LONG only fires at that range. Corruptor Card
@@ -1645,6 +1647,18 @@ class BattlePipeline {
       }
 
       const attacks = [createAttackDefinition(magicResult.avg_damage, 0.0, magicPeriod, 1.0)];
+
+      // Gear that auto-casts off THIS spell (bonus4 bAutoSpellOnSkill — Elemental
+      // Sword chains Cold Bolt → Fire Bolt → Lightning Bolt → Earth Spike). The proc
+      // rides the cast, so it costs no extra time; same treatment as the auto-attack
+      // autocasts on the physical path.
+      const magicAutocasts = this._runCardAutocastBranches(status, weapon, target, build,
+        { profile, gear_bonuses: gearBonuses },
+        ((gearBonuses && gearBonuses.autocast_on_skill) || []).filter((s) => s.src_skill_id === skill.id));
+      for (const ac of magicAutocasts) {
+        if (ac.unmodeled) continue;
+        attacks.push(createAttackDefinition(ac.branch.avg_damage, 0.0, 0.0, ac.chance / 100.0));
+      }
       const dps = calculateDps(attacks);
 
       return createBattleResult({
@@ -1656,6 +1670,9 @@ class BattlePipeline {
         attacks,
         period_ms: magicPeriod,
         dps_valid: true,
+        proc_branches: Object.fromEntries(magicAutocasts.map((a) => [a.key, a.branch])),
+        proc_chances: Object.fromEntries(magicAutocasts.map((a) => [a.key, a.chance])),
+        proc_labels: Object.fromEntries(magicAutocasts.map((a) => [a.key, a.label])),
       });
     }
     if (skillName === "HT_BLITZBEAT") {
@@ -2019,7 +2036,11 @@ class BattlePipeline {
     // swing with no added attack time, and each proc surfaces its own branch.
     const cardAutocasts = skill.id === 0
       ? this._runCardAutocastBranches(status, weapon, target, build, { profile, gear_bonuses: gearBonuses })
-      : [];
+      // On a CAST, the on-skill autocasts whose trigger is this very skill fire
+      // instead (bonus4 bAutoSpellOnSkill). Same pricing, same "rides the cast with
+      // no added time" model as the auto-attack procs.
+      : this._runCardAutocastBranches(status, weapon, target, build, { profile, gear_bonuses: gearBonuses },
+        ((gearBonuses && gearBonuses.autocast_on_skill) || []).filter((s) => s.src_skill_id === skill.id));
     for (const ac of cardAutocasts) {
       if (ac.unmodeled) continue; // shown, but never priced into the DPS
       attacks.push(createAttackDefinition(ac.branch.avg_damage, 0.0, 0.0, ac.chance / 100.0));

@@ -949,6 +949,25 @@ this **description-clause** pass over trusting `levels[].effect` (damage-only) f
   skill pages, all vanilla-parity values. Sources now SUM into one multiplier as battle.c does.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **`bAutoSpellWhenHit` has no consumer at all** [med] — 42 distinct skills across ~90 items
+  (Dark Lord Card's Meteor Storm, Ifrit Card's Earthquake, Ring of Resonance's Venom Splasher,
+  and a long tail of defensive Heal/Assumptio/Kyrie). `gearBonuses.autocast_when_hit` is
+  populated and then read by nobody. The offensive ones are real damage a tank deals, but they
+  fire on the MONSTER's attack rate, not yours — so like Reflect Shield they belong in the
+  Survivability panel as damage-per-hit-taken (`dps_valid:false`), not in your DPS. The
+  defensive ones (auto-Heal, auto-Assumptio) would be a survivability term. Needs the incoming
+  pipeline to grow a proc concept; scoped out for now, but it is the single biggest remaining
+  proc category.
+- **On-ATTACK autocasts still fire only on auto-attacks** [low] — in-game `bonus3 bAutoSpell`
+  triggers off skill hits too. Deliberate: pricing a proc off a skill needs the proc's own
+  attack-period model. (`bAutoSpellOnSkill` is exempt and IS priced — it names its trigger, so
+  the trigger's period is the period. Implemented 2026-08-11 for both the physical and magic
+  paths: Elemental Sword's bolt chain, Dagger of Hunter's Bash, Nepenthes Bow, Croce Staff,
+  Horn of Hillslion, Holy Marcher Hat.)
+- **`bHolyStrikeChance` (Ancient Mummy + Mummy card combo) is parsed and dropped** [low] — the
+  field `holy_strike_bonus_chance` exists on the gear bonuses and nothing reads it, because
+  PS_PR_HOLYSTRIKE itself is unsurfaced (see the Rogue/Stalker audit note above: its job array
+  is [7, 4008]). Fix the passive first, then the combo's +5% has somewhere to go.
 - **PS_CORRUPTINGDRAIN (Corruptor Card)** [med] — the proc is now REGISTERED and surfaced at its
   real rate (4% melee / 2% ranged, from the ATF_SHORT/ATF_LONG flags on its `bonus4 bAutoSpell`),
   but its damage is **deliberately unpriced**: the item text only says "damage based on your STR,

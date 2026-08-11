@@ -144,7 +144,7 @@ function buildAutocastSpec(bonuses, eff) {
       rate = typeof p[2] === "number" ? p[2] : 0;
     }
     bonuses.autocast_on_skill.push(createAutocastSpec({
-      skill_id: procId, skill_level: procLv, chance_per_mille: rate, src_skill_id: srcId,
+      skill_id: procId, skill_name: procName, skill_level: procLv, chance_per_mille: rate, src_skill_id: srcId,
     }));
   }
 }
@@ -225,21 +225,7 @@ function compute(equipped, refineLevels = null, scriptCtx = null, forceProcs = f
 
     bonuses.sc_effects.push(...parseScStart(script, ctx));
 
-    // Extract autobonus entries (temporary proc-based bonuses, e.g. Bonechewer Card)
-    const autobonusRe = /\bautobonus2?\s+"([^"]+)"\s*,\s*(\d+)/g;
-    let abMatch;
-    while ((abMatch = autobonusRe.exec(script)) !== null) {
-      const innerScript = abMatch[1];
-      const rate = parseInt(abMatch[2], 10);
-      const innerEffects = parseScript(innerScript, ctx);
-      bonuses.auto_bonuses.push({ inner_effects: innerEffects, rate, source_slot: slot, source_item_id: itemId });
-      if (forceProcs) {
-        for (const eff of innerEffects) {
-          if (isCard) applyEffect(cardGb, eff);
-          applyEffect(bonuses, eff);
-        }
-      }
-    }
+    collectAutobonuses(bonuses, script, ctx, { slot, itemId, forceProcs, alsoApplyTo: isCard ? cardGb : null });
   }
 
   if (refinedefUnits > 0) {
@@ -287,7 +273,29 @@ function applyPassiveBonuses(bonuses, masteryLevels, profile = null) {
   }
 }
 
-function applyComboBonuses(bonuses, equipped, profile = null, scriptCtx = null) {
+// autobonus / autobonus2 entries (temporary proc-based bonuses, e.g. Bonechewer
+// Card's +ATK on hit). They are PROCS, so they only take effect on the "always
+// proc" path; otherwise they are just recorded so the UI can offer that toggle.
+// Shared by item scripts and combos — a combo can carry one too (Hahoe Mask + Wit
+// Pumpkin Hat's +50 ATK), and those used to be dropped.
+function collectAutobonuses(bonuses, script, ctx, { slot = null, itemId = null, forceProcs = false, alsoApplyTo = null } = {}) {
+  const autobonusRe = /\bautobonus2?\s+"([^"]+)"\s*,\s*(\d+)/g;
+  let abMatch;
+  while ((abMatch = autobonusRe.exec(script)) !== null) {
+    const innerScript = abMatch[1];
+    const rate = parseInt(abMatch[2], 10);
+    const innerEffects = parseScript(innerScript, ctx);
+    bonuses.auto_bonuses.push({ inner_effects: innerEffects, rate, source_slot: slot, source_item_id: itemId });
+    if (forceProcs) {
+      for (const eff of innerEffects) {
+        if (alsoApplyTo) applyEffect(alsoApplyTo, eff);
+        applyEffect(bonuses, eff);
+      }
+    }
+  }
+}
+
+function applyComboBonuses(bonuses, equipped, profile = null, scriptCtx = null, forceProcs = false) {
   const equippedAegis = new Set();
   for (const itemId of Object.values(equipped)) {
     if (itemId == null) continue;
@@ -323,6 +331,10 @@ function applyComboBonuses(bonuses, equipped, profile = null, scriptCtx = null) 
         if (isCardCombo && bonuses.from_cards) applyEffect(bonuses.from_cards, eff);
       }
     }
+
+    collectAutobonuses(bonuses, combo.script, scriptCtx, {
+      slot: "combo", forceProcs, alsoApplyTo: isCardCombo ? bonuses.from_cards : null,
+    });
 
     const itemLabels = combo.items
       .map((name) => (loader.getItemByAegis(name) || {}).name || name)

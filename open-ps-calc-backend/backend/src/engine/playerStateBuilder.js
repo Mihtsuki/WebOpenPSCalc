@@ -51,7 +51,7 @@ function resolvePlayerState(build, config, profile = null) {
     const gb = gearBonusAggregator.compute(build.equipped, build.refine_levels, ctx, build.force_procs);
     gearBonusAggregator.applyPassiveBonuses(gb, gb.effective_mastery, profile);
     buildApplicator.applyPetBonuses(gb, build.selected_pet, profile);
-    gearBonusAggregator.applyComboBonuses(gb, build.equipped, profile, ctx);
+    gearBonusAggregator.applyComboBonuses(gb, build.equipped, profile, ctx, build.force_procs);
     // Merge wildcard card bonuses (custom card-mix UI) into gear bonuses.
     // RC_All / Size_All / Ele_All fan out here (not through the aggregator).
     const WC_SIZES = ["Size_Small", "Size_Medium", "Size_Large"];

@@ -917,6 +917,45 @@ test("a COMBO can grant an autocast (Gust Bow + Arrow of Wind → Wind Blade)", 
   assert.equal(state(1733, 1750, 40).res.proc_branches.card_autocast_NJ_HUUJIN, undefined);
 });
 
+test("a COMBO's autobonus is recorded and applied on the always-proc path", () => {
+  const cfg = createBattleConfig();
+  // Hahoe Mask + Witch's Pumpkin Hat: autobonus "{ bonus bAtk,50; }" at 0.5%.
+  // applyComboBonuses only ever parsed plain bonuses, so a combo's autobonus was
+  // dropped — no record for the "always proc" toggle to even offer.
+  const gear = (forceProcs) => resolvePlayerState(buildFromSaveSchema({
+    server: "payon_stories", job_id: 7, base_level: 99, job_level: 50,
+    base_stats: { str: 80, agi: 50, vit: 40, int: 1, dex: 60, luk: 20 },
+    equipped: { right_hand: 1101, head_mid: 5176, head_top: 18656 },
+    flags: { force_procs: forceProcs },
+  }), cfg, PS)[0];
+
+  const off = gear(false);
+  assert.equal(off.auto_bonuses.length, 1, "the combo's autobonus must be recorded");
+  assert.equal(off.weapon_atk_flat, 0, "but NOT applied until the proc is forced");
+  assert.equal(gear(true).weapon_atk_flat, 50, "always-proc applies the +50 ATK");
+});
+
+test("bAutoSpellOnSkill fires off the skill that triggers it (Elemental Sword)", () => {
+  const cfg = createBattleConfig();
+  const [gb, eff, weapon, status] = resolvePlayerState(buildFromSaveSchema({
+    server: "payon_stories", job_id: 9, base_level: 99, job_level: 50,
+    base_stats: { str: 20, agi: 50, vit: 40, int: 99, dex: 80, luk: 20 },
+    equipped: { right_hand: 13414 },
+  }), cfg, PS);
+  // Elemental Sword chains Cold Bolt → Fire Bolt → Lightning Bolt → Earth Spike,
+  // each at 100%. The specs were parsed but nothing ever consumed them.
+  assert.equal(gb.autocast_on_skill.length, 3, "three on-skill chains");
+  const cast = (name) => new BattlePipeline(cfg).calculate(status, weapon,
+    createSkillInstance({ id: loader.getSkillIdByName(name), level: 10, name }),
+    loader.getMonster(1036), eff, gb);
+
+  const cold = cast("MG_COLDBOLT");
+  assert.equal(cold.proc_chances.card_autocast_MG_FIREBOLT, 100, "Cold Bolt triggers Fire Bolt");
+  assert.ok(cold.proc_branches.card_autocast_MG_FIREBOLT.avg_damage > 0, "and it is priced");
+  // A spell that is not a trigger gets nothing.
+  assert.deepEqual(cast("MG_SOULSTRIKE").proc_branches, {});
+});
+
 test("Corruptor Card's proc is surfaced at the right rate but never priced", () => {
   const ROGUE = {
     job_id: 17, base_level: 99, job_level: 50,

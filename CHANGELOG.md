@@ -43,6 +43,14 @@ instead of release version. Dates are taken from actual git commit history.
   Flame Lord + Ring of Resonance** (Asura Strike / Sonic Blow / Investigate / Meteor Assault).
   Reported by a player. Note the bonus is *long-range physical* and the proc rides *physical*
   attacks — neither touches a magic spell, so a plagiarised Jupitel Thunder sees nothing from it.
+- **Gear that auto-casts off one of your skills now casts it.** `bAutoSpellOnSkill` had no
+  consumer at all, so **Elemental Sword**'s Cold Bolt → Fire Bolt → Lightning Bolt → Earth Spike
+  chain did nothing — it's a 100% proc, worth roughly +45% DPS on a bolt Wizard. Also covers
+  **Dagger of Hunter** (Bash), **Nepenthes Bow**, **Croce Staff**, **Horn of Hillslion** and
+  **Holy Marcher Hat**. Each shows as its own proc card with the skill that triggers it.
+- **A combo's `autobonus` is no longer dropped**, so the "Cards always proc" toggle now covers
+  combo procs too — **Hahoe Mask + Witch's Pumpkin Hat** (+50 ATK), **Twilight Desert +
+  Sandstorm** (+100% ASPD) and five others.
 - **Corruptor Card's proc is no longer invisible.** Its Corrupting Drain is a PS-custom skill, and
   the engine couldn't resolve the name at all, so the whole bonus was thrown away. The proc now
   shows with its real rate — **4% on melee attacks, 2% on ranged**, which the calculator also
