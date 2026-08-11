@@ -1966,7 +1966,11 @@ export default function BuildEditor() {
                 // A weapon can be Star-Crumb forged only if it's on the blacksmith
                 // forge list (FORGEABLE_WEAPON_IDS) — named/elemental weapons like
                 // Fire Brand or Muramasa are excluded; Damascus/Flamberge are kept.
-                const isForgeableWeapon = slot.key === "right_hand"
+                // Either hand can hold a forged weapon — a dual-wielding Assassin
+                // forges each dagger separately. (The off-hand only reaches the
+                // damage through the dual-wield branch, which is the only place an
+                // off-hand weapon is priced at all.)
+                const isForgeableWeapon = isWeaponSlot
                   && equippedId != null
                   && FORGEABLE_WEAPON_IDS.has(equippedId);
                 // A forged weapon's card slots hold the crafter's signature and the

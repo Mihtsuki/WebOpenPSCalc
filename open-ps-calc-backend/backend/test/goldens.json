@@ -917,6 +917,138 @@
    }
   }
  },
+ "assassin-dual-wield-forged-both-hands": {
+  "status": {
+   "str": 96,
+   "agi": 100,
+   "vit": 42,
+   "int_": 5,
+   "dex": 68,
+   "luk": 40,
+   "batk": 198,
+   "max_hp": 8490,
+   "max_sp": 426,
+   "aspd": 162.7,
+   "cri": 143,
+   "hit": 167,
+   "flee": 199,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 5,
+   "matk_max": 6
+  },
+  "result": {
+   "dps": 1104.878,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 14.3,
+   "period_ms": 746,
+   "normal": {
+    "min": 180,
+    "max": 180,
+    "avg": 180,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Forge Bonus",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 220,
+    "max": 220,
+    "avg": 220,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Forge Bonus",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "dw_lh_normal": {
+    "min": 295,
+    "max": 295,
+    "avg": 295,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Forge Bonus",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "dw_lh_crit": {
+    "min": 355,
+    "max": 355,
+    "avg": 355,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Forge Bonus",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "blacksmith-vvs-fire-forged-sword": {
   "status": {
    "str": 96,

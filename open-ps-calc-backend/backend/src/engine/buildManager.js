@@ -99,24 +99,38 @@ function buildFromSaveSchema(data) {
   let equipped = data.equipped || {};
   // Forged-weapon Star Crumb bonus on the right-hand weapon (VS/VVS/VVVS = 1/2/3
   // crumbs). Fed to the engine's forge fields; the raw map round-trips via save.
-  const rhForge = (data.forge || {}).right_hand || {};
-  const rhForgeSc = Math.max(0, Math.min(3, Number(rhForge.sc) || 0));
-  const rhForgeRanked = !!rhForge.ranked;
+  // Both hands can be forged — a dual-wielding Assassin forges each dagger
+  // separately. The left hand only reaches the damage through the dual-wield
+  // branch, which is the only place an off-hand weapon is resolved at all.
+  const readForge = (slot) => {
+    const f = (data.forge || {})[slot] || {};
+    return {
+      sc: Math.max(0, Math.min(3, Number(f.sc) || 0)),
+      ranked: !!f.ranked,
+      ele: Math.max(0, Math.min(4, Number(f.ele) || 0)),
+    };
+  };
+  const rhForge = readForge("right_hand");
+  const lhForge = readForge("left_hand");
+  const rhForgeSc = rhForge.sc;
+  const rhForgeRanked = rhForge.ranked;
   // Elemental forge: a Blacksmith forges with an elemental stone (Flame Heart →
   // Fire, Mystic Frozen → Water, Rough Wind → Wind, Great Nature → Earth), so the
   // weapon comes out Fire/Water/Wind/Earth. Those four are the only forgeable
   // elements — 1..4 in the engine's element ints (Water/Earth/Fire/Wind), 0 = the
   // ordinary Neutral forge. An element ALONE makes the weapon forged: you can
   // forge a plain Fire Katana with no Star Crumbs in it at all.
-  const rhForgeEle = Math.max(0, Math.min(4, Number(rhForge.ele) || 0));
+  const rhForgeEle = rhForge.ele;
   // A forged weapon cannot hold cards: the forge writes the crafter's signature and
   // the crumb/element data into the item's card slots, so there is no room for one.
   // The editor hides the pickers, but a build shared before that (or an API caller)
   // can still arrive carrying both — drop the cards rather than price a weapon that
-  // can't exist. Only the right hand is forgeable here, matching the editor.
-  if ((rhForgeSc > 0 || rhForgeRanked || rhForgeEle > 0) && FORGEABLE_WEAPON_IDS.has(equipped.right_hand)) {
+  // can't exist.
+  for (const [slot, f] of [["right_hand", rhForge], ["left_hand", lhForge]]) {
+    if (!(f.sc > 0 || f.ranked || f.ele > 0)) continue;
+    if (!FORGEABLE_WEAPON_IDS.has(equipped[slot])) continue;
     equipped = { ...equipped };
-    for (let i = 1; i <= 4; i++) delete equipped[`right_hand_card${i}`];
+    for (let i = 1; i <= 4; i++) delete equipped[`${slot}_card${i}`];
   }
 
   let activeBuffs = { ...(data.active_buffs || {}) };
@@ -155,6 +169,10 @@ function buildFromSaveSchema(data) {
     forge_sc_count: rhForgeSc,
     forge_ranked: rhForgeRanked,
     forge_element: rhForgeEle,
+    lh_is_forged: lhForge.sc > 0 || lhForge.ranked || lhForge.ele > 0,
+    lh_forge_sc_count: lhForge.sc,
+    lh_forge_ranked: lhForge.ranked,
+    lh_forge_element: lhForge.ele,
     active_status_levels: activeBuffs,
     mastery_levels: data.mastery_levels || {},
     is_ranged_override: flags.is_ranged_override ?? null,

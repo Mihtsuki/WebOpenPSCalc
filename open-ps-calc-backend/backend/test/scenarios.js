@@ -115,6 +115,14 @@ const scenarios = [
     skill: { name: "CR_HOLYCROSS", level: 6 },
     target: 1867,
   },
+    {
+    // Dual-wield Assassin with BOTH daggers forged, differently: a VVS Neutral in
+    // the main hand and a VVVS Fire in the off-hand. Locks that each hand carries
+    // its own crumbs and element — the off-hand used to be resolved with neither.
+    name: "assassin-dual-wield-forged-both-hands",
+    build: { job_id: 12, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 90, vit: 40, int: 1, dex: 60, luk: 40 }, equipped: { right_hand: 1201, left_hand: 1201 }, mastery_levels: { AS_RIGHT: 5, AS_LEFT: 5 }, forge: { right_hand: { sc: 2 }, left_hand: { sc: 3, ele: 3 } } },
+    target: 1036,
+  },
   {
     // Elemental forge: a VVS Fire Sword (2 Star Crumbs + Flame Heart) against the
     // Undead Ghoul — locks the crumb ATK and the forged element together, since the

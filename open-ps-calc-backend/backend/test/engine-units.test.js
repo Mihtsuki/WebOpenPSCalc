@@ -217,6 +217,37 @@ test("a forged weapon carries no cards", () => {
   // there in the first place (Fire Brand is not on the blacksmith forge list).
   const named = mk({ right_hand: { sc: 2 } }, { right_hand: 1133, right_hand_card1: 4035 });
   assert.equal(named.right_hand_card1, 4035);
+
+  // Each hand is forged separately, so forging one must not disarm the other.
+  const dual = { right_hand: 1201, right_hand_card1: 4035, left_hand: 1201, left_hand_card1: 4035 };
+  const lhOnly = mk({ left_hand: { sc: 1 } }, dual);
+  assert.equal(lhOnly.left_hand_card1, undefined, "off-hand forge clears the off-hand card");
+  assert.equal(lhOnly.right_hand_card1, 4035, "…and leaves the main hand alone");
+});
+
+test("the off-hand weapon is forged in its own right", () => {
+  const cfg = createBattleConfig();
+  const dps = (forge) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 12, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 90, vit: 40, int: 1, dex: 60, luk: 40 },
+      equipped: { right_hand: 1201, left_hand: 1201 },
+      mastery_levels: { AS_RIGHT: 5, AS_LEFT: 5 }, forge,
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    const res = new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }),
+      loader.getMonster(1036), eff, gb);
+    return { dps: res.dps, rh: res.normal.avg_damage, lh: (res.dw_lh_normal || {}).avg_damage };
+  };
+  const none = dps({});
+  const rhOnly = dps({ right_hand: { sc: 2 } });
+  const lhOnly = dps({ left_hand: { sc: 2 } });
+  // The off-hand used to be resolved with no forge data at all, so only the main
+  // hand could ever be forged — a dual-wield Assassin forges each dagger.
+  assert.ok(lhOnly.lh > none.lh, "off-hand crumbs must reach the off-hand hit");
+  assert.equal(lhOnly.rh, none.rh, "…and only the off-hand hit");
+  assert.equal(rhOnly.lh, none.lh, "the reverse too");
+  assert.ok(dps({ left_hand: { ele: 3 } }).lh > none.lh, "the off-hand's own element applies (Fire vs Undead)");
 });
 
 test("fire arrow feeds weapon element via its bAtkEle script (no override)", () => {

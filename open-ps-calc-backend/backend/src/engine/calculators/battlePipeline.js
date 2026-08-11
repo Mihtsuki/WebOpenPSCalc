@@ -1968,6 +1968,17 @@ class BattlePipeline {
           loader,
           build.equipped.left_hand,
           (build.refine_levels || {}).left_hand || 0,
+          // An endow applies to the character, so it colours BOTH weapons.
+          build.weapon_element,
+          // The off-hand is forged in its own right — an Assassin forges each
+          // dagger separately, with its own crumbs and elemental stone.
+          {
+            is_forged: build.lh_is_forged,
+            forge_sc_count: build.lh_forge_sc_count,
+            forge_ranked: build.lh_forge_ranked,
+            forge_element: build.lh_forge_element,
+            script_atk_ele_rh: gearBonuses.script_atk_ele_lh,
+          },
         );
         if (lhWeapon) {
           const rhLv = gearBonuses.effective_mastery.AS_RIGHT || 0;

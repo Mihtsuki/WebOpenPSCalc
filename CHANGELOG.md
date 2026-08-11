@@ -15,6 +15,11 @@ instead of release version. Dates are taken from actual git commit history.
   card pickers and clears anything already slotted, and a build shared before this is corrected
   when it loads. Cards in your other gear are untouched, and a weapon that isn't blacksmith-
   forgeable keeps its cards as before.
+- **The off-hand weapon can be forged too.** Forging was main-hand only, so a dual-wielding
+  Assassin's second dagger was always an unforged, Neutral one — its Star Crumbs and elemental
+  stone did nothing. Each hand now carries its own forge: a VVS main hand and a VVVS Fire
+  off-hand are two separate weapons, and forging one doesn't touch the other's cards. An endow
+  now colours both weapons, as it does in game, instead of only the main hand.
 - **Forged weapons can carry their element.** The forge control took Star Crumbs and a ranked
   forge, but the weapon was always Neutral — so a **VVS Fire Katana** was priced as a plain one.
   Pick the elemental stone it was forged with (**Flame Heart / Mystic Frozen / Rough Wind / Great
