@@ -440,6 +440,23 @@ const scenarios = [
     target: 1036,
   },
   {
+    // Demonstration with the FUEL Card: the PS wiki gives the skill a 5s cooldown, and
+    // the card cuts 2s off it — the first item bonus that moves a cooldown rather than
+    // a delay. Freezes both the cooldown floor and the reduction (period 5340 -> 3340).
+    name: "alchemist-demonstration-fuel-cooldown",
+    build: { job_id: 18, base_level: 99, job_level: 50, base_stats: { str: 70, agi: 70, vit: 50, int: 60, dex: 90, luk: 30 }, equipped: { right_hand: 1301, shoes: 2405, shoes_card1: 90007 } },
+    skill: { name: "AM_DEMONSTRATION", level: 5 },
+    target: 1002,
+  },
+  {
+    // Throw Arrow's own 0.3s cooldown (PS wiki), against a vanilla after-cast delay of
+    // 0 — before cooldowns existed this ran at the engine's 100ms minimum instead.
+    name: "dancer-throw-arrow-cooldown",
+    build: { job_id: 20, base_level: 99, job_level: 50, base_stats: { str: 40, agi: 70, vit: 40, int: 30, dex: 99, luk: 30 }, equipped: { right_hand: 1950, ammo: 1750 } },
+    skill: { name: "DC_THROWARROW", level: 5 },
+    target: 1002,
+  },
+  {
     // Pirate Skel + Flame Beetle Card, with Zeny Pincher active: the combo makes the
     // AUTOCAST Mammonite cost no zeny and be "unaffected by Zeny Pincher", so the proc
     // keeps the full 100+50×lv ratio (600% at Lv10) instead of the pinched 350%.

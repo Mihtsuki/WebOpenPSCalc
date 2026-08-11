@@ -54,6 +54,11 @@ function emptyProfile(name, overrides = {}) {
     // caps effective cast-skill spam at 3/sec (see PAYON_STORIES override).
     min_cast_period_ms: 100,
     ps_skill_delay_fn: {},
+    // Per-skill FIXED cooldown in ms, keyed by skill constant. Pre-renewal Hercules
+    // has no cooldowns, so this is empty for vanilla; PS documents them on the wiki
+    // ("Cast Delay: Global Cooldown and 0.3s Cooldown"). skillTiming takes
+    // max(after-cast delay, cooldown) and never applies delay reductions to it.
+    skill_cooldown_ms: {},
     ps_acd_zero: new Set(),
     ps_zero_cast: new Set(),
     ps_attack_interval: {},
@@ -70,6 +75,26 @@ function emptyProfile(name, overrides = {}) {
 }
 
 const STANDARD = emptyProfile("standard", { use_ps_data: false });
+
+// Per-skill fixed cooldowns, scraped from the PS wiki's "Cast Delay" line by
+// scripts/scrape-ps-cooldowns.mjs (re-run it after a patch). Pre-renewal Hercules has
+// no cooldowns and the bundled ps_skill_db.json predates the wiki documenting them,
+// which is why these live in their own file rather than the skill DB. `_checked` is
+// the scraper's bookkeeping — every skill it has looked at, so a re-run resumes.
+const PS_SKILL_COOLDOWNS = (() => {
+  try {
+    const raw = require("./data/ps/ps_skill_cooldowns.json");
+    const out = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (k.startsWith("_")) continue;
+      const ms = Number(v);
+      if (Number.isFinite(ms) && ms > 0) out[k] = ms;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+})();
 
 // ---------------------------------------------------------------------
 // Payon Stories verified deviations
@@ -546,6 +571,7 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
   // — sourced from other PS calcs' 0.33s default per the user; the PS wiki documents
   // Bragi's % reductions but no explicit spam cap.
   min_cast_period_ms: 333,
+  skill_cooldown_ms: PS_SKILL_COOLDOWNS,
   rate_bonuses: PS_RATE_BONUSES,
   mechanic_flags: PS_MECHANIC_FLAGS,
   aspd_buffs: PS_ASPD_BUFFS,

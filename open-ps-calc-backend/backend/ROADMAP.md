@@ -526,6 +526,30 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
     which `_runCardAutocastBranches` turns into a `MC_MAMMONITE_zeny_exempt` skill_param on the
     PROC's build only; a manual Mammonite on the same character is still pinched. Flame Beetle's
     own 50% zero-zeny chance remains unmodeled (zeny economy, no damage surface).
+- **Skill cooldowns (2026-08-10)** — pre-renewal Hercules has none, so the engine had none:
+  `skillTiming` returned `max(after-cast delay, 100 ms)` and a skill with a documented cooldown
+  span the 100 ms floor instead. PS documents them on the wiki ("Cast Delay : Global Cooldown and
+  0.3s Cooldown"), and the bundled `ps_skill_db.json` predates that text — every entry still reads
+  `"cast_delay": "Global Cooldown"` with no number. So they live in their own scraped file,
+  `data/ps/ps_skill_cooldowns.json`, rebuilt by `scripts/scrape-ps-cooldowns.mjs` (re-run after a
+  patch; it resolves page titles against the wiki's own `list=allpages` index because PS names and
+  page names differ — "Thunder Storm" is filed under "Thunderstorm", NJ_ISSEN is "Killing Strike"
+  in the DB and "Killing Stroke" on the wiki).
+  - `profile.skill_cooldown_ms` holds them; `skillTiming` takes **max(after-cast delay, cooldown)**
+    because a cooldown blocks only that skill while the delay blocks every skill — and DPS models
+    spamming one skill. Applied AFTER the reduction block: a cooldown is fixed, so Bragi, delayrate
+    gear and `after_cast_delay_reduction_pct` never shorten it (Acid Terror's page says
+    "unreducable" outright).
+  - Found on the first sweep of the 140 damage skills: **Demonstration 5 s, Charge Attack 3 s,
+    Musical Strike 0.3 s, Throw Arrow 0.3 s, Acid Terror 0.22 s.** 37 skills have no wiki page at
+    all (mostly transcendent), so those keep vanilla timing until PS documents them.
+  - DPS impact where it binds: Demonstration **−85%**, Charge Attack **−80%**, Throw Arrow −19%,
+    Musical Strike −5%. Acid Terror is unaffected — its 0.22 s cooldown is shorter than its cast.
+  - **`bSkillCooldown`** (new PS-custom bonus, milliseconds, negative to reduce) lets gear move a
+    cooldown; `gearBonuses.skill_cooldown` is added to the profile value, floored at 0. FUEL Card
+    uses it for its −2 s on Demonstration (5 s → 3 s, which is +77% DPS for that build). This is
+    the first bonus that touches a cooldown rather than a delay — do not reuse `bDelayrate`, which
+    is a percentage on the after-cast delay and is reducible.
 - **PS 2026-08-09 patch notes** (the GM announcement — carries changes the four rework PDFs
   do NOT mention; the PDFs are Merchant/Blacksmith/Alchemist only). Verified line by line:
   - **Crusader — Reflect Shield new formula**: `SkillLevel × ((SoftDef/2) + ⌊VIT/10⌋²) ×
@@ -742,8 +766,9 @@ brackets are the number of PS-custom entries found across those tables.
     instead of `atk_per_lv`, and why its old `lv10_rate` ASPD entry was dropped); Chemical
     Protections cap at rank 3. **FUEL Card** cut to +10% on both skills (was +30%). **New item:**
     Giant Pestle (1H Mace, ATK 100, Alchemist-only, +3/+12 ATK per Pharmacy level at base DEX &
-    LUK 60+/80+). **Not modeled (no damage surface):** Demonstration's SP cost 14→20 and FUEL's
-    −2 s Demonstration cooldown (the calc models neither SP cost nor cooldowns); Bio Cannibalize's
+    LUK 60+/80+). FUEL's **−2 s Demonstration cooldown IS modeled** as of 2026-08-10 (see the
+    cooldown section below). **Not modeled (no damage surface):** Demonstration's SP cost 14→20
+    (the calc models no SP costs); Bio Cannibalize's
     plant INT/AGI/HIT retune, Learning Potion's potion-conservation chance, the Potion Pitcher
     effect table, Tengu Card, Plant Bottle (summons/support); Remote Detonator itself — it is the
     *applier* of Burning, which IS modeled as a target debuff (see below).

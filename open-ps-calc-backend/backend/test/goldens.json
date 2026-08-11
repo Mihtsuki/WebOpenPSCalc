@@ -438,11 +438,11 @@
    "matk_max": 84
   },
   "result": {
-   "dps": 2584.958,
+   "dps": 2577.778,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
-   "period_ms": 718,
+   "period_ms": 720,
    "normal": {
     "min": 1774,
     "max": 1939,
@@ -492,11 +492,11 @@
    "matk_max": 84
   },
   "result": {
-   "dps": 1923.398,
+   "dps": 1918.056,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
-   "period_ms": 718,
+   "period_ms": 720,
    "normal": {
     "min": 1320,
     "max": 1443,
@@ -3536,6 +3536,112 @@
       "Final Damage"
      ]
     }
+   }
+  }
+ },
+ "alchemist-demonstration-fuel-cooldown": {
+  "status": {
+   "str": 75,
+   "agi": 76,
+   "vit": 53,
+   "int_": 67,
+   "dex": 99,
+   "luk": 30,
+   "batk": 149,
+   "max_hp": 7633,
+   "max_sp": 678,
+   "aspd": 159.7,
+   "cri": 110,
+   "hit": 198,
+   "flee": 180,
+   "def_": 4,
+   "mdef": 0,
+   "matk_min": 148,
+   "matk_max": 236
+  },
+  "result": {
+   "dps": 121.557,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 3340,
+   "normal": {
+    "min": 406,
+    "max": 406,
+    "avg": 406,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill ATK Bonus",
+     "Skill Ratio (ID 229 Lv 5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "dancer-throw-arrow-cooldown": {
+  "status": {
+   "str": 42,
+   "agi": 77,
+   "vit": 43,
+   "int_": 35,
+   "dex": 104,
+   "luk": 38,
+   "batk": 219,
+   "max_hp": 5800,
+   "max_sp": 815,
+   "aspd": 166.1,
+   "cri": 136,
+   "hit": 203,
+   "flee": 176,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 60,
+   "matk_max": 84
+  },
+  "result": {
+   "dps": 1086.842,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 760,
+   "normal": {
+    "min": 791,
+    "max": 863,
+    "avg": 826,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Arrow ATK",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 324 Lv 5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
    }
   }
  },

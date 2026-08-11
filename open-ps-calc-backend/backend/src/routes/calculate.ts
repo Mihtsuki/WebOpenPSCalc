@@ -346,13 +346,14 @@ router.post("/", (req: Request, res: Response) => {
     // one swing occupies. Same function and inputs the pipeline used for the period,
     // so these always reconcile with it. Cast/after-cast are 0 for a plain attack.
     const skillDataForTiming = skill.id !== 0 ? loader.getSkill(skill.id) : null;
-    const [castMsOut, afterCastMsOut] = skillDataForTiming
+    const [castMsOut, , cooldownMsOut, afterCastMsOut] = skillDataForTiming
       ? calculateSkillTiming(skillDataForTiming.name, skill.level, skillDataForTiming, status,
           gearBonuses, effBuild.support_buffs, effBuild.server)
-      : [0, 0];
+      : [0, 0, 0, 0];
     const timing = {
       cast_ms: castMsOut,
       after_cast_ms: afterCastMsOut,
+      cooldown_ms: cooldownMsOut,
       animation_ms: 2 * Math.max(100, Math.round(2000 - status.aspd * 10)),
     };
     const falcon = computeFalconDamage(status, effBuild, gearBonuses, target, loader);

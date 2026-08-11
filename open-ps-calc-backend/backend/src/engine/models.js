@@ -244,6 +244,7 @@ function createGearBonuses(overrides = {}) {
     delayrate: 0,
     skill_castrate: {},
     skill_delayrate: {},
+    skill_cooldown: {},  // bSkillCooldown — flat ms change to a skill's fixed cooldown (FUEL Card: −2000 on Demonstration)
     skill_grants: {},
     effective_mastery: {},
     auto_bonuses: [],

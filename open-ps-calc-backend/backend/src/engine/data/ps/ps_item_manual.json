@@ -1119,8 +1119,8 @@
     ],
     "slots": 0,
     "aegis_name": "FUEL_Card",
-    "_note": "PS Alchemist rework 2026-08-09: skill damage cut 30% -> 10% (compensated by Acid Terror's new 100+100*lv ratio); keeps Flee +5 and gains -2s Demonstration cooldown (cooldowns are not modeled by this calculator).",
-    "script": "bonus bFlee,5; bonus2 bSkillAtk,AM_DEMONSTRATION,10; bonus2 bSkillAtk,AM_ACIDTERROR,10;"
+    "_note": "PS Alchemist rework 2026-08-09: skill damage cut 30% -> 10% (compensated by Acid Terror's new 100+100*lv ratio); keeps Flee +5 and gains -2s Demonstration cooldown. That cut IS modeled as of 2026-08-10, now that skillTiming carries per-skill cooldowns: the PS wiki gives Demonstration a 5s cooldown, so this card takes it to 3s. bSkillCooldown is in MILLISECONDS, negative to reduce.",
+    "script": "bonus bFlee,5; bonus2 bSkillAtk,AM_DEMONSTRATION,10; bonus2 bSkillAtk,AM_ACIDTERROR,10; bonus2 bSkillCooldown,AM_DEMONSTRATION,-2000;"
   },
   "90008": {
     "type": "IT_CARD",

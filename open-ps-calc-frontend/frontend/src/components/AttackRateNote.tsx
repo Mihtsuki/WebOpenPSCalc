@@ -9,6 +9,8 @@ interface Props {
   castMs?: number;
   /** After-cast delay in ms, after reductions. Skills only. */
   afterCastMs?: number;
+  /** Fixed cooldown in ms, if the skill has one. Not reducible the way a delay is. */
+  cooldownMs?: number;
 }
 
 /** "0.57 s (566 ms)" — the two units players actually quote these timings in. */
@@ -30,7 +32,7 @@ function fmtTime(ms: number) {
  * A plain attack has no cast or after-cast delay, so its animation delay IS the
  * cycle, and the ASPD formula is shown in place of the missing rows.
  */
-export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, castMs, afterCastMs }: Props) {
+export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, castMs, afterCastMs, cooldownMs }: Props) {
   const perSec = 1000 / periodMs;
 
   return (
@@ -53,6 +55,14 @@ export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, ca
         <div className="tooltip-row">
           <span>After-cast delay</span>
           <span>{fmtTime(afterCastMs)}</span>
+        </div>
+      )}
+      {isSkill && cooldownMs != null && cooldownMs > 0 && (
+        // Its own row, never folded into the delay above: a cooldown is fixed, so
+        // Bragi and delayrate gear move one and not the other.
+        <div className="tooltip-row">
+          <span>Cooldown</span>
+          <span>{fmtTime(cooldownMs)}</span>
         </div>
       )}
       <div className="tooltip-row">

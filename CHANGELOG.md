@@ -32,6 +32,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Skill cooldowns are modeled.** The calculator had no notion of a cooldown, so any skill with
+  one was assumed to be spammable the moment its cast finished. Cooldowns now come from the PS
+  wiki, and where they bite they bite hard: **Demonstration** has a 5 s cooldown (its DPS was
+  overstated ~7×), **Charge Attack** 3 s (~5×), **Throw Arrow** and **Musical Strike** 0.3 s
+  (−19% and −5%). Acid Terror's 0.22 s is shorter than its own cast, so nothing changes there.
+  A cooldown is fixed — Bragi and delay-reduction gear shorten the after-cast delay, never this.
+- **FUEL Card's −2 s Demonstration cooldown now counts**, which it couldn't before: it takes the
+  cooldown from 5 s to 3 s, worth about +77% Demonstration DPS.
+- The cast rate panel lists **cast time, after-cast delay, cooldown and animation delay
+  separately** — a cooldown is not an after-cast delay, and only one of the two can be reduced.
 - **Maximum Over Thrust is a self buff, and it now actually does something.** It sat under
   Party buffs, which was wrong twice over: the skill is Whitesmith-only and self-cast
   ("cannot be activated to anyone beside the caster"), and the party checkbox had no effect

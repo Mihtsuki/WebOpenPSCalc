@@ -889,3 +889,43 @@ test("Pirate Skel + Flame Beetle exempts the AUTOCAST Mammonite from Zeny Pinche
   const manualFull = run({ beetle: true, skillId: mammoniteId }).res.normal.avg_damage;
   assert.ok(manualPinched < manualFull, "the combo must not exempt a manual cast");
 });
+
+test("per-skill cooldowns floor the cast interval, resist Bragi, and bend to bSkillCooldown", () => {
+  const cfg = createBattleConfig();
+  const PS = getProfile("payon_stories");
+  // Throw Arrow: vanilla after-cast delay is 0 (so the engine's 100ms minimum applied),
+  // but the PS wiki gives it a 0.3s fixed cooldown — that is what must set the floor.
+  const period = ({ dex = 150, bragi = false, skill = "DC_THROWARROW", job = 20, equipped } = {}) => {
+    const bragiSong = { SC_POEMBRAGI: 10, SC_POEMBRAGI_lesson: 10, SC_POEMBRAGI_dex: 99, SC_POEMBRAGI_int: 99 };
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: job, base_level: 99, job_level: 50,
+      base_stats: { str: 40, agi: 1, vit: 40, int: 60, dex, luk: 30 },
+      equipped: equipped || { right_hand: 1950, ammo: 1750 },
+      song_state: bragi ? bragiSong : {},
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    const sk = loader.getAllSkills().find((x) => x.name === skill);
+    const res = new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: sk.id, level: 5 }),
+      createTarget({ def_: 0, vit: 0, size: 1, race: 0, element: 0 }), eff, gb);
+    return { period: Math.round(res.period_ms), aspd: status.aspd, gb };
+  };
+
+  assert.equal(PS.skill_cooldown_ms.DC_THROWARROW, 300, "Throw Arrow's wiki cooldown must be loaded");
+  assert.equal(STANDARD.skill_cooldown_ms.DC_THROWARROW, undefined, "vanilla has no cooldowns");
+
+  // DEX 150 = instant cast, AGI 1 = a slow swing, so nothing else can be the floor:
+  // the interval is the 300ms cooldown, not the 100ms minimum delay.
+  const plain = period();
+  const animation = 2 * Math.max(100, Math.round(2000 - plain.aspd * 10));
+  assert.ok(plain.period >= 300, `cooldown must floor the interval (${plain.period}ms)`);
+  assert.equal(plain.period, Math.max(300, animation), "interval = max(cooldown, animation)");
+
+  // A cooldown is fixed: Bragi cuts after-cast delay, never this.
+  assert.equal(period({ bragi: true }).period, plain.period, "Bragi must not shorten a cooldown");
+
+  // bSkillCooldown moves it. FUEL Card takes Demonstration's 5s cooldown to 3s.
+  const bare = period({ skill: "AM_DEMONSTRATION", job: 18, equipped: { right_hand: 1301 } });
+  const fuel = period({ skill: "AM_DEMONSTRATION", job: 18, equipped: { right_hand: 1301, shoes: 2405, shoes_card1: 90007 } });
+  assert.equal(fuel.gb.skill_cooldown.AM_DEMONSTRATION, -2000, "FUEL Card must register -2s");
+  assert.equal(bare.period - fuel.period, 2000, `FUEL should cut 2s (${bare.period} -> ${fuel.period})`);
+});

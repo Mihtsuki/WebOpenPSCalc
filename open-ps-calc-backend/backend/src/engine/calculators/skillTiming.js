@@ -81,7 +81,25 @@ function calculateSkillTiming(skillName, skillLv, skillData, status, gearBonuses
   if (profile.ps_acd_zero.has(skillName)) effectiveDelay = MIN_SKILL_DELAY_MS;
   else effectiveDelay = Math.max(baseDelay, MIN_SKILL_DELAY_MS);
 
-  return [effectiveCast, effectiveDelay];
+  // Per-skill COOLDOWN (PS wiki "Cast Delay: … and 0.3s Cooldown"). The after-cast
+  // delay blocks every skill; a cooldown blocks only this one — and since DPS models
+  // spamming a single skill, the wait before the next cast is max(delay, cooldown).
+  //
+  // It is deliberately taken AFTER the reduction block above: a cooldown is fixed, so
+  // Bragi, delayrate gear and after_cast_delay_reduction_pct do not shorten it. Vanilla
+  // pre-renewal has no cooldowns, so this is empty outside the PS profile.
+  // Gear can shorten a cooldown by a flat amount (bSkillCooldown — FUEL Card's
+  // "-2 seconds Demonstration cooldown"), never below zero.
+  const cooldownBase = Number((profile.skill_cooldown_ms || {})[skillName] || 0);
+  const cooldownMod = Number((gearBonuses.skill_cooldown || {})[skillName] || 0);
+  const cooldownMs = Math.max(0, cooldownBase + cooldownMod);
+  const afterCastMs = effectiveDelay;               // before the cooldown floor
+  if (cooldownMs > 0) effectiveDelay = Math.max(effectiveDelay, cooldownMs);
+
+  // [0] and [1] are what every caller destructures. [2] and [3] keep the two apart
+  // for display — a UI that labels a cooldown "after-cast delay" is lying about which
+  // one it is, and they behave differently (only the delay takes reductions).
+  return [effectiveCast, effectiveDelay, cooldownMs, afterCastMs];
 }
 
 module.exports = { calculateSkillTiming };

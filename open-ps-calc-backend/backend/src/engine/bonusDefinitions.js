@@ -176,6 +176,11 @@ const BONUS2 = {
   bSkillSpCost: def((sk, v) => `${v > 0 ? "Increases" : "Reduces"} ${sk} SP cost by ${Math.abs(v)}.`, null),
   bCastrate: def((sk, v) => `${v < 0 ? "Reduces" : "Increases"} ${sk} cast time by ${Math.abs(v)}%.`, "skill_castrate", "dict"),
   bDelayrate: def((sk, v) => `${v < 0 ? "Reduces" : "Increases"} ${sk} after-cast delay by ${Math.abs(v)}%.`, "skill_delayrate", "dict"),
+  // Flat cooldown change in MILLISECONDS (negative reduces), e.g. FUEL Card's
+  // "-2 seconds Demonstration cooldown". Distinct from bDelayrate: a cooldown is
+  // fixed, so it is not scaled by Bragi or delayrate — skillTiming adds this to the
+  // profile's per-skill cooldown and takes max(after-cast delay, cooldown).
+  bSkillCooldown: def((sk, v) => `${v < 0 ? "Reduces" : "Increases"} ${sk} cooldown by ${Math.abs(v) / 1000}s.`, "skill_cooldown", "dict"),
   bWeaponAtk: def((wtype, v) => `+${v}% ATK with ${wtype}-type weapons.`, "weapon_atk_rate", "dict"),
   bDefRatioAtkEle: def((e, v) => `Bypasses DEF against ${ele(e)}-element targets.`, "def_ratio_atk_ele", "dict"),
   bDefRatioAtkRace: def((r, v) => `Bypasses DEF against ${race(r)}.`, "def_ratio_atk_race", "dict"),
