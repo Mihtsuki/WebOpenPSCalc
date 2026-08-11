@@ -45,6 +45,17 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Changed
 
+- **The damage breakdown reads like English now.** Step names mirrored the engine's internal
+  function names — *Attr Fix*, *Card Fix*, *Defense Fix* — which only helped if you had the source
+  open. They're now **Element vs target**, **Cards & gear**, **Target's DEF**, **Weapon mastery**,
+  **Size penalty** and so on, with the original name kept in the row's tooltip so anyone
+  cross-referencing a formula can still find it. Reported by a player.
+- **The skill ratio row names the skill.** It used to read *Skill Ratio (ID 0 Lv 1)*; it now says
+  **Skill ratio — Normal attack**, or **Skill ratio — Bash Lv10**.
+- **ATK buffs show their arithmetic.** Power-Thrust adds its percentage *into* the skill's ratio
+  rather than multiplying the total, and there was no way to see that had happened. The ratio row
+  now spells it out: *Cart Revolution Lv5: 250% + Power-Thrust Lv5 +25 = 275%*. Same for Maximum
+  Power-Thrust and Sonic Acceleration.
 - **Picking a skill now starts it at max rank** instead of Lv1 — that's the rank builds are
   planned around, so it's one less thing to set every time. The rank input beside it still moves,
   and a skill loaded from a shared build keeps whatever rank it was saved with.

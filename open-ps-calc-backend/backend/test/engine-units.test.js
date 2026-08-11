@@ -679,7 +679,7 @@ test("a cast above the skill's real rank is clamped, not computed", () => {
   // Joint Beat is 5 ranks on PS. A Lv10 request — from a share URL made while the
   // picker offered the vanilla 10 — must price as Lv5, not as a rank that doesn't exist.
   const step = (r) => r.normal.steps.find((s) => /Skill Ratio/.test(s.name)).name;
-  assert.match(step(at(10)), /Lv 5\)/);
+  assert.match(step(at(10)), /Joint Beat Lv5\)/);
   assert.equal(at(10).normal.avg_damage, at(5).normal.avg_damage);
 });
 

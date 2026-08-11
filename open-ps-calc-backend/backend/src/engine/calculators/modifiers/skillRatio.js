@@ -115,6 +115,13 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
     flatAdd += profile.param_skill_flat_adds[skillName](params, skill.level);
   }
 
+  // Everything that moves the ratio after the skill's own value, recorded so the
+  // breakdown can SHOW the arithmetic. A player reported that Power-Thrust's
+  // contribution was invisible: the row read "×2.75" with no hint that 250% of it
+  // was Cart Revolution and 25 points were the buff.
+  const baseRatio = ratio;
+  const ratioParts = [];
+
   const active = build.active_status_levels || {};
   // Power-Thrust (BS_OVERTHRUST) is a FIVE-rank skill: +5% ATK per rank, +25% at
   // max, added to the skill multiplier rather than multiplied in
@@ -123,19 +130,28 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
   // (a player caught Cart Revolution being priced at 300% instead of 275%).
   const otMax = (loader.getSkillByName("BS_OVERTHRUST") || {}).max_level || 5;
   if ("SC_OVERTHRUST" in active) {
-    ratio += 5 * Math.min(active.SC_OVERTHRUST, otMax);
+    const lv = Math.min(active.SC_OVERTHRUST, otMax);
+    ratio += 5 * lv;
+    ratioParts.push(`Power-Thrust Lv${lv} +${5 * lv}`);
   } else {
     const otLv = Math.min(Number(build.support_buffs.SC_OVERTHRUST || 0), otMax);
     if (otLv > 0) {
-      if (profile.mechanic_flags.has("BS_OVERTHRUST_PARTY_FULL_BONUS")) ratio += 5 * otLv;
-      else ratio += 5;
+      const add = profile.mechanic_flags.has("BS_OVERTHRUST_PARTY_FULL_BONUS") ? 5 * otLv : 5;
+      ratio += add;
+      ratioParts.push(`Power-Thrust Lv${otLv} (party) +${add}`);
     }
   }
-  if ("SC_OVERTHRUSTMAX" in active) ratio += 20 * active.SC_OVERTHRUSTMAX;
+  if ("SC_OVERTHRUSTMAX" in active) {
+    const add = 20 * active.SC_OVERTHRUSTMAX;
+    ratio += add;
+    ratioParts.push(`Maximum Power-Thrust Lv${active.SC_OVERTHRUSTMAX} +${add}`);
+  }
 
   if (skillName === "AS_SONICBLOW" && (params.AS_SONICBLOW_sonic_accel ?? true)) {
+    const before = ratio;
     ratio = Math.floor(ratio * 110 / 100);
     ratioSrc += " ×1.1 (Sonic Accel)";
+    ratioParts.push(`Sonic Acceleration ×1.1 (${before} → ${ratio})`);
   }
 
   // PS Performing (Bard/Dancer, Musical Strike / Throw Arrow): the profile
@@ -205,6 +221,18 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
     }
   }
 
+  // The step's label and note, in players' terms rather than ids: "Skill Ratio
+  // (ID 0 Lv 1)" told nobody anything. Normal attacks say so; skills carry their
+  // display name and rank; and the note spells out how the percentage was reached
+  // when anything modified it.
+  const skillLabel = skill.id === 0
+    ? "Normal attack"
+    : `${loader.getSkillDisplayName(skillName, profile) || skillName || `Skill ${skill.id}`} Lv${skill.level}`;
+  const ratioNote = ratioParts.length
+    ? `${skillLabel}: ${baseRatio}%` + ratioParts.map((p) => ` + ${p}`).join("") + ` = ${ratio}%`
+      + " — ATK buffs are ADDED into the skill's ratio, not multiplied onto the total."
+    : (skillData ? skillData.description || "" : "");
+
   const [mn, mx, av] = pmfStats(pmf);
   if (perfBaseRatio != null) {
     // Display split: base ratio first, then the Performing bonus as its own
@@ -212,7 +240,7 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
     // (cosmetic only — the damage applied the full ratio in one floor above).
     const back = perfBaseRatio / ratio;
     result.add_step({
-      name: `Skill Ratio (ID ${skill.id} Lv ${skill.level})`,
+      name: `Skill Ratio (${skillLabel})`,
       value: Math.round(av * back), min_value: Math.round(mn * back), max_value: Math.round(mx * back),
       multiplier: perfBaseRatio / 100,
       note: skillData ? skillData.description || "" : "",
@@ -228,8 +256,8 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
     });
   } else {
     result.add_step({
-      name: `Skill Ratio (ID ${skill.id} Lv ${skill.level})`, value: av, min_value: mn, max_value: mx, multiplier: ratio / 100,
-      note: skillData ? skillData.description || "" : "",
+      name: `Skill Ratio (${skillLabel})`, value: av, min_value: mn, max_value: mx, multiplier: ratio / 100,
+      note: ratioNote,
       formula: `dmg × ${ratio}% × ${hitLabel} (${ratioSrc})`,
       hercules_ref: "battle.c battle_calc_skillratio",
     });

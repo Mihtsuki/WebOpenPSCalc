@@ -136,6 +136,44 @@ function connectorInfo(step: Step, prev: Step): { badge: string; cls: string } {
   return { badge: "", cls: "conn-pass" };
 }
 
+// The engine names its steps after the Hercules functions they port (Attr Fix,
+// Card Fix, Defense Fix…) which keeps the code auditable against battle.c — but
+// it is not what a player reading a damage breakdown needs. Display labels are a
+// presentation concern, so they live here; `step.name` stays the engine's, and
+// the raw name is still shown in the row's tooltip for anyone cross-referencing.
+const STEP_LABELS: Record<string, string> = {
+  "Status BATK": "Status ATK",
+  "Weapon ATK Range": "Weapon damage roll",
+  "Size Fix": "Size penalty",
+  "Status BATK Added": "Your status ATK",
+  "Overrefine Bonus": "Overrefine bonus",
+  "Base Damage": "Base damage",
+  "Defense Fix": "Target's DEF",
+  "Magic Defense Fix": "Target's MDEF",
+  "Active Status Bonuses": "Buffs & statuses",
+  "Refine Bonus": "Refine ATK",
+  "Mastery Fix": "Weapon mastery",
+  "Weapon Research": "Weaponry Research",
+  "Attr Fix": "Element vs target",
+  "Card Fix": "Cards & gear",
+  "Card Fix (Magic)": "Cards & gear",
+  "Forge Bonus": "Forged weapon",
+  "Final Rate Bonus (Short)": "Melee damage bonuses",
+  "Final Rate Bonus (Long)": "Ranged damage bonuses",
+  "Final Rate Bonus (Weapon)": "Weapon-type bonuses",
+  "Skill ATK Bonus": "Per-skill gear bonus",
+  "Base MATK": "MATK roll",
+  "Branch": "Critical hit",
+  "Final Damage": "Final damage",
+};
+// "Skill Ratio (Bash Lv10)" → "Skill ratio — Bash Lv10". The engine already puts
+// the skill's display name (or "Normal attack") in the brackets.
+function stepLabel(name: string): string {
+  const m = /^Skill Ratio \((.+)\)$/.exec(name);
+  if (m) return `Skill ratio — ${m[1]}`;
+  return STEP_LABELS[name] ?? name;
+}
+
 function PipelineView({ steps, hideFinal = false, legend = true }: { steps: Step[]; hideFinal?: boolean; legend?: boolean }) {
   // Notes are hidden by default (hover reveals, tap pins) to keep the breakdown compact.
   const [open, setOpen] = useState<Set<number>>(() => new Set());
@@ -161,8 +199,8 @@ function PipelineView({ steps, hideFinal = false, legend = true }: { steps: Step
       {chips.length > 0 && (
         <div className="pipeline-inputs">
           {chips.map((s, i) => (
-            <span key={i} className="pipeline-chip" title={s.note || undefined}>
-              <span className="pipeline-chip-label">{s.name}</span>
+            <span key={i} className="pipeline-chip" title={[stepLabel(s.name) !== s.name ? s.name : "", s.note].filter(Boolean).join(" — ") || undefined}>
+              <span className="pipeline-chip-label">{stepLabel(s.name)}</span>
               <span className="pipeline-chip-val">{stepDisplayVal(s)}</span>
             </span>
           ))}
@@ -190,10 +228,13 @@ function PipelineView({ steps, hideFinal = false, legend = true }: { steps: Step
               <div
                 className={`pl-row${isFinal ? " pl-row--final" : ""}${hasNote ? " pl-row--note" : ""}`}
                 onClick={hasNote ? () => toggle(i) : undefined}
-                title={hasNote ? step.note : undefined}
+                // The engine's own step name rides along in the tooltip, so the
+                // friendlier label never costs you the ability to match a row
+                // against the formula it ports.
+                title={[stepLabel(step.name) !== step.name ? step.name : "", hasNote ? step.note : ""].filter(Boolean).join(" — ") || undefined}
               >
                 <span className={`pl-badge ${conn ? conn.cls : ""}`}>{conn ? conn.badge : ""}</span>
-                <span className="pl-name">{step.name}</span>
+                <span className="pl-name">{stepLabel(step.name)}</span>
                 <span className="pl-dots" aria-hidden="true" />
                 <span className="pl-val">{stepDisplayVal(step)}</span>
               </div>
