@@ -2687,7 +2687,13 @@ export default function BuildEditor() {
               <SearchPicker
                 placeholder="Search skills…"
                 search={skillSearch}
-                onSelect={(r) => setSkill({ id: r.id, level: 1, label: r.label, max_level: r.max_level ?? 10 })}
+                // Default to the skill's MAX rank: that's what a build is nearly
+                // always planned around, and Lv1 made every fresh pick look
+                // pointlessly weak. The rank input right next to it still moves.
+                onSelect={(r) => {
+                  const cap = r.max_level ?? 10;
+                  setSkill({ id: r.id, level: cap, label: r.label, max_level: cap });
+                }}
               />
             </div>
             {skill.id === 212 && data.server === "payon_stories" && (

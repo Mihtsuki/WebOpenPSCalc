@@ -27,6 +27,9 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Changed
 
+- **Picking a skill now starts it at max rank** instead of Lv1 — that's the rank builds are
+  planned around, so it's one less thing to set every time. The rank input beside it still moves,
+  and a skill loaded from a shared build keeps whatever rank it was saved with.
 - **Hilt Binding is easier to find.** The Blacksmith/Whitesmith passive list was in skill-tree
   order, which buried it in the middle of the six *Smith &lt;weapon&gt;* entries. Those six only
   matter because Veteran Axe reads how many you've mastered — they do nothing on their own — so
