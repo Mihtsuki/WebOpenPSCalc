@@ -15,6 +15,14 @@ instead of release version. Dates are taken from actual git commit history.
   stops losing 25% of its weapon ATK. The engine already understood the buff; there was simply no
   way to switch it on. Reported by a player.
 
+### Changed
+
+- **Hilt Binding is easier to find.** The Blacksmith/Whitesmith passive list was in skill-tree
+  order, which buried it in the middle of the six *Smith &lt;weapon&gt;* entries. Those six only
+  matter because Veteran Axe reads how many you've mastered — they do nothing on their own — so
+  they now sort last, putting **Hilt Binding, Weaponry Research and Tool Mastery** together at the
+  top. Reported by a player.
+
 ### Fixed
 
 - **Holy Cross's accuracy bonus now scales with its rank.** The calculator gave every rank of

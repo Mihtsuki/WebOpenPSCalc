@@ -541,7 +541,20 @@ class DataLoader {
           });
         }
       }
-      return entries;
+      // Picker order. The list otherwise comes out in skill-tree order, which is
+      // roughly alphabetical — that buried Hilt Binding (a real stat passive: +4
+      // ATK, +1 weapon level) in the middle of the six "Smith <weapon>" entries,
+      // where players stopped reading. The Smith skills are only in the picker
+      // because an ITEM SCRIPT reads their level (Veteran Axe scales off how many
+      // are mastered); they grant nothing on their own. So sink them below the
+      // passives that do something by themselves, keeping tree order within each
+      // group. Reported by a player who couldn't find Hilt Binding.
+      const CRAFTING_ONLY = new Set(["BS_DAGGER", "BS_SWORD", "BS_KNUCKLE", "BS_SPEAR", "BS_AXE", "BS_MACE"]);
+      const rank = (e) => (CRAFTING_ONLY.has(e.name) ? 1 : 0);
+      return entries
+        .map((e, i) => [e, i])
+        .sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1])
+        .map(([e]) => e);
     } catch {
       return [];
     }

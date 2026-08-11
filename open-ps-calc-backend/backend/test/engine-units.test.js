@@ -691,6 +691,14 @@ test("Smith Weapon skills master at rank 4; Smith Two-Handed Sword is gone", () 
     assert.equal(byName[n] && byName[n].max_level, 4, `${n} should offer 4 ranks`);
   }
   assert.ok(!("BS_TWOHANDSWORD" in byName), "Smith Two-Handed Sword folded into Smith Sword");
+  // The Smith skills grant nothing on their own (they are in the picker only so
+  // Veteran Axe's script can read them), so they must sort BELOW the passives
+  // that do — otherwise Hilt Binding gets lost in the middle of them.
+  const order = loader.getPassiveSkillsForJob(10).map((s) => s.name);
+  const firstSmith = order.findIndex((n) => n.startsWith("BS_") && n !== "BS_HILTBINDING" && n !== "BS_WEAPONRESEARCH");
+  for (const n of ["BS_HILTBINDING", "BS_WEAPONRESEARCH", "PS_MC_TOOLMASTERY"]) {
+    assert.ok(order.indexOf(n) >= 0 && order.indexOf(n) < firstSmith, `${n} must sort above the Smith skills`);
+  }
 });
 
 // ---------------------------------------------------------------------------
