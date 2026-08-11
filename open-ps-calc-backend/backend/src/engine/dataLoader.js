@@ -403,6 +403,23 @@ class DataLoader {
     return null;
   }
 
+  // Skill record by CONSTANT, with the profile's level cap applied — the
+  // by-id getSkill()'s counterpart for callers that only hold a name (the
+  // Plagiarism slot, which stores the copied skill by constant). Memoized per
+  // profile: the map is rebuilt when the server profile changes.
+  getSkillByName(skillName) {
+    if (!skillName) return null;
+    const cacheKey = this._profile ? this._profile.name : "none";
+    if (this.__skillByName == null || this.__skillByNameKey !== cacheKey) {
+      this.__skillByName = new Map();
+      this.__skillByNameKey = cacheKey;
+      for (const s of this.getAllSkills()) {
+        if (s && s.name && !this.__skillByName.has(s.name)) this.__skillByName.set(s.name, s);
+      }
+    }
+    return this.__skillByName.get(skillName) || null;
+  }
+
   getAllSkills() {
     let skills = [];
     try {

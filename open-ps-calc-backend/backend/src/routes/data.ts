@@ -287,6 +287,23 @@ router.get("/jobs", (_req: Request, res: Response) => {
   res.json(loader.getAllJobs());
 });
 
+// Skills a Rogue/Stalker can copy with Plagiarism, for the build editor's
+// Plagiarism slot. `jobs` tells the frontend which job ids get the slot at all,
+// so the job list lives in the profile rather than being hardcoded twice.
+router.get("/plagiarism", (req: Request, res: Response) => {
+  const server = applyServerProfile(req);
+  const profile = getProfile(server);
+  const skills = [...(profile.plagiarism_copyable || [])]
+    .map((name: string) => {
+      const rec = (loader as any).getSkillByName(name);
+      if (!rec) return null;
+      return { name, display_name: loader.getSkillDisplayName(name, profile), max_level: rec.max_level };
+    })
+    .filter((s: any) => s && s.max_level > 0)
+    .sort((a: any, b: any) => a.display_name.localeCompare(b.display_name));
+  res.json({ jobs: [...(profile.plagiarism_jobs || [])], skills });
+});
+
 router.get("/skill-tree/:jobId", (req: Request, res: Response) => {
   applyServerProfile(req);
   const skills = (loader as any).getPassiveSkillsForJob(Number(req.params.jobId));

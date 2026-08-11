@@ -20,6 +20,45 @@
  * for unaudited skills (it just also emits a warning step in that case).
  */
 
+// Skills a Rogue/Stalker can copy with Plagiarism (RG_PLAGIARISM), from
+// wiki.payonstories.com/Plagiarism — "Plagiarism can only learn strictly
+// offensive skills which can damage the rogue", and only ONE at a time (a new
+// copyable hit replaces it unless Preserve is toggled on). Constants resolved
+// from the skill DB display names on the wiki's list; a few differ from the
+// wiki wording (Arrow Repel = AC_CHARGEARROW "Charge Arrow", Venom Knife =
+// AS_VENOMKNIFE "Throw Venom Knife", B.S Sacramenti = PR_BENEDICTIO, Haze
+// Slasher = NJ_KASUMIKIRI "Haze Slash").
+// NB the four marked with * on the wiki (Heal, Ruwach, Aspersio, Sanctuary) are
+// only copyable while wearing Evil-Druid-carded armor, and the MvP-only ranks
+// (Intimidate 10 off Samurai Spectre, Water Ball 6/10 off Drake/Ktullanux) can
+// exceed the level the skill DB allows — the picker caps at the DB max.
+const PLAGIARISM_COPYABLE = new Set([
+  // Swordman / Knight / Crusader
+  "SM_BASH", "SM_MAGNUM", "KN_BOWLINGBASH",
+  "CR_GRANDCROSS", "CR_HOLYCROSS", "CR_SHIELDBOOMERANG", "CR_SHIELDCHARGE",
+  // Mage / Wizard / Sage
+  "MG_COLDBOLT", "MG_FIREBALL", "MG_FIREBOLT", "MG_FIREWALL", "MG_FROSTDIVER",
+  "MG_LIGHTNINGBOLT", "MG_NAPALMBEAT", "MG_SOULSTRIKE", "MG_THUNDERSTORM",
+  "WZ_EARTHSPIKE", "WZ_FIREPILLAR", "WZ_FROSTNOVA", "WZ_HEAVENDRIVE",
+  "WZ_JUPITEL", "WZ_VERMILION", "WZ_METEOR", "WZ_SIGHTRASHER", "WZ_STORMGUST",
+  "WZ_WATERBALL",
+  // Archer / Hunter
+  "AC_CHARGEARROW", "AC_SHOWER", "AC_DOUBLE",
+  "HT_BLASTMINE", "HT_CLAYMORETRAP", "HT_LANDMINE",
+  // Merchant / Alchemist
+  "MC_MAMMONITE", "AM_ACIDTERROR", "AM_DEMONSTRATION",
+  // Assassin
+  "AS_SPLASHER", "AS_VENOMKNIFE",
+  // Acolyte / Monk / Priest
+  "AL_HEAL", "AL_HOLYLIGHT", "AL_RUWACH",
+  "MO_EXTREMITYFIST", "MO_INVESTIGATE", "MO_TRIPLEATTACK", "MO_FINGEROFFENSIVE",
+  "PR_ASPERSIO", "PR_BENEDICTIO", "PR_MAGNUS", "PR_TURNUNDEAD", "PR_SANCTUARY",
+  // Ninja
+  "NJ_KASUMIKIRI", "NJ_KAENSIN", "NJ_HUUJIN", "NJ_HYOUSENSOU", "NJ_KOUENKA",
+  // MvP-only copies
+  "RG_INTIMIDATE",
+]);
+
 function emptyProfile(name, overrides = {}) {
   return {
     name,
@@ -70,6 +109,11 @@ function emptyProfile(name, overrides = {}) {
     weapon_avg_hits_by_zone: {},
     pet_bonuses: {},
     burning: null,
+    // Rogue/Stalker Plagiarism. Sourced from the PS wiki (see PLAGIARISM_COPYABLE);
+    // vanilla's copyable set is close but unaudited, so both profiles use this one.
+    plagiarism_copyable: PLAGIARISM_COPYABLE,
+    // Jobs that can copy a skill with it — Rogue and Stalker only.
+    plagiarism_jobs: new Set([17, 4018]),
     ...overrides,
   };
 }

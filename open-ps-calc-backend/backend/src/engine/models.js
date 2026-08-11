@@ -44,6 +44,11 @@ function createPlayerBuild(overrides = {}) {
 
     active_status_levels: {},
     mastery_levels: {},
+    // Rogue/Stalker Plagiarism: the ONE skill currently copied, as
+    // { name: <skill constant>, level: <copied rank> } (null = nothing copied).
+    // resolvePlayerState folds it into mastery_levels so a copied skill the
+    // engine reads passively (Triple Attack's auto-attack proc) actually fires.
+    plagiarized_skill: null,
 
     server: "payon_stories",
 

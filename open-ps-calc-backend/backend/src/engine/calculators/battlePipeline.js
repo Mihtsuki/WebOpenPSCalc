@@ -2021,9 +2021,13 @@ class BattlePipeline {
       ta_proc: taProc,
       ta_crit_proc: taCritProc,
       ta_proc_chance: taProcChance,
-      proc_branches: { ...(autoSpellBranch ? { autospell: autoSpellBranch } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzBranch } : {}), ...cardAutocastBranches },
-      proc_chances: { ...(autoSpellBranch ? { autospell: autoSpellChance } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzChance } : {}), ...cardAutocastChances },
-      proc_labels: { ...(autoSpellBranch ? { autospell: autoSpellLabel } : {}), ...(autoBlitzBranch ? { auto_blitz: "Auto Blitz Beat" } : {}), ...cardAutocastLabels },
+      // Triple Attack rides in `attacks`/DPS above, but it also gets a proc branch
+      // so the breakdown can SHOW what one proc hits for — it is the only source of
+      // damage a plagiarising Rogue has while auto-attacking, and Monks never had a
+      // readout for it either. `ta_proc` stays as-is for existing consumers.
+      proc_branches: { ...(autoSpellBranch ? { autospell: autoSpellBranch } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzBranch } : {}), ...(taProc ? { triple_attack: taProc } : {}), ...cardAutocastBranches },
+      proc_chances: { ...(autoSpellBranch ? { autospell: autoSpellChance } : {}), ...(autoBlitzBranch ? { auto_blitz: autoBlitzChance } : {}), ...(taProc ? { triple_attack: taProcChance } : {}), ...cardAutocastChances },
+      proc_labels: { ...(autoSpellBranch ? { autospell: autoSpellLabel } : {}), ...(autoBlitzBranch ? { auto_blitz: "Auto Blitz Beat" } : {}), ...(taProc ? { triple_attack: `Triple Attack Lv${taLv}` } : {}), ...cardAutocastLabels },
       dw_lh_normal:    dualWield ? dualWield.lhNormal        : null,
       dw_lh_crit:      dualWield ? dualWield.lhCrit          : null,
       dw_rh_factor:    dualWield ? dualWield.rhFactor         : null,

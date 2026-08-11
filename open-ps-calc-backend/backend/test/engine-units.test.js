@@ -883,6 +883,45 @@ test("mastery levels the job cannot learn are stripped (Assassin FLEE regression
   assert.deepEqual(loader.filterMasteryLevelsForJob(99999, { MO_IRONHAND: 10 }).dropped, []);
 });
 
+test("Plagiarism gives a Rogue the copied skill, gated by job, list and rank", () => {
+  const ROGUE = {
+    job_id: 17, base_level: 99, job_level: 50,
+    base_stats: { str: 80, agi: 70, vit: 40, int: 1, dex: 60, luk: 20 },
+    equipped: { right_hand: 1201 },
+  };
+  const dps = (over = {}) => runScenario({ name: "plag", build: { ...ROGUE, ...over }, target: 1036 }).result.dps;
+  const copied = (name, level) => ({ flags: { plagiarism: { name, level } } });
+
+  const plain = dps();
+  // A copied Triple Attack procs on NORMAL attacks — the whole point of recording
+  // it, since the damage skill stays on auto-attack.
+  const withTA = dps(copied("MO_TRIPLEATTACK", 5));
+  assert.ok(withTA > plain, "copied Triple Attack must proc on auto-attacks");
+  // PS retuned Triple Attack to 5 ranks; a copied "Lv10" clamps instead of falling
+  // off the rate table and silently procking nothing.
+  assert.equal(dps(copied("MO_TRIPLEATTACK", 10)), withTA, "over-max rank clamps to the PS max");
+  assert.equal(dps(copied("MO_TRIPLEATTACK", 0)), plain, "rank 0 is nothing copied");
+  // Only Rogue/Stalker copy skills, and only from the copyable list — a stale
+  // share link must not hand a Knight a plagiarised skill, nor a Rogue a
+  // non-copyable mastery.
+  const knight = { ...ROGUE, job_id: 7 };
+  assert.equal(
+    runScenario({ name: "kn1", build: { ...knight, ...copied("MO_TRIPLEATTACK", 5) }, target: 1036 }).result.dps,
+    runScenario({ name: "kn0", build: knight, target: 1036 }).result.dps,
+    "a Knight cannot plagiarise",
+  );
+  assert.equal(dps(copied("MO_IRONHAND", 10)), plain, "a skill off the copyable list is ignored");
+  assert.equal(dps({ flags: { plagiarism: { name: "", level: 5 } } }), plain, "an empty name is nothing copied");
+
+  // The copyable list is hand-transcribed from the PS wiki — every constant on it
+  // must resolve to a real skill, or the picker silently drops entries.
+  for (const name of PS.plagiarism_copyable) {
+    const rec = loader.getSkillByName(name);
+    assert.ok(rec && rec.max_level > 0, `${name} must exist in the skill DB`);
+  }
+  assert.ok(PS.plagiarism_jobs.has(17) && PS.plagiarism_jobs.has(4018), "Rogue and Stalker only");
+});
+
 test("card autocast (Pirate Skel to Mammonite) surfaces as a proc branch on auto-attacks only", () => {
   const cfg = createBattleConfig();
   const run = (skillId) => {

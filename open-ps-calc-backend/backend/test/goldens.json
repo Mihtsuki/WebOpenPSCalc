@@ -917,6 +917,110 @@
    }
   }
  },
+ "rogue-plagiarised-triple-attack": {
+  "status": {
+   "str": 86,
+   "agi": 77,
+   "vit": 46,
+   "int_": 5,
+   "dex": 67,
+   "luk": 20,
+   "batk": 167,
+   "max_hp": 6918,
+   "max_sp": 530,
+   "aspd": 168.7,
+   "cri": 76,
+   "hit": 166,
+   "flee": 176,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 5,
+   "matk_max": 6
+  },
+  "result": {
+   "dps": 330.224,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 7.6,
+   "period_ms": 626,
+   "normal": {
+    "min": 141,
+    "max": 141,
+    "avg": 141,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 179,
+    "max": 179,
+    "avg": 179,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "proc_branches": {
+    "triple_attack": {
+     "min": 481,
+     "max": 481,
+     "avg": 481,
+     "steps": [
+      "Status BATK",
+      "Weapon ATK",
+      "Weapon ATK Range",
+      "Size Fix",
+      "Status BATK Added",
+      "Overrefine Bonus",
+      "Base Damage",
+      "Skill Ratio (ID 263 Lv 5)",
+      "Defense Fix",
+      "Active Status Bonuses",
+      "Refine Bonus",
+      "Mastery Fix",
+      "Attr Fix",
+      "Card Fix",
+      "Final Rate Bonus (Short)",
+      "Final Rate Bonus (Weapon)",
+      "Final Damage"
+     ]
+    }
+   }
+  }
+ },
  "assassin-grimtooth": {
   "status": {
    "str": 96,

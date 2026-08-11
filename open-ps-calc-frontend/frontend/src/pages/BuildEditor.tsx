@@ -727,6 +727,7 @@ export default function BuildEditor() {
 
   const [jobs, setJobs] = useState<{ id: number; name: string }[]>([]);
   const [passiveSkills, setPassiveSkills] = useState<PassiveSkill[]>([]);
+  const [plagiarism, setPlagiarism] = useState<{ jobs: number[]; skills: { name: string; display_name: string; max_level: number }[] }>({ jobs: [], skills: [] });
   const [itemCache, setItemCache] = useState<Record<number, EquippedItemInfo>>({});
   const [mobInfo, setMobInfo] = useState<{
     name: string; level: number; race?: string;
@@ -1028,6 +1029,12 @@ export default function BuildEditor() {
     // (dataLoader.filterMasteryLevelsForJob), which also repairs existing share URLs.
     api.getJobPassives(data.job_id, data.server).then(setPassiveSkills).catch(() => setPassiveSkills([]));
   }, [data.job_id, data.server]);
+
+  // Plagiarism (Rogue/Stalker): the copyable-skill list and the jobs that get the
+  // slot both come from the server profile, so the wiki's list lives in one place.
+  useEffect(() => {
+    api.getPlagiarism(data.server).then(setPlagiarism).catch(() => setPlagiarism({ jobs: [], skills: [] }));
+  }, [data.server]);
 
   // Per-job-level STR/AGI/VIT/INT/DEX/LUK bonus (e.g. Knight +1 STR every
   // few job levels) -- statusCalculator.js already folds this into the
@@ -1464,6 +1471,11 @@ export default function BuildEditor() {
         .then((r) => r.items.map((s: any) => ({ id: s.id, label: s.display_name || s.name || `Skill ${s.id}`, sublabel: s.name, max_level: s.max_level ?? 10 }))),
     [data.server],
   );
+
+  // Rank cap for the plagiarised skill: its PS max level (Triple Attack is 5 ranks
+  // on PS, not 10). 0 when nothing is copied, which also disables the input.
+  const plagiarizedMax =
+    plagiarism.skills.find((s) => s.name === (data.flags?.plagiarism as any)?.name)?.max_level ?? 0;
 
   const currentEditorState: UrlEditorState = { build: data, skill, targetMode, customTarget, targetMods };
 
@@ -2231,6 +2243,76 @@ export default function BuildEditor() {
                   </div>
                 ))}
               </div>
+              </>
+            )}
+
+            {/* Plagiarism (Rogue/Stalker): the ONE skill you have copied. It is
+                not on your skill tree, so it can't live in the passive grid — but
+                the engine still needs it, because a copied Triple Attack procs on
+                your normal attacks. Recording it here also means you can leave the
+                damage skill above set to Normal attack and still keep the copy in
+                the build (and in the share link). */}
+            {plagiarism.jobs.includes(data.job_id) && (
+              <>
+                <div className="buff-section-header" style={{ marginTop: "0.9rem" }}>
+                  Plagiarism
+                  <InfoTooltip>
+                    Rogues and Stalkers copy the last offensive skill that hit them, at the
+                    rank it was used on you and no higher than your own Plagiarism rank —
+                    one skill at a time, kept between hits only while Preserve is toggled on.
+                    Set it here and the calculator treats it as your own: a copied
+                    <strong> Triple Attack</strong> procs on your normal attacks, so you can
+                    leave the damage skill on Normal attack and still see it. To see a copied
+                    spell's own damage (Jupitel Thunder, Asura Strike…), pick it as the skill
+                    at the top — it stays saved here either way. Heal, Ruwach, Aspersio and
+                    Sanctuary are only copyable while wearing Evil-Druid-carded armor.
+                  </InfoTooltip>
+                </div>
+                <div className="field-row">
+                  <div className="field" style={{ flex: 2 }}>
+                    <label>Copied skill</label>
+                    <select
+                      value={(data.flags?.plagiarism as any)?.name ?? ""}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        const rec = plagiarism.skills.find((s) => s.name === name);
+                        setData((prev) => ({
+                          ...prev,
+                          flags: {
+                            ...(prev.flags || {}),
+                            plagiarism: name ? { name, level: rec ? rec.max_level : 1 } : undefined,
+                          },
+                        }));
+                      }}
+                    >
+                      <option value="">— nothing copied —</option>
+                      {plagiarism.skills.map((s) => (
+                        <option key={s.name} value={s.name}>{s.display_name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>Rank</label>
+                    <input
+                      className="mono"
+                      type="number"
+                      min={0}
+                      max={plagiarizedMax}
+                      disabled={!(data.flags?.plagiarism as any)?.name}
+                      value={(data.flags?.plagiarism as any)?.level ?? 0}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        const lv = Math.max(0, Math.min(plagiarizedMax, Number(e.target.value) || 0));
+                        setData((prev) => {
+                          const cur = (prev.flags || {}).plagiarism as any;
+                          if (!cur?.name) return prev;
+                          return { ...prev, flags: { ...(prev.flags || {}), plagiarism: { ...cur, level: lv } } };
+                        });
+                      }}
+                    />
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-muted, #888)" }}>/ {plagiarizedMax}</span>
+                  </div>
+                </div>
               </>
             )}
           </Panel>

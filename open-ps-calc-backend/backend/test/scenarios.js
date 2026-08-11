@@ -116,6 +116,14 @@ const scenarios = [
     target: 1867,
   },
   {
+    // Plagiarism: a Rogue auto-attacking with a copied Triple Attack Lv5. The TA
+    // proc replaces the auto-attack at the PS rate, so this locks both the proc
+    // rate and the copied skill's ratio through a job that cannot learn it.
+    name: "rogue-plagiarised-triple-attack",
+    build: { job_id: 17, base_level: 99, job_level: 50, base_stats: { str: 80, agi: 70, vit: 40, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1201 }, flags: { plagiarism: { name: "MO_TRIPLEATTACK", level: 5 } } },
+    target: 1036,
+  },
+  {
     // vanilla_ok re-audit fixes (PS wiki). Grimtooth: flat 200% ATK all levels.
     name: "assassin-grimtooth",
     build: { job_id: 12, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 80, vit: 30, int: 1, dex: 60, luk: 10 }, equipped: { right_hand: 1250 } },

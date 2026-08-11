@@ -342,6 +342,34 @@ function AutoBlitzView({ branch, chance, dpsAdded }: { branch: DamageBranch; cha
   );
 }
 
+// Triple Attack — a Monk/Champion (or a Rogue who plagiarised it) has a per-rank
+// chance for a normal attack to become Triple Attack instead. It REPLACES the
+// swing rather than adding a hit, so its expected value is already inside the DPS
+// above; this panel is what one proc actually hits for.
+function TripleAttackView({ branch, chance, label }: { branch: DamageBranch; chance: number; label: string }) {
+  const n = (v: number) => Math.round(v).toLocaleString();
+  const range = Math.round(branch.min_damage) !== Math.round(branch.max_damage)
+    ? `${n(branch.min_damage)}–${n(branch.max_damage)}`
+    : n(branch.avg_damage);
+  return (
+    <div className="breakdown-view">
+      <div className="breakdown-head">
+        <span className="breakdown-title">{label}</span>
+        <span className="breakdown-sub">{chance.toFixed(1)}% per auto-attack</span>
+      </div>
+      <PipelineView steps={branch.steps} hideFinal />
+      <div className="breakdown-total">
+        <span className="breakdown-total-label">Per-proc damage</span>
+        <span className="breakdown-total-val">{range}</span>
+      </div>
+      <div className="self-damage-resists" style={{ marginTop: "0.5rem" }}>
+        <span className="self-damage-chip muted">replaces the auto-attack</span>
+        <span className="self-damage-chip muted">already folded into the DPS above</span>
+      </div>
+    </div>
+  );
+}
+
 // Card autocast on a physical attack (`bonus3 bAutoSpell,...`) — Pirate Skel Card's
 // auto-Mammonite, Rekenber Mercenary Card's auto-Bash. The proc rides on the swing
 // with no extra attack time, so its expected value is already inside the DPS above;
@@ -468,6 +496,15 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
         dpsAdded: periodMs > 0
           ? (autoBlitzDamage.avg_damage * (activeResult.result.proc_chances?.auto_blitz ?? 0) / 100) / (periodMs / 1000)
           : null,
+      }
+    : null;
+  // Triple Attack proc (Monk/Champion, or a Rogue's plagiarised copy).
+  const tripleAttackBranch = activeResult.result.proc_branches?.triple_attack ?? null;
+  const tripleAttack = tripleAttackBranch
+    ? {
+        branch: tripleAttackBranch,
+        chance: activeResult.result.proc_chances?.triple_attack ?? 0,
+        label: activeResult.result.proc_labels?.triple_attack ?? "Triple Attack",
       }
     : null;
   // Card autocasts on a physical attack (Pirate Skel Card → Mammonite, Rekenber
@@ -840,6 +877,8 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
       {autoSpell && <AutoSpellView branch={autoSpell.branch} chance={autoSpell.chance} label={autoSpell.label} />}
 
       {autoBlitz && <AutoBlitzView branch={autoBlitz.branch} chance={autoBlitz.chance} dpsAdded={autoBlitz.dpsAdded} />}
+
+      {tripleAttack && <TripleAttackView branch={tripleAttack.branch} chance={tripleAttack.chance} label={tripleAttack.label} />}
 
       {cardAutocasts.map((ac) => (
         <CardAutocastView key={ac.key} branch={ac.branch} chance={ac.chance} label={ac.label} dpsAdded={ac.dpsAdded} />

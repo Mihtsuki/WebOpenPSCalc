@@ -26,6 +26,26 @@ function resolvePlayerState(build, config, profile = null) {
   const { levels: legalMastery, dropped } = loader.filterMasteryLevelsForJob(build.job_id, build.mastery_levels);
   if (dropped.length) build = { ...build, mastery_levels: legalMastery };
 
+  // Plagiarism (RG_PLAGIARISM): a Rogue/Stalker carries ONE copied skill and uses
+  // it as if it were their own, so its level belongs in mastery_levels — that is
+  // what makes a copied Triple Attack proc on auto-attacks. Folded in AFTER the
+  // job filter above (the copied skill is by definition not on the Rogue's tree),
+  // and gated on the job + the profile's copyable list so a stale share link
+  // can't hand a Knight a plagiarised Asura Strike. It never overwrites a level
+  // the job legitimately has.
+  const plag = build.plagiarized_skill;
+  if (plag && plag.name && plag.level > 0
+      && profile.plagiarism_jobs.has(build.job_id)
+      && profile.plagiarism_copyable.has(plag.name)
+      && !(plag.name in (build.mastery_levels || {}))) {
+    // Clamp to the skill's PS max rank — you cannot copy a rank that does not
+    // exist, and an over-max level reads as 0 in the rate tables (PS retuned
+    // Triple Attack to 5 ranks, so a copied "Lv10" would silently proc nothing).
+    const rec = loader.getSkillByName(plag.name);
+    const maxLv = rec && rec.max_level > 0 ? rec.max_level : plag.level;
+    build = { ...build, mastery_levels: { ...(build.mastery_levels || {}), [plag.name]: Math.min(plag.level, maxLv) } };
+  }
+
   function onePass(status) {
     const ctx = gearBonusAggregator.scriptCtxFromBuild(build, status);
     const gb = gearBonusAggregator.compute(build.equipped, build.refine_levels, ctx, build.force_procs);

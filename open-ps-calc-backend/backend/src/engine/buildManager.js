@@ -59,6 +59,7 @@ function buildToSaveSchema(build, loader) {
       armor_element: build.armor_element,
       spirit_spheres: build.spirit_spheres,
       sn_never_died: build.sn_never_died,
+      plagiarism: build.plagiarized_skill,
     },
     server: build.server,
     manual_adj: { ...build.manual_adj_bonuses },
@@ -146,6 +147,12 @@ function buildFromSaveSchema(data) {
     sn_never_died: flags.sn_never_died ?? false,
     armor_element: flags.armor_element ?? 0,
     spirit_spheres: flags.spirit_spheres ?? 0,
+    // Plagiarism (Rogue/Stalker): { name, level }. Rides in `flags` so it
+    // round-trips through the existing share-URL key rather than needing a new
+    // positional Z3 code. Anything malformed is treated as "nothing copied".
+    plagiarized_skill: (flags.plagiarism && flags.plagiarism.name)
+      ? { name: String(flags.plagiarism.name), level: Math.max(0, Number(flags.plagiarism.level) || 0) }
+      : null,
     force_procs: flags.force_procs ?? false,
     server: data.server || "payon_stories",
     manual_adj_bonuses: data.manual_adj || {},

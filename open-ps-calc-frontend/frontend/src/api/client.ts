@@ -40,6 +40,9 @@ export const api = {
     request("/data/jobs") as Promise<{ id: number; name: string }[]>,
   getJobPassives: (jobId: number, server: string) =>
     request(`/data/skill-tree/${jobId}?server=${server}`) as Promise<{ name: string; mastery_key: string; description: string; max_level: number }[]>,
+  // Rogue/Stalker Plagiarism: which jobs get the slot, and what they can copy.
+  getPlagiarism: (server: string) =>
+    request(`/data/plagiarism?server=${server}`) as Promise<{ jobs: number[]; skills: { name: string; display_name: string; max_level: number }[] }>,
   getJobBonusStats: (jobId: number, jobLevel: number, server: string) =>
     request(`/data/job-bonus-stats/${jobId}?job_level=${jobLevel}&server=${server}`) as Promise<{ str_: number; agi: number; vit: number; int_: number; dex: number; luk: number }>,
   searchItems: (params: Record<string, unknown>) =>

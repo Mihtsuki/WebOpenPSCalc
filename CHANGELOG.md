@@ -9,6 +9,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Rogues and Stalkers can plagiarise.** The Passive skills panel now has a **Plagiarism** slot:
+  pick the skill you've copied and its rank, from the 55 skills the PS wiki lists as copyable. It's
+  saved with the build and travels in the share link, so you can record a copied **Jupitel Thunder
+  Lv10** and still leave the damage skill set to Normal attack. It isn't just bookkeeping — a copied
+  **Triple Attack** procs on your auto-attacks, which the calculator previously had no way to model
+  (Triple Attack is 5 ranks on PS, and the slot caps you there). To see a copied spell's own damage,
+  pick it as the skill at the top as usual. Reported by a player.
+- **Triple Attack procs now get their own breakdown card**, showing what one proc hits for and the
+  proc chance, for Monks and Champions as well as plagiarising Rogues. It replaces the auto-attack
+  rather than adding a hit, so its damage was already inside the DPS — you just couldn't see it.
 - **Weapon Perfection is now a buff you can turn on** — as a Blacksmith self-buff *and* as a party
   buff, since on Payon Stories party members receive it too. It nullifies the weapon-vs-size
   penalty completely: every weapon deals 100% to every size, so an Axe against a Medium target

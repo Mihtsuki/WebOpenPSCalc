@@ -706,6 +706,15 @@ brackets are the number of PS-custom entries found across those tables.
    to `ps_skill_db.json`), so both are selectable and compute (DEF applies). Only Holy Strike
    (PS_PR_HOLYSTRIKE) remains unsurfaced — a passive melee proc with a mismatched job array
    ([7, 4008] = Knight/LK) that needs its own review.
+   **Plagiarism (2026-08-11):** a Rogue/Stalker build now carries the ONE copied skill in
+   `flags.plagiarism` (`{name, level}`); `playerStateBuilder` folds it into `mastery_levels` after
+   the job filter, gated on `profile.plagiarism_jobs` + `plagiarism_copyable` (the wiki's copyable
+   list, in `serverProfiles.js`) and clamped to the skill's PS max rank. That is what makes a copied
+   **Triple Attack** proc on auto-attacks — the only copyable skill the engine reads passively;
+   everything else was already castable from the (job-unfiltered) skill picker. Reported by a player
+   who had no way to record a copy without setting it as the damage skill. Open: the MvP-only ranks
+   the wiki documents (Intimidate 10 off Samurai Spectre, Water Ball 6/10 off Drake/Ktullanux) exceed
+   the skill DB's max and are clamped away — the picker has no notion of an above-max rank.
 5. **Swordsman / Knight [6]** — ✅ done (Knight Patch PDF + wiki, with-DEF). Fixed: **Blade Mastery**
    (SM_TWOHAND, key SM_TWOHANDSWORD) now covers 1H swords — the fallback pointed at a non-existent
    `KN_TWOHANDMASTERY`, so 1H-sword Knights got no mastery ATK; **Counter Attack** always-crits (its
