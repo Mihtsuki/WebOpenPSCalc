@@ -3,8 +3,12 @@ interface Props {
   periodMs: number;
   /** Animation delay: 2 × (2000 − ASPD×10) ms. The time one swing occupies. */
   adelayMs: number;
-  /** A skill's cadence rather than a plain swing: changes the wording and the last row. */
+  /** A skill's cadence rather than a plain swing: changes the wording and the rows. */
   isSkill?: boolean;
+  /** Cast time in ms, after DEX / Bragi / gear reductions. Skills only. */
+  castMs?: number;
+  /** After-cast delay in ms, after reductions. Skills only. */
+  afterCastMs?: number;
 }
 
 /** "0.57 s (566 ms)" — the two units players actually quote these timings in. */
@@ -16,16 +20,17 @@ function fmtTime(ms: number) {
  * The attack/cast rate readout, shared by the damage panel's ASPD metric and the
  * Combat stats ASPD card so the two can never drift apart.
  *
- * Two representations, because those are the two players look for: attacks per second,
- * and the time between attacks (2 atk/s = 0.5 s). For a skill the animation delay is
- * printed beside its cast cadence, since lining those two up is what the numbers are
- * for — but the panel states no rule about which one wins. Explaining the mechanic is
- * the wiki's job; this is a readout.
+ * Shows the BASE timings and two derivatives, per gibz: cast time, after-cast delay
+ * and animation delay are the three independent numbers a caster works with —
+ * expressed separately because you tune the animation delay AGAINST the after-cast
+ * delay — and "between casts" is the combined figure that per-second comes from.
+ * Which of the timings wins is left to the reader; explaining the mechanic is the
+ * wiki's job.
  *
- * The only note kept is the one that qualifies the number itself: a cycle can carry
- * more than one hit, so this is not hits per second.
+ * A plain attack has no cast or after-cast delay, so its animation delay IS the
+ * cycle, and the ASPD formula is shown in place of the missing rows.
  */
-export default function AttackRateNote({ periodMs, adelayMs, isSkill = false }: Props) {
+export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, castMs, afterCastMs }: Props) {
   const perSec = 1000 / periodMs;
 
   return (
@@ -38,23 +43,39 @@ export default function AttackRateNote({ periodMs, adelayMs, isSkill = false }: 
         <span>Per second</span>
         <span>{perSec.toFixed(2)} {isSkill ? "casts/s" : "atk/s"}</span>
       </div>
-      <div className="tooltip-row">
-        <span>Between {isSkill ? "casts" : "attacks"}</span>
-        <span>{fmtTime(periodMs)}</span>
-      </div>
-      {isSkill ? (
+      {isSkill && castMs != null && (
         <div className="tooltip-row">
-          <span>Animation delay</span>
-          <span>{fmtTime(adelayMs)}</span>
+          <span>Cast time</span>
+          <span>{castMs > 0 ? fmtTime(castMs) : "instant"}</span>
         </div>
-      ) : (
-        <div className="tooltip-row"><span>Formula</span><span>50 ÷ (200 − ASPD)</span></div>
+      )}
+      {isSkill && afterCastMs != null && (
+        <div className="tooltip-row">
+          <span>After-cast delay</span>
+          <span>{fmtTime(afterCastMs)}</span>
+        </div>
+      )}
+      <div className="tooltip-row">
+        <span>Animation delay</span>
+        <span>{fmtTime(adelayMs)}</span>
+      </div>
+      {isSkill && (
+        // The cycle the three above resolve to, and what Per second is derived from.
+        // Usually cast + after-cast; when a swing is slower it equals the animation
+        // delay instead, and seeing the two rows match is the explanation.
+        <div className="tooltip-row tooltip-row--total">
+          <span>Between casts</span>
+          <span>{fmtTime(periodMs)}</span>
+        </div>
       )}
       {!isSkill && (
-        <div className="tooltip-note">
-          Attack cycles, not hits — a katar's second hit, dual-wield's third hit and multi-hit
-          skills all land inside one cycle.
-        </div>
+        <>
+          <div className="tooltip-row"><span>Formula</span><span>50 ÷ (200 − ASPD)</span></div>
+          <div className="tooltip-note">
+            Attack cycles, not hits — a katar's second hit, dual-wield's third hit and multi-hit
+            skills all land inside one cycle.
+          </div>
+        </>
       )}
     </>
   );

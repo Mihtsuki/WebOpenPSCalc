@@ -341,8 +341,22 @@ router.post("/", (req: Request, res: Response) => {
       str_: gearBonuses.str_, agi: gearBonuses.agi, vit: gearBonuses.vit,
       int_: gearBonuses.int_, dex: gearBonuses.dex, luk: gearBonuses.luk,
     };
+    // The base timings behind the cast rate, so the UI can show them instead of only
+    // the cycle they add up to: cast time, after-cast delay, and the animation delay
+    // one swing occupies. Same function and inputs the pipeline used for the period,
+    // so these always reconcile with it. Cast/after-cast are 0 for a plain attack.
+    const skillDataForTiming = skill.id !== 0 ? loader.getSkill(skill.id) : null;
+    const [castMsOut, afterCastMsOut] = skillDataForTiming
+      ? calculateSkillTiming(skillDataForTiming.name, skill.level, skillDataForTiming, status,
+          gearBonuses, effBuild.support_buffs, effBuild.server)
+      : [0, 0];
+    const timing = {
+      cast_ms: castMsOut,
+      after_cast_ms: afterCastMsOut,
+      animation_ms: 2 * Math.max(100, Math.round(2000 - status.aspd * 10)),
+    };
     const falcon = computeFalconDamage(status, effBuild, gearBonuses, target, loader);
-    res.json({ status, weapon, target, result: battleResult, gear_stat_bonuses, falcon, has_auto_bonuses: gearBonuses.auto_bonuses.length > 0 });
+    res.json({ status, weapon, target, result: battleResult, timing, gear_stat_bonuses, falcon, has_auto_bonuses: gearBonuses.auto_bonuses.length > 0 });
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: "Calculation failed", detail: String(err.message || err) });

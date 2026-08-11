@@ -515,6 +515,8 @@ label {
   border-top: 1px solid var(--border-soft);
 }
 .info-tooltip-bubble .tooltip-row span:first-child { color: var(--text-faint); white-space: nowrap; }
+/* The row the ones above resolve to (between casts) — reads as a total, not a peer. */
+.info-tooltip-bubble .tooltip-row--total span:last-child { color: var(--text); }
 
 /* ---------------- Dashboard / build list ---------------- */
 .build-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }

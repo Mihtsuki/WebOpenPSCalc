@@ -60,6 +60,9 @@ interface FalconResult {
 interface SingleResult {
   has_auto_bonuses?: boolean;
   status: { aspd: number };
+  // Base timings behind the cast rate (routes/calculate.ts). Cast and after-cast are
+  // 0 on the normal-attack result, which has neither.
+  timing?: { cast_ms: number; after_cast_ms: number; animation_ms: number };
   result: {
     hit_chance: number;
     crit_chance: number;
@@ -617,7 +620,13 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
         {attackRate ? (
           <HoverNote
             className="metric"
-            note={<AttackRateNote periodMs={attackRate.periodMs} adelayMs={aspdDelayMs} isSkill={rateIsSkill} />}
+            note={<AttackRateNote
+              periodMs={attackRate.periodMs}
+              adelayMs={activeResult.timing?.animation_ms ?? aspdDelayMs}
+              isSkill={rateIsSkill}
+              castMs={rateIsSkill ? activeResult.timing?.cast_ms : undefined}
+              afterCastMs={rateIsSkill ? activeResult.timing?.after_cast_ms : undefined}
+            />}
           >
             <div className="label">ASPD</div>
             <div className="value">
