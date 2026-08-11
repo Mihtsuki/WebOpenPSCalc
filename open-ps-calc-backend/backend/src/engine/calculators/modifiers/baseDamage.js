@@ -89,16 +89,33 @@ function calculateBaseDamage(status, weapon, build, target, skill, result, opts 
     result.add_step({ name: "Arrow ATK", value: aAvg, min_value: aMin, max_value: aMax, note: `Ammo ID ${ammoId}: +${arrowAtk} ATK`, formula: "damage += arrow roll", hercules_ref: "battle.c:658-660" });
   }
 
+  // Weapon Perfection (BS_WEAPONPERFECT) nullifies the size penalty outright —
+  // "All weapons will deal 100% damage on all monsters regardless of the target's
+  // size or player's weapon". On PS it is also a PARTY buff ("Party members also
+  // receive this skill's effects" — wiki.payonstories.com/Weapon_Perfection), so
+  // it counts whether you cast it or a party Blacksmith did. Level sets duration
+  // only, so either source is presence-only.
+  const weaponPerfect = "SC_WEAPONPERFECT" in build.active_status_levels
+    || Number((build.support_buffs || {}).SC_WEAPONPERFECT || 0) > 0;
+
   let sizeMult = 100;
-  if (!build.no_sizefix && !skill.ignore_size_fix && !("SC_WEAPONPERFECT" in build.active_status_levels)) {
+  let sizeNote;
+  if (build.no_sizefix) {
+    sizeNote = `size penalty nullified (gear bNoSizeFix) → 100%`;
+  } else if (skill.ignore_size_fix) {
+    sizeNote = `${skill.name || "skill"} ignores the size penalty → 100%`;
+  } else if (weaponPerfect) {
+    sizeNote = `size penalty nullified (Weapon Perfection) → 100%`;
+  } else {
     sizeMult = loader.getSizeFixMultiplier(weapon.weapon_type, target.size);
     pmf = scaleFloor(pmf, sizeMult, 100);
+    sizeNote = `${weapon.weapon_type} vs ${target.size} target → ${sizeMult}%`;
   }
 
   const [sMin, sMax, sAvg] = pmfStats(pmf);
   result.add_step({
     name: "Size Fix", value: sAvg, min_value: sMin, max_value: sMax, multiplier: sizeMult / 100,
-    note: `${weapon.weapon_type} vs ${target.size} target → ${sizeMult}%`,
+    note: sizeNote,
     formula: `weapon_atk * ${sizeMult} // 100`, hercules_ref: "battle.c lines 659-664",
   });
 

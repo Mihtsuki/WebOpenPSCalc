@@ -7,6 +7,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-11
 
+### Added
+
+- **Weapon Perfection is now a buff you can turn on** — as a Blacksmith self-buff *and* as a party
+  buff, since on Payon Stories party members receive it too. It nullifies the weapon-vs-size
+  penalty completely: every weapon deals 100% to every size, so an Axe against a Medium target
+  stops losing 25% of its weapon ATK. The engine already understood the buff; there was simply no
+  way to switch it on. Reported by a player.
+
 ### Fixed
 
 - **Holy Cross's accuracy bonus now scales with its rank.** The calculator gave every rank of

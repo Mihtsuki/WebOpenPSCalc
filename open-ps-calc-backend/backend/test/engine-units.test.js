@@ -626,6 +626,27 @@ test("Adrenaline Rush: all melee weapons, 30/20% self and 20/10% party", () => {
   assert.equal(aspd(1707, SELF), aspd(1707, {}), "bows must remain excluded");
 });
 
+test("Weapon Perfection nullifies the size penalty, self-cast or from the party", () => {
+  // Axe vs a Medium target is a 75% size penalty — Weapon Perfection removes it.
+  // The PS wiki is explicit that party members receive the effect, so the party
+  // (support_buffs) source must be worth exactly as much as the self-cast one.
+  const build = {
+    server: "payon_stories", job_id: 10, base_level: 90, job_level: 50,
+    base_stats: { str: 90, agi: 40, vit: 40, int: 1, dex: 50, luk: 10 },
+    equipped: { right_hand: 1301 },
+  };
+  const avg = (buffs) => runScenario({ name: "wp", build: { ...build, ...buffs }, target: 1036 }).result.normal.avg;
+  const off = avg({});
+  const self = avg({ active_buffs: { SC_WEAPONPERFECT: 1 } });
+  const party = avg({ support_buffs: { SC_WEAPONPERFECT: 1 } });
+  assert.ok(self > off, "self-cast must remove the size penalty");
+  assert.equal(party, self, "party-cast must be identical to self-cast");
+  // Sanity: a weapon with no penalty against this size gains nothing from it.
+  const swordOff = avg({ equipped: { right_hand: 1101 } });
+  const swordOn = avg({ equipped: { right_hand: 1101 }, active_buffs: { SC_WEAPONPERFECT: 1 } });
+  assert.equal(swordOn, swordOff, "a 100% size match must be unaffected");
+});
+
 test("Crazy Uproar grants STR, VIT and soft DEF per level (self); party gets soft DEF only", () => {
   const cfg = createBattleConfig();
   const st = (buffs) => {

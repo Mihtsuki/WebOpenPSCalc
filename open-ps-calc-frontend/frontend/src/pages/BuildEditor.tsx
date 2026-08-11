@@ -326,6 +326,11 @@ const SELF_BUFFS = [
   // is the SC_ADRENALINE entry under Party buffs. Level only sets duration, so this
   // is presence-only. Kept on its own SC key so the two never overwrite each other.
   { key: "SC_ADRENALINE_SELF", label: "Adrenaline Rush (self)", max: 1, jobs: [10, 4011] },
+  // Weapon Perfection (BS_WEAPONPERFECT): nullifies the weapon-vs-size penalty
+  // entirely — every weapon deals 100% to every size. Level sets duration only,
+  // so presence-only. It IS castable on the party (see PARTY_BUFFS); this entry
+  // is the self-cast one, and either source nullifies the penalty the same way.
+  { key: "SC_WEAPONPERFECT",   label: "Weapon Perfection",      max: 1,  jobs: [10, 4011] },
   // Zeny Pincher (PS_BS_ZENYPINCHER, quest skill, toggled): Mammonite costs no zeny
   // and, after the PS Merchant rework, deals 100 + 25×lv% instead of 100 + 50×lv%
   // (350% vs 600% at Lv10). Only affects Mammonite.
@@ -383,6 +388,10 @@ const PARTY_BUFFS = [
   // a Mace/Axe and +10% with any other melee weapon (bows and guns excluded). Level
   // only sets duration; the self-cast version lives in SELF_BUFFS.
   { key: "SC_ADRENALINE", label: "Adrenaline Rush", max: 1, source: "Blacksmith" },
+  // Weapon Perfection from a party Blacksmith — the PS wiki is explicit that
+  // "Party members also receive this skill's effects", and the effect is the same
+  // as the self-cast one (no size penalty), so the engine treats both identically.
+  { key: "SC_WEAPONPERFECT", label: "Weapon Perfection", max: 1, source: "Blacksmith" },
   // Crazy Uproar from a party Merchant: soft DEF only (2 × level) — the +STR/+VIT
   // half is caster-only, which is why the self-cast entry lives in SELF_BUFFS.
   { key: "SC_SHOUT", label: "Crazy Uproar (party soft DEF)", max: 4, source: "Merchant" },
