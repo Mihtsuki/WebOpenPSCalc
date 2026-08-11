@@ -22,8 +22,10 @@ export interface BuildData {
   bonus_stats: Record<string, number>;
   equipped: Record<string, number | null>;
   refine: Record<string, number>;
-  // Forged-weapon Star Crumb bonus, per weapon slot (sc = crumbs 0–3, ranked forge).
-  forge?: Record<string, { sc: number; ranked: boolean }>;
+  // Forged-weapon properties, per weapon slot: sc = Star Crumbs 0–3, ranked forge,
+  // and ele = the elemental stone's element (0 Neutral / 1 Water / 2 Earth /
+  // 3 Fire / 4 Wind), which sets the weapon's element on its own.
+  forge?: Record<string, { sc: number; ranked: boolean; ele?: number }>;
   target_mob_id: number | null;
   server: string;
   weapon_element?: string;

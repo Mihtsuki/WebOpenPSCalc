@@ -592,6 +592,7 @@ const Z3_KEYS: string[] = [
   // Appended (keep at the end — Z3 codes are positional and must stay stable).
   "forge", "sc", "ranked",
   "burning",
+  "ele", // elemental forge (forge.<slot>.ele)
 ];
 const Z3_ENC: Record<string, string> = {};
 const Z3_DEC: Record<string, string> = {};
@@ -2027,6 +2028,31 @@ export default function BuildEditor() {
                           <option value={1}>Very Strong (+5)</option>
                           <option value={2}>Very Very Strong (+10)</option>
                           <option value={3}>Very Very Very Strong (+40)</option>
+                        </select>
+                        {/* Elemental forge — a Blacksmith forging with an elemental
+                            stone (Flame Heart / Mystic Frozen / Rough Wind / Great
+                            Nature) turns the weapon Fire / Water / Wind / Earth.
+                            Those four are the only forgeable elements. It applies on
+                            its own, with or without Star Crumbs, and an endow
+                            (Fire Weapon, Aspersio…) still overrides it while active. */}
+                        <select
+                          style={{ marginTop: "0.35rem" }}
+                          value={data.forge?.[slot.key]?.ele ?? 0}
+                          title="Elemental forge — the weapon's element comes from the elemental stone it was forged with. An active endow overrides it."
+                          onChange={(e) => {
+                            const ele = Number(e.target.value);
+                            setData((prev) => {
+                              const forge = { ...(prev.forge || {}) };
+                              forge[slot.key] = { sc: 0, ranked: false, ...(forge[slot.key] || {}), ele };
+                              return { ...prev, forge };
+                            });
+                          }}
+                        >
+                          <option value={0}>Neutral (no stone)</option>
+                          <option value={3}>Fire (Flame Heart)</option>
+                          <option value={1}>Water (Mystic Frozen)</option>
+                          <option value={4}>Wind (Rough Wind)</option>
+                          <option value={2}>Earth (Great Nature)</option>
                         </select>
                         <div className="field-checkbox" style={{ marginTop: "0.35rem" }}>
                           <label title="Forged by a ranked blacksmith — +10 seeking damage on top of the Star Crumb bonus.">

@@ -102,6 +102,13 @@ function buildFromSaveSchema(data) {
   const rhForge = (data.forge || {}).right_hand || {};
   const rhForgeSc = Math.max(0, Math.min(3, Number(rhForge.sc) || 0));
   const rhForgeRanked = !!rhForge.ranked;
+  // Elemental forge: a Blacksmith forges with an elemental stone (Flame Heart →
+  // Fire, Mystic Frozen → Water, Rough Wind → Wind, Great Nature → Earth), so the
+  // weapon comes out Fire/Water/Wind/Earth. Those four are the only forgeable
+  // elements — 1..4 in the engine's element ints (Water/Earth/Fire/Wind), 0 = the
+  // ordinary Neutral forge. An element ALONE makes the weapon forged: you can
+  // forge a plain Fire Katana with no Star Crumbs in it at all.
+  const rhForgeEle = Math.max(0, Math.min(4, Number(rhForge.ele) || 0));
 
   let activeBuffs = { ...(data.active_buffs || {}) };
   let supportBuffs = { ...(data.support_buffs || {}) };
@@ -135,10 +142,10 @@ function buildFromSaveSchema(data) {
     refine_levels: data.refine || {},
     weapon_element: data.weapon_element ?? null,
     forge: data.forge || {},
-    is_forged: rhForgeSc > 0 || rhForgeRanked,
+    is_forged: rhForgeSc > 0 || rhForgeRanked || rhForgeEle > 0,
     forge_sc_count: rhForgeSc,
     forge_ranked: rhForgeRanked,
-    forge_element: 0,
+    forge_element: rhForgeEle,
     active_status_levels: activeBuffs,
     mastery_levels: data.mastery_levels || {},
     is_ranged_override: flags.is_ranged_override ?? null,

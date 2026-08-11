@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Forged weapons can carry their element.** The forge control took Star Crumbs and a ranked
+  forge, but the weapon was always Neutral — so a **VVS Fire Katana** was priced as a plain one.
+  Pick the elemental stone it was forged with (**Flame Heart / Mystic Frozen / Rough Wind / Great
+  Nature**) and the weapon becomes Fire / Water / Wind / Earth. It works with or without Star
+  Crumbs — a Fire weapon with no crumbs is still a Fire weapon — and an active endow (Fire Weapon,
+  Aspersio…) still overrides it, as in game. Against a Ghoul, a VVS Fire Sword goes from 190 to
+  280 average.
 - **Rogues and Stalkers can plagiarise.** The Passive skills panel now has a **Plagiarism** slot:
   pick the skill you've copied and its rank, from the 55 skills the PS wiki lists as copyable. It's
   saved with the build and travels in the share link, so you can record a copied **Jupitel Thunder

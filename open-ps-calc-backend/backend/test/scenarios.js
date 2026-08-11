@@ -116,6 +116,14 @@ const scenarios = [
     target: 1867,
   },
   {
+    // Elemental forge: a VVS Fire Sword (2 Star Crumbs + Flame Heart) against the
+    // Undead Ghoul — locks the crumb ATK and the forged element together, since the
+    // element used to be hardcoded Neutral no matter what the build said.
+    name: "blacksmith-vvs-fire-forged-sword",
+    build: { job_id: 10, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 40, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1101 }, forge: { right_hand: { sc: 2, ele: 3 } } },
+    target: 1036,
+  },
+  {
     // Corruptor Card (8218) on footgear: Corrupting Drain procs on 4% of melee
     // swings for 100 + STR + ⌊STR²/40⌋ + DEX + … + LUK + ⌊LUK²/40⌋, unaffected by
     // element/size/race, healing 75% of what it deals. Locks the card's formula.

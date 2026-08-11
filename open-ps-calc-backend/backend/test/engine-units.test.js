@@ -147,6 +147,49 @@ test("resolveWeapon: element override > ammo script element > weapon innate", ()
   assert.strictEqual(resolveWeapon(loader, 1101, 0, 4, { script_atk_ele_rh: 3 }).element, 4);
 });
 
+test("an elemental forge sets the weapon's element, and an endow still beats it", () => {
+  const cfg = createBattleConfig();
+  const state = (forge, support = {}) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 40, vit: 40, int: 1, dex: 60, luk: 20 },
+      equipped: { right_hand: 1101 }, forge, support_buffs: support,
+    });
+    return resolvePlayerState(b, cfg, PS);
+  };
+  // Flame Heart forge → Fire (3). It counts as forged on its own: you can forge a
+  // Fire weapon with no Star Crumbs in it, and that must not invent a crumb bonus.
+  const [, effFire, fire] = state({ right_hand: { ele: 3 } });
+  assert.equal(fire.element, 3);
+  assert.equal(fire.forge_sc_count, 0, "an element alone is not a Star Crumb");
+  assert.equal(effFire.is_forged, true);
+  // Crumbs and element are independent.
+  const [, , both] = state({ right_hand: { sc: 2, ele: 1 } });
+  assert.equal(both.element, 1, "Mystic Frozen → Water");
+  assert.equal(both.forge_sc_count, 2);
+  // Only blacksmith-forgeable weapons can be forged at all — a bow ignores it.
+  const bowBuild = buildFromSaveSchema({
+    server: "payon_stories", job_id: 11, base_level: 99, job_level: 50,
+    base_stats: { str: 50, agi: 60, vit: 40, int: 1, dex: 90, luk: 20 },
+    equipped: { right_hand: 1707 }, forge: { right_hand: { sc: 2, ele: 3 } },
+  });
+  assert.equal(resolvePlayerState(bowBuild, cfg, PS)[2].element, 0, "not a forgeable weapon");
+  // An active endow overrides the forged element, as in game.
+  const [, , endowed] = state({ right_hand: { ele: 3 } }, { weapon_endow_sc: "SC_PROPERTYWATER" });
+  assert.equal(endowed.element, 1, "Water endow beats the Fire forge");
+
+  // And it reaches the damage: Fire vs an Undead-1 Ghoul beats Neutral.
+  const dmg = (forge) => runScenario({
+    name: "forge", target: 1036,
+    build: {
+      job_id: 10, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 40, vit: 40, int: 1, dex: 60, luk: 20 },
+      equipped: { right_hand: 1101 }, forge,
+    },
+  }).result.normal.avg;
+  assert.ok(dmg({ right_hand: { ele: 3 } }) > dmg({}), "Fire must beat Neutral vs Undead");
+});
+
 test("fire arrow feeds weapon element via its bAtkEle script (no override)", () => {
   const build = buildFromSaveSchema({
     job_id: 19, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 1, vit: 1, int: 1, dex: 1, luk: 1 },
