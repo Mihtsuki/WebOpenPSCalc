@@ -124,6 +124,14 @@ const scenarios = [
     target: 1036,
   },
   {
+    // Bow Rogue with the Gust Bow + Arrow of Wind combo: +25% long-range physical
+    // AND (INT 40+) a 20% Wind Blade Lv5 autocast. Locks both halves of a combo that
+    // grants an autocast — the autocast half used to be dropped on the floor.
+    name: "bowgue-gust-bow-wind-arrow",
+    build: { job_id: 17, base_level: 99, job_level: 50, base_stats: { str: 80, agi: 70, vit: 40, int: 40, dex: 90, luk: 20 }, equipped: { right_hand: 1733, ammo: 1755 } },
+    target: 1036,
+  },
+  {
     // vanilla_ok re-audit fixes (PS wiki). Grimtooth: flat 200% ATK all levels.
     name: "assassin-grimtooth",
     build: { job_id: 12, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 80, vit: 30, int: 1, dex: 60, luk: 10 }, equipped: { right_hand: 1250 } },

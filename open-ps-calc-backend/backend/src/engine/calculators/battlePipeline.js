@@ -1142,8 +1142,14 @@ class BattlePipeline {
     const specs = (gearBonuses && gearBonuses.autocast_on_attack) || [];
     if (!specs.length) return [];
 
+    // A spec tagged ATF_SHORT/ATF_LONG only fires at that range. Corruptor Card
+    // carries both (4% melee / 2% ranged), so without this a bow build would be
+    // priced at the melee rate.
+    const isRanged = resolveIsRanged(build, weapon, null);
+    const inRange = (s) => (s.melee_only && isRanged) || (s.ranged_only && !isRanged) ? false : true;
+
     const best = new Map(); // skill_id -> spec with the highest level, then rate
-    for (const spec of specs) {
+    for (const spec of specs.filter(inRange)) {
       const prev = best.get(spec.skill_id);
       if (!prev
         || spec.skill_level > prev.skill_level
@@ -1155,7 +1161,27 @@ class BattlePipeline {
     const out = [];
     for (const spec of best.values()) {
       const sd = loader.getSkill(spec.skill_id);
-      if (!sd) continue;
+      // A PS-custom proc skill with no battle data (Corruptor Card's Corrupting
+      // Drain: damage off STR/INT/DEX/LUK, no published formula). Surface the proc
+      // and its chance, but price NOTHING — it stays out of `attacks`, so the DPS
+      // never claims a number we can't derive. Silently dropping it read as "the
+      // card does nothing".
+      if (!sd || !sd.attack_type) {
+        const psName = loader.getPsSkill(spec.skill_name || "");
+        const label = (psName && psName.name) || spec.skill_name || `Skill ${spec.skill_id}`;
+        out.push({
+          key: `card_autocast_${spec.skill_name || spec.skill_id}`,
+          label: `${label} Lv${spec.skill_level || 1}`,
+          chance: spec.chance_per_mille / 10,
+          unmodeled: true,
+          branch: createDamageResult({ steps: [{
+            name: "Not yet implemented", value: 0, min_value: 0, max_value: 0, multiplier: 1,
+            note: `${label} has no published damage formula, so it is not yet implemented — the proc fires at the rate shown, but its damage is excluded from the DPS above.`,
+            formula: "", hercules_ref: "",
+          }] }),
+        });
+        continue;
+      }
       const dt = sd.damage_type || [];
       const level = Math.max(1, Math.min(spec.skill_level || 1, sd.max_level || 10));
       const castSkill = {
@@ -1995,6 +2021,7 @@ class BattlePipeline {
       ? this._runCardAutocastBranches(status, weapon, target, build, { profile, gear_bonuses: gearBonuses })
       : [];
     for (const ac of cardAutocasts) {
+      if (ac.unmodeled) continue; // shown, but never priced into the DPS
       attacks.push(createAttackDefinition(ac.branch.avg_damage, 0.0, 0.0, ac.chance / 100.0));
     }
     const cardAutocastBranches = Object.fromEntries(cardAutocasts.map((a) => [a.key, a.branch]));

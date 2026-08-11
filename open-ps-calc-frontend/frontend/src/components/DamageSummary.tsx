@@ -381,26 +381,40 @@ function CardAutocastView({ branch, chance, label, dpsAdded }: {
   const range = Math.round(branch.min_damage) !== Math.round(branch.max_damage)
     ? `${n(branch.min_damage)}–${n(branch.max_damage)}`
     : n(branch.avg_damage);
+  // A proc whose skill has no formula we can derive (Corruptor Card's Corrupting
+  // Drain). The proc and its rate are real, the damage is not calculated — say so
+  // rather than printing a 0 that reads as "this card does nothing".
+  const unmodeled = branch.steps.length === 1 && branch.steps[0].name === "Not yet implemented";
   return (
     <div className="breakdown-view">
       <div className="breakdown-head">
         <span className="breakdown-title">Card autocast — {label}</span>
         <span className="breakdown-sub">{chance}% per physical attack</span>
       </div>
-      <PipelineView steps={branch.steps} hideFinal />
-      <div className="breakdown-total">
-        <span className="breakdown-total-label">Per-proc damage</span>
-        <span className="breakdown-total-val">{range}</span>
-      </div>
-      {dpsAdded != null && dpsAdded > 0 && (
-        <div className="breakdown-total">
-          <span className="breakdown-total-label">≈ DPS added</span>
-          <span className="breakdown-total-val">+{n(dpsAdded)}</span>
-        </div>
+      {unmodeled ? (
+        // Same treatment an unmodelled SKILL gets in the main breakdown — a warn
+        // notice with the reason, never a number.
+        <div className="notice warn">{branch.steps[0].note}</div>
+      ) : (
+        <>
+          <PipelineView steps={branch.steps} hideFinal />
+          <div className="breakdown-total">
+            <span className="breakdown-total-label">Per-proc damage</span>
+            <span className="breakdown-total-val">{range}</span>
+          </div>
+          {dpsAdded != null && dpsAdded > 0 && (
+            <div className="breakdown-total">
+              <span className="breakdown-total-label">≈ DPS added</span>
+              <span className="breakdown-total-val">+{n(dpsAdded)}</span>
+            </div>
+          )}
+        </>
       )}
       <div className="self-damage-resists" style={{ marginTop: "0.5rem" }}>
         <span className="self-damage-chip muted">auto-attacks only</span>
-        <span className="self-damage-chip muted">already folded into the DPS above</span>
+        <span className="self-damage-chip muted">
+          {unmodeled ? "damage NOT included in the DPS above" : "already folded into the DPS above"}
+        </span>
       </div>
     </div>
   );

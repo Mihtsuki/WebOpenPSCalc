@@ -115,9 +115,16 @@ function buildAutocastSpec(bonuses, eff) {
     if (skillId == null) return;
     const skillLevel = typeof p[1] === "number" ? p[1] : 1;
     const rate = typeof p[2] === "number" ? p[2] : 0;
+    // bonus4's trigger-flag argument (ATF_SHORT / ATF_LONG / ATF_WEAPON | …). It
+    // arrives as the raw source text since the parser doesn't resolve the ATF_*
+    // constants; only the range half changes damage, so that's all we read. With no
+    // flag (bonus3) the autocast applies at any range, as before.
+    const flag = p.length >= 4 ? String(p[3]) : "";
     const spec = createAutocastSpec({
-      skill_id: skillId, skill_level: skillLevel, chance_per_mille: rate,
+      skill_id: skillId, skill_name: skillName, skill_level: skillLevel, chance_per_mille: rate,
       when_hit: bt === "bAutoSpellWhenHit",
+      melee_only: /ATF_SHORT/.test(flag),
+      ranged_only: /ATF_LONG/.test(flag),
     });
     if (bt === "bAutoSpellWhenHit") bonuses.autocast_when_hit.push(spec);
     else bonuses.autocast_on_attack.push(spec);
@@ -303,6 +310,14 @@ function applyComboBonuses(bonuses, equipped, profile = null, scriptCtx = null) 
         const skName = String(eff.params[0]);
         const skLv = typeof eff.params[1] === "number" ? eff.params[1] : 1;
         bonuses.skill_grants[skName] = Math.max(bonuses.skill_grants[skName] || 0, skLv);
+      } else if (["bAutoSpell", "bAutoSpellWhenHit", "bAutoSpellOnSkill"].includes(eff.bonus_type)) {
+        // A COMBO can grant an autocast too (Gust Bow + Arrow of Wind → Wind Blade
+        // Lv5), and those were being handed to applyEffect, which has no autospell
+        // field to write to — so they vanished. Route them the same way an item
+        // script's autocast is routed. NB when a combo declares the same skill twice
+        // at different rates (Gust Bow: 10%, then 20% at base INT ≥ 40) the pipeline
+        // keeps the higher one, matching the item text's "chance is increased".
+        buildAutocastSpec(bonuses, eff);
       } else {
         applyEffect(bonuses, eff);
         if (isCardCombo && bonuses.from_cards) applyEffect(bonuses.from_cards, eff);

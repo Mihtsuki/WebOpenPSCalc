@@ -1021,6 +1021,102 @@
    }
   }
  },
+ "bowgue-gust-bow-wind-arrow": {
+  "status": {
+   "str": 86,
+   "agi": 77,
+   "vit": 46,
+   "int_": 44,
+   "dex": 97,
+   "luk": 20,
+   "batk": 199,
+   "max_hp": 6918,
+   "max_sp": 727,
+   "aspd": 161.3,
+   "cri": 76,
+   "hit": 196,
+   "flee": 176,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 80,
+   "matk_max": 108
+  },
+  "result": {
+   "dps": 474.005,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 7.6,
+   "period_ms": 774,
+   "normal": {
+    "min": 306,
+    "max": 345,
+    "avg": 325,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Arrow ATK",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 405,
+    "max": 405,
+    "avg": 405,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Arrow ATK",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "proc_branches": {
+    "card_autocast_NJ_HUUJIN": {
+     "min": 147,
+     "max": 213,
+     "avg": 179,
+     "steps": [
+      "Base MATK",
+      "Skill Ratio (ID 540 Lv 5)",
+      "Magic Defense Fix",
+      "Attr Fix",
+      "Card Fix (Magic)",
+      "× 3 hits",
+      "Final Damage"
+     ]
+    }
+   }
+  }
+ },
  "assassin-grimtooth": {
   "status": {
    "str": 96,

@@ -883,6 +883,71 @@ test("mastery levels the job cannot learn are stripped (Assassin FLEE regression
   assert.deepEqual(loader.filterMasteryLevelsForJob(99999, { MO_IRONHAND: 10 }).dropped, []);
 });
 
+test("a COMBO can grant an autocast (Gust Bow + Arrow of Wind → Wind Blade)", () => {
+  const cfg = createBattleConfig();
+  const BOWGUE = {
+    server: "payon_stories", job_id: 17, base_level: 99, job_level: 50,
+    base_stats: { str: 80, agi: 70, vit: 40, int: 1, dex: 90, luk: 20 },
+  };
+  const state = (rh, ammo, int_ = 1) => {
+    const b = buildFromSaveSchema({ ...BOWGUE, base_stats: { ...BOWGUE.base_stats, int: int_ }, equipped: { right_hand: rh, ammo } });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    return { gb, res: new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }), loader.getMonster(1036), eff, gb) };
+  };
+
+  // The +25% long-range half of the four elemental-bow combos already worked (the
+  // vanilla combo db carries it) — pin it so it can't be lost.
+  for (const [bow, arrow] of [[1730, 1752], [1731, 1754], [1732, 1756], [1733, 1755]]) {
+    assert.equal(state(bow, arrow).gb.long_atk_rate, 25, `bow ${bow} + arrow ${arrow}`);
+  }
+  assert.equal(state(1733, 1752).gb.long_atk_rate, 0, "Gust Bow + Fire Arrow is not the pairing");
+  assert.equal(state(1734, 1755).gb.long_atk_rate, 0, "the arrow alone is not the combo");
+  assert.equal(state(1733, 1750).gb.long_atk_rate, 0, "the bow alone is not the combo");
+
+  // The AUTOCAST half was dropped: combo effects went to applyEffect, which has no
+  // autospell field, so Gust Bow's Wind Blade never existed. 10%, doubled to 20% at
+  // base INT ≥ 40 ("this chance is increased when the wearer's INT is 40 or greater").
+  const lowInt = state(1733, 1755, 1).res;
+  const highInt = state(1733, 1755, 40).res;
+  assert.equal(lowInt.proc_chances.card_autocast_NJ_HUUJIN, 10);
+  assert.equal(highInt.proc_chances.card_autocast_NJ_HUUJIN, 20);
+  assert.ok(highInt.proc_branches.card_autocast_NJ_HUUJIN.avg_damage > 0, "the proc must be priced");
+  assert.ok(highInt.dps > state(1733, 1750, 40).res.dps, "and must reach the DPS");
+  // Not a bow/arrow property — no combo, no autocast.
+  assert.equal(state(1733, 1750, 40).res.proc_branches.card_autocast_NJ_HUUJIN, undefined);
+});
+
+test("Corruptor Card's proc is surfaced at the right rate but never priced", () => {
+  const ROGUE = {
+    job_id: 17, base_level: 99, job_level: 50,
+    base_stats: { str: 80, agi: 70, vit: 40, int: 1, dex: 60, luk: 20 },
+  };
+  const CARD = { shoes: 2404, shoes_card1: 8218 };
+  const cfg = createBattleConfig();
+  // The live pipeline, not runScenario — the golden serializer drops proc_chances.
+  const run = (eq) => {
+    const b = buildFromSaveSchema({ server: "payon_stories", ...ROGUE, equipped: eq });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }),
+      loader.getMonster(1036), eff, gb);
+  };
+
+  const melee = run({ right_hand: 1201, ...CARD });
+  const ranged = run({ right_hand: 1733, ammo: 1755, ...CARD });
+  const key = "card_autocast_PS_CORRUPTINGDRAIN";
+  // The skill constant is PS-custom, so it isn't in the vanilla skill DB — it used to
+  // resolve to no id at all, which dropped the bonus silently.
+  assert.ok(melee.proc_branches?.[key], "the proc must be visible");
+  // ATF_SHORT / ATF_LONG: 4% melee, 2% ranged — the card carries both.
+  assert.equal(melee.proc_chances[key], 4);
+  assert.equal(ranged.proc_chances[key], 2);
+  // Corrupting Drain's damage formula isn't published, so it must NOT be priced:
+  // no fabricated number, and no contribution to the DPS.
+  assert.deepEqual(melee.proc_branches[key].steps.map((s) => s.name), ["Not yet implemented"]);
+  const noCard = run({ right_hand: 1201, shoes: 2404 });
+  assert.equal(melee.dps, noCard.dps, "an unpriced proc must not move the DPS");
+});
+
 test("Plagiarism gives a Rogue the copied skill, gated by job, list and rank", () => {
   const ROGUE = {
     job_id: 17, base_level: 99, job_level: 50,

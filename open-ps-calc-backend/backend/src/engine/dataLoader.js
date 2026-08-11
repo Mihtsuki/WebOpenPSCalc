@@ -648,6 +648,17 @@ class DataLoader {
       } catch {
         // ignore
       }
+      // PS-custom constants (PS_*) are absent from the vanilla skill DB, so an item
+      // script naming one (Corruptor Card's PS_CORRUPTINGDRAIN) resolved to null and
+      // its whole bonus was silently dropped. Register them too — whether the engine
+      // can PRICE the skill is a separate question, answered where it is consumed.
+      try {
+        for (const rec of this.getPsCustomSkills()) {
+          if (rec.constant && rec.id != null && !(rec.constant in mapping)) mapping[rec.constant] = Number(rec.id);
+        }
+      } catch {
+        // ignore
+      }
       this._skillNameToId = mapping;
     }
     return this._skillNameToId[name] ?? null;

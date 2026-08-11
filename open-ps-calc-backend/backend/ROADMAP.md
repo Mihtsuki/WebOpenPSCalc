@@ -949,6 +949,15 @@ this **description-clause** pass over trusting `levels[].effect` (damage-only) f
   skill pages, all vanilla-parity values. Sources now SUM into one multiplier as battle.c does.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **PS_CORRUPTINGDRAIN (Corruptor Card)** [med] — the proc is now REGISTERED and surfaced at its
+  real rate (4% melee / 2% ranged, from the ATF_SHORT/ATF_LONG flags on its `bonus4 bAutoSpell`),
+  but its damage is **deliberately unpriced**: the item text only says "damage based on your STR,
+  INT, DEX, and LUK … not affected by elemental, size, or racial modifiers" and heals 75% of it —
+  no coefficients anywhere (no wiki page, PDF, or API detail as of 2026-08-11). It emits a
+  "Not yet implemented" branch that never reaches the DPS. Needs a formula (in-game measurements
+  across STR/INT/DEX/LUK spreads would do) before it can be modelled. Same shape as the other
+  PS-custom procs — the moment a formula exists, `_psCustomBattleSkills` + a `misc_formulas` entry
+  is all it takes.
 - **NJ_KIRIKAGE (Shadow Slash) crit** [med] — dead id (543 vs real 530) AND on PS should only crit
   while **Shadow's Within** is active with a PS-tuned value. Needs `skill_params` threaded into
   `critChance.js` + a source for the crit magnitude. Left disabled (documented in `critChance.js`)

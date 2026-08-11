@@ -316,10 +316,16 @@ function createSCEffect(overrides = {}) {
 function createAutocastSpec(overrides = {}) {
   return {
     skill_id: 0,
+    skill_name: "",
     skill_level: 1,
     chance_per_mille: 0,
     src_skill_id: null,
     when_hit: false,
+    // bonus4 bAutoSpell's ATF_SHORT / ATF_LONG flag: the same card can carry two
+    // specs with DIFFERENT rates for melee and ranged (Corruptor Card is 4% / 2%),
+    // so the range the attack was made at picks which one applies.
+    melee_only: false,
+    ranged_only: false,
     ...overrides,
   };
 }
