@@ -865,6 +865,58 @@
    }
   }
  },
+ "crusader-holy-cross-lv6-accuracy": {
+  "status": {
+   "str": 87,
+   "agi": 42,
+   "vit": 57,
+   "int_": 26,
+   "dex": 48,
+   "luk": 15,
+   "batk": 163,
+   "max_hp": 9697,
+   "max_sp": 598,
+   "aspd": 160.8,
+   "cri": 60,
+   "hit": 147,
+   "flee": 141,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 35,
+   "matk_max": 51
+  },
+  "result": {
+   "dps": 904.082,
+   "dps_valid": true,
+   "hit_chance": 80,
+   "crit_chance": 0,
+   "period_ms": 784,
+   "normal": {
+    "min": 886,
+    "max": 886,
+    "avg": 886,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 253 Lv 6)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "assassin-grimtooth": {
   "status": {
    "str": 96,

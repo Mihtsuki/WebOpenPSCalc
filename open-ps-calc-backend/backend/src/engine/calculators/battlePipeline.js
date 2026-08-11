@@ -1454,7 +1454,9 @@ class BattlePipeline {
     }
 
     if (skillName === "CR_REFLECTSHIELD") {
-      const [hitChanceRS] = calculateHitChance(status, target, this.config);
+      const [hitChanceRS] = calculateHitChance(status, target, this.config, null, 0, {
+        mastery: gearBonuses ? gearBonuses.effective_mastery : build.mastery_levels,
+      });
       const rsResult = this._runReflectShieldBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
       const rsAttacks = [
         createAttackDefinition(rsResult.avg_damage, 0.0, amotion, hitChanceRS / 100.0),
@@ -1475,7 +1477,9 @@ class BattlePipeline {
 
     if (skillName === "CR_SHIELDBOOMERANG") {
       if (profile.mechanic_flags.has("CR_SHIELDBOOMERANG_NK_IGNORE_FLEE")) skill.nk_ignore_flee = true;
-      const [hitChanceSB] = calculateHitChance(status, target, this.config);
+      const [hitChanceSB] = calculateHitChance(status, target, this.config, null, 0, {
+        mastery: gearBonuses ? gearBonuses.effective_mastery : build.mastery_levels,
+      });
       const effectiveHitSB = skill.nk_ignore_flee ? 100.0 : hitChanceSB;
       const sbResult = this._runShieldBoomerangBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
       let castMs = 0, delayMs = 0;
@@ -1689,7 +1693,10 @@ class BattlePipeline {
       && profile.mechanic_flags.has("MO_TRIPLEATTACK_PS_BONUS")
       && "SC_EXPLOSIONSPIRITS" in (build.active_status_levels || {});
     const [isEligible, critChance] = calculateCritChance(status, weapon, skill, target, this.config, build.server, gearBonuses, taFury);
-    let [hitChance, perfectDodge] = calculateHitChance(status, target, this.config, skillName, skill.level);
+    let [hitChance, perfectDodge] = calculateHitChance(status, target, this.config, skillName, skill.level, {
+      mastery: gearBonuses ? gearBonuses.effective_mastery : build.mastery_levels,
+      skill_params: build.skill_params,
+    });
     if (build.target_mob_id != null) perfectDodge = 0.0;
 
     if (profile.mechanic_flags.has(`${skillName}_NK_IGNORE_FLEE`)) skill.nk_ignore_flee = true;

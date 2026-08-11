@@ -566,12 +566,14 @@ function computeBreakpoints(eff: any, weapon: any, gb: any, status: any, config:
   }
 
   // HIT: +HIT (= +DEX, 1:1) to reach 95% / 100% hit vs the selected monster.
-  // Uses the real hit-chance fn so any skill accuracy bonus (Holy Cross, Shield
-  // Chain) is folded in. Only meaningful against a real target that can dodge.
+  // Uses the real hit-chance fn so every accuracy bonus (Holy Cross, Bash,
+  // Magnum Break, Pierce, Shield Chain, Sonic Accel, Weaponry Research) is
+  // folded in. Only meaningful against a real target that can dodge.
   let hit: { current_pct: number; to95: number | null; to100: number | null } | null = null;
   if (target && Number(target.flee) > 0) {
     const skillName = skillData ? skillData.name : "";
-    const rateOf = (dHit: number) => calculateHitChance({ ...status, hit: status.hit + dHit }, target, config, skillName, skill ? skill.level : 1)[0];
+    const rateOf = (dHit: number) => calculateHitChance({ ...status, hit: status.hit + dHit }, target, config, skillName, skill ? skill.level : 1,
+      { mastery: gb ? gb.effective_mastery : eff.mastery_levels, skill_params: eff.skill_params })[0];
     const need = (thresh: number) => { for (let k = 0; k <= 400; k++) if (rateOf(k) >= thresh) return k; return null; };
     hit = { current_pct: Math.round(rateOf(0)), to95: need(95), to100: need(100) };
   }

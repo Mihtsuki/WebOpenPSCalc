@@ -922,21 +922,34 @@ this **description-clause** pass over trusting `levels[].effect` (damage-only) f
 
 ### Fixed in this pass
 - **CR_HOLYCROSS** — +20% accuracy bonus (`hitChance.js` `SKILL_HITRATE_PCT_BONUS`).
+  **Corrected 2026-08-11:** it is **+2% of hitrate per rank** (2/4/…/20 at Lv1–10 —
+  wiki.payonstories.com/Holy_Cross "Accuracy Bonus" column), not a flat 20% at every rank. The
+  scraped one-line skill description only quotes the Lv10 value, which is what the flat read came
+  from. Reported by a player (accuracy didn't move with Holy Cross rank).
 - **PA_SHIELDCHAIN** — +20% accuracy bonus (same table; battle.c:4713 groups it with Holy Cross).
 - **SN_SHARPSHOOTING / MA_SHARPSHOOTING** — +20 crit was DEAD: `critChance.js` hardcoded ids
   (280/357) never matched the loaded skills.json ids (382/8215). Re-keyed to skill **name**.
 - **KN_PIERCE / ML_PIERCE** — hits by target size (Small 1 / Medium 2 / Large 3), was flat 3
   (battle.c:4395 `wd.div_ = size+1`). Added size-based `weapon_hit_counts` fns in `serverProfiles.js`.
+- **The rest of the accuracy table** (2026-08-11, surfaced by the Holy Cross correction — only Holy
+  Cross and Shield Chain were ever in `SKILL_HITRATE_PCT_BONUS`, so every other documented accuracy
+  bonus was silently missing): **SM_BASH** +5%/lv, **SM_MAGNUM** +10%/lv, **KN_PIERCE** +5%/lv,
+  **KN_AUTOCOUNTER** +20%, and **BS_WEAPONRESEARCH** +2%/lv — the last a *passive* that rides on
+  every attack (battle.c:5355 "Weaponry Research hidden bonus"; the wiki lists +Accuracy% as a third
+  column beside its +HIT and +ATK, both of which were already modeled). All confirmed on the PS wiki
+  skill pages, all vanilla-parity values. Sources now SUM into one multiplier as battle.c does.
 
 ### Open gaps (verified, prioritised) — punch-list
 - **NJ_KIRIKAGE (Shadow Slash) crit** [med] — dead id (543 vs real 530) AND on PS should only crit
   while **Shadow's Within** is active with a PS-tuned value. Needs `skill_params` threaded into
   `critChance.js` + a source for the crit magnitude. Left disabled (documented in `critChance.js`)
   rather than restored ungated.
-- **AS_SONICACCEL** [med] — Sonic Blow's +10% damage is modeled (`skillRatio.js:120`) but the
-  accuracy half is missing. **Conflict to resolve:** battle.c:4737 gives `hitrate × 1.5` (+50% of
-  hitrate) when Sonic Accel is learned; the PS skill DB says "+50 Hit" (flat). Confirm on the PS wiki
-  before implementing.
+- ~~**AS_SONICACCEL**~~ — resolved 2026-08-11. wiki.payonstories.com/Sonic_Acceleration settles the
+  conflict explicitly ("Sonic Acceleration does **not** give a flat +50 Hit … SA gives +50% 'Hit',
+  the Hit actually being Accuracy rate", with a 30% → 45% worked example), i.e. battle.c's +50
+  hitpercbonus, not the skill DB's "+50 Hit" wording. Implemented in `hitChance.js`; assumed learned,
+  like the +10% damage half in `skillRatio.js`, and both are switched off by the same
+  `skill_params.AS_SONICBLOW_sonic_accel`.
 - **SN_SIGHT (True Sight)** [med, Snipers] — entire self-buff unmodeled: +5 all stats, accuracy,
   +weapon damage %, +crit. Not currently a selectable buff.
 - **LK_CONCENTRATION** [med] — only the AGI/DEX% is applied (`statusCalculator.js:62`). Vanilla also

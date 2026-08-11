@@ -5,6 +5,24 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-11
+
+### Fixed
+
+- **Holy Cross's accuracy bonus now scales with its rank.** The calculator gave every rank of
+  Holy Cross the full +20% accuracy, when the bonus is **+2% per rank** (+2% at Lv1 → +20% at
+  Lv10). Low-rank Holy Cross was showing a hit chance it doesn't have; Lv10 is unchanged. As a
+  worked example, a base-level-99 Crusader hitting **Abysmal Knights** needs **52 DEX** to never
+  miss with Holy Cross Lv10 (147 HIT), **67 DEX** at Lv1, and 68 DEX on a plain auto-attack —
+  the Hit breakpoints panel gives the exact number for your build. Reported by a player.
+- **Every other accuracy bonus is now applied too.** Accuracy — a percentage *of your hit chance*,
+  not a flat +HIT — was only wired up for Holy Cross and Shield Chain. Now also modeled:
+  **Bash** (+5% per level, so Lv10 turns a 67% hit chance into 100%), **Magnum Break** (+10% per
+  level), **Pierce** (+5% per level), **Auto Counter** (+20%), **Sonic Blow** with Sonic
+  Acceleration (+50%), and **Weaponry Research** (+2% per level — a passive that rides on every
+  attack, on top of the +2 HIT and +2 ATK per level it already gave). Multiple sources add
+  together into a single multiplier, as the server does it.
+
 ## 2026-08-10
 
 ### Added

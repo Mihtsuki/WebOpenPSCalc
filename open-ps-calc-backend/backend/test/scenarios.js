@@ -106,6 +106,16 @@ const scenarios = [
     target: 1867,
   },
   {
+    // Holy Cross at a NON-max rank: PS gives it a +2%-of-hitrate accuracy bonus
+    // per rank (wiki.payonstories.com/Holy_Cross), so at Lv6 the hit chance here
+    // must be 72 × 1.12 = 80%, not the 86% the engine gave when it applied a flat
+    // ×1.20 at every rank. DEX 45 vs Banshee's 155 flee keeps it off the 100% cap.
+    name: "crusader-holy-cross-lv6-accuracy",
+    build: { job_id: 14, base_level: 99, job_level: 50, base_stats: { str: 80, agi: 40, vit: 50, int: 20, dex: 45, luk: 10 }, equipped: { right_hand: 1101 } },
+    skill: { name: "CR_HOLYCROSS", level: 6 },
+    target: 1867,
+  },
+  {
     // vanilla_ok re-audit fixes (PS wiki). Grimtooth: flat 200% ATK all levels.
     name: "assassin-grimtooth",
     build: { job_id: 12, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 80, vit: 30, int: 1, dex: 60, luk: 10 }, equipped: { right_hand: 1250 } },

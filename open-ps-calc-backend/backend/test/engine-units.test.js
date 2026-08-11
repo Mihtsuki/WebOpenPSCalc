@@ -108,6 +108,35 @@ test("hitChance: 80 + hit − flee, clamped, and ailments auto-hit", () => {
   assert.strictEqual(calculateHitChance(status, mk(300, { SC_STUN: 1 }), config)[0], 100); // can't-move → auto-hit
 });
 
+test("accuracy bonuses scale with rank and are a % of hitrate, summed once", () => {
+  const config = createBattleConfig();
+  const status = createStatusData();
+  status.hit = 100;
+  // 80 + 100 − 130 = 50% base hitrate, so a bonus reads off directly as its %.
+  const t = () => createTarget({ flee: 130, luk: 0, level: 1, agi: 1, target_active_scs: {} });
+  const rate = (skill, lv, opts) => calculateHitChance(status, t(), config, skill, lv, opts)[0];
+
+  assert.strictEqual(rate(null, 0), 50);
+  // Holy Cross: +2% of hitrate per rank (PS wiki table), NOT a flat 20% at every
+  // rank — Lv5 gives 50 × 1.10, Lv10 gives 50 × 1.20.
+  assert.strictEqual(rate("CR_HOLYCROSS", 1), 51);
+  assert.strictEqual(rate("CR_HOLYCROSS", 5), 55);
+  assert.strictEqual(rate("CR_HOLYCROSS", 10), 60);
+  // Vanilla-parity rank scalers confirmed on the PS wiki.
+  assert.strictEqual(rate("SM_BASH", 10), 75);      // +5%/lv
+  assert.strictEqual(rate("SM_MAGNUM", 10), 100);   // +10%/lv
+  assert.strictEqual(rate("KN_PIERCE", 4), 60);     // +5%/lv
+  assert.strictEqual(rate("PA_SHIELDCHAIN", 1), 60); // flat +20%
+  // Sonic Accel is assumed learned (as in skillRatio) and switchable off.
+  assert.strictEqual(rate("AS_SONICBLOW", 10), 75);
+  assert.strictEqual(rate("AS_SONICBLOW", 10, { skill_params: { AS_SONICBLOW_sonic_accel: false } }), 50);
+  // Weaponry Research's passive +2%/lv rides on every attack, skill or not, and
+  // ADDS to a skill's bonus in one multiplier (battle.c sums into hitpercbonus).
+  const wr = { mastery: { BS_WEAPONRESEARCH: 10 } };
+  assert.strictEqual(rate(null, 0, wr), 60);
+  assert.strictEqual(rate("CR_HOLYCROSS", 10, wr), 70); // 50 × (1 + 0.20 + 0.20)
+});
+
 // ---------------------------------------------------------------------------
 // weapon element precedence
 // ---------------------------------------------------------------------------
