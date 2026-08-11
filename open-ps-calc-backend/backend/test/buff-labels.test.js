@@ -98,13 +98,22 @@ const NO_SKILL_MAPPING = new Set([
 const norm = (s) =>
   s.toLowerCase().replace(/['’\-]/g, "").replace(/\s+/g, " ").trim();
 
-// Parse { key: "SC_...", label: "..." } pairs out of the buff arrays.
+// A buff whose picker `max` is deliberately NOT the skill's learnable max. Only
+// for statuses whose LEVEL is not a skill rank — document the reason, and never
+// add one to silence a failure.
+const INTENTIONAL_MAX = {
+  // The Super Novice Fury chant grants Explosion Spirits at SC level 13 (PS
+  // formula 175+25×13 = +50% crit). Not a rank of the Monk's 5-rank skill.
+  SC_EXPLOSIONSPIRITS: 13,
+};
+
+// Parse { key: "SC_...", label: "...", max: N } out of the buff arrays.
 function parseBuffLabels() {
   const src = fs.readFileSync(BUILD_EDITOR, "utf8");
-  const re = /\{\s*key:\s*"(SC_[A-Z0-9_]+)"\s*,\s*label:\s*"([^"]*)"/g;
+  const re = /\{\s*key:\s*"(SC_[A-Z0-9_]+)"\s*,\s*label:\s*"([^"]*)"\s*,\s*max:\s*(\d+)/g;
   const out = [];
   let m;
-  while ((m = re.exec(src)) !== null) out.push({ key: m[1], label: m[2] });
+  while ((m = re.exec(src)) !== null) out.push({ key: m[1], label: m[2], max: Number(m[3]) });
   return out;
 }
 
@@ -136,6 +145,25 @@ test("every buff label contains its skill's DB display name", () => {
     }
   }
   assert.equal(failures.length, 0, `buff label drift detected:\n${failures.join("\n")}`);
+});
+
+test("no buff offers more ranks than its skill has", () => {
+  // A picker `max` above the skill's real rank is a damage bug, not a cosmetic one:
+  // Power-Thrust is +5% ATK per rank, so offering 10 ranks priced every attack at
+  // +50% instead of its real +25% cap — a player spotted it as Cart Revolution
+  // costing 300% instead of 275%.
+  const failures = [];
+  for (const { key, label, max } of parseBuffLabels()) {
+    if (INTENTIONAL_MAX[key] === max) continue;
+    const skillConst = BUFF_SKILL[key];
+    if (!skillConst) continue;
+    const rec = loader.getSkillByName(skillConst);
+    if (!rec || !(rec.max_level > 0)) continue;
+    if (max > rec.max_level) {
+      failures.push(`  ${key} ("${label}"): picker offers ${max} ranks, ${skillConst} has ${rec.max_level}`);
+    }
+  }
+  assert.equal(failures.length, 0, `buff rank overshoot:\n${failures.join("\n")}`);
 });
 
 test("intentional-rename labels still match their documented value", () => {

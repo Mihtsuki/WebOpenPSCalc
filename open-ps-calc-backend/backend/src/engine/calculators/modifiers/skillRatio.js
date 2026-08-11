@@ -116,10 +116,16 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
   }
 
   const active = build.active_status_levels || {};
+  // Power-Thrust (BS_OVERTHRUST) is a FIVE-rank skill: +5% ATK per rank, +25% at
+  // max, added to the skill multiplier rather than multiplied in
+  // (wiki.payonstories.com/Power-Thrust). Clamp the rank — the buff picker offered
+  // 10 ranks for a while, so shared builds carry a Lv10 that would read as +50%
+  // (a player caught Cart Revolution being priced at 300% instead of 275%).
+  const otMax = (loader.getSkillByName("BS_OVERTHRUST") || {}).max_level || 5;
   if ("SC_OVERTHRUST" in active) {
-    ratio += 5 * active.SC_OVERTHRUST;
+    ratio += 5 * Math.min(active.SC_OVERTHRUST, otMax);
   } else {
-    const otLv = Number(build.support_buffs.SC_OVERTHRUST || 0);
+    const otLv = Math.min(Number(build.support_buffs.SC_OVERTHRUST || 0), otMax);
     if (otLv > 0) {
       if (profile.mechanic_flags.has("BS_OVERTHRUST_PARTY_FULL_BONUS")) ratio += 5 * otLv;
       else ratio += 5;

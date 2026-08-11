@@ -531,6 +531,34 @@ test("Cart Revolution scales 50% per rank and caps at 5", () => {
   assert.equal(loader.getSkill(153).max_level, 5, "picker must offer 5 ranks");
 });
 
+test("Power-Thrust adds 5 ratio points per rank and stops at rank 5", () => {
+  const cfg = createBattleConfig();
+  const ratioOf = (otLv, skillName) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 40, vit: 40, int: 1, dex: 60, luk: 20 },
+      equipped: { right_hand: 1301 }, support_buffs: { SC_OVERTHRUST: otLv },
+      mastery_levels: { MC_CARTREVOLUTION: 5 },
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    const id = skillName ? loader.getSkillIdByName(skillName) : 0;
+    const res = new BattlePipeline(cfg).calculate(status, weapon,
+      createSkillInstance({ id, level: skillName ? 5 : 1, name: skillName || "" }),
+      loader.getMonster(1036), eff, gb);
+    return res.normal.steps.find((s) => /Skill Ratio/.test(s.name)).multiplier;
+  };
+  // +5% ATK per rank, ADDED to the skill multiplier (wiki: "additive for skills,
+  // not multiplicative"). Rank 5 is the cap: an auto-attack is 100 + 25 = 125%,
+  // Cart Revolution Lv5 is 250 + 25 = 275% — NOT the 150% / 300% a rank-10
+  // Power-Thrust produced while the picker offered ten ranks.
+  assert.equal(ratioOf(0, null), 1);
+  assert.equal(ratioOf(5, null), 1.25);
+  assert.equal(ratioOf(10, null), 1.25, "rank is clamped, not extrapolated");
+  assert.equal(ratioOf(0, "MC_CARTREVOLUTION"), 2.5);
+  assert.equal(ratioOf(5, "MC_CARTREVOLUTION"), 2.75);
+  assert.equal(ratioOf(10, "MC_CARTREVOLUTION"), 2.75);
+});
+
 test("Zeny Pincher halves Mammonite's PER-LEVEL term, not the whole ratio", () => {
   const fn = PS.weapon_ratios.MC_MAMMONITE;
   const ctxOff = createCalcContext({ skill_params: {}, skill_levels: {} });

@@ -309,7 +309,9 @@ const SELF_BUFFS = [
   { key: "SC_SUB_WEAPONPROPERTY", label: "Magnum Break (lingering fire)", max: 1, jobs: [1, 7, 14, 23, 4008, 4015] },
   // Knight / Lord Knight
   { key: "SC_TWOHANDQUICKEN",  label: "Sword Quickening",      max: 10, jobs: [7, 4008] },
-  { key: "SC_ONEHANDQUICKEN",  label: "One-Hand Quicken",      max: 10, jobs: [7, 4008] },
+  // One rank in both the vanilla and PS skill DBs, and the ASPD it grants doesn't
+  // scale with level — presence-only, so offering 10 ranks was meaningless.
+  { key: "SC_ONEHANDQUICKEN",  label: "One-Hand Quicken",      max: 1,  jobs: [7, 4008] },
   // Crusader / Paladin
   { key: "SC_SPEARQUICKEN",    label: "Spear Quicken",         max: 10, jobs: [14, 4015] },
   { key: "SC_PROVIDENCE",      label: "Providence",            max: 5,  jobs: [14, 4015] },
@@ -383,7 +385,10 @@ const PARTY_BUFFS = [
   { key: "SC_ANGELUS", label: "Angelus", max: 5, source: "Priest" },
   // Over Thrust IS castable on the party; Maximum Over Thrust is not (it lives in
   // SELF_BUFFS, Whitesmith only).
-  { key: "SC_OVERTHRUST", label: "Over Thrust", max: 10, source: "Blacksmith" },
+  // FIVE ranks (+5% ATK each, +25% at max) — the picker offered 10, which priced
+  // every attack at +50%. wiki.payonstories.com/Power-Thrust; the engine clamps the
+  // rank as well, so builds shared while it read 10 are corrected on load.
+  { key: "SC_OVERTHRUST", label: "Over Thrust", max: 5, source: "Blacksmith" },
   // Adrenaline Rush received from a party Blacksmith: PS rework gives +20% ASPD with
   // a Mace/Axe and +10% with any other melee weapon (bows and guns excluded). Level
   // only sets duration; the self-cast version lives in SELF_BUFFS.

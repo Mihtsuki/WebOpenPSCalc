@@ -35,6 +35,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Power-Thrust was adding +50% instead of +25%, inflating every damage number under it.**
+  The buff picker offered 10 ranks; the skill has **5** (+5% ATK each). So a maxed Power-Thrust
+  priced an auto-attack at ×1.50 instead of ×1.25, and **Cart Revolution Lv5 at 300% instead of
+  275%** — which is exactly how a player caught it, seeing more damage in the calculator than
+  in game. The picker now stops at 5 and the engine clamps the rank as well, so builds shared
+  while it read 10 are corrected when they load. One-Hand Quicken had the same overshoot (10
+  ranks offered, 1 real), though its level never changed a number.
 - **Combos that grant an auto-cast now actually cast it.** A combo's `bonus3 bAutoSpell` was
   being dropped, so **Gust Bow + Arrow of Wind** never auto-cast its Wind Blade Lv5 (10%, and 20%
   once your base INT reaches 40) — the +25% long-range half of that combo worked, which is why it
