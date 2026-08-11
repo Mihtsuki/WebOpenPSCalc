@@ -671,6 +671,13 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
     // monsters would otherwise reach +20% at lv10 instead of the intended +10%.
     AS_ENCHANTPOISON: 5,
     AS_VENOMDUST: 5,
+    // ── Max-level audit, 2026-08-11 ──────────────────────────────────────────
+    // The PS skill-DB scrape knows these ranks but carries no per-level table, so
+    // _applySkillCap's evidence rule won't take its word for them. Read straight
+    // off the live wiki infobox ("Levels: N") instead: Strip Weapon / Armor /
+    // Shield / Helm are 3 ranks on PS (vanilla 5), Abracadabra 5 (vanilla 10).
+    RG_STRIPWEAPON: 3, RG_STRIPARMOR: 3, RG_STRIPSHIELD: 3, RG_STRIPHELM: 3,
+    SA_ABRACADABRA: 5,
   },
   // HW_NAPALMVULCAN uses Shadow (Dark) element on PS instead of Ghost
   skill_elements: { HW_NAPALMVULCAN: 7 },

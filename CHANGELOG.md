@@ -35,6 +35,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Skills now offer the number of ranks they actually have on Payon Stories.** After the
+  Power-Thrust fix below, every skill's max level was audited. Sixteen were being offered at the
+  vanilla count: **Joint Beat**, **Free Cast**, **Advanced Book**, **Amplify Magic Power** and
+  **Watery Evasion** drop 10 → 5, **Double Casting** and **Cast Cancel** 5 → 1, **Volcano /
+  Deluge / Violent Gale** 5 → 3, **Strip Weapon / Armor / Shield / Helm** 5 → 3, **Abracadabra**
+  10 → 5, and **Moonlit Water Mill** gains its 5 ranks. The skill picker and the passive picker
+  had also disagreed on some of these — they now share one source. A build shared with a rank
+  that no longer exists is computed at the real maximum instead.
 - **Power-Thrust was adding +50% instead of +25%, inflating every damage number under it.**
   The buff picker offered 10 ranks; the skill has **5** (+5% ATK each). So a maxed Power-Thrust
   priced an auto-attack at ×1.50 instead of ×1.25, and **Cart Revolution Lv5 at 300% instead of

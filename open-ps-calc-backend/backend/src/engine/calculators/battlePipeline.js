@@ -1464,10 +1464,15 @@ class BattlePipeline {
     const amotion = Math.max(100, Math.round(2000 - status.aspd * 10));
     const adelay = 2 * amotion;
 
-    if (profile.skill_level_cap_overrides && profile.skill_level_cap_overrides[skillName] != null) {
-      const cap = profile.skill_level_cap_overrides[skillName];
-      if (skill.level > cap) skill = { ...skill, level: cap };
-    }
+    // Clamp the cast level to the rank the skill actually HAS on this server —
+    // profile override first, else the DB max (loader._applySkillCap has already
+    // folded the PS scrape into it). Was override-only, so a skill whose PS max is
+    // simply lower than vanilla's (Joint Beat 10 → 5) still computed at the
+    // requested level, and any share URL made while the picker offered the vanilla
+    // count kept computing with ranks that do not exist.
+    const servedMax = skillData && skillData.max_level > 0 ? skillData.max_level : null;
+    const lvCap = (profile.skill_level_cap_overrides || {})[skillName] ?? servedMax;
+    if (lvCap != null && skill.level > lvCap) skill = { ...skill, level: lvCap };
 
     if (skillName === "MO_EXTREMITYFIST") {
       const asuraResult = this._runAsuraStrikeBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });

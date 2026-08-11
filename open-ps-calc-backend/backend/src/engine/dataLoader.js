@@ -381,10 +381,28 @@ class DataLoader {
   // reworks also promote skills upward: the 2026-08 Merchant rework turned the 1-rank
   // quest skills Cart Revolution / Crazy Uproar into 5- and 4-rank tree skills, and
   // the Blacksmith rework gave every Smith Weapon skill a 4th rank.
+  // With no explicit override, the PS skill DB is a better source than the vanilla
+  // one for a PS server — but ONLY where the scrape actually saw a per-level table
+  // (`levels`), since a record scraped without one can carry a placeholder max
+  // (Falcon Assault reads 1 there, with no table behind it). A table whose length
+  // matches max_level is real evidence, so that value wins; anything thinner falls
+  // back to vanilla. This is what keeps the SKILL picker in step with the passive
+  // picker, which has always preferred the PS entry — Free Cast and Advanced Book
+  // were offered at 5 ranks in one and 10 in the other.
+  _psScrapedMaxLevel(skillName) {
+    const rec = this.getPsSkill(skillName);
+    if (!rec || !(rec.max_level > 0)) return null;
+    const levels = Array.isArray(rec.levels) ? rec.levels.length : 0;
+    return levels === rec.max_level ? rec.max_level : null;
+  }
+
   _applySkillCap(skill) {
     if (!skill) return skill;
     const caps = this._profile && this._profile.skill_level_cap_overrides;
-    const cap = caps ? caps[skill.name] : null;
+    const explicit = caps ? caps[skill.name] : null;
+    const cap = explicit != null
+      ? explicit
+      : (this._usePsData ? this._psScrapedMaxLevel(skill.name) : null);
     return cap != null && skill.max_level !== cap ? { ...skill, max_level: cap } : skill;
   }
 

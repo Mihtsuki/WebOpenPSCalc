@@ -948,6 +948,40 @@ this **description-clause** pass over trusting `levels[].effect` (damage-only) f
   column beside its +HIT and +ATK, both of which were already modeled). All confirmed on the PS wiki
   skill pages, all vanilla-parity values. Sources now SUM into one multiplier as battle.c does.
 
+## Max-level audit (2026-08-11)
+
+**Why.** Power-Thrust shipped in the buff picker at 10 ranks for a 5-rank skill, adding +50% to
+every skill ratio instead of +25% (a player spotted Cart Revolution priced at 300% vs 275%). The
+*range* of an input had never been audited — only formulas. This is that sweep, for every skill.
+
+**Method.** For all 500+ non-3rd-job skills, compare what the loader SERVES (`_applySkillCap`)
+against `ps_skill_db.json`'s scraped max and the vanilla DB, then evaluate every profile ratio fn
+at its served max to catch out-of-range tables.
+
+**Findings.** No skill whose level scales damage was mis-served, and no ratio/proc table breaks at
+its max (0 of both). 33 skills disagreed with the scrape: 11 are deliberate profile overrides
+(reworks the scrape can't see), 22 were unexamined.
+
+**Fixed.** `_applySkillCap` now resolves **profile override > PS scrape > vanilla**, taking the
+scrape's max only when it is backed by a matching per-level table — a record scraped without one
+can hold a placeholder (Falcon Assault reads 1 there). That corrected 11 skills the picker served
+at the vanilla count, including **Joint Beat 10 → 5**, **Free Cast / Advanced Book / Amplify
+Magic Power / Watery Evasion 10 → 5**, **Double Casting and Cast Cancel 5 → 1**, and the Sage
+element fields 5 → 3 — and it closed a split-brain where the passive picker already showed the PS
+number while the skill picker showed vanilla's. Five more were settled from the live wiki infobox
+("Levels: N") as explicit overrides: **Strip Weapon/Armor/Shield/Helm 5 → 3**, **Abracadabra
+10 → 5**. `battlePipeline` now clamps a cast to the served max, not just to an explicit override,
+so share URLs made under the old counts stop computing with ranks that don't exist.
+
+**Still unresolved (4).** `SN_FALCONASSAULT` (scrape 1, no table, no wiki page — vanilla 5 kept),
+`ST_FULLSTRIP` (scrape 3), `PF_FOGWALL` (scrape 1), `CR_ALCHEMY` (dead skill). None scale damage.
+Re-check after any wiki update.
+
+**Adjacent finding — LK_JOINTBEAT has no PS ratio** [med]: it falls through to a flat 100% at
+every rank, but the bundled scrape carries the real table — **40% per level** (40/80/120/160/200%
+at Lv1–5). One line in `PS_BF_WEAPON_RATIOS` (`LK_JOINTBEAT: (lv) => 40 * lv`) plus a golden;
+left out of the max-level change deliberately, since it moves damage numbers.
+
 ### Open gaps (verified, prioritised) — punch-list
 - **`bAutoSpellWhenHit` has no consumer at all** [med] — 42 distinct skills across ~90 items
   (Dark Lord Card's Meteor Storm, Ifrit Card's Earthquake, Ring of Resonance's Venom Splasher,

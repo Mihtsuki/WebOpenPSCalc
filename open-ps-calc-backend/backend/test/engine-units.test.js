@@ -531,6 +531,55 @@ test("Cart Revolution scales 50% per rank and caps at 5", () => {
   assert.equal(loader.getSkill(153).max_level, 5, "picker must offer 5 ranks");
 });
 
+test("a skill's served max level follows override > PS scrape (evidenced) > vanilla", () => {
+  // Explicit profile caps still win outright — they are the only source that can see
+  // a post-scrape rework, in either direction.
+  assert.equal(loader.getSkillByName("BS_SWORD").max_level, 4, "raised by the Blacksmith rework (PS scrape still says 3)");
+  assert.equal(loader.getSkillByName("MC_CARTREVOLUTION").max_level, 5, "raised from a 1-rank quest skill");
+  assert.equal(loader.getSkillByName("BS_TWOHANDSWORD").max_level, 0, "removed on PS");
+
+  // With no override, a PS max BACKED BY A PER-LEVEL TABLE wins over vanilla. These
+  // were being served at the vanilla count by the skill picker while the passive
+  // picker already showed the PS one.
+  for (const [name, max] of [["LK_JOINTBEAT", 5], ["SA_FREECAST", 5], ["SA_ADVANCEDBOOK", 5],
+    ["HW_MAGICPOWER", 5], ["NJ_SUITON", 5], ["PF_DOUBLECASTING", 1], ["SA_VOLCANO", 3]]) {
+    assert.equal(loader.getSkillByName(name).max_level, max, `${name} should serve the PS max`);
+  }
+  // …but a PS record with NO level table behind it is not evidence — a scrape
+  // artifact must not silently cut a skill's ranks.
+  assert.equal(loader.getSkillByName("SN_FALCONASSAULT").max_level, 5, "PS record says 1 with no table — keep vanilla");
+  assert.equal(loader.getSkillByName("PF_FOGWALL").max_level, 5, "PS record says 1 with no table — keep vanilla");
+  // Where the live wiki settles one of those, it becomes an explicit override.
+  assert.equal(loader.getSkillByName("RG_STRIPARMOR").max_level, 3, "wiki infobox: Levels 3");
+  assert.equal(loader.getSkillByName("SA_ABRACADABRA").max_level, 5, "wiki infobox: Levels 5");
+
+  // Vanilla profile is untouched by any of this.
+  loader.setProfile(getProfile("standard"));
+  try {
+    assert.equal(loader.getSkillByName("LK_JOINTBEAT").max_level, 10);
+    assert.equal(loader.getSkillByName("SA_FREECAST").max_level, 10);
+  } finally {
+    loader.setProfile(PS);
+  }
+});
+
+test("a cast above the skill's real rank is clamped, not computed", () => {
+  const cfg = createBattleConfig();
+  const [gb, eff, weapon, status] = resolvePlayerState(buildFromSaveSchema({
+    server: "payon_stories", job_id: 4008, base_level: 99, job_level: 50,
+    base_stats: { str: 90, agi: 50, vit: 40, int: 1, dex: 60, luk: 20 },
+    equipped: { right_hand: 1101 },
+  }), cfg, PS);
+  const at = (lv) => new BattlePipeline(cfg).calculate(status, weapon,
+    createSkillInstance({ id: loader.getSkillIdByName("LK_JOINTBEAT"), level: lv, name: "LK_JOINTBEAT" }),
+    loader.getMonster(1036), eff, gb);
+  // Joint Beat is 5 ranks on PS. A Lv10 request — from a share URL made while the
+  // picker offered the vanilla 10 — must price as Lv5, not as a rank that doesn't exist.
+  const step = (r) => r.normal.steps.find((s) => /Skill Ratio/.test(s.name)).name;
+  assert.match(step(at(10)), /Lv 5\)/);
+  assert.equal(at(10).normal.avg_damage, at(5).normal.avg_damage);
+});
+
 test("Power-Thrust adds 5 ratio points per rank and stops at rank 5", () => {
   const cfg = createBattleConfig();
   const ratioOf = (otLv, skillName) => {
