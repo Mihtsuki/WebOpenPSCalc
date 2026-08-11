@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<title>Power-Thrust and the ATK buffs that stack with it | Open PS Calc</title>
+<meta name="description" content="Power-Thrust adds its percentage into the skill ratio rather than multiplying the total — five ranks, +25% at most.">
+<link rel="canonical" href="https://openpscalc.com/mechanics/power-thrust.html">
+<meta property="og:type" content="article"><meta property="og:title" content="Power-Thrust and the ATK buffs that stack with it | Open PS Calc">
+<meta property="og:description" content="Power-Thrust adds its percentage into the skill ratio rather than multiplying the total — five ranks, +25% at most."><meta property="og:url" content="https://openpscalc.com/mechanics/power-thrust.html">
+<meta property="og:image" content="https://openpscalc.com/icon-512.png">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Mechanics","item":"https://openpscalc.com/mechanics.html"},{"@type":"ListItem","position":3,"name":"Power-Thrust and the ATK buffs that stack with it","item":"https://openpscalc.com/mechanics/power-thrust.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Power-Thrust and the ATK buffs that stack with it","description":"Power-Thrust adds its percentage into the skill ratio rather than multiplying the total — five ranks, +25% at most.","url":"https://openpscalc.com/mechanics/power-thrust.html","mainEntityOfPage":"https://openpscalc.com/mechanics/power-thrust.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories damage mechanics (pre-renewal Ragnarok Online)","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much ATK does Power-Thrust give on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"Five percent per rank across five ranks, so twenty-five percent at maximum, for the caster and party members on screen."}},{"@type":"Question","name":"Is Power-Thrust multiplied with the skill's damage?","acceptedAnswer":{"@type":"Answer","text":"No, it is added into the skill's ratio. A 250% skill under a maxed Power-Thrust becomes a 275% skill rather than being multiplied by 1.25."}},{"@type":"Question","name":"Can Maximum Power-Thrust be cast on party members?","acceptedAnswer":{"@type":"Answer","text":"No. Maximum Power-Thrust affects only the caster; it is the Whitesmith's personal damage buff."}}]}</script>
+<style>
+  :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
+  :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6}
+  a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:780px;margin:0 auto;padding:2rem 1.4rem 4rem}
+  header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
+  h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
+  h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
+  .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+  p{color:var(--text)}
+  .lead{color:var(--dim);font-size:1.02rem}
+  table{border-collapse:collapse;width:100%;max-width:360px;font-size:.9rem;margin:.5rem 0}
+  th,td{text-align:left;padding:.35rem .6rem;border-bottom:1px solid var(--border-soft)}
+  td.n{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--accent);text-align:right}
+  .cta{display:inline-block;margin:1.4rem 0 .5rem;padding:.6rem 1.1rem;background:var(--accent);color:var(--on-accent);font-weight:700;border-radius:6px}
+  .cta:hover{filter:brightness(1.08);text-decoration:none}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;margin:1rem 0}
+  .card{display:block;padding:.7rem .85rem;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text)}
+  .card:hover{border-color:var(--accent-dim);text-decoration:none}
+  .card .c{color:var(--dim);font-size:.82rem}
+  footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.82rem}
+</style></head>
+<body><div class="wrap">
+<header><nav><a href="/">Open PS Calc</a> › <a href="/mechanics.html">Mechanics</a> › Power-Thrust and the ATK buffs that stack with it</nav></header>
+<span class="eyebrow">Payon Stories mechanics</span>
+<h1>Power-Thrust and the ATK buffs that stack with it</h1>
+<p class="lead">Power-Thrust adds its percentage into the skill ratio rather than multiplying the total — five ranks, +25% at most.</p>
+<h2>Five ranks, +5% each</h2>
+<p>Power-Thrust (also called Over Thrust) has <strong>five ranks</strong> and grants
++5% ATK each, so +25% at maximum. It affects the caster and every party member on screen.</p>
+<p>Crucially, the wiki notes that the bonus is <em>additive for skills, not multiplicative</em>:
+it is added into the skill's ratio percentage. So Cart Revolution Lv5, a 250% skill, becomes a
+275% skill — not 250% × 1.25 = 312%. On a plain auto-attack (100%) it becomes 125%.</p>
+<h2>The rest of the Blacksmith buff kit</h2>
+<ul>
+<li><strong>Maximum Power-Thrust</strong> — +20% ATK per level, but caster-only; it cannot be given to the party.</li>
+<li><strong>Adrenaline Rush</strong> — attack speed, not damage. On Payon Stories the caster gets +30% ASPD with an axe or mace and +20% with any other melee weapon; party members get +20% / +10%.</li>
+<li><strong>Weapon Perfection</strong> — removes the size penalty for the caster and the party.</li>
+<li><strong>Weaponry Research</strong> — passive: +2 HIT, +2 ATK and +2% accuracy per level.</li>
+</ul>
+
+<h2>Frequently asked questions</h2>
+<h3>How much ATK does Power-Thrust give on Payon Stories?</h3>
+<p>Five percent per rank across five ranks, so twenty-five percent at maximum, for the caster and party members on screen.</p>
+<h3>Is Power-Thrust multiplied with the skill's damage?</h3>
+<p>No, it is added into the skill's ratio. A 250% skill under a maxed Power-Thrust becomes a 275% skill rather than being multiplied by 1.25.</p>
+<h3>Can Maximum Power-Thrust be cast on party members?</h3>
+<p>No. Maximum Power-Thrust affects only the caster; it is the Whitesmith's personal damage buff.</p>
+<h2>See it on your own build</h2>
+<p>The calculator prints every step of this with your stats, gear and target, so you can check the
+numbers rather than take them on trust.</p>
+<p><a class="cta" href="/">Open the damage calculator →</a></p>
+<p class="seealso">Builds this affects most: <a href="/guides/blacksmith-battle-smith.html">Blacksmith — Battle Smith (AGI)</a>.</p>
+<h2>Sources</h2>
+<p class="sources"><a href="https://wiki.payonstories.com/Power-Thrust" rel="noopener">Payon Stories wiki — Power-Thrust ↗</a> · <a href="https://wiki.payonstories.com/Weaponry_Research" rel="noopener">Payon Stories wiki — Weaponry Research ↗</a> · Formulas as implemented in the calculator's engine, which is open about what it cannot yet model.</p>
+<h2>Related</h2>
+<p class="seealso"><a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a> · <a href="/mechanics/hit-and-accuracy.html">Hit, flee and accuracy on Payon Stories</a> · <a href="/mechanics/weapon-size-penalty.html">The weapon size penalty, and Weapon Perfection</a> · <a href="/mechanics.html">All mechanics</a> · <a href="/guides.html">Build guides</a></p>
+<footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Not affiliated with or endorsed by Payon Stories.</footer></div></body></html>

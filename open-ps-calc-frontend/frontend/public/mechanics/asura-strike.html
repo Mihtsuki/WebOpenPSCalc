@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<title>Asura Strike damage on Payon Stories | Open PS Calc</title>
+<meta name="description" content="The reworked Asura Strike formula: ATK × (8 + SP/10) + 1000, a flat 1000 at every rank, and unlike vanilla it does not ignore the target's DEF.">
+<link rel="canonical" href="https://openpscalc.com/mechanics/asura-strike.html">
+<meta property="og:type" content="article"><meta property="og:title" content="Asura Strike damage on Payon Stories | Open PS Calc">
+<meta property="og:description" content="The reworked Asura Strike formula: ATK × (8 + SP/10) + 1000, a flat 1000 at every rank, and unlike vanilla it does not ignore the target's DEF."><meta property="og:url" content="https://openpscalc.com/mechanics/asura-strike.html">
+<meta property="og:image" content="https://openpscalc.com/icon-512.png">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Mechanics","item":"https://openpscalc.com/mechanics.html"},{"@type":"ListItem","position":3,"name":"Asura Strike damage on Payon Stories","item":"https://openpscalc.com/mechanics/asura-strike.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Asura Strike damage on Payon Stories","description":"The reworked Asura Strike formula: ATK × (8 + SP/10) + 1000, a flat 1000 at every rank, and unlike vanilla it does not ignore the target's DEF.","url":"https://openpscalc.com/mechanics/asura-strike.html","mainEntityOfPage":"https://openpscalc.com/mechanics/asura-strike.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories damage mechanics (pre-renewal Ragnarok Online)","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How is Asura Strike damage calculated on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"Damage is your ATK multiplied by (8 + your current SP divided by 10, rounded down), plus a flat 1000. The flat 1000 is the same at every skill rank."}},{"@type":"Question","name":"Does Asura Strike ignore DEF on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"No. Unlike vanilla Ragnarok Online, Asura Strike on Payon Stories takes the target's defence normally, so high-DEF targets reduce it."}},{"@type":"Question","name":"Does INT increase Asura Strike damage?","acceptedAnswer":{"@type":"Answer","text":"Yes, indirectly but substantially. INT raises Max SP, and current SP is part of the damage multiplier, so more SP means a larger multiple of your ATK."}}]}</script>
+<style>
+  :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
+  :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6}
+  a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:780px;margin:0 auto;padding:2rem 1.4rem 4rem}
+  header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
+  h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
+  h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
+  .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+  p{color:var(--text)}
+  .lead{color:var(--dim);font-size:1.02rem}
+  table{border-collapse:collapse;width:100%;max-width:360px;font-size:.9rem;margin:.5rem 0}
+  th,td{text-align:left;padding:.35rem .6rem;border-bottom:1px solid var(--border-soft)}
+  td.n{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--accent);text-align:right}
+  .cta{display:inline-block;margin:1.4rem 0 .5rem;padding:.6rem 1.1rem;background:var(--accent);color:var(--on-accent);font-weight:700;border-radius:6px}
+  .cta:hover{filter:brightness(1.08);text-decoration:none}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;margin:1rem 0}
+  .card{display:block;padding:.7rem .85rem;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text)}
+  .card:hover{border-color:var(--accent-dim);text-decoration:none}
+  .card .c{color:var(--dim);font-size:.82rem}
+  footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.82rem}
+</style></head>
+<body><div class="wrap">
+<header><nav><a href="/">Open PS Calc</a> › <a href="/mechanics.html">Mechanics</a> › Asura Strike damage on Payon Stories</nav></header>
+<span class="eyebrow">Payon Stories mechanics</span>
+<h1>Asura Strike damage on Payon Stories</h1>
+<p class="lead">The reworked Asura Strike formula: ATK × (8 + SP/10) + 1000, a flat 1000 at every rank, and unlike vanilla it does not ignore the target's DEF.</p>
+<h2>The formula</h2>
+<p class="formula">damage = ATK × (8 + ⌊SP ÷ 10⌋) + 1000</p>
+<p>where SP is your <em>current</em> SP at the moment of the cast. Two things differ from
+vanilla Ragnarok, and both matter:</p>
+<ul>
+<li>The flat bonus is <strong>1000 at every rank</strong>, not 250 + 150 per level. Rank buys you
+the SP cost and the cast, not the flat damage.</li>
+<li>Asura on Payon Stories <strong>does not ignore DEF</strong>. The vanilla skill bypasses it;
+here the target's defence applies normally, so a high-DEF target genuinely blunts it.</li>
+</ul>
+<p>The cast consumes ⌊MaxSP × 0.2 × rank⌋ SP, so a bigger SP pool is both the damage
+multiplier and the fuel.</p>
+<h2>Why INT is a damage stat here</h2>
+<p>Because SP enters the multiplier, INT is not a support stat for a Monk — it is
+part of the damage. Every 10 SP is another whole multiple of your ATK. That is what makes the
+Monk build unusual: you stack STR for ATK <em>and</em> INT for Max SP, and gear that adds Max SP
+adds damage directly.</p>
+<p><strong>Spirit spheres</strong> add +3 ATK each to the Monk line, and because they land on
+base ATK they are amplified by the ×(8 + SP/10) multiplier along with everything else.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>How is Asura Strike damage calculated on Payon Stories?</h3>
+<p>Damage is your ATK multiplied by (8 + your current SP divided by 10, rounded down), plus a flat 1000. The flat 1000 is the same at every skill rank.</p>
+<h3>Does Asura Strike ignore DEF on Payon Stories?</h3>
+<p>No. Unlike vanilla Ragnarok Online, Asura Strike on Payon Stories takes the target's defence normally, so high-DEF targets reduce it.</p>
+<h3>Does INT increase Asura Strike damage?</h3>
+<p>Yes, indirectly but substantially. INT raises Max SP, and current SP is part of the damage multiplier, so more SP means a larger multiple of your ATK.</p>
+<h2>See it on your own build</h2>
+<p>The calculator prints every step of this with your stats, gear and target, so you can check the
+numbers rather than take them on trust.</p>
+<p><a class="cta" href="/">Open the damage calculator →</a></p>
+<p class="seealso">Builds this affects most: <a href="/guides/monk-asura.html">Monk — Asura</a>.</p>
+<h2>Sources</h2>
+<p class="sources"><a href="https://wiki.payonstories.com/Asura_Strike" rel="noopener">Payon Stories wiki — Asura Strike ↗</a> · <a href="https://wiki.payonstories.com/Monk" rel="noopener">PSRO Monk Rework (2026) ↗</a> · Formulas as implemented in the calculator's engine, which is open about what it cannot yet model.</p>
+<h2>Related</h2>
+<p class="seealso"><a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a> · <a href="/mechanics/triple-attack.html">Triple Attack, and how Rogues can borrow it</a> · <a href="/mechanics.html">All mechanics</a> · <a href="/guides.html">Build guides</a></p>
+<footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Not affiliated with or endorsed by Payon Stories.</footer></div></body></html>

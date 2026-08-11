@@ -11,6 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Build guides","item":"https://openpscalc.com/guides.html"},{"@type":"ListItem","position":3,"name":"Hunter — Trapper","item":"https://openpscalc.com/guides/hunter-trapper.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Hunter — Trapper Build Guide","description":"Hunter Trapper build for Payon Stories (pre-renewal RO): recommended stats, signature skill (Blast Mine), gear, and a link to calculate its damage.","url":"https://openpscalc.com/guides/hunter-trapper.html","mainEntityOfPage":"https://openpscalc.com/guides/hunter-trapper.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories Hunter Trapper build","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do Hunter traps ignore DEF on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"Yes. Trap damage is computed from INT and DEX and is not reduced by the target's DEF, which makes traps unusually strong against heavily armoured monsters."}},{"@type":"Question","name":"Which trap should I use?","acceptedAnswer":{"@type":"Answer","text":"Match the element to the target: Land Mine for Earth, Blast Mine for Wind, Freezing Trap for Water and Claymore Trap for Fire, choosing whichever the monster is weakest against."}},{"@type":"Question","name":"Is a trapper viable for solo play?","acceptedAnswer":{"@type":"Answer","text":"Yes, though it is slower to set up than Double Strafe. Its advantage shows against high-DEF targets and in places where you can prepare the ground before pulling."}}]}</script>
 <style>
   :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
   :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
@@ -21,6 +22,11 @@
   header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
   h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
   h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
   .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
   p{color:var(--text)}
   .lead{color:var(--dim);font-size:1.02rem}
@@ -42,12 +48,33 @@
 <p class="lead">The INT/DEX Trapper Hunter. Trap damage — Land Mine (Earth), Blast Mine (Wind), Freezing Trap (Water), Claymore Trap (Fire) — scales with INT and DEX and ignores DEF, making it brutal against high-DEF targets. Pick the trap whose element the target is weakest to and let the mines do the work.</p>
 <a class="cta" href="/?t=hunter-trapper">Open this build in the calculator →</a>
 <p style="font-size:.85rem;color:#9a9fb0">Opens the calculator with the <strong>Hunter — Trapper</strong> build preloaded — then tune stats and gear.</p>
+<h2>Why this build works</h2>
+<p>Trap damage comes from INT and DEX and ignores the target's DEF entirely. Against armoured
+monsters that blunt every weapon build, a trapper's numbers do not move — which is exactly when
+traps are worth the setup.</p>
 <h2>Recommended stats <span style="font-weight:400;font-size:.8rem;color:#5d6276">(base level 99)</span></h2>
 <table><tbody><tr><td>STR</td><td class="n">1</td></tr><tr><td>AGI</td><td class="n">30</td></tr><tr><td>VIT</td><td class="n">1</td></tr><tr><td>INT</td><td class="n">99</td></tr><tr><td>DEX</td><td class="n">90</td></tr><tr><td>LUK</td><td class="n">1</td></tr></tbody></table>
-<h2>Signature skill</h2>
-<p><strong>Blast Mine</strong> — set it as your skill in the calculator to see a full step-by-step damage breakdown, plus ASPD/cast/hit breakpoints, time-to-kill, and survivability.</p>
-<h2>Gear &amp; tips</h2>
-<p>INT/DEX gear and a bow for setup; the Rust-Worn Apparatus accessory suits Trappers. Swap traps to match each target's element weakness.</p>
-<h2>Learn more</h2>
-<p><a href="https://wiki.payonstories.com/Hunter" rel="noopener">Hunter on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
+<p>Traps are placed, not aimed: you set the ground, pull the target across it, and let
+the element do the work. Because each trap is a different element, a trapper answers a wider range
+of monsters than any single-element caster.</p>
+<h2>Skills that matter</h2>
+<ul><li><strong>Land Mine</strong> (Earth), <strong>Blast Mine</strong> (Wind), <strong>Freezing Trap</strong> (Water), <strong>Claymore Trap</strong> (Fire) — pick by the target's weakness.</li><li><strong>Remove Trap</strong> — recover and re-place; traps are consumables and this is your economy.</li><li><strong>Ankle Snare</strong> — control that makes the damage traps land.</li></ul>
+<h2>Gear</h2>
+<p>INT and DEX gear, and enough VIT to survive placing them. Bow choice barely matters for
+the traps themselves, so use it for stats or carry one for Double Strafe as a second mode.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Do Hunter traps ignore DEF on Payon Stories?</h3>
+<p>Yes. Trap damage is computed from INT and DEX and is not reduced by the target's DEF, which makes traps unusually strong against heavily armoured monsters.</p>
+<h3>Which trap should I use?</h3>
+<p>Match the element to the target: Land Mine for Earth, Blast Mine for Wind, Freezing Trap for Water and Claymore Trap for Fire, choosing whichever the monster is weakest against.</p>
+<h3>Is a trapper viable for solo play?</h3>
+<p>Yes, though it is slower to set up than Double Strafe. Its advantage shows against high-DEF targets and in places where you can prepare the ground before pulling.</p>
+<h2>How the numbers are calculated</h2>
+<p>Every figure this build produces is broken down step by step in the calculator — base damage,
+skill ratio, the target's DEF, masteries, element and cards, each with its running total.
+The mechanics behind this build: <a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a>.</p>
+<p><a class="cta" href="/?t=hunter-trapper">Calculate this build's damage →</a></p>
+<h2>Related</h2>
+<p class="seealso"><a href="/guides/hunter-double-strafe.html">Hunter — Double Strafe (DS)</a> · <a href="/guides/alchemist-acid-demonstration.html">Alchemist — Acid Demonstration (SAD)</a> · <a href="/guides.html">All build guides</a> · <a href="/mechanics.html">How the mechanics work</a> · <a href="https://wiki.payonstories.com/Hunter" rel="noopener">Hunter on the Payon Stories wiki ↗</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer></div></body></html>

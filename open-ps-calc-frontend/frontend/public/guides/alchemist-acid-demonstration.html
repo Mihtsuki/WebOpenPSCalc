@@ -11,6 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Build guides","item":"https://openpscalc.com/guides.html"},{"@type":"ListItem","position":3,"name":"Alchemist — Acid Demonstration (SAD)","item":"https://openpscalc.com/guides/alchemist-acid-demonstration.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Alchemist — Acid Demonstration (SAD) Build Guide","description":"Alchemist Acid Demonstration (SAD) build for Payon Stories (pre-renewal RO): recommended stats, signature skill (Acid Demonstration), gear, and a link to calculate its damage.","url":"https://openpscalc.com/guides/alchemist-acid-demonstration.html","mainEntityOfPage":"https://openpscalc.com/guides/alchemist-acid-demonstration.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories Alchemist Acid Demonstration (SAD) build","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does Acid Terror ignore DEF?","acceptedAnswer":{"@type":"Answer","text":"It works through defence rather than being reduced by it in the ordinary way, which is why it is the standard answer to high-DEF, high-HP targets."}},{"@type":"Question","name":"How much damage does Acid Terror do at max rank?","acceptedAnswer":{"@type":"Answer","text":"Six hundred percent at rank five under the reworked formula of one hundred plus one hundred per rank."}},{"@type":"Question","name":"Why do Alchemists want Bragi?","acceptedAnswer":{"@type":"Answer","text":"Because the build is limited by how often it can throw rather than by the damage of each throw. Reducing cast time and after-cast delay directly raises throughput."}}]}</script>
 <style>
   :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
   :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
@@ -21,6 +22,11 @@
   header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
   h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
   h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
   .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
   p{color:var(--text)}
   .lead{color:var(--dim);font-size:1.02rem}
@@ -42,12 +48,32 @@
 <p class="lead">The SAD Alchemist — STR/DEX with plant summons and Acid Terror spam that works through DEF, brutal against high-DEF and high-HP targets. STR and DEX drive the throughput, AGI adds flee and plant attack speed, and it shines hardest under a Bard's Bragi.</p>
 <a class="cta" href="/?t=alchemist-acid-demonstration">Open this build in the calculator →</a>
 <p style="font-size:.85rem;color:#9a9fb0">Opens the calculator with the <strong>Alchemist — Acid Demonstration (SAD)</strong> build preloaded — then tune stats and gear.</p>
+<h2>Why this build works</h2>
+<p>Acid Terror works through DEF, so the monsters that shrug off weapon builds are exactly
+where it shines. Add plants that attack alongside you and the class turns into steady, DEF-proof
+throughput rather than big single hits.</p>
 <h2>Recommended stats <span style="font-weight:400;font-size:.8rem;color:#5d6276">(base level 99)</span></h2>
 <table><tbody><tr><td>STR</td><td class="n">90</td></tr><tr><td>AGI</td><td class="n">60</td></tr><tr><td>VIT</td><td class="n">1</td></tr><tr><td>INT</td><td class="n">1</td></tr><tr><td>DEX</td><td class="n">80</td></tr><tr><td>LUK</td><td class="n">1</td></tr></tbody></table>
-<h2>Signature skill</h2>
-<p><strong>Acid Demonstration</strong> — set it as your skill in the calculator to see a full step-by-step damage breakdown, plus ASPD/cast/hit breakpoints, time-to-kill, and survivability.</p>
-<h2>Gear &amp; tips</h2>
-<p>Bottles as ammo, STR/DEX/AGI gear; excellent against tanky targets that shrug off physical hits, especially with Bragi support.</p>
-<h2>Learn more</h2>
-<p><a href="https://wiki.payonstories.com/Alchemist" rel="noopener">Alchemist on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
+<p>Summon, throw, repeat. Throughput is limited by cast and delay more than by damage,
+which is why an Alchemist gains more from a Bard's Bragi than almost any other class.</p>
+<h2>Skills that matter</h2>
+<ul><li><strong>Acid Terror</strong> — (100 + 100 × rank)% and works through DEF; 600% at rank 5.</li><li><strong>Summon Flora / Marine Sphere</strong> — free damage that does not cost you casts.</li><li><strong>Pharmacy</strong> — your supply line, and it scales some Alchemist gear.</li><li><strong>Crazy Uproar</strong> — four ranks on Payon Stories: STR, VIT and soft DEF.</li></ul>
+<h2>Gear</h2>
+<p>STR and DEX gear with enough AGI to keep plants and yourself moving. Bottles are the real
+cost of the build, so Pharmacy ranks are effectively damage.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Does Acid Terror ignore DEF?</h3>
+<p>It works through defence rather than being reduced by it in the ordinary way, which is why it is the standard answer to high-DEF, high-HP targets.</p>
+<h3>How much damage does Acid Terror do at max rank?</h3>
+<p>Six hundred percent at rank five under the reworked formula of one hundred plus one hundred per rank.</p>
+<h3>Why do Alchemists want Bragi?</h3>
+<p>Because the build is limited by how often it can throw rather than by the damage of each throw. Reducing cast time and after-cast delay directly raises throughput.</p>
+<h2>How the numbers are calculated</h2>
+<p>Every figure this build produces is broken down step by step in the calculator — base damage,
+skill ratio, the target's DEF, masteries, element and cards, each with its running total.
+The mechanics behind this build: <a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a>.</p>
+<p><a class="cta" href="/?t=alchemist-acid-demonstration">Calculate this build's damage →</a></p>
+<h2>Related</h2>
+<p class="seealso"><a href="/guides/blacksmith-battle-smith.html">Blacksmith — Battle Smith (AGI)</a> · <a href="/guides/hunter-trapper.html">Hunter — Trapper</a> · <a href="/guides.html">All build guides</a> · <a href="/mechanics.html">How the mechanics work</a> · <a href="https://wiki.payonstories.com/Alchemist" rel="noopener">Alchemist on the Payon Stories wiki ↗</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer></div></body></html>

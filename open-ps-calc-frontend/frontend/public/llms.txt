@@ -8,6 +8,21 @@
 
 - [Damage calculator](https://openpscalc.com/): the interactive tool — pick a class, skill, stats, gear and cards; see how each number is reached.
 - [Build guides index](https://openpscalc.com/guides.html): starter builds for every class, each openable in the calculator.
+- [Mechanics reference](https://openpscalc.com/mechanics.html): how Payon Stories' reworked damage formulas actually work, with sources.
+
+## Mechanics reference
+How this server differs from vanilla pre-renewal Ragnarok Online. Each page states the formula the
+calculator implements and what it was verified against.
+- [How damage is calculated on Payon Stories](https://openpscalc.com/mechanics/damage-formula.html): The order every physical hit passes through on Payon Stories — base damage, skill ratio, DEF, masteries, element, cards — and why the order changes the result.
+- [Hit, flee and accuracy on Payon Stories](https://openpscalc.com/mechanics/hit-and-accuracy.html): How hit chance is computed, why skill accuracy bonuses are a percentage of your hit rate rather than flat HIT, and how much DEX you need to stop missing.
+- [Asura Strike damage on Payon Stories](https://openpscalc.com/mechanics/asura-strike.html): The reworked Asura Strike formula: ATK × (8 + SP/10) + 1000, a flat 1000 at every rank, and unlike vanilla it does not ignore the target's DEF.
+- [Grand Cross damage and recoil on Payon Stories](https://openpscalc.com/mechanics/grand-cross.html): Grand Cross combines ATK and MATK, hits three times, applies defence asymmetrically, and hurts the caster — how each half is computed.
+- [The weapon size penalty, and Weapon Perfection](https://openpscalc.com/mechanics/weapon-size-penalty.html): Every weapon deals reduced damage against some monster sizes. Weapon Perfection removes that penalty outright — for you and your party.
+- [Forged weapons: Star Crumbs, elements and slots](https://openpscalc.com/mechanics/forged-weapons.html): What a Blacksmith's forge actually adds — seeking damage that ignores DEF, an element from the stone used, and why a forged weapon can never hold a card.
+- [Power-Thrust and the ATK buffs that stack with it](https://openpscalc.com/mechanics/power-thrust.html): Power-Thrust adds its percentage into the skill ratio rather than multiplying the total — five ranks, +25% at most.
+- [Triple Attack, and how Rogues can borrow it](https://openpscalc.com/mechanics/triple-attack.html): Triple Attack is five ranks on Payon Stories, procs on normal attacks, and a Rogue who plagiarises it procs it too.
+- [Magnum Break's lingering fire damage](https://openpscalc.com/mechanics/magnum-break.html): After casting Magnum Break your attacks carry extra Fire damage — an added chunk that bypasses the target's DEF.
+- [Reflect Shield on Payon Stories](https://openpscalc.com/mechanics/reflect-shield.html): The reworked Reflect Shield formula makes VIT quadratic, so a tank's returned damage scales far faster than it used to.
 
 ## Build guides
 - [Knight — Hybrid](https://openpscalc.com/guides/knight-hybrid.html): A balanced STR/VIT/AGI Knight built around a two-handed sword or spear. High STR drives Bash and auto-attacks, VIT keeps you alive for melee and MvP work, and enough AGI to attack at a reasonable clip. A forgiving, all-round melee build that leans on weapon mastery for flat ATK.

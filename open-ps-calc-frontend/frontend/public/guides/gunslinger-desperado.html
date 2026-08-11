@@ -11,6 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Build guides","item":"https://openpscalc.com/guides.html"},{"@type":"ListItem","position":3,"name":"Gunslinger — Desperado","item":"https://openpscalc.com/guides/gunslinger-desperado.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Gunslinger — Desperado Build Guide","description":"Gunslinger Desperado build for Payon Stories (pre-renewal RO): recommended stats, signature skill (Desperado), gear, and a link to calculate its damage.","url":"https://openpscalc.com/guides/gunslinger-desperado.html","mainEntityOfPage":"https://openpscalc.com/guides/gunslinger-desperado.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories Gunslinger Desperado build","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What stat does Desperado scale with?","acceptedAnswer":{"@type":"Answer","text":"Primarily DEX, which is also your hit and much of your attack throughput, so it is the clear first priority for the build."}},{"@type":"Question","name":"What does Chain Action do on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"It gives revolver normal attacks a chance to fire a second time, reaching seventy percent at maximum rank, which roughly transforms auto-attack throughput."}},{"@type":"Question","name":"Is Gatling Fever worth using?","acceptedAnswer":{"@type":"Answer","text":"Yes on Payon Stories, where it grants a flat forty percent ATK at all levels plus attack speed that rises with rank, and the vanilla flee penalty is suppressed."}}]}</script>
 <style>
   :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
   :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
@@ -21,6 +22,11 @@
   header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
   h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
   h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
   .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
   p{color:var(--text)}
   .lead{color:var(--dim);font-size:1.02rem}
@@ -42,12 +48,32 @@
 <p class="lead">The revolver Desperado Gunslinger — a rapid multi-hit AoE that scales primarily with DEX. Max DEX for damage, mid INT for the SP to keep firing, and the rest in VIT for survivability while you burst a gathered mob down.</p>
 <a class="cta" href="/?t=gunslinger-desperado">Open this build in the calculator →</a>
 <p style="font-size:.85rem;color:#9a9fb0">Opens the calculator with the <strong>Gunslinger — Desperado</strong> build preloaded — then tune stats and gear.</p>
+<h2>Why this build works</h2>
+<p>Desperado is rapid multi-hit area damage that scales primarily with DEX, and a revolver
+Gunslinger has Chain Action turning ordinary attacks into two. It is one of the few ranged classes
+that wants to be inside the pack rather than away from it.</p>
 <h2>Recommended stats <span style="font-weight:400;font-size:.8rem;color:#5d6276">(base level 99)</span></h2>
 <table><tbody><tr><td>STR</td><td class="n">1</td></tr><tr><td>AGI</td><td class="n">1</td></tr><tr><td>VIT</td><td class="n">70</td></tr><tr><td>INT</td><td class="n">60</td></tr><tr><td>DEX</td><td class="n">99</td></tr><tr><td>LUK</td><td class="n">1</td></tr></tbody></table>
-<h2>Signature skill</h2>
-<p><strong>Desperado</strong> — set it as your skill in the calculator to see a full step-by-step damage breakdown, plus ASPD/cast/hit breakpoints, time-to-kill, and survivability.</p>
-<h2>Gear &amp; tips</h2>
-<p>A revolver for Desperado; DEX/INT/VIT gear. Barrage boosts your damage; cancel it with Run and Gun to recast coins.</p>
-<h2>Learn more</h2>
-<p><a href="https://wiki.payonstories.com/Gunslinger" rel="noopener">Gunslinger on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
+<p>Gather, then spray. Between Desperados your auto-attacks are doing real work thanks
+to Chain Action, so attack speed and DEX both matter more than the tooltip suggests.</p>
+<h2>Skills that matter</h2>
+<ul><li><strong>Desperado</strong> — multi-hit area damage around you, scaling with DEX.</li><li><strong>Chain Action</strong> — revolver attacks proc a second hit, up to seventy percent at max rank.</li><li><strong>Single Action</strong> — hit and attack speed with guns.</li><li><strong>Gatling Fever</strong> — a flat forty percent ATK on Payon Stories plus attack speed that scales with rank.</li></ul>
+<h2>Gear</h2>
+<p>A revolver for Chain Action, DEX-first gear, INT for sustained SP, and VIT because
+Desperado puts you in the middle of what you are shooting.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>What stat does Desperado scale with?</h3>
+<p>Primarily DEX, which is also your hit and much of your attack throughput, so it is the clear first priority for the build.</p>
+<h3>What does Chain Action do on Payon Stories?</h3>
+<p>It gives revolver normal attacks a chance to fire a second time, reaching seventy percent at maximum rank, which roughly transforms auto-attack throughput.</p>
+<h3>Is Gatling Fever worth using?</h3>
+<p>Yes on Payon Stories, where it grants a flat forty percent ATK at all levels plus attack speed that rises with rank, and the vanilla flee penalty is suppressed.</p>
+<h2>How the numbers are calculated</h2>
+<p>Every figure this build produces is broken down step by step in the calculator — base damage,
+skill ratio, the target's DEF, masteries, element and cards, each with its running total.
+The mechanics behind this build: <a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a> · <a href="/mechanics/hit-and-accuracy.html">Hit, flee and accuracy on Payon Stories</a>.</p>
+<p><a class="cta" href="/?t=gunslinger-desperado">Calculate this build's damage →</a></p>
+<h2>Related</h2>
+<p class="seealso"><a href="/guides/hunter-double-strafe.html">Hunter — Double Strafe (DS)</a> · <a href="/guides/ninja-throwing.html">Ninja — Throwing (DEX)</a> · <a href="/guides.html">All build guides</a> · <a href="/mechanics.html">How the mechanics work</a> · <a href="https://wiki.payonstories.com/Gunslinger" rel="noopener">Gunslinger on the Payon Stories wiki ↗</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer></div></body></html>

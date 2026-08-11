@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<title>How damage is calculated on Payon Stories | Open PS Calc</title>
+<meta name="description" content="The order every physical hit passes through on Payon Stories — base damage, skill ratio, DEF, masteries, element, cards — and why the order changes the result.">
+<link rel="canonical" href="https://openpscalc.com/mechanics/damage-formula.html">
+<meta property="og:type" content="article"><meta property="og:title" content="How damage is calculated on Payon Stories | Open PS Calc">
+<meta property="og:description" content="The order every physical hit passes through on Payon Stories — base damage, skill ratio, DEF, masteries, element, cards — and why the order changes the result."><meta property="og:url" content="https://openpscalc.com/mechanics/damage-formula.html">
+<meta property="og:image" content="https://openpscalc.com/icon-512.png">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Mechanics","item":"https://openpscalc.com/mechanics.html"},{"@type":"ListItem","position":3,"name":"How damage is calculated on Payon Stories","item":"https://openpscalc.com/mechanics/damage-formula.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How damage is calculated on Payon Stories","description":"The order every physical hit passes through on Payon Stories — base damage, skill ratio, DEF, masteries, element, cards — and why the order changes the result.","url":"https://openpscalc.com/mechanics/damage-formula.html","mainEntityOfPage":"https://openpscalc.com/mechanics/damage-formula.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories damage mechanics (pre-renewal Ragnarok Online)","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Does a critical hit ignore DEF on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"Yes. A critical hit uses the weapon's maximum damage roll and bypasses the defence step entirely, which is why crit builds hold up so well against high-DEF monsters."}},{"@type":"Question","name":"Are weapon mastery and refine damage reduced by the target's DEF?","acceptedAnswer":{"@type":"Answer","text":"No. Both are applied after the defence step, so they arrive at full value. That is why flat ATK from masteries and refine is worth more against armoured targets than the same amount of ATK on the weapon."}},{"@type":"Question","name":"Do ATK buffs multiply the final damage?","acceptedAnswer":{"@type":"Answer","text":"Not usually. Power-Thrust and Over Thrust are added into the skill's ratio percentage rather than multiplied at the end, so a maxed Power-Thrust turns a 250% skill into a 275% skill."}}]}</script>
+<style>
+  :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
+  :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6}
+  a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:780px;margin:0 auto;padding:2rem 1.4rem 4rem}
+  header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
+  h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
+  h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
+  .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+  p{color:var(--text)}
+  .lead{color:var(--dim);font-size:1.02rem}
+  table{border-collapse:collapse;width:100%;max-width:360px;font-size:.9rem;margin:.5rem 0}
+  th,td{text-align:left;padding:.35rem .6rem;border-bottom:1px solid var(--border-soft)}
+  td.n{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--accent);text-align:right}
+  .cta{display:inline-block;margin:1.4rem 0 .5rem;padding:.6rem 1.1rem;background:var(--accent);color:var(--on-accent);font-weight:700;border-radius:6px}
+  .cta:hover{filter:brightness(1.08);text-decoration:none}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;margin:1rem 0}
+  .card{display:block;padding:.7rem .85rem;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text)}
+  .card:hover{border-color:var(--accent-dim);text-decoration:none}
+  .card .c{color:var(--dim);font-size:.82rem}
+  footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.82rem}
+</style></head>
+<body><div class="wrap">
+<header><nav><a href="/">Open PS Calc</a> › <a href="/mechanics.html">Mechanics</a> › How damage is calculated on Payon Stories</nav></header>
+<span class="eyebrow">Payon Stories mechanics</span>
+<h1>How damage is calculated on Payon Stories</h1>
+<p class="lead">The order every physical hit passes through on Payon Stories — base damage, skill ratio, DEF, masteries, element, cards — and why the order changes the result.</p>
+<h2>The pipeline, in order</h2>
+<p>A physical hit is not one multiplication. It is a chain, and each step
+works on the result of the last one, so the order decides the number. Payon Stories keeps
+the pre-renewal order:</p>
+<ol>
+<li><strong>Base damage</strong> — the weapon's ATK roll, the size penalty, then your status ATK (STR/DEX/LUK and gear) added on top.</li>
+<li><strong>ATK rate</strong> — flat %ATK buffs.</li>
+<li><strong>Skill ratio</strong> — the skill's own multiplier (Bash Lv10 = 400%, Cart Revolution Lv5 = 250%). Buffs like Power-Thrust are <em>added into this percentage</em>, not multiplied afterwards.</li>
+<li><strong>Critical</strong> — a crit takes the weapon's maximum roll and skips DEF entirely.</li>
+<li><strong>Defense</strong> — the target's hard DEF (a percentage cut) and then soft DEF (a flat subtraction).</li>
+<li><strong>Refine and mastery</strong> — refine ATK and weapon-mastery ATK, both applied <em>after</em> DEF, which is why they are so strong against high-DEF targets.</li>
+<li><strong>Element</strong> — your attack element against the target's element and level.</li>
+<li><strong>Forge bonus</strong> — a forged weapon's Star Crumb damage, also after DEF.</li>
+<li><strong>Cards</strong> — race, size, element and class card multipliers.</li>
+<li><strong>Final rate</strong> — melee/ranged and per-weapon final modifiers.</li>
+</ol>
+<h2>Why the order matters</h2>
+<p>Two bonuses of the same size are not worth the same. Anything applied
+<em>before</em> DEF gets cut by it; anything applied <em>after</em> arrives whole. Against a
+high-DEF target, +40 ATK from a mastery is worth far more than +40 ATK on the weapon itself,
+because the mastery lands after the subtraction. It is also why refine and forge damage feel
+disproportionately good against armoured monsters — and why a crit, which skips DEF outright,
+is not simply "more damage" but a different calculation.</p>
+<p>The calculator prints every one of these steps with its running total, so you can see
+exactly where a number came from rather than trusting a final figure.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Does a critical hit ignore DEF on Payon Stories?</h3>
+<p>Yes. A critical hit uses the weapon's maximum damage roll and bypasses the defence step entirely, which is why crit builds hold up so well against high-DEF monsters.</p>
+<h3>Are weapon mastery and refine damage reduced by the target's DEF?</h3>
+<p>No. Both are applied after the defence step, so they arrive at full value. That is why flat ATK from masteries and refine is worth more against armoured targets than the same amount of ATK on the weapon.</p>
+<h3>Do ATK buffs multiply the final damage?</h3>
+<p>Not usually. Power-Thrust and Over Thrust are added into the skill's ratio percentage rather than multiplied at the end, so a maxed Power-Thrust turns a 250% skill into a 275% skill.</p>
+<h2>See it on your own build</h2>
+<p>The calculator prints every step of this with your stats, gear and target, so you can check the
+numbers rather than take them on trust.</p>
+<p><a class="cta" href="/">Open the damage calculator →</a></p>
+<p class="seealso">Builds this affects most: <a href="/guides/knight-hybrid.html">Knight — Hybrid</a> · <a href="/guides/blacksmith-battle-smith.html">Blacksmith — Battle Smith (AGI)</a>.</p>
+<h2>Sources</h2>
+<p class="sources"><a href="https://wiki.payonstories.com/" rel="noopener">Payon Stories wiki ↗</a> · Formulas as implemented in the calculator's engine, which is open about what it cannot yet model.</p>
+<h2>Related</h2>
+<p class="seealso"><a href="/mechanics/hit-and-accuracy.html">Hit, flee and accuracy on Payon Stories</a> · <a href="/mechanics/weapon-size-penalty.html">The weapon size penalty, and Weapon Perfection</a> · <a href="/mechanics/forged-weapons.html">Forged weapons: Star Crumbs, elements and slots</a> · <a href="/mechanics.html">All mechanics</a> · <a href="/guides.html">Build guides</a></p>
+<footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Not affiliated with or endorsed by Payon Stories.</footer></div></body></html>

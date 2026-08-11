@@ -3034,6 +3034,8 @@ export default function BuildEditor() {
           <span className="credits-sep">·</span>
           <a className="credits-link" href="/guides.html">Build guides</a>
           <span className="credits-sep">·</span>
+          <a className="credits-link" href="/mechanics.html">How it's calculated</a>
+          <span className="credits-sep">·</span>
           <a className="credits-link" href="https://discord.gg/payonstories" target="_blank" rel="noreferrer">Discord</a>
           <span className="credits-sep">·</span>
           <a className="credits-link" href="https://cp.payonstories.com/" target="_blank" rel="noreferrer">PS Website</a>

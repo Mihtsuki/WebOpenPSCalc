@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+<title>How Payon Stories damage works — mechanics reference | Open PS Calc</title>
+<meta name="description" content="Reference pages for the reworked Payon Stories damage formulas: the damage pipeline, hit and accuracy, Asura Strike, Grand Cross, the size penalty, forged weapons and more.">
+<link rel="canonical" href="https://openpscalc.com/mechanics.html">
+<meta property="og:type" content="article"><meta property="og:title" content="How Payon Stories damage works — mechanics reference | Open PS Calc">
+<meta property="og:description" content="Reference pages for the reworked Payon Stories damage formulas: the damage pipeline, hit and accuracy, Asura Strike, Grand Cross, the size penalty, forged weapons and more."><meta property="og:url" content="https://openpscalc.com/mechanics.html">
+<meta property="og:image" content="https://openpscalc.com/icon-512.png">
+<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Mechanics","item":"https://openpscalc.com/mechanics.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"How Payon Stories damage mechanics work","url":"https://openpscalc.com/mechanics.html","description":"Reference pages for the reworked Payon Stories damage formulas: the damage pipeline, hit and accuracy, Asura Strike, Grand Cross, size penalties, forged weapons and more.","isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mainEntity":{"@type":"ItemList","itemListElement":[{"@type":"ListItem","position":1,"url":"https://openpscalc.com/mechanics/damage-formula.html","name":"How damage is calculated on Payon Stories"},{"@type":"ListItem","position":2,"url":"https://openpscalc.com/mechanics/hit-and-accuracy.html","name":"Hit, flee and accuracy on Payon Stories"},{"@type":"ListItem","position":3,"url":"https://openpscalc.com/mechanics/asura-strike.html","name":"Asura Strike damage on Payon Stories"},{"@type":"ListItem","position":4,"url":"https://openpscalc.com/mechanics/grand-cross.html","name":"Grand Cross damage and recoil on Payon Stories"},{"@type":"ListItem","position":5,"url":"https://openpscalc.com/mechanics/weapon-size-penalty.html","name":"The weapon size penalty, and Weapon Perfection"},{"@type":"ListItem","position":6,"url":"https://openpscalc.com/mechanics/forged-weapons.html","name":"Forged weapons: Star Crumbs, elements and slots"},{"@type":"ListItem","position":7,"url":"https://openpscalc.com/mechanics/power-thrust.html","name":"Power-Thrust and the ATK buffs that stack with it"},{"@type":"ListItem","position":8,"url":"https://openpscalc.com/mechanics/triple-attack.html","name":"Triple Attack, and how Rogues can borrow it"},{"@type":"ListItem","position":9,"url":"https://openpscalc.com/mechanics/magnum-break.html","name":"Magnum Break's lingering fire damage"},{"@type":"ListItem","position":10,"url":"https://openpscalc.com/mechanics/reflect-shield.html","name":"Reflect Shield on Payon Stories"}]}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}</script>
+<style>
+  :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
+  :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6}
+  a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:780px;margin:0 auto;padding:2rem 1.4rem 4rem}
+  header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
+  h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
+  h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
+  .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+  p{color:var(--text)}
+  .lead{color:var(--dim);font-size:1.02rem}
+  table{border-collapse:collapse;width:100%;max-width:360px;font-size:.9rem;margin:.5rem 0}
+  th,td{text-align:left;padding:.35rem .6rem;border-bottom:1px solid var(--border-soft)}
+  td.n{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--accent);text-align:right}
+  .cta{display:inline-block;margin:1.4rem 0 .5rem;padding:.6rem 1.1rem;background:var(--accent);color:var(--on-accent);font-weight:700;border-radius:6px}
+  .cta:hover{filter:brightness(1.08);text-decoration:none}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;margin:1rem 0}
+  .card{display:block;padding:.7rem .85rem;background:var(--panel);border:1px solid var(--border);border-radius:6px;color:var(--text)}
+  .card:hover{border-color:var(--accent-dim);text-decoration:none}
+  .card .c{color:var(--dim);font-size:.82rem}
+  footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.82rem}
+</style></head>
+<body><div class="wrap">
+<header><nav><a href="/">Open PS Calc</a> › Mechanics</nav></header>
+<span class="eyebrow">Payon Stories</span>
+<h1>How Payon Stories damage actually works</h1>
+<p class="lead">Payon Stories reworks a lot of pre-renewal Ragnarok Online: Asura Strike no longer
+ignores DEF, Grand Cross applies defence asymmetrically, skill accuracy is a percentage of your hit
+rate rather than flat HIT. These pages document the formulas the
+<a href="/">damage calculator</a> implements, with the sources they were verified against.</p>
+<div class="grid"><a class="card" href="/mechanics/damage-formula.html"><strong>How damage is calculated on Payon Stories</strong><div class="c">The order every physical hit passes through on Payon Stories — base damage, skill ratio, DEF, masteries, element, cards — and why the order changes the result.</div></a><a class="card" href="/mechanics/hit-and-accuracy.html"><strong>Hit, flee and accuracy on Payon Stories</strong><div class="c">How hit chance is computed, why skill accuracy bonuses are a percentage of your hit rate rather than flat HIT, and how much DEX you need to stop missing.</div></a><a class="card" href="/mechanics/asura-strike.html"><strong>Asura Strike damage on Payon Stories</strong><div class="c">The reworked Asura Strike formula: ATK × (8 + SP/10) + 1000, a flat 1000 at every rank, and unlike vanilla it does not ignore the target's DEF.</div></a><a class="card" href="/mechanics/grand-cross.html"><strong>Grand Cross damage and recoil on Payon Stories</strong><div class="c">Grand Cross combines ATK and MATK, hits three times, applies defence asymmetrically, and hurts the caster — how each half is computed.</div></a><a class="card" href="/mechanics/weapon-size-penalty.html"><strong>The weapon size penalty, and Weapon Perfection</strong><div class="c">Every weapon deals reduced damage against some monster sizes. Weapon Perfection removes that penalty outright — for you and your party.</div></a><a class="card" href="/mechanics/forged-weapons.html"><strong>Forged weapons: Star Crumbs, elements and slots</strong><div class="c">What a Blacksmith's forge actually adds — seeking damage that ignores DEF, an element from the stone used, and why a forged weapon can never hold a card.</div></a><a class="card" href="/mechanics/power-thrust.html"><strong>Power-Thrust and the ATK buffs that stack with it</strong><div class="c">Power-Thrust adds its percentage into the skill ratio rather than multiplying the total — five ranks, +25% at most.</div></a><a class="card" href="/mechanics/triple-attack.html"><strong>Triple Attack, and how Rogues can borrow it</strong><div class="c">Triple Attack is five ranks on Payon Stories, procs on normal attacks, and a Rogue who plagiarises it procs it too.</div></a><a class="card" href="/mechanics/magnum-break.html"><strong>Magnum Break's lingering fire damage</strong><div class="c">After casting Magnum Break your attacks carry extra Fire damage — an added chunk that bypasses the target's DEF.</div></a><a class="card" href="/mechanics/reflect-shield.html"><strong>Reflect Shield on Payon Stories</strong><div class="c">The reworked Reflect Shield formula makes VIT quadratic, so a tank's returned damage scales far faster than it used to.</div></a></div>
+<footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Where a formula isn't published, the calculator says so rather than showing an invented number.</footer></div></body></html>

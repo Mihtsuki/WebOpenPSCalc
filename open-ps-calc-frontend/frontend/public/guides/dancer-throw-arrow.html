@@ -11,6 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Build guides","item":"https://openpscalc.com/guides.html"},{"@type":"ListItem","position":3,"name":"Dancer — Throw Arrow","item":"https://openpscalc.com/guides/dancer-throw-arrow.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Dancer — Throw Arrow Build Guide","description":"Dancer Throw Arrow build for Payon Stories (pre-renewal RO): recommended stats, signature skill (Throw Arrow), gear, and a link to calculate its damage.","url":"https://openpscalc.com/guides/dancer-throw-arrow.html","mainEntityOfPage":"https://openpscalc.com/guides/dancer-throw-arrow.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories Dancer Throw Arrow build","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Throw Arrow worth using on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"Yes. The Performing bonus adds ratio to it and the arrow sets its element, which makes it a real ranged attack rather than a filler skill."}},{"@type":"Question","name":"What is the difference between a Bard and a Dancer here?","acceptedAnswer":{"@type":"Answer","text":"Mechanically the attacks mirror each other, Musical Strike with an instrument against Throw Arrow with a whip. The difference is which party songs and dances you bring."}},{"@type":"Question","name":"Do I need AGI as a Dancer?","acceptedAnswer":{"@type":"Answer","text":"Enough to attack at a reasonable rate. DEX is the damage stat, but attack speed decides whether that damage is sustained."}}]}</script>
 <style>
   :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
   :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
@@ -21,6 +22,11 @@
   header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
   h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
   h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
   .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
   p{color:var(--text)}
   .lead{color:var(--dim);font-size:1.02rem}
@@ -42,12 +48,31 @@
 <p class="lead">The Dancer mirror of the Bard attacker, using Throw Arrow. DEX-heavy for damage and hit, AGI for attack speed, and the equipped arrow's element decides your damage type. Performing adds ratio on Payon Stories.</p>
 <a class="cta" href="/?t=dancer-throw-arrow">Open this build in the calculator →</a>
 <p style="font-size:.85rem;color:#9a9fb0">Opens the calculator with the <strong>Dancer — Throw Arrow</strong> build preloaded — then tune stats and gear.</p>
+<h2>Why this build works</h2>
+<p>Throw Arrow is the Dancer's mirror of Musical Strike, and it works the same way: Performing
+adds ratio, and the arrow you have equipped decides the element. DEX drives the damage and the hit.</p>
 <h2>Recommended stats <span style="font-weight:400;font-size:.8rem;color:#5d6276">(base level 99)</span></h2>
 <table><tbody><tr><td>STR</td><td class="n">1</td></tr><tr><td>AGI</td><td class="n">90</td></tr><tr><td>VIT</td><td class="n">24</td></tr><tr><td>INT</td><td class="n">40</td></tr><tr><td>DEX</td><td class="n">90</td></tr><tr><td>LUK</td><td class="n">1</td></tr></tbody></table>
-<h2>Signature skill</h2>
-<p><strong>Throw Arrow</strong> — set it as your skill in the calculator to see a full step-by-step damage breakdown, plus ASPD/cast/hit breakpoints, time-to-kill, and survivability.</p>
-<h2>Gear &amp; tips</h2>
-<p>A whip plus elemental arrows; toggle Performing in the Target panel.</p>
-<h2>Learn more</h2>
-<p><a href="https://wiki.payonstories.com/Dancer" rel="noopener">Dancer on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
+<p>Dance for the party, attack between. Like the Bard, your ensemble skills often matter
+more to a group's output than your own damage — but unlike vanilla, you are not choosing between
+them and contributing damage.</p>
+<h2>Skills that matter</h2>
+<ul><li><strong>Throw Arrow</strong> — ranged physical damage with your arrow's element.</li><li><strong>Fortune's Kiss</strong> and the other dances — party-wide value that no other class provides.</li><li><strong>Dancing Lesson</strong> — flat ATK with a whip and better dances.</li></ul>
+<h2>Gear</h2>
+<p>A slotted whip, a full arrow set, and DEX-first gear with AGI behind it.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Is Throw Arrow worth using on Payon Stories?</h3>
+<p>Yes. The Performing bonus adds ratio to it and the arrow sets its element, which makes it a real ranged attack rather than a filler skill.</p>
+<h3>What is the difference between a Bard and a Dancer here?</h3>
+<p>Mechanically the attacks mirror each other, Musical Strike with an instrument against Throw Arrow with a whip. The difference is which party songs and dances you bring.</p>
+<h3>Do I need AGI as a Dancer?</h3>
+<p>Enough to attack at a reasonable rate. DEX is the damage stat, but attack speed decides whether that damage is sustained.</p>
+<h2>How the numbers are calculated</h2>
+<p>Every figure this build produces is broken down step by step in the calculator — base damage,
+skill ratio, the target's DEF, masteries, element and cards, each with its running total.
+The mechanics behind this build: <a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a> · <a href="/mechanics/hit-and-accuracy.html">Hit, flee and accuracy on Payon Stories</a>.</p>
+<p><a class="cta" href="/?t=dancer-throw-arrow">Calculate this build's damage →</a></p>
+<h2>Related</h2>
+<p class="seealso"><a href="/guides/bard-musical-strike.html">Bard — Musical Strike</a> · <a href="/guides/hunter-double-strafe.html">Hunter — Double Strafe (DS)</a> · <a href="/guides.html">All build guides</a> · <a href="/mechanics.html">How the mechanics work</a> · <a href="https://wiki.payonstories.com/Dancer" rel="noopener">Dancer on the Payon Stories wiki ↗</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer></div></body></html>

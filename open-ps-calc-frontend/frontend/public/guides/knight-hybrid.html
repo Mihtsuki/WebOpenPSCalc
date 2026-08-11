@@ -11,6 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Build guides","item":"https://openpscalc.com/guides.html"},{"@type":"ListItem","position":3,"name":"Knight — Hybrid","item":"https://openpscalc.com/guides/knight-hybrid.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Knight — Hybrid Build Guide","description":"Knight Hybrid build for Payon Stories (pre-renewal RO): recommended stats, signature skill (Bash), gear, and a link to calculate its damage.","url":"https://openpscalc.com/guides/knight-hybrid.html","mainEntityOfPage":"https://openpscalc.com/guides/knight-hybrid.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories Knight Hybrid build","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is a Knight better with a spear or a two-handed sword?","acceptedAnswer":{"@type":"Answer","text":"Size is not what separates them: spears and two-handed swords share the same size profile, full damage against Large and three quarters against Small and Medium. Choose on the skills instead — spears for Pierce and Brandish Spear and for riding a Peco Peco, two-handed swords for Bash and the higher raw ATK."}},{"@type":"Question","name":"How much DEX does a Knight need?","acceptedAnswer":{"@type":"Answer","text":"Enough to stop missing what you fight, which depends entirely on the target's flee. Bash helps a great deal because each rank adds five percent of your hit rate, so a maxed Bash reaches targets your auto-attack cannot."}},{"@type":"Question","name":"Does Provoke increase my damage?","acceptedAnswer":{"@type":"Answer","text":"Yes. Provoke reduces the target's DEF, and since defence is applied partway through the damage chain, everything after it lands harder."}}]}</script>
 <style>
   :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
   :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
@@ -21,6 +22,11 @@
   header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
   h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
   h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
   .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
   p{color:var(--text)}
   .lead{color:var(--dim);font-size:1.02rem}
@@ -42,12 +48,37 @@
 <p class="lead">A balanced STR/VIT/AGI Knight built around a two-handed sword or spear. High STR drives Bash and auto-attacks, VIT keeps you alive for melee and MvP work, and enough AGI to attack at a reasonable clip. A forgiving, all-round melee build that leans on weapon mastery for flat ATK.</p>
 <a class="cta" href="/?t=knight-hybrid">Open this build in the calculator →</a>
 <p style="font-size:.85rem;color:#9a9fb0">Opens the calculator with the <strong>Knight — Hybrid</strong> build preloaded — then tune stats and gear.</p>
+<h2>Why this build works</h2>
+<p>A Knight's damage is mostly flat ATK — STR, weapon mastery and refine — pushed through a
+big two-hander. That profile is forgiving: it does not need a crit threshold or a cast-time
+breakpoint to function, and mastery ATK lands after the target's DEF, so it holds up against
+armoured monsters that punish weapon-ATK builds.</p>
 <h2>Recommended stats <span style="font-weight:400;font-size:.8rem;color:#5d6276">(base level 99)</span></h2>
 <table><tbody><tr><td>STR</td><td class="n">90</td></tr><tr><td>AGI</td><td class="n">60</td></tr><tr><td>VIT</td><td class="n">60</td></tr><tr><td>INT</td><td class="n">1</td></tr><tr><td>DEX</td><td class="n">40</td></tr><tr><td>LUK</td><td class="n">1</td></tr></tbody></table>
-<h2>Signature skill</h2>
-<p><strong>Bash</strong> — set it as your skill in the calculator to see a full step-by-step damage breakdown, plus ASPD/cast/hit breakpoints, time-to-kill, and survivability.</p>
-<h2>Gear &amp; tips</h2>
-<p>Two-hand sword or spear, weapon mastery maxed, and STR/VIT gear. Race and size cards on your weapon scale damage hardest.</p>
-<h2>Learn more</h2>
-<p><a href="https://wiki.payonstories.com/Knight" rel="noopener">Knight on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
+<p>Open with Bash on a single target and auto-attack between casts; Magnum Break for
+packs, which also leaves a Fire buff on your attacks for ten seconds. VIT is what lets you stand
+still and keep swinging, and it is the reason a Knight can tank targets an Assassin has to dodge.</p>
+<h2>Skills that matter</h2>
+<ul><li><strong>Bash</strong> — your bread and butter. Each rank adds both damage and accuracy (+5% of your hit rate per level), so a maxed Bash lands on targets your auto-attack misses.</li><li><strong>Two-Handed Sword Mastery / Spear Mastery</strong> — flat ATK per level, applied after DEF. Max it early; it is the most reliable damage on the sheet.</li><li><strong>Magnum Break</strong> — AoE plus a ten-second Fire buff on your attacks that ignores the target's DEF.</li><li><strong>Provoke</strong> — cuts the target's DEF, which raises every subsequent hit.</li><li><strong>Endure / Auto Berserk</strong> — staying power while you commit to a target.</li></ul>
+<h2>Gear</h2>
+<p>Start with any two-handed sword or spear you can wield and put every point of mastery in
+before you chase a better weapon — mastery ATK is worth more than the same ATK on the weapon
+because it lands after DEF. Then move to a slotted two-hander and add race or size cards for the
+targets you actually farm. Armour goes to VIT and Neutral resistance; a Raydric Card is the single
+biggest survivability upgrade for most melee.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Is a Knight better with a spear or a two-handed sword?</h3>
+<p>Size is not what separates them: spears and two-handed swords share the same size profile, full damage against Large and three quarters against Small and Medium. Choose on the skills instead — spears for Pierce and Brandish Spear and for riding a Peco Peco, two-handed swords for Bash and the higher raw ATK.</p>
+<h3>How much DEX does a Knight need?</h3>
+<p>Enough to stop missing what you fight, which depends entirely on the target's flee. Bash helps a great deal because each rank adds five percent of your hit rate, so a maxed Bash reaches targets your auto-attack cannot.</p>
+<h3>Does Provoke increase my damage?</h3>
+<p>Yes. Provoke reduces the target's DEF, and since defence is applied partway through the damage chain, everything after it lands harder.</p>
+<h2>How the numbers are calculated</h2>
+<p>Every figure this build produces is broken down step by step in the calculator — base damage,
+skill ratio, the target's DEF, masteries, element and cards, each with its running total.
+The mechanics behind this build: <a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a> · <a href="/mechanics/hit-and-accuracy.html">Hit, flee and accuracy on Payon Stories</a> · <a href="/mechanics/magnum-break.html">Magnum Break's lingering fire damage</a> · <a href="/mechanics/weapon-size-penalty.html">The weapon size penalty, and Weapon Perfection</a>.</p>
+<p><a class="cta" href="/?t=knight-hybrid">Calculate this build's damage →</a></p>
+<h2>Related</h2>
+<p class="seealso"><a href="/guides/crusader-grand-cross.html">Crusader — Grand Cross (GC)</a> · <a href="/guides/blacksmith-battle-smith.html">Blacksmith — Battle Smith (AGI)</a> · <a href="/guides.html">All build guides</a> · <a href="/mechanics.html">How the mechanics work</a> · <a href="https://wiki.payonstories.com/Knight" rel="noopener">Knight on the Payon Stories wiki ↗</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer></div></body></html>

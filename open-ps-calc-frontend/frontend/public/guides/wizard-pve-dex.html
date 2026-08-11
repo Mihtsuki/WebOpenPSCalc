@@ -11,6 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Build guides","item":"https://openpscalc.com/guides.html"},{"@type":"ListItem","position":3,"name":"Wizard — PvE (DEX)","item":"https://openpscalc.com/guides/wizard-pve-dex.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Wizard — PvE (DEX) Build Guide","description":"Wizard PvE (DEX) build for Payon Stories (pre-renewal RO): recommended stats, signature skill (Storm Gust), gear, and a link to calculate its damage.","url":"https://openpscalc.com/guides/wizard-pve-dex.html","mainEntityOfPage":"https://openpscalc.com/guides/wizard-pve-dex.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories Wizard PvE (DEX) build","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much DEX does a Wizard need on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"Enough to reach the cast times you can actually play with, and ideally the instant-cast threshold for your key spell. The calculator's cast breakpoints panel gives the exact DEX for your build rather than a general number, because gear and Bragi change it."}},{"@type":"Question","name":"Is INT or DEX more important for a Wizard?","acceptedAnswer":{"@type":"Answer","text":"INT is the damage per cast and DEX is the number of casts. Below the cast breakpoints DEX usually wins because an interrupted or slow cast wastes the MATK entirely, which is why the standard build maxes INT and then pours everything into DEX."}},{"@type":"Question","name":"Does Amplify Magic Power stack with elemental staffs?","acceptedAnswer":{"@type":"Answer","text":"Yes. Amplify raises your MATK for the next spell and the element multiplier is applied separately later in the chain, so the two multiply together rather than overlapping."}}]}</script>
 <style>
   :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
   :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
@@ -21,6 +22,11 @@
   header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
   h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
   h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
   .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
   p{color:var(--text)}
   .lead{color:var(--dim);font-size:1.02rem}
@@ -42,12 +48,34 @@
 <p class="lead">The pure DEX nuker. Wizards get enormous value from DEX because their strongest spells — Storm Gust, Lord of Vermilion, Meteor Storm — have long cast times. Max INT for raw MATK, then stack DEX to cast fast (and hit the instant-cast breakpoint), with a little VIT so you aren't one-shot mid-cast.</p>
 <a class="cta" href="/?t=wizard-pve-dex">Open this build in the calculator →</a>
 <p style="font-size:.85rem;color:#9a9fb0">Opens the calculator with the <strong>Wizard — PvE (DEX)</strong> build preloaded — then tune stats and gear.</p>
+<h2>Why this build works</h2>
+<p>Wizard damage per cast is enormous but slow, so the binding constraint is almost never
+MATK — it is cast time. DEX buys casts, and a cast you do not finish is zero damage. That is why the
+DEX Wizard out-damages a pure INT one in practice despite a lower number on the tooltip.</p>
 <h2>Recommended stats <span style="font-weight:400;font-size:.8rem;color:#5d6276">(base level 99)</span></h2>
 <table><tbody><tr><td>STR</td><td class="n">1</td></tr><tr><td>AGI</td><td class="n">1</td></tr><tr><td>VIT</td><td class="n">9</td></tr><tr><td>INT</td><td class="n">99</td></tr><tr><td>DEX</td><td class="n">99</td></tr><tr><td>LUK</td><td class="n">1</td></tr></tbody></table>
-<h2>Signature skill</h2>
-<p><strong>Storm Gust</strong> — set it as your skill in the calculator to see a full step-by-step damage breakdown, plus ASPD/cast/hit breakpoints, time-to-kill, and survivability.</p>
-<h2>Gear &amp; tips</h2>
-<p>A MATK staff, INT headgear, and DEX for cast reduction. Check the cast breakpoints for the DEX needed to instant-cast.</p>
-<h2>Learn more</h2>
-<p><a href="https://wiki.payonstories.com/Wizard" rel="noopener">Wizard on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
+<p>Position first, cast second. Storm Gust and Meteor Storm reward pulling a pack into
+one place; Lord of Vermilion is the fastest to lay down when things are already gathered. A little
+VIT stops a stray hit from cancelling a long cast, which is worth more than the INT it costs.</p>
+<h2>Skills that matter</h2>
+<ul><li><strong>Storm Gust</strong> — the workhorse: heavy Water AoE that also freezes, which is defence as well as damage.</li><li><strong>Meteor Storm</strong> — Fire AoE for undead and plant-heavy maps.</li><li><strong>Lord of Vermilion</strong> — Wind AoE, the quickest of the three to get out.</li><li><strong>Jupitel Thunder</strong> — single-target Wind, and the reason Wind gear matters.</li><li><strong>Amplify Magic Power</strong> — +10% MATK per rank on your next spell, five ranks on Payon Stories.</li></ul>
+<h2>Gear</h2>
+<p>A staff with MATK and INT, then anything that reduces cast time or after-cast delay.
+Element matters more for a Wizard than for anyone else: matching the target's weakness is a larger
+multiplier than any single piece of gear, so carry the spells rather than the perfect staff.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>How much DEX does a Wizard need on Payon Stories?</h3>
+<p>Enough to reach the cast times you can actually play with, and ideally the instant-cast threshold for your key spell. The calculator's cast breakpoints panel gives the exact DEX for your build rather than a general number, because gear and Bragi change it.</p>
+<h3>Is INT or DEX more important for a Wizard?</h3>
+<p>INT is the damage per cast and DEX is the number of casts. Below the cast breakpoints DEX usually wins because an interrupted or slow cast wastes the MATK entirely, which is why the standard build maxes INT and then pours everything into DEX.</p>
+<h3>Does Amplify Magic Power stack with elemental staffs?</h3>
+<p>Yes. Amplify raises your MATK for the next spell and the element multiplier is applied separately later in the chain, so the two multiply together rather than overlapping.</p>
+<h2>How the numbers are calculated</h2>
+<p>Every figure this build produces is broken down step by step in the calculator — base damage,
+skill ratio, the target's DEF, masteries, element and cards, each with its running total.
+The mechanics behind this build: <a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a>.</p>
+<p><a class="cta" href="/?t=wizard-pve-dex">Calculate this build's damage →</a></p>
+<h2>Related</h2>
+<p class="seealso"><a href="/guides/sage-bolter.html">Sage — Bolter</a> · <a href="/guides/priest-magnus-exorcismus.html">Priest — Magnus Exorcismus</a> · <a href="/guides.html">All build guides</a> · <a href="/mechanics.html">How the mechanics work</a> · <a href="https://wiki.payonstories.com/Wizard" rel="noopener">Wizard on the Payon Stories wiki ↗</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer></div></body></html>

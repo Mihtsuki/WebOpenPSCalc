@@ -11,6 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" type="image/svg+xml" href="/icon.svg">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Open PS Calc","item":"https://openpscalc.com/"},{"@type":"ListItem","position":2,"name":"Build guides","item":"https://openpscalc.com/guides.html"},{"@type":"ListItem","position":3,"name":"Rogue — Back Stab","item":"https://openpscalc.com/guides/rogue-back-stab.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Rogue — Back Stab Build Guide","description":"Rogue Back Stab build for Payon Stories (pre-renewal RO): recommended stats, signature skill (Back Stab), gear, and a link to calculate its damage.","url":"https://openpscalc.com/guides/rogue-back-stab.html","mainEntityOfPage":"https://openpscalc.com/guides/rogue-back-stab.html","image":"https://openpscalc.com/icon-512.png","inLanguage":"en","about":"Payon Stories Rogue Back Stab build","author":{"@type":"Organization","name":"Open PS Calc","url":"https://openpscalc.com/"},"publisher":{"@type":"Organization","name":"Open PS Calc","logo":{"@type":"ImageObject","url":"https://openpscalc.com/icon-512.png"}},"isPartOf":{"@type":"WebSite","name":"Open PS Calc","url":"https://openpscalc.com/"},"mentions":{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Open PS Calc","alternateName":"Payon Stories Damage Calculator","url":"https://openpscalc.com/","applicationCategory":"GameApplication","operatingSystem":"Web browser","description":"Fan-made damage calculator for Payon Stories (pre-renewal Ragnarok Online): step-by-step damage breakdown, ASPD/cast/hit breakpoints, build comparison, time-to-kill and survivability, modeling the server's reworked mechanics.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"isAccessibleForFree":true}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What can a Rogue plagiarise on Payon Stories?","acceptedAnswer":{"@type":"Answer","text":"Strictly offensive skills that can damage the Rogue, from a published list covering most classes — Bash, the bolts, Grand Cross, Asura Strike, Triple Attack and many more. Only one is held at a time unless Preserve is active."}},{"@type":"Question","name":"Does a plagiarised Triple Attack work for a Rogue?","acceptedAnswer":{"@type":"Answer","text":"Yes. A copied Triple Attack procs on the Rogue's normal attacks exactly as it does for a Monk, which makes it one of the few copies that changes your auto-attack rather than giving you a skill to cast."}},{"@type":"Question","name":"Does Back Stab ever miss?","acceptedAnswer":{"@type":"Answer","text":"No, it always hits. The opportunity bonus for striking a target that is not facing you is separate and multiplies the damage further."}}]}</script>
 <style>
   :root{color-scheme:dark;--bg:#12141c;--panel:#181b26;--border:#2a2f40;--border-soft:#232838;--text:#e8e6df;--dim:#9a9fb0;--faint:#5d6276;--accent:#d8a657;--accent-dim:#a3793c;--link:#8fb4d9;--on-accent:#1a1306}
   :root[data-theme="light"]{color-scheme:light;--bg:#f0ebe0;--panel:#e8e2d4;--border:#b5ab95;--border-soft:#c8c0ac;--text:#1e1a10;--dim:#56493a;--faint:#8a7a64;--accent:#966419;--accent-dim:#7a5015;--link:#2060a0;--on-accent:#f0ebe0}
@@ -21,6 +22,11 @@
   header nav{font-size:.85rem;color:var(--dim);margin-bottom:1.5rem}
   h1{font-size:1.75rem;line-height:1.2;margin:.2rem 0 .4rem}
   h2{font-size:1.15rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
+  h3{font-size:.98rem;margin:1.2rem 0 .3rem;color:var(--text)}
+  ul,ol{color:var(--text)}li{margin:.25rem 0}
+  .formula{font-family:"IBM Plex Mono",ui-monospace,monospace;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.7rem .9rem;color:var(--accent);overflow-x:auto}
+  .seealso{margin:.4rem 0;color:var(--dim);font-size:.9rem}
+  .sources{font-size:.85rem;color:var(--dim)}
   .eyebrow{color:var(--accent-dim);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
   p{color:var(--text)}
   .lead{color:var(--dim);font-size:1.02rem}
@@ -42,12 +48,33 @@
 <p class="lead">A STR/AGI Rogue built around Back Stab, which lands a heavy hit from behind (with a further bonus when the target isn't facing you). STR drives the hit, AGI gives speed and flee, and a chunk of INT sustains SP for repeated Back Stabs.</p>
 <a class="cta" href="/?t=rogue-back-stab">Open this build in the calculator →</a>
 <p style="font-size:.85rem;color:#9a9fb0">Opens the calculator with the <strong>Rogue — Back Stab</strong> build preloaded — then tune stats and gear.</p>
+<h2>Why this build works</h2>
+<p>Back Stab is a heavy single hit that cannot miss, with a further multiplier when the target
+is not facing you. Add Plagiarism — the ability to carry someone else's skill — and the Rogue
+becomes the most situationally adaptable damage class on the server.</p>
 <h2>Recommended stats <span style="font-weight:400;font-size:.8rem;color:#5d6276">(base level 99)</span></h2>
 <table><tbody><tr><td>STR</td><td class="n">90</td></tr><tr><td>AGI</td><td class="n">70</td></tr><tr><td>VIT</td><td class="n">1</td></tr><tr><td>INT</td><td class="n">60</td></tr><tr><td>DEX</td><td class="n">30</td></tr><tr><td>LUK</td><td class="n">1</td></tr></tbody></table>
-<h2>Signature skill</h2>
-<p><strong>Back Stab</strong> — set it as your skill in the calculator to see a full step-by-step damage breakdown, plus ASPD/cast/hit breakpoints, time-to-kill, and survivability.</p>
-<h2>Gear &amp; tips</h2>
-<p>A dagger, STR/AGI/DEX gear; the Back Stab opportunity bonus rewards attacking from behind.</p>
-<h2>Learn more</h2>
-<p><a href="https://wiki.payonstories.com/Rogue" rel="noopener">Rogue on the Payon Stories wiki ↗</a> · <a href="/guides.html">All build guides</a></p>
+<p>Approach unseen, strike from behind, and keep the opportunity bonus by managing
+where the target is looking. Plagiarism means your kit changes with what has hit you recently, so
+Preserve is what turns a lucky copy into a plan.</p>
+<h2>Skills that matter</h2>
+<ul><li><strong>Back Stab</strong> — always hits, and gains roughly forty percent more when the target is not facing you.</li><li><strong>Plagiarism</strong> — copies the last copyable offensive skill that hit you, at the rank it was used and capped by your own rank.</li><li><strong>Preserve</strong> — keeps that copy instead of losing it to the next hit.</li><li><strong>Raid</strong> — area damage for when one target is not the problem.</li><li><strong>Sword Mastery / Vulture's Eye</strong> — flat ATK, or bow range if you play the bow variant.</li></ul>
+<h2>Gear</h2>
+<p>A dagger for Back Stab, or a bow if you lean on Double Attack at range. STR and AGI, with
+enough INT to sustain repeated casts.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>What can a Rogue plagiarise on Payon Stories?</h3>
+<p>Strictly offensive skills that can damage the Rogue, from a published list covering most classes — Bash, the bolts, Grand Cross, Asura Strike, Triple Attack and many more. Only one is held at a time unless Preserve is active.</p>
+<h3>Does a plagiarised Triple Attack work for a Rogue?</h3>
+<p>Yes. A copied Triple Attack procs on the Rogue's normal attacks exactly as it does for a Monk, which makes it one of the few copies that changes your auto-attack rather than giving you a skill to cast.</p>
+<h3>Does Back Stab ever miss?</h3>
+<p>No, it always hits. The opportunity bonus for striking a target that is not facing you is separate and multiplies the damage further.</p>
+<h2>How the numbers are calculated</h2>
+<p>Every figure this build produces is broken down step by step in the calculator — base damage,
+skill ratio, the target's DEF, masteries, element and cards, each with its running total.
+The mechanics behind this build: <a href="/mechanics/triple-attack.html">Triple Attack, and how Rogues can borrow it</a> · <a href="/mechanics/hit-and-accuracy.html">Hit, flee and accuracy on Payon Stories</a> · <a href="/mechanics/damage-formula.html">How damage is calculated on Payon Stories</a>.</p>
+<p><a class="cta" href="/?t=rogue-back-stab">Calculate this build's damage →</a></p>
+<h2>Related</h2>
+<p class="seealso"><a href="/guides/assassin-sonic-blow.html">Assassin — Sonic Blow (PvE)</a> · <a href="/guides/hunter-double-strafe.html">Hunter — Double Strafe (DS)</a> · <a href="/guides.html">All build guides</a> · <a href="/mechanics.html">How the mechanics work</a> · <a href="https://wiki.payonstories.com/Rogue" rel="noopener">Rogue on the Payon Stories wiki ↗</a></p>
 <footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>. Stats are a starting point — tune them to your gear and goals.</footer></div></body></html>
