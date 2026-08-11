@@ -2077,12 +2077,6 @@ export default function BuildEditor() {
                         </div>
                       </>
                     )}
-                    {cardSlotCount > 0 && isForged && (
-                      <p style={{ fontSize: "0.75rem", color: "var(--text-muted, #888)", marginTop: "0.5rem" }}>
-                        Forged weapons take no cards — the forge fills the slots with the
-                        crafter's signature.
-                      </p>
-                    )}
                     {cardSlotCount > 0 && !isForged && (
                       <>
                         {isWeaponSlot && (
