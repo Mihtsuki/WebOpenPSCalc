@@ -66,13 +66,13 @@ instead of release version. Dates are taken from actual git commit history.
 - **A combo's `autobonus` is no longer dropped**, so the "Cards always proc" toggle now covers
   combo procs too — **Hahoe Mask + Witch's Pumpkin Hat** (+50 ATK), **Twilight Desert +
   Sandstorm** (+100% ASPD) and five others.
-- **Corruptor Card's proc is no longer invisible.** Its Corrupting Drain is a PS-custom skill, and
-  the engine couldn't resolve the name at all, so the whole bonus was thrown away. The proc now
-  shows with its real rate — **4% on melee attacks, 2% on ranged**, which the calculator also
-  reads correctly per weapon now (any card with separate melee/ranged proc rates was using the
-  melee rate for both). Its **damage is still not calculated**: PS publishes no formula for
-  Corrupting Drain, so the card's panel says so outright rather than showing an invented number,
-  and nothing from it is folded into your DPS.
+- **Corruptor Card is fully modelled.** Its Corrupting Drain is a PS-custom skill the engine
+  couldn't even resolve, so the whole bonus was thrown away. It now procs at its real rate —
+  **4% on melee attacks, 2% on ranged**, read per weapon (any card with separate melee/ranged
+  rates was using the melee one for both) — and its damage is computed from the card's formula:
+  `100 + STR + STR²/40 + DEX + DEX²/40 + INT + INT²/40 + LUK + LUK²/40`, off your total stats,
+  unaffected by element, size or race. The breakdown shows one step per stat, the **75% lifesteal**
+  is reported beside it as healing (never as damage), and the proc now counts toward your DPS.
 - **Holy Cross's accuracy bonus now scales with its rank.** The calculator gave every rank of
   Holy Cross the full +20% accuracy, when the bonus is **+2% per rank** (+2% at Lv1 → +20% at
   Lv10). Low-rank Holy Cross was showing a hit chance it doesn't have; Lv10 is unchanged. As a

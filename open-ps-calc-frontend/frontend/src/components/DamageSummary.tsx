@@ -45,6 +45,9 @@ interface DamageBranch {
   // Crit lifesteal (bCritHeal — Crescent Scythe). HP returned to you on a crit,
   // not damage: never folded into the damage total or DPS.
   crit_heal?: { permille: number; min: number; max: number; avg: number };
+  // Corrupting Drain (Corruptor Card) returns a share of its damage as HP. Like
+  // crit_heal it is healing, never damage — shown beside the proc, never in the DPS.
+  drain_heal?: { pct: number; avg: number };
 }
 
 interface FalconResult {
@@ -409,6 +412,12 @@ function CardAutocastView({ branch, chance, label, dpsAdded }: {
             </div>
           )}
         </>
+      )}
+      {branch.drain_heal && (
+        <div className="breakdown-total">
+          <span className="breakdown-total-label">HP healed per proc ({branch.drain_heal.pct}% of the damage)</span>
+          <span className="breakdown-total-val">{n(branch.drain_heal.avg)}</span>
+        </div>
       )}
       <div className="self-damage-resists" style={{ marginTop: "0.5rem" }}>
         <span className="self-damage-chip muted">auto-attacks only</span>

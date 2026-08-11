@@ -45,6 +45,9 @@ function normalizeBranch(br) {
   if (br.crit_heal) {
     out.crit_heal = { permille: br.crit_heal.permille, min: r3(br.crit_heal.min), max: r3(br.crit_heal.max), avg: r3(br.crit_heal.avg) };
   }
+  // Corrupting Drain's lifesteal — same reasoning as crit_heal: not part of the
+  // damage numbers, so freeze it separately or a regression there is invisible.
+  if (br.drain_heal) out.drain_heal = { pct: br.drain_heal.pct, avg: r3(br.drain_heal.avg) };
   return out;
 }
 

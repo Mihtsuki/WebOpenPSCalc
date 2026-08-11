@@ -1138,6 +1138,52 @@ class BattlePipeline {
    * Returns [{ key, label, chance, branch }], at most one entry per autocast skill
    * (duplicate cards keep the best rate rather than stacking into >100%).
    */
+  /**
+   * A proc whose damage is a self-contained stat formula rather than an ATK/MATK
+   * ratio — Corruptor Card's Corrupting Drain. Nothing in the ordinary pipeline
+   * applies: no weapon roll, no DEF, and the card states outright that element,
+   * size and race modifiers don't touch it. Broken into one step per stat so the
+   * breakdown shows where the number comes from, same as every other branch.
+   */
+  _runMiscFormulaBranch(status, skillName, label, formulaFn, profile) {
+    const result = createDamageResult();
+    const term = (v) => v + Math.floor((v * v) / 40);
+    let running = 100;
+    result.add_step({
+      name: "Base", value: running, min_value: running, max_value: running,
+      note: `${label}: flat 100 before stats`, formula: "100", hercules_ref: "",
+    });
+    for (const [statLabel, val] of [["STR", status.str], ["DEX", status.dex], ["INT", status.int_], ["LUK", status.luk]]) {
+      running += term(val);
+      result.add_step({
+        name: `${statLabel} Term`, value: running, min_value: running, max_value: running,
+        note: `${statLabel} ${val} → ${val} + ⌊${val}²/40⌋ = ${term(val)}`,
+        formula: `+ ${statLabel} + ⌊${statLabel}²/40⌋`, hercules_ref: "",
+      });
+    }
+
+    const total = formulaFn(status);
+    result.pmf = { [total]: 1.0 };
+    result.min_damage = total;
+    result.max_damage = total;
+    result.avg_damage = total;
+    result.add_step({
+      name: "Final Damage", value: total, min_value: total, max_value: total,
+      note: "Fixed damage: no weapon roll, and unaffected by element, size or race "
+        + "(per the card). No DEF term is documented either, so none is applied.",
+      formula: "100 + STR + ⌊STR²/40⌋ + DEX + ⌊DEX²/40⌋ + INT + ⌊INT²/40⌋ + LUK + ⌊LUK²/40⌋",
+      hercules_ref: "",
+    });
+
+    // The drain half — HP returned to you, never counted as damage (same treatment
+    // as Crescent Scythe's crit heal).
+    const healPct = skillName === "PS_CORRUPTINGDRAIN" ? (profile.ps_corrupting_drain_heal_pct || 0) : 0;
+    if (healPct > 0) {
+      result.drain_heal = { pct: healPct, avg: Math.floor((total * healPct) / 100) };
+    }
+    return result;
+  }
+
   _runCardAutocastBranches(status, weapon, target, build, opts, specsOverride = null) {
     const { profile = STANDARD, gear_bonuses: gearBonuses } = opts;
     if (!profile.mechanic_flags.has("PS_CARD_AUTOCAST_ON_ATTACK")) return [];
@@ -1163,14 +1209,28 @@ class BattlePipeline {
     const out = [];
     for (const spec of best.values()) {
       const sd = loader.getSkill(spec.skill_id);
-      // A PS-custom proc skill with no battle data (Corruptor Card's Corrupting
-      // Drain: damage off STR/INT/DEX/LUK, no published formula). Surface the proc
+      const psName = loader.getPsSkill(spec.skill_name || "");
+      const psLabel = (psName && psName.name) || spec.skill_name || `Skill ${spec.skill_id}`;
+
+      // PS-custom proc skills that are not an ATK/MATK ratio at all — their damage
+      // is a self-contained stat formula (profile.misc_formulas).
+      const miscFn = (profile.misc_formulas || {})[spec.skill_name];
+      if (miscFn && (!sd || !sd.attack_type)) {
+        out.push({
+          key: `card_autocast_${spec.skill_name}`,
+          label: `${psLabel} Lv${spec.skill_level || 1}`,
+          chance: spec.chance_per_mille / 10,
+          branch: this._runMiscFormulaBranch(status, spec.skill_name, psLabel, miscFn, profile),
+        });
+        continue;
+      }
+
+      // A PS-custom proc skill with no battle data AND no formula. Surface the proc
       // and its chance, but price NOTHING — it stays out of `attacks`, so the DPS
       // never claims a number we can't derive. Silently dropping it read as "the
       // card does nothing".
       if (!sd || !sd.attack_type) {
-        const psName = loader.getPsSkill(spec.skill_name || "");
-        const label = (psName && psName.name) || spec.skill_name || `Skill ${spec.skill_id}`;
+        const label = psLabel;
         out.push({
           key: `card_autocast_${spec.skill_name || spec.skill_id}`,
           label: `${label} Lv${spec.skill_level || 1}`,

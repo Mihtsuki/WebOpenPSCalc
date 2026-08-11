@@ -116,6 +116,14 @@ const scenarios = [
     target: 1867,
   },
   {
+    // Corruptor Card (8218) on footgear: Corrupting Drain procs on 4% of melee
+    // swings for 100 + STR + ⌊STR²/40⌋ + DEX + … + LUK + ⌊LUK²/40⌋, unaffected by
+    // element/size/race, healing 75% of what it deals. Locks the card's formula.
+    name: "rogue-corruptor-card-drain",
+    build: { job_id: 17, base_level: 99, job_level: 50, base_stats: { str: 80, agi: 70, vit: 40, int: 40, dex: 60, luk: 50 }, equipped: { right_hand: 1201, shoes: 2404, shoes_card1: 8218 } },
+    target: 1036,
+  },
+  {
     // Plagiarism: a Rogue auto-attacking with a copied Triple Attack Lv5. The TA
     // proc replaces the auto-attack at the PS rate, so this locks both the proc
     // rate and the copied skill's ratio through a job that cannot learn it.

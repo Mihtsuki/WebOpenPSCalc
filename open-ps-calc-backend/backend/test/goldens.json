@@ -917,6 +917,103 @@
    }
   }
  },
+ "rogue-corruptor-card-drain": {
+  "status": {
+   "str": 86,
+   "agi": 77,
+   "vit": 46,
+   "int_": 44,
+   "dex": 67,
+   "luk": 50,
+   "batk": 173,
+   "max_hp": 6918,
+   "max_sp": 363,
+   "aspd": 168.7,
+   "cri": 176,
+   "hit": 166,
+   "flee": 176,
+   "def_": 2,
+   "mdef": 0,
+   "matk_min": 80,
+   "matk_max": 108
+  },
+  "result": {
+   "dps": 292.307,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 17.6,
+   "period_ms": 626,
+   "normal": {
+    "min": 146,
+    "max": 146,
+    "avg": 146,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 185,
+    "max": 185,
+    "avg": 185,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (ID 0 Lv 1)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "proc_branches": {
+    "card_autocast_PS_CORRUPTINGDRAIN": {
+     "min": 753,
+     "max": 753,
+     "avg": 753,
+     "steps": [
+      "Base",
+      "STR Term",
+      "DEX Term",
+      "INT Term",
+      "LUK Term",
+      "Final Damage"
+     ],
+     "drain_heal": {
+      "pct": 75,
+      "avg": 564
+     }
+    }
+   }
+  }
+ },
  "rogue-plagiarised-triple-attack": {
   "status": {
    "str": 86,

@@ -1002,15 +1002,17 @@ left out of the max-level change deliberately, since it moves damage numbers.
   field `holy_strike_bonus_chance` exists on the gear bonuses and nothing reads it, because
   PS_PR_HOLYSTRIKE itself is unsurfaced (see the Rogue/Stalker audit note above: its job array
   is [7, 4008]). Fix the passive first, then the combo's +5% has somewhere to go.
-- **PS_CORRUPTINGDRAIN (Corruptor Card)** [med] — the proc is now REGISTERED and surfaced at its
-  real rate (4% melee / 2% ranged, from the ATF_SHORT/ATF_LONG flags on its `bonus4 bAutoSpell`),
-  but its damage is **deliberately unpriced**: the item text only says "damage based on your STR,
-  INT, DEX, and LUK … not affected by elemental, size, or racial modifiers" and heals 75% of it —
-  no coefficients anywhere (no wiki page, PDF, or API detail as of 2026-08-11). It emits a
-  "Not yet implemented" branch that never reaches the DPS. Needs a formula (in-game measurements
-  across STR/INT/DEX/LUK spreads would do) before it can be modelled. Same shape as the other
-  PS-custom procs — the moment a formula exists, `_psCustomBattleSkills` + a `misc_formulas` entry
-  is all it takes.
+- ~~**PS_CORRUPTINGDRAIN (Corruptor Card)**~~ — **modelled 2026-08-11.** The in-game card tooltip
+  carries the formula the API's description omits:
+  `100 + STR + ⌊STR²/40⌋ + DEX + ⌊DEX²/40⌋ + INT + ⌊INT²/40⌋ + LUK + ⌊LUK²/40⌋`, off TOTAL stats,
+  healing 75% of what it deals. Lives in `PAYON_STORIES.misc_formulas` (that field's first
+  consumer) and is priced by `_runMiscFormulaBranch` — fixed damage, no weapon roll, no
+  element/size/race, one breakdown step per stat. Rate is 4% melee / 2% ranged from the
+  ATF_SHORT/ATF_LONG flags, and it now counts toward the DPS. **Assumption to verify:** the card
+  documents no DEF interaction, so none is applied — if in-game numbers show DEF biting, add a
+  `defenseFix` pass to the branch. The heal is reported as its own figure, never as damage.
+  **General lesson: the in-game tooltip carries terms the item API's description drops** — the
+  same trap as the pre/post-patch API lag noted in `context.md`.
 - **NJ_KIRIKAGE (Shadow Slash) crit** [med] — dead id (543 vs real 530) AND on PS should only crit
   while **Shadow's Within** is active with a PS-tuned value. Needs `skill_params` threaded into
   `critChance.js` + a source for the crit magnitude. Left disabled (documented in `critChance.js`)

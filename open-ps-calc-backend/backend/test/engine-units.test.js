@@ -1033,7 +1033,42 @@ test("bAutoSpellOnSkill fires off the skill that triggers it (Elemental Sword)",
   assert.deepEqual(cast("MG_SOULSTRIKE").proc_branches, {});
 });
 
-test("Corruptor Card's proc is surfaced at the right rate but never priced", () => {
+test("Corrupting Drain follows the card's stat formula and heals 75%", () => {
+  const cfg = createBattleConfig();
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 17, base_level: 99, job_level: 50,
+    base_stats: { str: 80, agi: 70, vit: 40, int: 40, dex: 60, luk: 50 },
+    equipped: { right_hand: 1201, shoes: 2404, shoes_card1: 8218 },
+  });
+  const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+  const res = new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }),
+    loader.getMonster(1036), eff, gb);
+  const branch = res.proc_branches.card_autocast_PS_CORRUPTINGDRAIN;
+
+  // Card text: 100 + STR + STR²/40 + DEX + DEX²/40 + INT + INT²/40 + LUK + LUK²/40,
+  // computed off TOTAL stats. Independent restatement of the formula, not a
+  // frozen number, so a stat-resolution change can't quietly drift it.
+  const term = (v) => v + Math.floor((v * v) / 40);
+  const expected = 100 + term(status.str) + term(status.dex) + term(status.int_) + term(status.luk);
+  assert.equal(branch.avg_damage, expected);
+  assert.equal(branch.min_damage, expected, "fixed damage — no weapon roll");
+  assert.equal(branch.max_damage, expected);
+  // Healed by 75% of the damage — healing, never damage.
+  assert.deepEqual(branch.drain_heal, { pct: 75, avg: Math.floor((expected * 75) / 100) });
+  // Now that it's priced, it belongs in the DPS (4% of a melee swing).
+  const noCard = (() => {
+    const b2 = buildFromSaveSchema({
+      server: "payon_stories", job_id: 17, base_level: 99, job_level: 50,
+      base_stats: { str: 80, agi: 70, vit: 40, int: 40, dex: 60, luk: 50 },
+      equipped: { right_hand: 1201, shoes: 2404 },
+    });
+    const [g2, e2, w2, s2] = resolvePlayerState(b2, cfg, PS);
+    return new BattlePipeline(cfg).calculate(s2, w2, createSkillInstance({ id: 0, level: 1 }), loader.getMonster(1036), e2, g2).dps;
+  })();
+  assert.ok(res.dps > noCard, "the proc must now reach the DPS");
+});
+
+test("Corruptor Card's proc is surfaced at the right rate", () => {
   const ROGUE = {
     job_id: 17, base_level: 99, job_level: 50,
     base_stats: { str: 80, agi: 70, vit: 40, int: 1, dex: 60, luk: 20 },
@@ -1057,11 +1092,13 @@ test("Corruptor Card's proc is surfaced at the right rate but never priced", () 
   // ATF_SHORT / ATF_LONG: 4% melee, 2% ranged — the card carries both.
   assert.equal(melee.proc_chances[key], 4);
   assert.equal(ranged.proc_chances[key], 2);
-  // Corrupting Drain's damage formula isn't published, so it must NOT be priced:
-  // no fabricated number, and no contribution to the DPS.
-  assert.deepEqual(melee.proc_branches[key].steps.map((s) => s.name), ["Not yet implemented"]);
-  const noCard = run({ right_hand: 1201, shoes: 2404 });
-  assert.equal(melee.dps, noCard.dps, "an unpriced proc must not move the DPS");
+  // Damage is priced from the card's own formula (see the test above), so the two
+  // ranges must differ only by the rate, not by the hit.
+  assert.equal(melee.proc_branches[key].avg_damage, ranged.proc_branches[key].avg_damage,
+    "the proc's damage is stat-based — the same at any range");
+  // Only the rate differs by range, so the DPS contribution is halved on a bow.
+  const meleeAdd = melee.dps - run({ right_hand: 1201, shoes: 2404 }).dps;
+  assert.ok(meleeAdd > 0, "a priced proc reaches the DPS");
 });
 
 test("Plagiarism gives a Rogue the copied skill, gated by job, list and rank", () => {

@@ -695,6 +695,22 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
   magic_ratios: PS_BF_MAGIC_RATIOS,
   magic_vanilla_ok: PS_MAGIC_VANILLA_OK,
   pet_bonuses: PS_PET_BONUSES,
+  // Self-contained damage formulas for PS-custom skills that aren't an ATK/MATK
+  // ratio at all — the value is computed from stats and nothing else. Each takes
+  // the resolved status and returns a flat damage figure.
+  misc_formulas: {
+    // Corrupting Drain (Corruptor Card, id 8218), verbatim off the card:
+    //   100 + STR + STR²/40 + DEX + DEX²/40 + INT + INT²/40 + LUK + LUK²/40
+    // "not affected by elemental, size, or racial modifiers", and it heals you for
+    // 75% of the damage. Stats are the TOTAL (gear/buffs included) — the card says
+    // "your STR/INT/DEX/LUK stats", i.e. the numbers in your stat window.
+    PS_CORRUPTINGDRAIN: (status) => {
+      const term = (v) => v + Math.floor((v * v) / 40);
+      return 100 + term(status.str) + term(status.dex) + term(status.int_) + term(status.luk);
+    },
+  },
+  // Fraction of Corrupting Drain's damage returned as HP.
+  ps_corrupting_drain_heal_pct: 75,
 });
 
 const PROFILES = {
