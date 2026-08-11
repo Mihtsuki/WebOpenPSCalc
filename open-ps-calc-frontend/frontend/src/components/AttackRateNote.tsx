@@ -34,6 +34,10 @@ function fmtTime(ms: number) {
  */
 export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, castMs, afterCastMs, cooldownMs }: Props) {
   const perSec = 1000 / periodMs;
+  // A cycle shorter than one swing can only mean the animation floor wasn't applied
+  // to this branch — the physical path takes max(cast + after-cast, animation), while
+  // magic, traps and the skills with their own period don't (yet).
+  const ignoresAnimation = periodMs < adelayMs - 1;
 
   return (
     <>
@@ -86,6 +90,15 @@ export default function AttackRateNote({ periodMs, adelayMs, isSkill = false, ca
             skills all land inside one cycle.
           </div>
         </>
+      )}
+      {isSkill && ignoresAnimation && (
+        // Only when the cycle actually undercuts a swing: that is the case where the
+        // figures above are optimistic, because those branches (magic, traps, and the
+        // skills with their own period) don't floor at the animation delay yet. Where
+        // the floor is applied — every plain physical skill — this would be noise.
+        <div className="tooltip-note">
+          Animation delay is not factored into Per second and Between casts yet.
+        </div>
       )}
     </>
   );

@@ -42,6 +42,8 @@ instead of release version. Dates are taken from actual git commit history.
   cooldown from 5 s to 3 s, worth about +77% Demonstration DPS.
 - The cast rate panel lists **cast time, after-cast delay, cooldown and animation delay
   separately** — a cooldown is not an after-cast delay, and only one of the two can be reduced.
+  Where the animation delay isn't part of the rate yet — magic, traps and a few skills with
+  their own timing — the panel says so.
 - **Maximum Over Thrust is a self buff, and it now actually does something.** It sat under
   Party buffs, which was wrong twice over: the skill is Whitesmith-only and self-cast
   ("cannot be activated to anyone beside the caster"), and the party checkbox had no effect
