@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://openpscalc.com/</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/knight-hybrid.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/crusader-grand-cross.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/wizard-pve-dex.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/sage-bolter.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/sage-hindsight.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/hunter-double-strafe.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/hunter-trapper.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/bard-musical-strike.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/dancer-throw-arrow.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/priest-magnus-exorcismus.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/monk-asura.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/blacksmith-battle-smith.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/alchemist-acid-demonstration.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/assassin-sonic-blow.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/rogue-back-stab.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/super-novice-melee.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/gunslinger-desperado.html</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://openpscalc.com/guides/ninja-throwing.html</loc><changefreq>weekly</changefreq></url>
+  <!-- /stats is deliberately absent (and disallowed in robots.txt). -->
+  <url><loc>https://openpscalc.com/</loc><lastmod>2026-08-11</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://openpscalc.com/guides.html</loc><lastmod>2026-07-28</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://openpscalc.com/guides/knight-hybrid.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/crusader-grand-cross.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/wizard-pve-dex.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/sage-bolter.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/sage-hindsight.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/hunter-double-strafe.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/hunter-trapper.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/bard-musical-strike.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/dancer-throw-arrow.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/priest-magnus-exorcismus.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/monk-asura.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/blacksmith-battle-smith.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/alchemist-acid-demonstration.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/assassin-sonic-blow.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/rogue-back-stab.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/super-novice-melee.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/gunslinger-desperado.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://openpscalc.com/guides/ninja-throwing.html</loc><lastmod>2026-07-28</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
