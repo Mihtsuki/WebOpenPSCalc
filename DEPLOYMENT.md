@@ -26,6 +26,12 @@ GitHub push to main
 EC2 instance:
   nginx :80 -> static files from $EC2_DEPLOY_PATH/frontend/dist
             -> proxies /api/* to http://127.0.0.1:4000/api/*
+            -> serves index.html for the SPA's two routes ONLY (/ and /stats);
+               anything else that isn't a real file is a genuine 404 rendered
+               from /404.html. (It used to fall back to index.html for every
+               path, which returned 200 for URLs that don't exist — Google
+               classifies those as soft 404s.) Applied by deploy/patch-nginx.sh,
+               which is idempotent and rolls back if `nginx -t` fails.
   pm2 process "openpscalc-backend" -> tsx src/server.ts (PORT=4000)
 ```
 

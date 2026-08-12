@@ -116,14 +116,15 @@ const STYLE = `
   footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border);color:var(--faint);font-size:.82rem}
 `;
 
-function shell({ title, desc, canonical, body, jsonLd = [] }) {
+function shell({ title, desc, canonical, body, jsonLd = [], robots = null }) {
   const ld = jsonLd.map(jsonLdScript).join("\n");
   return `<!doctype html>
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <title>${esc(title)}</title>
-<meta name="description" content="${esc(desc)}">
+<meta name="description" content="${esc(desc)}">${robots ? `
+<meta name="robots" content="${robots}">` : ""}
 <link rel="canonical" href="${canonical}">
 <meta property="og:type" content="article"><meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${canonical}">
@@ -271,6 +272,31 @@ ${guides ? `<p class="seealso">Builds this affects most: ${guides}.</p>` : ""}
   return shell({ title, desc: m.blurb, canonical, body, jsonLd });
 }
 
+// A real 404 page, served WITH a 404 status by nginx (error_page 404 /404.html).
+// Without it the SPA fallback answered every unknown URL with 200 and the app
+// shell, which Google files as a soft 404 — one of the "not indexed" reasons.
+// noindex as well, so the page itself never competes for anything.
+function notFoundPage() {
+  const body = `
+<header><nav><a href="/">Open PS Calc</a> › Not found</nav></header>
+<span class="eyebrow">404</span>
+<h1>That page doesn't exist</h1>
+<p class="lead">The link may be out of date, or mistyped. Everything the site has is one click away:</p>
+<div class="grid">
+<a class="card" href="/"><strong>Damage calculator</strong><div class="c">Build a character and see how each number is reached</div></a>
+<a class="card" href="/guides.html"><strong>Build guides</strong><div class="c">A starter build for every class</div></a>
+<a class="card" href="/mechanics.html"><strong>Mechanics</strong><div class="c">How Payon Stories' reworked formulas actually work</div></a>
+</div>
+<footer>Open PS Calc is an unofficial, fan-made <a href="/">Payon Stories damage calculator</a>.</footer>`;
+  return shell({
+    title: "Page not found | Open PS Calc",
+    desc: "That page doesn't exist. Head to the Payon Stories damage calculator, the build guides, or the mechanics reference.",
+    canonical: `${SITE}/404.html`,
+    body,
+    robots: "noindex, follow",
+  });
+}
+
 function mechanicsIndexPage() {
   const canonical = `${SITE}/mechanics.html`;
   const jsonLd = [
@@ -363,6 +389,7 @@ for (const g of GUIDES_DATA) {
   fs.writeFileSync(path.join(GUIDES, `${g.slug}.html`), guidePage(g));      // → /guides/<slug>.html
 }
 fs.writeFileSync(path.join(PUBLIC, "mechanics.html"), mechanicsIndexPage()); // → /mechanics.html
+fs.writeFileSync(path.join(PUBLIC, "404.html"), notFoundPage());            // → nginx error_page
 for (const m of MECHANICS) {
   fs.writeFileSync(path.join(MECH, `${m.slug}.html`), mechanicsPage(m));    // → /mechanics/<slug>.html
 }
