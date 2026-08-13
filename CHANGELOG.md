@@ -15,6 +15,12 @@ instead of release version. Dates are taken from actual git commit history.
   it is not an auto-hit: a blinded monster still evades, just badly. It is a status a real build
   can set up, via Grizzly Card's Hammerfall clause, Lex Divina or Blinding Mist.
 
+- **Drill's Clashing Spiral gets a damage number.** The mob version of Spiral Pierce
+  (`ML_SPIRALPIERCE`) was showing element and hit count but no figure. It deals ATK × skill
+  level in total, spread over its five hits, so at Lv5 a Drill's cast is five times its ATK
+  before your resists. The player-cast Spiral Pierce is a different (weapon-weight) formula and
+  is still unported — the mob clone is modelled separately so that port stays honest.
+
 - **A Blacksmith wearing Grizzly or Sasquatch is told what Hammerfall sets up.** Both cards
   inflict a status on the target with Hammerfall — blind at 100%, freeze at 30%. The calculator
   prices one attack, so it can't sequence "Hammerfall, then hit the blinded target"; the target
@@ -49,6 +55,12 @@ instead of release version. Dates are taken from actual git commit history.
   effect is unchanged. Both upstream sources are still stale on this — vanilla `item_db` has
   it as `EQP_ACC` and the live PS item API still says "Compound on: Accessory" — so the slot
   is pinned in `ps_item_manual.json`, the same way the card's reworked script already was.
+- **DEF-ignoring monster casts are no longer priced as if your armour stopped them.** The
+  incoming pipeline ignored the skill DB's IgnoreDefense flag, so Asura Strike, Earthquake,
+  Auto Counter, Critical Slash, Fire Pillar and Clashing Spiral were all reduced by the DEF you
+  were wearing when in game they go straight through it. The Survivability panel understated
+  exactly the casts worth building around. The outgoing direction already honoured this flag.
+
 - **Grizzly Card's Hammerfall clause reads 100%, not 30%.** The bundled description had the old
   number; the live PS item API says 100% (resistances still apply). Pinned in
   `ps_item_manual.json` like the other refreshed descriptions.

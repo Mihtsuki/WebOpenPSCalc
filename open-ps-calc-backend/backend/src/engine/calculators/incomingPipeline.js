@@ -44,7 +44,11 @@ function applyLexAeterna(build, pmf, result) {
 }
 
 function calculateIncomingPhysicalDamage(mobId, build, status, gearBonuses, weapon, config, opts = {}) {
-  const { is_ranged: isRanged = false, mob_atk_bonus_rate: mobAtkBonusRate = 0, ele_override: eleOverride = null, ratio_override: ratioOverride = null } = opts;
+  const {
+    is_ranged: isRanged = false, mob_atk_bonus_rate: mobAtkBonusRate = 0,
+    ele_override: eleOverride = null, ratio_override: ratioOverride = null,
+    ignore_def: ignoreDef = false,
+  } = opts;
   const mob = loader.getMonsterData(mobId);
   if (!mob) return notFoundResult(mobId);
 
@@ -89,7 +93,14 @@ function calculateIncomingPhysicalDamage(mobId, build, status, gearBonuses, weap
 
   // Player is the defender; the "attacker" (mob) has no ignore-DEF gear in
   // this calculator, so pass a zeroed-out GearBonuses rather than the player's own.
-  pmf = calculateDefenseFix(playerTarget, { ignore_hard_def: false }, createGearBonuses(), pmf, config, result, { is_crit: false, skill: null });
+  // A skill flagged IgnoreDefense in the skill DB (Asura, Earthquake, Clashing
+  // Spiral, Auto Counter…) bypasses the player's DEF entirely, the same nk_ignore_def
+  // path the outgoing direction uses — without this the DEF-ignoring casts a player
+  // actually has to survive would be priced as if armour stopped them.
+  pmf = calculateDefenseFix(
+    playerTarget, { ignore_hard_def: false }, createGearBonuses(), pmf, config, result,
+    { is_crit: false, skill: ignoreDef ? { nk_ignore_def: true } : null },
+  );
 
   pmf = calculateIncomingPhysical(mob.race, atkEle, mob.size, isRanged, playerTarget, pmf, result);
 

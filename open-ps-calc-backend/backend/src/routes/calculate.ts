@@ -117,7 +117,12 @@ function resolveMobSkillDamage(skillId: number, level: number, profile: any, mob
   }
   hits = Math.max(1, hits);
 
-  return { name, desc: sk.description || name, attackType, elementInt, hits, ratio, hasNumber, estimated, damageType, level: lv };
+  // Skills the skill DB flags as ignoring DEF (Asura, Earthquake, Clashing Spiral,
+  // Auto Counter…). The outgoing direction already honours this flag; the incoming
+  // one has to as well, or the casts that hurt most get priced as if armour applied.
+  const ignoreDef = Array.isArray(sk.damage_type) && sk.damage_type.includes("IgnoreDefense");
+
+  return { name, desc: sk.description || name, attackType, elementInt, hits, ratio, hasNumber, estimated, damageType, level: lv, ignoreDef };
 }
 const gearBonusAggregator = require("../engine/gearBonusAggregator");
 const { applyPetBonuses } = require("../engine/buildApplicator");
@@ -397,7 +402,7 @@ router.post("/incoming", (req: Request, res: Response) => {
         return res.json({ status, mob, skill: spec, result: null, modeled: false });
       }
       // Multi-hit skills: the ratio is per hit; scale the priced hit by the count.
-      const skOpts = { ele_override: spec.elementInt, ratio_override: spec.ratio };
+      const skOpts = { ele_override: spec.elementInt, ratio_override: spec.ratio, ignore_def: spec.ignoreDef };
       let result = spec.attackType === "Magic"
         ? calculateIncomingMagicDamage(mobId, effBuild, status, gearBonuses, weapon, skOpts)
         : calculateIncomingPhysicalDamage(mobId, effBuild, status, gearBonuses, weapon, config, skOpts);

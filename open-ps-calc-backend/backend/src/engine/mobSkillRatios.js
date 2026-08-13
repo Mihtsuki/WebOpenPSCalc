@@ -63,6 +63,21 @@ const MOB_SKILL_RATIOS = {
   NPC_DARKSTRIKE:    () => 100, // magic, Dark
   NPC_MAGICALATTACK: () => 100, // magic
   NPC_DARKTHUNDER:   () => 100, // magic, Wind
+
+  // Clashing Spiral (the mob clone of Spiral Pierce, e.g. Drill's). Total damage is
+  // ATK × size-modifier × skill level — reported by a PS player and matching
+  // kokotewa.com/db/skl_info?id=ML_SPIRALPIERCE ("DMG atk 1.00 ~ 5.00" over 5 levels,
+  // "DMG hits 5"). Two things make that a plain per-level ratio here:
+  //   - The caller prices ONE hit and multiplies by the skill_db hit count (5), so
+  //     the value below is PER HIT: 20×lv × 5 hits = ATK × lv total.
+  //   - The size modifier is inverse-by-target-size (Small 125 / Medium 100 /
+  //     Large 75%), and the target of an incoming skill is always the player, who is
+  //     Medium — so it is a no-op in this direction and is left out rather than
+  //     hardcoded as ×100%.
+  // Deliberately NOT aliased onto LK_SPIRALPIERCE: the player-cast version is a
+  // weapon-WEIGHT formula (see ROADMAP), which is a different shape and still
+  // unported. Keying the mob clone separately keeps that port honest.
+  ML_SPIRALPIERCE: (lv) => 20 * lv,
 };
 
 // Monster-clone skill names (the MS_/ML_/MA_ prefixes carried by mob copies of
@@ -75,15 +90,15 @@ const MOB_SKILL_RATIOS = {
 //   ML_PIERCE        -> KN_PIERCE        (Pierce; PS-vanilla-OK, hits by size —
 //                                          resolved to 2 vs the Medium player by
 //                                          profile.weapon_hit_counts)
-//   ML_SPIRALPIERCE  -> LK_SPIRALPIERCE  (Spiral Pierce; no ratio modeled yet
-//                                          -> still falls through to element/type)
 //   MA_SHARPSHOOTING -> SN_SHARPSHOOTING (Sharp Shooting)
+// ML_SPIRALPIERCE is deliberately NOT aliased: the player's Spiral Pierce is a
+// weapon-weight formula that is still unported, while the mob clone is a plain
+// per-level ATK ratio — so it carries its own MOB_SKILL_RATIOS entry instead.
 // (ML_AUTOGUARD is a Self-target buff and MA_SANDMAN a Misc sleep trap — both
 // already classify as non-damage, so they are intentionally NOT aliased here.)
 const MOB_SKILL_ALIASES = {
   MS_BASH: "SM_BASH",
   ML_PIERCE: "KN_PIERCE",
-  ML_SPIRALPIERCE: "LK_SPIRALPIERCE",
   MA_SHARPSHOOTING: "SN_SHARPSHOOTING",
 };
 
