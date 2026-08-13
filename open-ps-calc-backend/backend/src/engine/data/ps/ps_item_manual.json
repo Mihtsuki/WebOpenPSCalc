@@ -1,4 +1,8 @@
 {
+  "4162": {
+    "_note": "Grizzly Card's Hammerfall clause: the bundled description says 30% blind, the live PS item API says 100% (checked 2026-08-12) — refreshed here verbatim from the API, since the number is what makes the card worth slotting. No script change: the on-being-hit auto-Blind is already the vanilla bonus2 bAddEffWhenHit, and the Hammerfall half inflicts a status on the TARGET, which this calculator represents as the target-status toggles (tick 'Blinded' to price the follow-up hits) rather than as a proc the engine sequences.",
+    "description": "Add the chance of auto casting <font color='#663399'>Blind</font> on an enemy when the user receives Physical Damage.<br/>If the user is equipped with an item compounded to the <font color='#008800'>Big Foot Card</font>, the blinding chance will be increased.<br/>Hammerfall has 100% chance to blind targets (resistances still apply)<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Armor</font><br/>Weight:<font color='#009900'> 1</font>"
+  },
   "4261": {
     "_note": "PS patch notes 2026-08-09 (Item Changes): Wootan Fighter Card raises Magnum Break's lingering fire effect from 20% to 30%. bMagnumLinger is a PS-specific bonus consumed by the lingering-fire step in _runBranch. DEF +1 unchanged.",
     "script": "bonus bDef,1; bonus bMagnumLinger,30;"

@@ -9,6 +9,18 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Blind is now a target status you can price.** Tick it and the monster's flee drops 25%,
+  which is often the difference between whiffing and connecting — against a Mysteltainn a
+  Blacksmith at 159 HIT goes from 28% to 93% hit rate, tripling DPS. Unlike Asleep and Stunned
+  it is not an auto-hit: a blinded monster still evades, just badly. It is a status a real build
+  can set up, via Grizzly Card's Hammerfall clause, Lex Divina or Blinding Mist.
+
+- **A Blacksmith wearing Grizzly or Sasquatch is told what Hammerfall sets up.** Both cards
+  inflict a status on the target with Hammerfall — blind at 100%, freeze at 30%. The calculator
+  prices one attack, so it can't sequence "Hammerfall, then hit the blinded target"; the target
+  panel now names the status the equipped card gives you and points at the toggle that prices
+  your follow-up hits.
+
 - **Equipped items and cards show their description on hover.** You could read what a card did
   while picking it from the search list, but not once it was slotted — which is when you
   actually want to check it. Hovering (or tab-focusing) an equipped item or card name now shows
@@ -37,6 +49,10 @@ instead of release version. Dates are taken from actual git commit history.
   effect is unchanged. Both upstream sources are still stale on this — vanilla `item_db` has
   it as `EQP_ACC` and the live PS item API still says "Compound on: Accessory" — so the slot
   is pinned in `ps_item_manual.json`, the same way the card's reworked script already was.
+- **Grizzly Card's Hammerfall clause reads 100%, not 30%.** The bundled description had the old
+  number; the live PS item API says 100% (resistances still apply). Pinned in
+  `ps_item_manual.json` like the other refreshed descriptions.
+
 - **Two card descriptions no longer contradict what the card actually does.** Now that equipped
   cards show their description on hover, stale scraped text is in plain sight. **Pirate Skel
   Card** still described the pre-rework "Enables Level 5 Discount" effect and an Accessory slot;

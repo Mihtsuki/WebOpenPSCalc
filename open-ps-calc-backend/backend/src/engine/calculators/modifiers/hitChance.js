@@ -53,7 +53,12 @@ function calculateHitChance(status, target, config, skillName, skillLevel, opts 
     return [100.0, 0.0];
   }
 
-  const mobFlee = target.flee > 0 ? target.flee : target.level + target.agi;
+  let mobFlee = target.flee > 0 ? target.flee : target.level + target.agi;
+  // Blind cuts the blinded unit's HIT and FLEE by 25% (status.c status_calc_flee /
+  // status_calc_hit). On the TARGET only the flee half reaches this calculation —
+  // its own accuracy never enters your damage — so a blinded monster is easier to
+  // land on. Same 25% the player-side blind uses in statusCalculator.js.
+  if (targetScs.SC_BLIND) mobFlee = Math.floor((mobFlee * 75) / 100);
   let hitrate = 80 + status.hit - mobFlee;
 
   // Accuracy bonuses (% of hitrate), summed and applied before the clamp —

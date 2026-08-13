@@ -247,6 +247,11 @@ router.post("/", (req: Request, res: Response) => {
       // Status debuffs
       if (targetModsInput.sleep)  sc.SC_SLEEP  = true;
       if (targetModsInput.stun)   sc.SC_STUN   = true;
+      // Blind: −25% of the target's flee (hitChance.js). Unlike sleep/stun it is not
+      // an auto-hit — a blinded monster still evades, just worse. Reachable on a mob
+      // via Grizzly Card's Hammerfall clause, a Priest's Lex Divina, or a Sage's
+      // Blinding Mist, so it is a status a real build can actually set up.
+      if (targetModsInput.blind)  sc.SC_BLIND  = true;
       target.target_active_scs = sc;
       // Burning (PS, Burning 2026-08-09 PDF): a 5-second stacking debuff — the
       // Alchemist's Remote Detonator applies 5 stacks at once with a Marine Sphere

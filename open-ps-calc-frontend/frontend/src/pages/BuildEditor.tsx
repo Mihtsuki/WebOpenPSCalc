@@ -519,8 +519,18 @@ const DEFAULT_TARGET_MODS: TargetMods = {
   provoke: 0,
   sleep: false,
   stun: false,
+  blind: false,
   burning: 0,
 };
+
+// PS gives two armour cards a clause that inflicts a status on the TARGET when you
+// cast Hammerfall — a status this panel can then price. Both are Blacksmith staples,
+// and the effect is invisible in the damage number until you tick the matching
+// toggle, so the panel says so when the card is equipped.
+const HAMMERFALL_STATUS_CARDS: { id: number; name: string; effect: string; toggle: string }[] = [
+  { id: 4162, name: "Grizzly Card", effect: "Hammerfall blinds the target (100%, resistances still apply)", toggle: "Blinded" },
+  { id: 4216, name: "Sasquatch Card", effect: "Hammerfall freezes the target (30%, does not stack with Stun)", toggle: "Frozen, under Element status" },
+];
 
 // Compact URL state (z2_): before compressing, drop every value that equals its
 // default and every field that can be re-derived on load, then re-hydrate against
@@ -614,6 +624,7 @@ const Z3_KEYS: string[] = [
   "forge", "sc", "ranked",
   "burning",
   "ele", // elemental forge (forge.<slot>.ele)
+  "blind", // target Blind (targetMods.blind)
 ];
 const Z3_ENC: Record<string, string> = {};
 const Z3_DEC: Record<string, string> = {};
@@ -824,6 +835,19 @@ export default function BuildEditor() {
   const provokeLv = (targetMods.provoke as unknown) === true ? 10 : (Number(targetMods.provoke) || 0);
   // Burning stacks (0–5). Absent in shared URLs made before Burning existed.
   const burningStacks = Math.max(0, Math.min(5, Number(targetMods.burning) || 0));
+
+  // Cards whose PS clause lets THIS build inflict one of the target statuses below
+  // with Hammerfall. The engine prices a single attack, so it can't sequence "cast
+  // Hammerfall, then hit the blinded target" — what it can do is point out that the
+  // status is yours to apply, and let you tick it to price the follow-up hits.
+  const hammerfallStatusCards = useMemo(() => {
+    const equippedCardIds = new Set(
+      Object.entries(data.equipped)
+        .filter(([k]) => /_card\d$/.test(k))
+        .map(([, v]) => Number(v)),
+    );
+    return HAMMERFALL_STATUS_CARDS.filter((c) => equippedCardIds.has(c.id));
+  }, [data.equipped]);
 
   // FLEE needed to dodge the selected monster 95% of the time. Incoming hit% =
   // 80 + mobHIT − FLEE, floored at 5% (→ 95% is the dodge ceiling), and a mob's
@@ -3065,6 +3089,22 @@ export default function BuildEditor() {
                 <span>Stunned (auto-hit)</span>
               </label>
             </div>
+            <div className="field field-checkbox">
+              <label title="SC_BLIND: the target's flee drops 25%, raising your hit rate. Not an auto-hit — a blinded monster still evades, just worse.">
+                <input type="checkbox" checked={targetMods.blind} onChange={(e) => setTargetMods((m) => ({ ...m, blind: e.target.checked }))} />
+                <span>Blinded (−25% target flee)</span>
+              </label>
+            </div>
+            {hammerfallStatusCards.length > 0 && (
+              <div className="hint-text">
+                {hammerfallStatusCards.map((c) => (
+                  <div key={c.id}>
+                    <strong>{c.name}</strong> — {c.effect}. Tick <em>{c.toggle}</em> to price your
+                    hits against a target you have put in that state.
+                  </div>
+                ))}
+              </div>
+            )}
           </Panel>
 
       </div>
