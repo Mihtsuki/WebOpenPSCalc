@@ -23,6 +23,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Pirate Skel Card is a headgear card, not an accessory card.** It was only offered in the
+  two accessory slots, so a build could never slot it where it actually goes. It now appears
+  in the headgear (top/mid/low) card pickers and no longer in accessories; its auto-Mammonite
+  effect is unchanged. Both upstream sources are still stale on this — vanilla `item_db` has
+  it as `EQP_ACC` and the live PS item API still says "Compound on: Accessory" — so the slot
+  is pinned in `ps_item_manual.json`, the same way the card's reworked script already was.
+  (Its in-app description still reads the pre-rework "Enables Level 5 Discount / Accessory"
+  text, which comes from the auto-scraped override layer and will correct itself when PS
+  updates the API.)
+
 - **Naiad's MDEF is 40, not 20.** The bundled monster data had Naiad (id 3054) at 20 MDEF, so
   magic damage against it was overstated — a bolt landed ~25% higher than it does in game
   (pre-re hard MDEF passes 80% of MATK at 20, 60% at 40). Corrected in both `ps_mob_db.json`
