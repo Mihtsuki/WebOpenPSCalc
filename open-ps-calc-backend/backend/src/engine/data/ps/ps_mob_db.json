@@ -47012,7 +47012,7 @@
       "hp": 9115,
       "sp": 0,
       "def_": 10,
-      "mdef": 20,
+      "mdef": 40,
       "atk_min": 401,
       "atk_max": 686,
       "size": "Medium",

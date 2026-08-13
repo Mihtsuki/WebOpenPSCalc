@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-12
+
+### Fixed
+
+- **Naiad's MDEF is 40, not 20.** The bundled monster data had Naiad (id 3054) at 20 MDEF, so
+  magic damage against it was overstated — a bolt landed ~25% higher than it does in game
+  (pre-re hard MDEF passes 80% of MATK at 20, 60% at 40). Corrected in both `ps_mob_db.json`
+  (what the engine reads) and `monsters.json` (the scrape source, so a regeneration doesn't
+  revert it). Every other Naiad stat was verified against the live control panel and matches.
+
 ## 2026-08-11
 
 ### Added
