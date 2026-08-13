@@ -388,19 +388,39 @@ const PARTY_BUFFS = [
   // FIVE ranks (+5% ATK each, +25% at max) — the picker offered 10, which priced
   // every attack at +50%. wiki.payonstories.com/Power-Thrust; the engine clamps the
   // rank as well, so builds shared while it read 10 are corrected on load.
-  { key: "SC_OVERTHRUST", label: "Over Thrust", max: 5, source: "Blacksmith" },
+  // Over Thrust has no SELF_BUFFS counterpart, so this entry is also what a
+  // self-casting Blacksmith ticks — labelled accordingly, and never hidden.
+  { key: "SC_OVERTHRUST", label: "Over Thrust (self or party)", max: 5, source: "Blacksmith" },
   // Adrenaline Rush received from a party Blacksmith: PS rework gives +20% ASPD with
   // a Mace/Axe and +10% with any other melee weapon (bows and guns excluded). Level
   // only sets duration; the self-cast version lives in SELF_BUFFS.
-  { key: "SC_ADRENALINE", label: "Adrenaline Rush", max: 1, source: "Blacksmith" },
+  { key: "SC_ADRENALINE", label: "Adrenaline Rush (from a party Blacksmith)", max: 1, source: "Blacksmith" },
   // Weapon Perfection from a party Blacksmith — the PS wiki is explicit that
   // "Party members also receive this skill's effects", and the effect is the same
   // as the self-cast one (no size penalty), so the engine treats both identically.
-  { key: "SC_WEAPONPERFECT", label: "Weapon Perfection", max: 1, source: "Blacksmith" },
+  { key: "SC_WEAPONPERFECT", label: "Weapon Perfection (from a party Blacksmith)", max: 1, source: "Blacksmith" },
   // Crazy Uproar from a party Merchant: soft DEF only (2 × level) — the +STR/+VIT
   // half is caster-only, which is why the self-cast entry lives in SELF_BUFFS.
-  { key: "SC_SHOUT", label: "Crazy Uproar (party soft DEF)", max: 4, source: "Merchant" },
+  { key: "SC_SHOUT", label: "Crazy Uproar (from a party Merchant — soft DEF only)", max: 4, source: "Merchant" },
 ] as const;
+
+// A party buff is hidden once your own job can cast the same thing on itself.
+// PS splits several of these by who cast them — Adrenaline Rush is +30% ASPD on an
+// axe self-cast but +20% received, Crazy Uproar gives the caster STR/VIT the party
+// never sees — so showing both to a Blacksmith invites ticking the weaker one and
+// quietly losing 10% ASPD (this is exactly how a reported ASPD mismatch happened).
+// Matched by SC key: the self entry either shares the key or is the dedicated
+// `<key>_SELF` variant. Over Thrust has no self entry, so it stays for every job —
+// it is the only control a self-casting Blacksmith has for it.
+function partyBuffSupersededBySelf(key: string, jobId: number): boolean {
+  return SELF_BUFFS.some(
+    (b) => (b.key === key || b.key === `${key}_SELF`) && (b.jobs as readonly number[]).includes(jobId)
+  );
+}
+
+function partyBuffsFrom(source: string, jobId: number) {
+  return PARTY_BUFFS.filter((b) => b.source === source && !partyBuffSupersededBySelf(b.key, jobId));
+}
 
 const SONG_BUFFS = [
   { key: "SC_DRUMBATTLE", label: "Battle Theme (Drum)", max: 10 },
@@ -1138,6 +1158,26 @@ export default function BuildEditor() {
       }
       if (Object.keys(nextActive).length === Object.keys(prevActive).length) return prev;
       return { ...prev, active_buffs: nextActive };
+    });
+  }, [data.job_id]);
+
+  // Same reasoning for the party buffs this job supersedes with a self-cast entry
+  // (see partyBuffSupersededBySelf): hiding the checkbox isn't enough, since a
+  // value left in support_buffs -- from a previous job, or from a build shared
+  // before this rule existed -- would still be sent to the backend and applied,
+  // with no control on screen showing it. Dropped rather than migrated to the
+  // self key: the self-cast magnitude is the larger one, and silently raising a
+  // shared build's numbers is worse than making the owner re-tick a control that
+  // is now unambiguous.
+  useEffect(() => {
+    setData((prev) => {
+      const prevSupport = (prev.support_buffs || {}) as Record<string, number>;
+      const nextSupport: Record<string, number> = {};
+      for (const [k, v] of Object.entries(prevSupport)) {
+        if (!partyBuffSupersededBySelf(k, prev.job_id)) nextSupport[k] = v;
+      }
+      if (Object.keys(nextSupport).length === Object.keys(prevSupport).length) return prev;
+      return { ...prev, support_buffs: nextSupport };
     });
   }, [data.job_id]);
 
@@ -2551,7 +2591,7 @@ export default function BuildEditor() {
                   <div className="buff-group">
                     <span className="buff-group-label">Priest</span>
                     <div className="passive-grid">
-                      {PARTY_BUFFS.filter((b) => b.source === "Priest").map((b) => {
+                      {partyBuffsFrom("Priest", data.job_id).map((b) => {
                         const current = (data.support_buffs as Record<string, number> | undefined)?.[b.key] ?? 0;
                         return (
                           <div className="field field-checkbox" key={b.key}>
@@ -2585,7 +2625,7 @@ export default function BuildEditor() {
                   <div className="buff-group">
                     <span className="buff-group-label">Blacksmith</span>
                     <div className="passive-grid">
-                      {PARTY_BUFFS.filter((b) => b.source === "Blacksmith").map((b) => {
+                      {partyBuffsFrom("Blacksmith", data.job_id).map((b) => {
                         const current = (data.support_buffs as Record<string, number> | undefined)?.[b.key] ?? 0;
                         return (
                           <div className="field field-checkbox" key={b.key}>
@@ -2603,10 +2643,13 @@ export default function BuildEditor() {
                     </div>
                   </div>
 
-                  <div className="buff-group">
+                  {/* Crazy Uproar is the whole Merchant group, and it's hidden from the
+                      Merchant line itself (they self-cast it), so the group can empty
+                      out entirely — don't leave a bare header behind. */}
+                  <div className="buff-group" hidden={partyBuffsFrom("Merchant", data.job_id).length === 0}>
                     <span className="buff-group-label">Merchant</span>
                     <div className="passive-grid">
-                      {PARTY_BUFFS.filter((b) => b.source === "Merchant").map((b) => {
+                      {partyBuffsFrom("Merchant", data.job_id).map((b) => {
                         const current = (data.support_buffs as Record<string, number> | undefined)?.[b.key] ?? 0;
                         return (
                           <div className="field field-checkbox" key={b.key}>

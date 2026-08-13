@@ -7,6 +7,20 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-12
 
+### Changed
+
+- **A buff you cast on yourself no longer has a weaker twin under Party buffs.** Payon Stories
+  splits several Merchant-line buffs by who cast them — Adrenaline Rush is +30% ASPD with an
+  axe or mace self-cast but +20% received, and Crazy Uproar's +1 STR/+1 VIT per level is
+  caster-only — so a Blacksmith looking at both an unqualified "Adrenaline Rush" under Party
+  buffs and "Adrenaline Rush (self)" under Self buffs could easily tick the wrong one and
+  quietly lose 10% attack speed (this cost a reported build ~5 ASPD). A party buff is now
+  hidden once your own job can cast the same thing on itself, and any stale value is dropped
+  from the build rather than left applying invisibly. The ones that remain say where they come
+  from ("Adrenaline Rush (from a party Blacksmith)"). Over Thrust is unchanged and still shown
+  to everyone — it has no separate self-cast entry, so it is what a self-casting Blacksmith
+  ticks.
+
 ### Fixed
 
 - **Naiad's MDEF is 40, not 20.** The bundled monster data had Naiad (id 3054) at 20 MDEF, so
