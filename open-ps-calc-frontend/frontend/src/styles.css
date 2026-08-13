@@ -497,6 +497,11 @@ label {
   pointer-events: auto;
 }
 .hover-note:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); border-radius: var(--radius); }
+/* Equipped item / card name that reveals its description on hover or focus. The
+   bubble itself is .search-tooltip (shared with the picker) and is positioned in
+   JS, so nothing here needs to lay it out — this is only the trigger. */
+.hover-description { cursor: help; outline: none; min-width: 0; }
+.hover-description:focus-visible { box-shadow: 0 0 0 2px var(--accent-soft); border-radius: var(--radius); }
 /* Trailing caveat under the label/value rows — same weight as the rows, no divider. */
 .info-tooltip-bubble .tooltip-note {
   margin-top: 0.55rem;

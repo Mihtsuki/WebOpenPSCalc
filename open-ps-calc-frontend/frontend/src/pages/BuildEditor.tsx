@@ -6,6 +6,7 @@ import SearchPicker from "../components/SearchPicker";
 import Panel from "../components/Panel";
 import InfoTooltip from "../components/InfoTooltip";
 import HoverNote from "../components/HoverNote";
+import HoverDescription from "../components/HoverDescription";
 import AttackRateNote from "../components/AttackRateNote";
 import ChangelogModal from "../components/ChangelogModal";
 import ResultsPanel from "../components/ResultsPanel";
@@ -2029,10 +2030,14 @@ export default function BuildEditor() {
                     {equippedId != null ? (
                       <>
                       <div className={`selected-pill${isInvalid ? " selected-pill--invalid" : ""}`}>
-                        <span title={isInvalid ? "Not equippable by this class — excluded from calculation" : undefined}>
+                        <HoverDescription
+                          id={equippedId as number}
+                          fetchDescription={fetchItemTooltip}
+                          title={isInvalid ? "Not equippable by this class — excluded from calculation" : undefined}
+                        >
                           {item ? item.name : `Item #${equippedId}`}
                           {isRefineable ? ` +${data.refine[slot.key] || 0}` : ""}
-                        </span>
+                        </HoverDescription>
                         <button
                           onClick={() => {
                             setData((prev) => {
@@ -2213,7 +2218,9 @@ export default function BuildEditor() {
                                 <div key={cardKey} className="card-slot">
                                   {cardId != null ? (
                                     <div className="selected-pill">
-                                      <span>{card ? card.name : `Card #${cardId}`}</span>
+                                      <HoverDescription id={cardId} fetchDescription={fetchItemTooltip}>
+                                        {card ? card.name : `Card #${cardId}`}
+                                      </HoverDescription>
                                       <button onClick={() => updateField(["equipped", cardKey], null)}>×</button>
                                     </div>
                                   ) : (

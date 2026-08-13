@@ -7,6 +7,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-12
 
+### Added
+
+- **Equipped items and cards show their description on hover.** You could read what a card did
+  while picking it from the search list, but not once it was slotted — which is when you
+  actually want to check it. Hovering (or tab-focusing) an equipped item or card name now shows
+  the same bubble the picker uses. Descriptions are fetched once per item and cached for the
+  session.
+
 ### Changed
 
 - **A buff you cast on yourself no longer has a weaker twin under Party buffs.** Payon Stories
@@ -29,9 +37,12 @@ instead of release version. Dates are taken from actual git commit history.
   effect is unchanged. Both upstream sources are still stale on this — vanilla `item_db` has
   it as `EQP_ACC` and the live PS item API still says "Compound on: Accessory" — so the slot
   is pinned in `ps_item_manual.json`, the same way the card's reworked script already was.
-  (Its in-app description still reads the pre-rework "Enables Level 5 Discount / Accessory"
-  text, which comes from the auto-scraped override layer and will correct itself when PS
-  updates the API.)
+- **Two card descriptions no longer contradict what the card actually does.** Now that equipped
+  cards show their description on hover, stale scraped text is in plain sight. **Pirate Skel
+  Card** still described the pre-rework "Enables Level 5 Discount" effect and an Accessory slot;
+  it now describes the auto-Mammonite proc and Headgear. **Pill Bug Card** still said Cart
+  Revolution +8% while the modelled script (and PS) say +10%. Both are pinned in
+  `ps_item_manual.json` from the live PS item API text, so a re-scrape can't walk them back.
 
 - **Naiad's MDEF is 40, not 20.** The bundled monster data had Naiad (id 3054) at 20 MDEF, so
   magic damage against it was overstated — a bolt landed ~25% higher than it does in game
