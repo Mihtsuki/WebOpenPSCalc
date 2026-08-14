@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **The Mailbreaker debuff is now named after itself, and Hammer Fall can apply it.** PS's
+  +10% damage-taken debuff comes from two skills — the Assassin's **Venom Dust** and
+  **Hammer Fall** — but the calculator only offered it as "Venom Dust", so a Blacksmith
+  opening with Hammer Fall had to tick a box named after someone else's skill to price their
+  own build. The toggle is now **Mailbreaker (+10% damage taken)** and names both sources.
+  Links shared under the old name keep working and load with it ticked.
+
 - **Blind is now a target status you can price.** Tick it and the monster's flee drops 25%,
   which is often the difference between whiffing and connecting — against a Mysteltainn a
   Blacksmith at 159 HIT goes from 28% to 93% hit rate, tripling DPS. Unlike Asleep and Stunned

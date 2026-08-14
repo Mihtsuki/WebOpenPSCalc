@@ -103,7 +103,11 @@ export interface TargetMods {
   element_status: string;
   element_change: string; // Sage Elemental Change: override target element to Water/Earth/Fire/Wind ("" = off). No effect on MVP/boss.
   lex_aeterna: boolean;
-  venom_dust: boolean; // Venom Dust (Assassin): target on it takes +10% phys & magic damage. Works on bosses.
+  // Mailbreaker (PS-custom): +10% phys & magic damage taken. Applied by Venom Dust
+  // (Assassin) or Hammer Fall (Blacksmith/Merchant). Works on bosses.
+  mailbreaker: boolean;
+  /** @deprecated pre-rename key for `mailbreaker`; only read when decoding old share links. */
+  venom_dust?: boolean;
   breaking_cloak: boolean; // Cloak initiative (Assassin, Cloak Lv3+): opening auto-attack ×2, or Sonic Blow +10%.
   performing: boolean; // Performing (Bard/Dancer): while a song/dance is active, Musical Strike & Throw Arrow gain +100 ratio points.
   quagmire: number; // WZ_QUAGMIRE level 0–5 (0 = off). Legacy shared URLs may carry a boolean.

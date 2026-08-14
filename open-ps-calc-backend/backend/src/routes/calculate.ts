@@ -211,8 +211,14 @@ function applyLexAeterna(br: any): void {
 // Venom Dust (PS Assassin rework): a target standing on Venom Dust takes +10%
 // physical and magical damage for 5s (the "Mailbreaker" debuff). Works on
 // MVP/boss-flagged monsters. wiki.payonstories.com / Assassin Rework doc.
-function applyVenomDust(br: any): void {
-  applyResultMult(br, 1.1, "Venom Dust", "+10% physical & magical damage taken (Venom Dust / Mailbreaker debuff)", "PS-AssassinRework");
+// Mailbreaker (PS-custom debuff): the target takes +10% physical AND magical damage.
+// Two skills apply it, per their ps_skill_db descriptions — the Assassin's Venom Dust
+// ("Mailbreaker debuff is applied to unit standing on venom dust") and Hammer Fall
+// ("Applies Mailbreaker(+10% Damage received) effect on target"). It was modelled under
+// the Venom Dust name only, so a Blacksmith opening with Hammer Fall had no way to
+// price it without ticking a box that named someone else's skill.
+function applyMailbreaker(br: any): void {
+  applyResultMult(br, 1.1, "Mailbreaker", "+10% physical & magical damage taken (Venom Dust / Hammer Fall)", "PS-AssassinRework");
 }
 
 // Cloak initiative bonus (PS Assassin rework, requires Cloak Lv3+): breaking Cloak
@@ -368,8 +374,10 @@ router.post("/", (req: Request, res: Response) => {
       const sName = skill.id === 0 ? "" : (loader.getSkill(skill.id)?.name || "");
       applyBreakingCloak(battleResult, skill.id === 0, sName === "AS_SONICBLOW");
     }
-    if (targetModsInput?.venom_dust) {
-      applyVenomDust(battleResult);
+    // `venom_dust` is the pre-rename key — still honoured so shared links made before
+    // the debuff was named after itself keep pricing the same.
+    if (targetModsInput?.mailbreaker || targetModsInput?.venom_dust) {
+      applyMailbreaker(battleResult);
     }
     if (targetModsInput?.lex_aeterna) {
       applyLexAeterna(battleResult);

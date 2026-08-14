@@ -511,7 +511,7 @@ const DEFAULT_TARGET_MODS: TargetMods = {
   element_status: "",
   element_change: "",
   lex_aeterna: false,
-  venom_dust: false,
+  mailbreaker: false,
   breaking_cloak: false,
   performing: false,
   quagmire: 0,
@@ -625,6 +625,7 @@ const Z3_KEYS: string[] = [
   "burning",
   "ele", // elemental forge (forge.<slot>.ele)
   "blind", // target Blind (targetMods.blind)
+  "mailbreaker", // targetMods.mailbreaker — was `venom_dust`, whose code stays above
 ];
 const Z3_ENC: Record<string, string> = {};
 const Z3_DEC: Record<string, string> = {};
@@ -661,26 +662,38 @@ function encodeState(state: UrlEditorState): string {
   return "z3_" + LZString.compressToEncodedURIComponent(JSON.stringify(renameKeys(pruned, Z3_ENC)));
 }
 
+// The Mailbreaker debuff shipped named after one of the two skills that applies it.
+// Links shared under `venom_dust` decode into the renamed field so they keep pricing
+// the same +10%, and the stale key is dropped rather than left shadowing it.
+function migrateTargetMods(state: any): any {
+  const tm = state && state.targetMods;
+  if (tm && typeof tm === "object" && "venom_dust" in tm) {
+    if (tm.venom_dust && tm.mailbreaker == null) tm.mailbreaker = true;
+    delete tm.venom_dust;
+  }
+  return state;
+}
+
 function decodeState(encoded: string): UrlEditorState | null {
   try {
     if (encoded.startsWith("z3_")) {
       const json = LZString.decompressFromEncodedURIComponent(encoded.slice(3));
       if (!json) return null;
       const defs = JSON.parse(JSON.stringify(URL_STATE_DEFAULTS));
-      return mergeDefaults(renameKeys(JSON.parse(json), Z3_DEC), defs) as UrlEditorState;
+      return migrateTargetMods(mergeDefaults(renameKeys(JSON.parse(json), Z3_DEC), defs)) as UrlEditorState;
     }
     if (encoded.startsWith("z2_")) {
       const json = LZString.decompressFromEncodedURIComponent(encoded.slice(3));
       if (!json) return null;
       // Fresh clone of the defaults so the returned state shares no references with them.
       const defs = JSON.parse(JSON.stringify(URL_STATE_DEFAULTS));
-      return mergeDefaults(JSON.parse(json), defs) as UrlEditorState;
+      return migrateTargetMods(mergeDefaults(JSON.parse(json), defs)) as UrlEditorState;
     }
     if (encoded.startsWith("z1_")) {
       const json = LZString.decompressFromEncodedURIComponent(encoded.slice(3));
-      return json ? JSON.parse(json) : null;
+      return json ? migrateTargetMods(JSON.parse(json)) : null;
     }
-    return JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    return migrateTargetMods(JSON.parse(decodeURIComponent(escape(atob(encoded)))));
   } catch {
     return null;
   }
@@ -3009,9 +3022,9 @@ export default function BuildEditor() {
             </div>
 
             <div className="field field-checkbox" style={{ marginTop: "0.4rem" }}>
-              <label title="Venom Dust (Assassin rework): a target standing on the dust takes +10% physical & magical damage for 5s (the Mailbreaker debuff). Works on MVP/boss monsters.">
-                <input type="checkbox" checked={targetMods.venom_dust} onChange={(e) => setTargetMods((m) => ({ ...m, venom_dust: e.target.checked }))} />
-                <span>Venom Dust (+10% damage taken)</span>
+              <label title="Mailbreaker (PS): the target takes +10% physical AND magical damage. Applied by the Assassin's Venom Dust (while standing on the cloud, 5s) or by Hammer Fall, which also stuns. Works on MVP/boss monsters.">
+                <input type="checkbox" checked={targetMods.mailbreaker} onChange={(e) => setTargetMods((m) => ({ ...m, mailbreaker: e.target.checked }))} />
+                <span>Mailbreaker (+10% damage taken)</span>
               </label>
             </div>
 

@@ -143,6 +143,10 @@ function createTarget(overrides = {}) {
     matk_percent: 100,
     aspd_rate: 1000,
     target_active_scs: {},
+    // Declared for shape only — nothing in the pipeline reads either. The Mailbreaker
+    // debuff (+10% damage taken, from Venom Dust or Hammer Fall) is applied to the
+    // finished result in routes/calculate.ts, not as a target flag. `venom_dust` is
+    // its pre-rename name.
     mailbreaker: false,
     venom_dust: false,
     raided: false,
