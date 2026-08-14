@@ -78,6 +78,40 @@ const MOB_SKILL_RATIOS = {
   // weapon-WEIGHT formula (see ROADMAP), which is a different shape and still
   // unported. Keying the mob clone separately keeps that port honest.
   ML_SPIRALPIERCE: (lv) => 20 * lv,
+  // Eight mobs cast the PLAYER-id Spiral Pierce (397) rather than the clone (8218).
+  // A monster has no weapon to weigh, so the weapon-weight formula that makes the
+  // player's version unported simply doesn't apply to it — cast by a mob it is the
+  // same ATK × level hit as the clone above. Only ever read in the incoming
+  // direction (this map is never consulted for the player's own attacks), so this
+  // does NOT quietly "port" LK_SPIRALPIERCE for outgoing damage.
+  LK_SPIRALPIERCE: (lv) => 20 * lv,
+};
+
+// Skills whose damage comes from the TARGET's stats rather than the caster's
+// ATK/MATK, so no ratio can express them. The caller reads the player's own
+// status to price these; each entry says which quantity and how much of it.
+// Sourced from kokotewa.com/db/skl_info, the database Payon Stories players use
+// for mob-skill numbers (it is where the Clashing Spiral figures came from).
+const MOB_SKILL_TARGET_STAT_DAMAGE = {
+  // "Hex an enemy to reduce their HP by a percentage of their current HP by
+  // chance" — 10/12/16/25/50% by level, landing 50% of the time. This is why it
+  // never fit a ratio and sat unpriced while 19 monsters cast it, Baphomet at Lv5
+  // among them. Ignores DEF, MDEF and elemental resists: it is a fraction of your
+  // HP, not an attack. The calculator assumes you are at full HP.
+  NPC_DARKBREATH: {
+    quantity: "hp",
+    pctByLevel: [10, 12, 16, 25, 50],
+    chancePct: 50,
+    note: "% of your current HP — DEF, MDEF and resists don't apply",
+  },
+  // Soul Burn removes all of the target's SP; at Lv5 ONLY it also deals magic
+  // damage equal to twice the SP removed, ignoring MDEF. Below Lv5 it is an
+  // SP drain with no HP damage at all.
+  PF_SOULBURN: {
+    quantity: "sp",
+    multiplierByLevel: [0, 0, 0, 0, 2],
+    note: "twice the SP it burns (Lv5 only) — ignores MDEF",
+  },
 };
 
 // Monster-clone skill names (the MS_/ML_/MA_ prefixes carried by mob copies of
@@ -120,6 +154,13 @@ const NO_HP_DAMAGE_SKILLS = new Set([
   "PR_LEXDIVINA",       // silence
   "PR_LEXAETERNA",      // vulnerability debuff (no damage itself)
   "SL_STUN",            // stun
+  // Sanctuary is a HEAL. It only damages Undead-ELEMENT or Undead-race targets, and
+  // the player is neither — the sole exception being Evil Druid armour, which makes
+  // you Undead element and would indeed take the hit. Five mobs cast it, and calling
+  // it "a damage skill we can't price" implied it might hurt an ordinary build; this
+  // says plainly that it doesn't. (If Evil Druid builds ever need it, that is a
+  // separate branch keyed on the player's armour element, not a ratio.)
+  "PR_SANCTUARY",
 ]);
 
 // Damage skills whose power is a flat/special formula that does NOT fit the
@@ -128,11 +169,17 @@ const NO_HP_DAMAGE_SKILLS = new Set([
 // publicly documented or is PS-tuned beyond the emulator baseline (a computed
 // figure would be a fabricated number, which this calc deliberately avoids).
 const FLAT_UNMODELED_SKILLS = new Set([
-  // Shadow-property hit that ignores DEF/Flee. Sources disagree on the power:
-  // iRO describes it as a % of the target's max HP, while some emulators use a
-  // flat 500+(lv-1)*1000+rnd(0..999) capped at 9999. Unmodeled pending a
-  // PS-confirmed formula (divine-pride/RMS list no formula; PS tunes it).
-  "NPC_DARKBREATH",
+  // Asura Strike. Its damage is driven by the CASTER's SP, and a monster's SP pool
+  // isn't in mob_db (the field exists but is 0 for every mob that casts it), so
+  // there is no honest number to print — unlike Dark Breath, whose formula reads
+  // the target's stats instead and is now priced.
+  "MO_EXTREMITYFIST",
+  // Monster-only 3rd-job (renewal) skills. Their formulas live behind `#ifdef
+  // RENEWAL` in battle.c and PS is pre-renewal, so whatever these do on PS is
+  // custom and undocumented — kokotewa has no formula for them either (it returns
+  // "Unknown skill" for SC_MAELSTROM). Element and type only, deliberately.
+  "WL_CRIMSONROCK", "WL_DRAINLIFE", "RK_SONICWAVE", "AB_ADORAMUS",
+  "GC_DARKCROW", "SO_CLOUD_KILL", "LG_RAYOFGENESIS", "SC_MAELSTROM",
   // Splash for the caster's current HP. In the data these are target:self /
   // dmg:false, so they never reach the damage path here anyway (kept for
   // completeness — the incoming pipeline has no flat/self-HP branch).
@@ -142,4 +189,5 @@ const FLAT_UNMODELED_SKILLS = new Set([
 
 module.exports = {
   MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES,
+  MOB_SKILL_TARGET_STAT_DAMAGE,
 };

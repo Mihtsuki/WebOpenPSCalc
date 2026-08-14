@@ -15,6 +15,18 @@ instead of release version. Dates are taken from actual git commit history.
   it is not an auto-hit: a blinded monster still evades, just badly. It is a status a real build
   can set up, via Grizzly Card's Hammerfall clause, Lex Divina or Blinding Mist.
 
+- **Four more monster casts get a damage number, and the rest say why they can't.** A sweep of
+  all 224 mob-cast skills found 13 that hurt you but showed no figure; that is now 9, and the
+  survivors are the ones with no honest formula rather than an accident. **Dark Breath** — cast
+  by 19 monsters, Baphomet among them — takes a share of your **current HP** (10/12/16/25/50%
+  by level, landing half the time), which is why it never fitted a ratio: at Lv5 it removes half
+  your health regardless of armour, resists or MDEF. **Soul Burn** deals twice the SP it burns,
+  at Lv5 only. **Spiral Pierce cast under the player's own skill id** (eight monsters use it) is
+  priced like the clone. **Sanctuary** is a heal that only damages Undead, so it now says "no
+  direct damage" instead of implying an unknown hit. Asura Strike (its power comes from the
+  caster's SP, which mob data doesn't carry) and the monster-only 3rd-job skills (renewal-era,
+  no pre-renewal formula) stay unpriced, now explicitly.
+
 - **Drill's Clashing Spiral gets a damage number.** The mob version of Spiral Pierce
   (`ML_SPIRALPIERCE`) was showing element and hit count but no figure. It deals ATK × skill
   level in total, spread over its five hits, so at Lv5 a Drill's cast is five times its ATK

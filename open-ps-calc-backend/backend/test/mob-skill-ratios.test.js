@@ -9,7 +9,10 @@
 const test = require("node:test");
 const assert = require("node:assert");
 
-const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES } = require("../src/engine/mobSkillRatios");
+const {
+  MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES,
+  MOB_SKILL_TARGET_STAT_DAMAGE,
+} = require("../src/engine/mobSkillRatios");
 const { BF_WEAPON_RATIOS } = require("../src/engine/calculators/modifiers/skillRatio");
 const { calculateIncomingPhysicalDamage } = require("../src/engine/calculators/incomingPipeline");
 const { buildFromSaveSchema } = require("../src/engine/buildManager");
@@ -49,10 +52,50 @@ test("status/drain skills are classified as no-HP-damage, not priced", () => {
 });
 
 test("flat/special damage skills are marked unmodeled (no fabricated number)", () => {
-  for (const s of ["NPC_DARKBREATH", "NPC_SELFDESTRUCTION", "NPC_SMOKING"]) {
+  // Asura's power comes from the CASTER's SP, which mob_db doesn't carry, and the
+  // monster-only 3rd-job skills are renewal-era with no pre-renewal formula — so
+  // there is nothing honest to print for either. (NPC_DARKBREATH used to live here;
+  // it now has a sourced target-stat formula, asserted in the next test.)
+  for (const s of ["MO_EXTREMITYFIST", "WL_CRIMSONROCK", "SC_MAELSTROM", "NPC_SELFDESTRUCTION", "NPC_SMOKING"]) {
     assert.ok(FLAT_UNMODELED_SKILLS.has(s), `${s} should be flat/unmodeled`);
     assert.ok(!(s in MOB_SKILL_RATIOS), `${s} should not have a ratio`);
   }
+});
+
+test("target-stat skills are priced off the player, not the mob's ATK", () => {
+  // Dark Breath takes a share of your CURRENT HP (10/12/16/25/50 by level, 50% of
+  // casts) and Soul Burn deals twice the SP it burns, but only at Lv5. Neither is a
+  // ratio, so both must be in the target-stat table and in none of the others.
+  const db = MOB_SKILL_TARGET_STAT_DAMAGE.NPC_DARKBREATH;
+  assert.deepStrictEqual(db.pctByLevel, [10, 12, 16, 25, 50]);
+  assert.strictEqual(db.quantity, "hp");
+  assert.strictEqual(db.chancePct, 50);
+
+  const sb = MOB_SKILL_TARGET_STAT_DAMAGE.PF_SOULBURN;
+  assert.strictEqual(sb.quantity, "sp");
+  assert.strictEqual(sb.multiplierByLevel[4], 2);      // Lv5 deals 2× the SP burned
+  assert.strictEqual(sb.multiplierByLevel[0], 0);      // Lv1 burns SP but deals no HP damage
+
+  // A skill must land in exactly one bucket — a name in two of them would make the
+  // resolver's answer depend on the order the branches happen to be checked in.
+  for (const name of Object.keys(MOB_SKILL_TARGET_STAT_DAMAGE)) {
+    assert.ok(!(name in MOB_SKILL_RATIOS), `${name} is target-stat, not a ratio`);
+    assert.ok(!FLAT_UNMODELED_SKILLS.has(name), `${name} is priceable, not unmodeled`);
+    assert.ok(!NO_HP_DAMAGE_SKILLS.has(name), `${name} does deal HP damage`);
+  }
+});
+
+test("a mob casting Spiral Pierce is priced under both of its skill ids", () => {
+  // Eight mobs cast the player id (397) and one the clone (8218); a monster has no
+  // weapon to weigh, so both are the same ATK × level hit. Per hit, over 5 hits.
+  for (const name of ["LK_SPIRALPIERCE", "ML_SPIRALPIERCE"]) {
+    assert.strictEqual(typeof MOB_SKILL_RATIOS[name], "function", `${name} should be priced`);
+    assert.strictEqual(MOB_SKILL_RATIOS[name](5) * 5, 500, `${name} Lv5 = ATK × 5 in total`);
+    assert.strictEqual(MOB_SKILL_RATIOS[name](1) * 5, 100, `${name} Lv1 = ATK × 1 in total`);
+  }
+  // The clone must NOT alias onto the player skill: that alias is what made it
+  // borrow the (still unported, weapon-weight) player formula and come out unpriced.
+  assert.ok(!("ML_SPIRALPIERCE" in MOB_SKILL_ALIASES), "the clone carries its own ratio");
 });
 
 test("monster-clone skills alias onto their canonical player skill", () => {
@@ -64,7 +107,8 @@ test("monster-clone skills alias onto their canonical player skill", () => {
     assert.ok(!FLAT_UNMODELED_SKILLS.has(clone), `${clone} is priceable via ${canon}`);
   }
   // The damaging clones with a modeled player ratio resolve to a real % (Bash,
-  // Pierce, Sharp Shooting). Spiral Pierce has no ratio yet -> intentionally absent.
+  // Pierce, Sharp Shooting). Spiral Pierce is no longer among them — it carries its
+  // own mob-side ratio instead, covered by its own test above.
   assert.strictEqual(typeof BF_WEAPON_RATIOS[MOB_SKILL_ALIASES.MS_BASH], "function");
   assert.strictEqual(typeof BF_WEAPON_RATIOS[MOB_SKILL_ALIASES.ML_PIERCE], "function");
   assert.strictEqual(typeof BF_WEAPON_RATIOS[MOB_SKILL_ALIASES.MA_SHARPSHOOTING], "function");

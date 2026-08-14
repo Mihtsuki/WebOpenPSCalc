@@ -15,7 +15,16 @@ interface IncomingResult {
 
 interface SkillDamage {
   modeled: boolean;
-  skill: { name: string; desc: string; attackType: string; elementInt: number; hits: number; ratio: number; hasNumber: boolean; estimated: boolean; damageType: "damage" | "status" };
+  skill: {
+    name: string; desc: string; attackType: string; elementInt: number; hits: number;
+    ratio: number; hasNumber: boolean; estimated: boolean; damageType: "damage" | "status";
+    // Skills flagged IgnoreDefense in the skill DB (Asura, Earthquake, Clashing Spiral…)
+    // go straight through armour, so the panel must not promise DEF helps.
+    ignoreDef?: boolean;
+    // Damage read off the player's own HP/SP rather than the mob's ATK (Dark Breath,
+    // Soul Burn). Nothing mitigates it — not DEF, not MDEF, not elemental resists.
+    targetStat?: { quantity: "hp" | "sp"; pct: number | null; mult: number | null; chancePct: number | null; note: string } | null;
+  };
   result: { min_damage: number; max_damage: number; avg_damage: number } | null;
 }
 
@@ -103,13 +112,31 @@ function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; m
       </div>
       <div className="surv-line-metrics">
         {hasNumber && hitsToKill != null && <span className="surv-chip"><b>{hitsToKill}</b> casts to down you</span>}
-        {!isStatus && <span className="surv-chip">{magic ? "vs your MDEF" : "vs your DEF"}</span>}
-        {!isStatus && <span className="surv-chip good">{eleName(s.elementInt)} resist reduces it</span>}
+        {/* Only promise that defence helps when it actually does. A % -of-your-HP hit
+            is mitigated by nothing at all; an IgnoreDefense skill still respects
+            elemental resists but walks through armour. */}
+        {!isStatus && (s.targetStat
+          ? <span className="surv-chip surv-chip--muted">nothing reduces it</span>
+          : s.ignoreDef
+            ? <span className="surv-chip surv-chip--muted">ignores your {magic ? "MDEF" : "DEF"}</span>
+            : <span className="surv-chip">{magic ? "vs your MDEF" : "vs your DEF"}</span>)}
+        {!isStatus && !s.targetStat && <span className="surv-chip good">{eleName(s.elementInt)} resist reduces it</span>}
       </div>
       {hasNumber
-        ? s.estimated && <p className="surv-skill-note">For testing — this figure uses a pre-renewal baseline ratio (confirmed vs Hercules; PS could tune it beyond that). Treat the number as approximate.</p>
+        ? s.targetStat
+          ? (
+            <p className="surv-skill-note">
+              This one is measured off <em>you</em>, not the monster: {s.targetStat.note}.
+              {s.targetStat.chancePct != null && ` It lands on ${s.targetStat.chancePct}% of casts.`}
+              {" "}Assumes you are at full {s.targetStat.quantity === "sp" ? "SP" : "HP"}, so more max{" "}
+              {s.targetStat.quantity === "sp" ? "SP" : "HP"} means a bigger hit — armour and resist gear do nothing here.
+              The percentages come from a community skill database rather than from Payon Stories, so treat
+              them as approximate.
+            </p>
+          )
+          : s.estimated && <p className="surv-skill-note">For testing — this figure uses a pre-renewal baseline ratio (confirmed vs Hercules; PS could tune it beyond that). Treat the number as approximate.</p>
         : notModeled
-          ? <p className="surv-skill-note">Damage isn't modeled yet — no reliable Payon Stories formula exists for this skill (e.g. Dark Breath, Spiral Pierce, monster-only 3rd-job skills), and it can't be measured in-game. The element &amp; type above still tell you which resist gear helps.</p>
+          ? <p className="surv-skill-note">Damage isn't modeled yet — no reliable Payon Stories formula exists for this skill (Asura Strike, whose power comes from the caster's SP, and the monster-only 3rd-job skills, which are renewal-era), and it can't be measured in-game. The element &amp; type above still tell you which resist gear helps.</p>
           : <p className="surv-skill-note">No direct damage — this is a status / support skill.</p>}
     </div>
   );
@@ -208,10 +235,11 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
         reduction gear are accurate. Cast-skill damage falls into three buckets: PS-reworked skills a mob
         casts (Fire Bolt, Bash, Lord of Vermilion, …) are priced with their Payon Stories formulas;
         monster-native <b>NPC_</b> skills and a few unaudited vanilla skills use a pre-renewal baseline
-        ratio and are marked <b>for testing</b> (approximate — PS could tune them); and skills with no
-        reliable formula (Dark Breath, Spiral Pierce, monster-only 3rd-job skills) are marked
-        <b>not modeled yet</b> and show element &amp; type only. Assumes single-target; Perfect Dodge
-        isn't folded into the dodge %.
+        ratio and are marked <b>for testing</b> (approximate — PS could tune them); a few are measured
+        off your own stats instead (Dark Breath takes a share of your current HP, Soul Burn twice the
+        SP it burns) and no gear reduces those; and skills with no reliable formula (Asura Strike,
+        monster-only 3rd-job skills) are marked <b>not modeled yet</b> and show element &amp; type only.
+        Assumes single-target; Perfect Dodge isn't folded into the dodge %.
       </p>
     </div>
   );

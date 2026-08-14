@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 const { logCalculate, logFeature, logDonateClick, logPageView } = require("../middleware/statsLogger");
 import { createBattleConfig } from "../engine/config";
 import { buildFromSaveSchema } from "../engine/buildManager";
-import { createSkillInstance, createTarget } from "../engine/models";
+import { createSkillInstance, createTarget, createDamageResult } from "../engine/models";
 import { loader } from "../engine/dataLoader";
 import { getProfile } from "../engine/serverProfiles";
 import { resolvePlayerState } from "../engine/playerStateBuilder";
@@ -31,7 +31,10 @@ const { calculateHitChance } = require("../engine/calculators/modifiers/hitChanc
 //      hasNumber:false, damageType "damage" (element/type only).
 // Monster-clone names (MS_/ML_/MA_) are resolved through MOB_SKILL_ALIASES to
 // their canonical player skill for the ratio/hit lookups.
-const { MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES } = require("../engine/mobSkillRatios");
+const {
+  MOB_SKILL_RATIOS, NO_HP_DAMAGE_SKILLS, FLAT_UNMODELED_SKILLS, MOB_SKILL_ALIASES,
+  MOB_SKILL_TARGET_STAT_DAMAGE,
+} = require("../engine/mobSkillRatios");
 const ELE_NAME_TO_INT: Record<string, number> = {
   Ele_Neutral: 0, Ele_Water: 1, Ele_Earth: 2, Ele_Fire: 3, Ele_Wind: 4,
   Ele_Poison: 5, Ele_Holy: 6, Ele_Dark: 7, Ele_Ghost: 8, Ele_Undead: 9,
@@ -122,7 +125,32 @@ function resolveMobSkillDamage(skillId: number, level: number, profile: any, mob
   // one has to as well, or the casts that hurt most get priced as if armour applied.
   const ignoreDef = Array.isArray(sk.damage_type) && sk.damage_type.includes("IgnoreDefense");
 
-  return { name, desc: sk.description || name, attackType, elementInt, hits, ratio, hasNumber, estimated, damageType, level: lv, ignoreDef };
+  // Damage read off the PLAYER's stats rather than the caster's ATK (Dark Breath's
+  // % of current HP, Soul Burn's twice-the-SP-burned). No ratio can express these,
+  // so they carry their own spec and the caller prices them from `status`.
+  const targetStat = MOB_SKILL_TARGET_STAT_DAMAGE[name];
+  let targetStatSpec = null;
+  if (targetStat && isAttack) {
+    const pct = targetStat.pctByLevel ? targetStat.pctByLevel[lv - 1] : null;
+    const mult = targetStat.multiplierByLevel ? targetStat.multiplierByLevel[lv - 1] : null;
+    // A level that deals no HP damage at all (Soul Burn below Lv5) is a drain, not
+    // a hit — say so rather than printing a 0.
+    if ((pct != null && pct > 0) || (mult != null && mult > 0)) {
+      targetStatSpec = { quantity: targetStat.quantity, pct, mult, chancePct: targetStat.chancePct ?? null, note: targetStat.note };
+      // Sourced from kokotewa, not from PS itself — same standing as the pre-renewal
+      // baseline ratios, so it carries the same "for testing" tag rather than being
+      // presented as a PS-exact figure.
+      estimated = true;
+    } else {
+      damageType = "status";
+    }
+  }
+
+  return {
+    name, desc: sk.description || name, attackType, elementInt, hits, ratio,
+    hasNumber: hasNumber || targetStatSpec != null, estimated, damageType, level: lv,
+    ignoreDef: ignoreDef || targetStatSpec != null, targetStat: targetStatSpec,
+  };
 }
 const gearBonusAggregator = require("../engine/gearBonusAggregator");
 const { applyPetBonuses } = require("../engine/buildApplicator");
@@ -401,6 +429,30 @@ router.post("/incoming", (req: Request, res: Response) => {
         // UI still shows element/type for the latter.
         return res.json({ status, mob, skill: spec, result: null, modeled: false });
       }
+      // Damage taken straight off the player's own stats (Dark Breath's % of current
+      // HP, Soul Burn's 2× SP burned). It never touches the mob's ATK, DEF, elements
+      // or resists, so it bypasses the pipelines entirely and is reported as a flat,
+      // certain figure. Current HP/SP are taken as full — the calculator has no
+      // notion of a damaged character.
+      if (spec.targetStat) {
+        const pool = spec.targetStat.quantity === "sp" ? status.max_sp : status.max_hp;
+        const dmg = spec.targetStat.pct != null
+          ? Math.floor((pool * spec.targetStat.pct) / 100)
+          : Math.floor(pool * spec.targetStat.mult);
+        const result = createDamageResult({ min_damage: dmg, max_damage: dmg, avg_damage: dmg, pmf: { [dmg]: 1.0 } });
+        result.add_step({
+          name: spec.targetStat.quantity === "sp" ? "SP burned × multiplier" : "% of current HP",
+          value: dmg, min_value: dmg, max_value: dmg, multiplier: 1.0,
+          note: `${spec.name} Lv${spec.level}: ${spec.targetStat.note}`
+            + (spec.targetStat.chancePct != null ? ` (lands ${spec.targetStat.chancePct}% of casts)` : ""),
+          formula: spec.targetStat.pct != null
+            ? `${spec.targetStat.pct}% × ${pool} ${spec.targetStat.quantity.toUpperCase()}`
+            : `${spec.targetStat.mult} × ${pool} SP`,
+          hercules_ref: "kokotewa.com/db/skl_info",
+        });
+        return res.json({ status, mob, skill: spec, result, modeled: true });
+      }
+
       // Multi-hit skills: the ratio is per hit; scale the priced hit by the count.
       const skOpts = { ele_override: spec.elementInt, ratio_override: spec.ratio, ignore_def: spec.ignoreDef };
       let result = spec.attackType === "Magic"
