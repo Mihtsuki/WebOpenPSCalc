@@ -311,9 +311,16 @@ router.post("/", (req: Request, res: Response) => {
       // has not been confirmed in-game on PS.
       if (targetModsInput.offensive_blessing
           && (target.element === 9 || target.race === "Demon" || target.race === "Undead")) {
+        const dexLost = target.dex - Math.floor(target.dex / 2);
         target.str = Math.floor(target.str / 2);
         target.int_ = Math.floor(target.int_ / 2);
         target.dex = Math.floor(target.dex / 2);
+        // HIT is level + DEX and was computed when the target was built, so it has to
+        // come down by the DEX just lost or the two disagree. Subtracting the loss
+        // (rather than recomputing level + dex) keeps any other HIT the target was
+        // given. FLEE is deliberately untouched: it comes from AGI, which Blessing
+        // does not affect — so a blessed monster is less accurate, not easier to hit.
+        if (target.hit > 0) target.hit = Math.max(0, target.hit - dexLost);
       }
       // Burning (PS, Burning 2026-08-09 PDF): a 5-second stacking debuff — the
       // Alchemist's Remote Detonator applies 5 stacks at once with a Marine Sphere
