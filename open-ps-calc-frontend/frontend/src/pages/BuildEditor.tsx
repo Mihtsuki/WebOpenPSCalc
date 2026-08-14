@@ -512,6 +512,7 @@ const DEFAULT_TARGET_MODS: TargetMods = {
   element_change: "",
   lex_aeterna: false,
   mailbreaker: false,
+  offensive_blessing: false,
   breaking_cloak: false,
   performing: false,
   quagmire: 0,
@@ -626,6 +627,7 @@ const Z3_KEYS: string[] = [
   "ele", // elemental forge (forge.<slot>.ele)
   "blind", // target Blind (targetMods.blind)
   "mailbreaker", // targetMods.mailbreaker — was `venom_dust`, whose code stays above
+  "offensive_blessing", // targetMods.offensive_blessing (Blessing cast on Undead/Demon)
 ];
 const Z3_ENC: Record<string, string> = {};
 const Z3_DEC: Record<string, string> = {};
@@ -840,6 +842,16 @@ export default function BuildEditor() {
     }
     // Monster mode: allow if no mob selected yet (unknown), else check element/race.
     return !data.target_mob_id || mobInfo?.element === 9 || mobInfo?.race === "Demon";
+  }, [targetMode, customTarget.element, customTarget.race, data.target_mob_id, mobInfo?.element, mobInfo?.race]);
+
+  // Offensive Blessing debuffs Undead-ELEMENT, Undead-race and Demon-race targets —
+  // Hercules' `undead_flag || race == RC_DEMON`. Same shape as signumApplicable, but
+  // Signum's own predicate deliberately omits the Undead race, so they aren't shared.
+  const offensiveBlessingApplies = useMemo(() => {
+    const undeadOrDemon = (element?: number, race?: string) =>
+      element === 9 || race === "Demon" || race === "Undead";
+    if (targetMode === "custom") return undeadOrDemon(customTarget.element, customTarget.race);
+    return !data.target_mob_id || undeadOrDemon(mobInfo?.element, mobInfo?.race);
   }, [targetMode, customTarget.element, customTarget.race, data.target_mob_id, mobInfo?.element, mobInfo?.race]);
 
   // Quagmire level (0–5). Tolerant of the legacy boolean shape from older shared URLs (true → max 5).
@@ -1239,6 +1251,15 @@ export default function BuildEditor() {
       .then(setMobInfo)
       .catch(() => setMobInfo(null));
   }, [data.target_mob_id, data.server]);
+
+  // Same for offensive Blessing — it only debuffs Undead/Demon, so a toggle left on
+  // after switching to, say, a Formless target would sit there looking active while
+  // the engine ignored it.
+  useEffect(() => {
+    if (!offensiveBlessingApplies) {
+      setTargetMods((m) => m.offensive_blessing ? { ...m, offensive_blessing: false } : m);
+    }
+  }, [offensiveBlessingApplies]);
 
   // Auto-clear Signum Crucis when the target changes to a non-applicable race.
   useEffect(() => {
@@ -3025,6 +3046,18 @@ export default function BuildEditor() {
               <label title="Mailbreaker (PS): the target takes +10% physical AND magical damage. Applied by the Assassin's Venom Dust (while standing on the cloud, 5s) or by Hammer Fall, which also stuns. Works on MVP/boss monsters.">
                 <input type="checkbox" checked={targetMods.mailbreaker} onChange={(e) => setTargetMods((m) => ({ ...m, mailbreaker: e.target.checked }))} />
                 <span>Mailbreaker (+10% damage taken)</span>
+              </label>
+            </div>
+
+            <div className="field field-checkbox">
+              <label title="Blessing cast on an Undead-element or Demon-race monster is a debuff, not a buff: it halves the target's STR, INT and DEX regardless of skill level. Halving INT cuts its soft MDEF (INT + VIT/2), so this is a straight magic-damage gain — the reason a Priest blesses a Ghoul before opening. Ignored on any other target. MVP/boss immunity isn't modelled.">
+                <input
+                  type="checkbox"
+                  checked={targetMods.offensive_blessing}
+                  onChange={(e) => setTargetMods((m) => ({ ...m, offensive_blessing: e.target.checked }))}
+                  disabled={!offensiveBlessingApplies}
+                />
+                <span>Offensive Blessing (halves Undead/Demon STR·INT·DEX)</span>
               </label>
             </div>
 

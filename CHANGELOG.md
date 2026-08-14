@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Offensive Blessing.** Cast on an Undead-element or Demon-race monster, Blessing is a debuff
+  instead of a buff: it **halves the target's STR, INT and DEX**, regardless of skill level.
+  Halving INT cuts the target's soft MDEF (INT + VIT/2), so it is a straight magic-damage gain —
+  against a Loli Ruri (INT 74 → 37) a Wizard's Fire Bolt goes up **19%**. It does nothing to a
+  target with little INT to lose (a Ghoul has 1), and the toggle disables itself when the
+  selected monster is neither Undead nor Demon. MVP/boss immunity isn't modelled.
+
 - **The Mailbreaker debuff is now named after itself, and Hammer Fall can apply it.** PS's
   +10% damage-taken debuff comes from two skills — the Assassin's **Venom Dust** and
   **Hammer Fall** — but the calculator only offered it as "Venom Dust", so a Blacksmith

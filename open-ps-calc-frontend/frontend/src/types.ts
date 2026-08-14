@@ -106,6 +106,8 @@ export interface TargetMods {
   // Mailbreaker (PS-custom): +10% phys & magic damage taken. Applied by Venom Dust
   // (Assassin) or Hammer Fall (Blacksmith/Merchant). Works on bosses.
   mailbreaker: boolean;
+  // Blessing cast on an Undead-element / Demon-race target halves its STR, INT and DEX.
+  offensive_blessing: boolean;
   /** @deprecated pre-rename key for `mailbreaker`; only read when decoding old share links. */
   venom_dust?: boolean;
   breaking_cloak: boolean; // Cloak initiative (Assassin, Cloak Lv3+): opening auto-attack ×2, or Sonic Blow +10%.

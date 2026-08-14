@@ -292,6 +292,29 @@ router.post("/", (req: Request, res: Response) => {
       // Blinding Mist, so it is a status a real build can actually set up.
       if (targetModsInput.blind)  sc.SC_BLIND  = true;
       target.target_active_scs = sc;
+      // Offensive Blessing (AL_BLESSING). Cast on an Undead-ELEMENT or Demon-RACE
+      // monster, Blessing is a debuff rather than a buff: Hercules sets its val2 to 0
+      // for those targets, and status_calc_str/int/dex then take the `else` branch and
+      // HALVE each of STR, INT and DEX (`str >>= 1`, an integer shift, so odd values
+      // round down). Skill level is irrelevant — the halving is all-or-nothing.
+      //
+      // What that buys you here: the target's soft MDEF is INT + VIT/2
+      // (defenseFix.js), so halving INT is a straight magic-damage increase — the
+      // reason a Priest blesses a Ghoul before opening. The halved STR and DEX are
+      // the monster's own ATK and HIT, which only matter in the incoming direction;
+      // /incoming takes no target_mods today, so they are recorded on the target for
+      // consistency rather than being read there.
+      //
+      // wiki.payonstories.com/Blessing documents only the buff half, so this is the
+      // stock pre-renewal behaviour. Boss immunity is NOT modelled: nothing in the
+      // SC_BLESSING branch blocks MVPs, and it takes no resistance roll, but that
+      // has not been confirmed in-game on PS.
+      if (targetModsInput.offensive_blessing
+          && (target.element === 9 || target.race === "Demon" || target.race === "Undead")) {
+        target.str = Math.floor(target.str / 2);
+        target.int_ = Math.floor(target.int_ / 2);
+        target.dex = Math.floor(target.dex / 2);
+      }
       // Burning (PS, Burning 2026-08-09 PDF): a 5-second stacking debuff — the
       // Alchemist's Remote Detonator applies 5 stacks at once with a Marine Sphere
       // Bottle. Each stack cuts the target's HARD MDEF by 2 (raising every magic hit
