@@ -48,8 +48,12 @@ function calculateIncomingPhysicalDamage(mobId, build, status, gearBonuses, weap
     is_ranged: isRanged = false, mob_atk_bonus_rate: mobAtkBonusRate = 0,
     ele_override: eleOverride = null, ratio_override: ratioOverride = null,
     ignore_def: ignoreDef = false,
+    // A debuffed copy of the monster (offensive Blessing halves its STR/INT/DEX).
+    // The caller applies the debuff so that the SAME object is used for the damage
+    // and handed back to the client, instead of the two drifting apart.
+    mob_override: mobOverride = null,
   } = opts;
-  const mob = loader.getMonsterData(mobId);
+  const mob = mobOverride || loader.getMonsterData(mobId);
   if (!mob) return notFoundResult(mobId);
 
   const result = createDamageResult();
@@ -120,8 +124,9 @@ function calculateIncomingMagicDamage(mobId, build, status, gearBonuses, weapon,
   const {
     mob_matk_bonus_rate: mobMatkBonusRate = 0, mob_int_bonus_rate: mobIntBonusRate = 0,
     ele_override: eleOverride = null, ratio_override: ratioOverride = null,
+    mob_override: mobOverride = null,
   } = opts;
-  const mob = loader.getMonsterData(mobId);
+  const mob = mobOverride || loader.getMonsterData(mobId);
   if (!mob) return notFoundResult(mobId);
 
   const result = createDamageResult();

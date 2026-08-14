@@ -1429,7 +1429,7 @@ export default function BuildEditor() {
       const [normalRes, skillRes, ...incByEle] = await Promise.all([
         api.calculate(normalPayload),
         skill.id !== 0 ? api.calculate(skillPayload) : Promise.resolve(null),
-        ...attackEles.map((ele) => api.calculateIncoming(buildWithFlags, mobId!, "physical", { ele_override: ele }).catch(() => null)),
+        ...attackEles.map((ele) => api.calculateIncoming(buildWithFlags, mobId!, "physical", { ele_override: ele }, targetMods).catch(() => null)),
       ]);
       const elements = attackEles
         .map((ele, i) => ({ ele, taken: incByEle[i] }))
@@ -1447,9 +1447,16 @@ export default function BuildEditor() {
           // and its elemental attacks, which are the element lines above).
           kit: mobSkills.filter((s) => s.ele == null && s.id != null && s.dmg).map((s) => ({ id: s.id, d: s.d, lv: s.lv })).slice(0, 16),
           mob_name: mobInfo?.name ?? null,
-          mob_hit: mobInfo?.stats ? mobInfo.level + mobInfo.stats.dex : null,
+          // Take the monster's DEX from what the backend actually used, not from the
+          // undebuffed mobInfo: offensive Blessing halves it, and HIT = level + DEX
+          // drives the dodge chance shown next to these lines.
+          mob_hit: (() => {
+            const usedMob = (elements[0]?.taken as any)?.mob ?? mobInfo;
+            return usedMob?.stats ? usedMob.level + usedMob.stats.dex : null;
+          })(),
           mob_element: 0, // basic melee is Neutral (tags the Neutral line as "basic")
           build: buildWithFlags, // reused for on-demand "which skill hits me" fetches
+          target_mods: targetMods,  // so those fetches see the same debuffs as these lines
           mob_id: mobId,
         } : null,
         // Poison ailment DoT: the target loses 2%/s of its Max HP on Payon Stories

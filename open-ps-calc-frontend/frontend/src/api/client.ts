@@ -71,15 +71,17 @@ export const api = {
     request("/calculate/breakpoints", { method: "POST", body: payload }) as Promise<{ breakpoints: Breakpoints }>,
   // Incoming damage (mob → player): how hard the selected monster hits YOU.
   // direction "physical" (basic attack) or "magic" (INT-based MATK, for casters).
-  calculateIncoming: (build: unknown, mobId: number, direction: "physical" | "magic", opts: Record<string, unknown> = {}) =>
-    request("/calculate/incoming", { method: "POST", body: { build, target: { mob_id: mobId }, direction, opts } }) as Promise<{
+  // `targetMods` carries the debuffs that change what the MONSTER does (offensive
+  // Blessing halves its INT and DEX, so its magic damage drops and you dodge more).
+  calculateIncoming: (build: unknown, mobId: number, direction: "physical" | "magic", opts: Record<string, unknown> = {}, targetMods?: unknown) =>
+    request("/calculate/incoming", { method: "POST", body: { build, target: { mob_id: mobId }, direction, opts, target_mods: targetMods } }) as Promise<{
       status: { max_hp: number; flee: number; [k: string]: any };
       mob: any;
       result: { min_damage: number; max_damage: number; avg_damage: number; steps: any[] };
     }>,
   // Damage a specific mob skill would do to the player (survivability "which skill hits me").
-  calculateIncomingSkill: (build: unknown, mobId: number, skillId: number, level: number) =>
-    request("/calculate/incoming", { method: "POST", body: { build, target: { mob_id: mobId }, mob_skill: { id: skillId, level } } }) as Promise<{
+  calculateIncomingSkill: (build: unknown, mobId: number, skillId: number, level: number, targetMods?: unknown) =>
+    request("/calculate/incoming", { method: "POST", body: { build, target: { mob_id: mobId }, mob_skill: { id: skillId, level }, target_mods: targetMods } }) as Promise<{
       status: { max_hp: number; [k: string]: any };
       modeled: boolean;
       skill: { name: string; desc: string; attackType: string; elementInt: number; hits: number; ratio: number; hasNumber: boolean; estimated: boolean; damageType: "damage" | "status"; level: number };

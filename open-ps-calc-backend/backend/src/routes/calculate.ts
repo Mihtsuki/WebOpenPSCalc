@@ -440,9 +440,33 @@ router.post("/", (req: Request, res: Response) => {
   }
 });
 
+// Target debuffs that change what the MONSTER does to you. Only offensive Blessing
+// qualifies today: halving a monster's INT roughly halves its MATK (magic damage you
+// take), and halving its DEX lowers its HIT (you dodge more). Returns a COPY — the
+// loader hands out shared, cached mob records, so mutating one would poison every
+// later request for that monster.
+function applyIncomingTargetMods(mob: any, targetModsInput: any): any {
+  if (!mob || !targetModsInput?.offensive_blessing) return mob;
+  const undeadOrDemon = mob.element === 9 || mob.race === "Demon" || mob.race === "Undead";
+  if (!undeadOrDemon) return mob;
+  const stats = mob.stats || {};
+  return {
+    ...mob,
+    stats: {
+      ...stats,
+      str: Math.floor((stats.str || 0) / 2),
+      int: Math.floor((stats.int || 0) / 2),
+      dex: Math.floor((stats.dex || 0) / 2),
+    },
+  };
+}
+
 router.post("/incoming", (req: Request, res: Response) => {
   try {
-    const { build: buildData, target: targetInput, direction, opts, mob_skill: mobSkill } = req.body || {};
+    const {
+      build: buildData, target: targetInput, direction, opts, mob_skill: mobSkill,
+      target_mods: targetModsInput,
+    } = req.body || {};
     if (!buildData) return res.status(400).json({ error: "build is required" });
     if (!targetInput || targetInput.mob_id == null) return res.status(400).json({ error: "target.mob_id is required" });
 
@@ -454,8 +478,12 @@ router.post("/incoming", (req: Request, res: Response) => {
     const [gearBonuses, effBuild, weapon, status] = resolvePlayerState(build, config, profile);
 
     const mobId = Number(targetInput.mob_id);
-    const mob = loader.getMonsterData(mobId);
-    if (!mob) return res.status(404).json({ error: "Monster not found" });
+    const rawMob = loader.getMonsterData(mobId);
+    if (!rawMob) return res.status(404).json({ error: "Monster not found" });
+    // Debuff it once, then use that same object for every figure below and hand it
+    // back in the response, so the damage, the mob-skill pricing and the client's
+    // own derived numbers (its HIT, and therefore your dodge %) all agree.
+    const mob = applyIncomingTargetMods(rawMob, targetModsInput);
 
     // A specific mob skill cast at the player (survivability "which skill hits me").
     if (mobSkill && mobSkill.id != null) {
@@ -492,7 +520,7 @@ router.post("/incoming", (req: Request, res: Response) => {
       }
 
       // Multi-hit skills: the ratio is per hit; scale the priced hit by the count.
-      const skOpts = { ele_override: spec.elementInt, ratio_override: spec.ratio, ignore_def: spec.ignoreDef };
+      const skOpts = { ele_override: spec.elementInt, ratio_override: spec.ratio, ignore_def: spec.ignoreDef, mob_override: mob };
       let result = spec.attackType === "Magic"
         ? calculateIncomingMagicDamage(mobId, effBuild, status, gearBonuses, weapon, skOpts)
         : calculateIncomingPhysicalDamage(mobId, effBuild, status, gearBonuses, weapon, config, skOpts);
@@ -503,8 +531,8 @@ router.post("/incoming", (req: Request, res: Response) => {
     }
 
     const result = direction === "magic"
-      ? calculateIncomingMagicDamage(mobId, effBuild, status, gearBonuses, weapon, opts || {})
-      : calculateIncomingPhysicalDamage(mobId, effBuild, status, gearBonuses, weapon, config, opts || {});
+      ? calculateIncomingMagicDamage(mobId, effBuild, status, gearBonuses, weapon, { ...(opts || {}), mob_override: mob })
+      : calculateIncomingPhysicalDamage(mobId, effBuild, status, gearBonuses, weapon, config, { ...(opts || {}), mob_override: mob });
 
     res.json({ status, weapon, mob, result });
   } catch (err: any) {

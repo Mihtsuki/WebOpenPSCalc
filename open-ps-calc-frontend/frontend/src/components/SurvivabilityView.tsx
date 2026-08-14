@@ -35,6 +35,7 @@ export interface IncomingData {
   mob_hit: number | null;     // mob HIT = level + DEX (drives your dodge chance)
   mob_element: number | null; // basic-attack element (Neutral) — tags the basic line
   build: unknown;             // reused for on-demand skill-damage fetches
+  target_mods?: unknown;      // debuffs on the monster (offensive Blessing) — same ones the element lines used
   mob_id: number | null;
 }
 
@@ -158,7 +159,7 @@ export default function SurvivabilityView({ incoming }: { incoming: IncomingData
     setPickedId(s.id); setDmg(null); setLoading(true);
     try {
       if (incoming.mob_id == null) return;
-      const r = await api.calculateIncomingSkill(incoming.build, incoming.mob_id, s.id, s.lv);
+      const r = await api.calculateIncomingSkill(incoming.build, incoming.mob_id, s.id, s.lv, incoming.target_mods);
       setDmg(r as SkillDamage);
     } catch { setDmg(null); } finally { setLoading(false); }
   };

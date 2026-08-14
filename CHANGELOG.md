@@ -10,11 +10,19 @@ instead of release version. Dates are taken from actual git commit history.
 ### Added
 
 - **Offensive Blessing.** Cast on an Undead-element or Demon-race monster, Blessing is a debuff
-  instead of a buff: it **halves the target's STR, INT and DEX**, regardless of skill level.
-  Halving INT cuts the target's soft MDEF (INT + VIT/2), so it is a straight magic-damage gain —
-  against a Loli Ruri (INT 74 → 37) a Wizard's Fire Bolt goes up **19%**. It does nothing to a
-  target with little INT to lose (a Ghoul has 1), and the toggle disables itself when the
-  selected monster is neither Undead nor Demon. MVP/boss immunity isn't modelled.
+  instead of a buff: it **halves the target's STR, INT and DEX**, regardless of skill level. It
+  pays off in three places at once, and the Survivability panel now reflects the last two:
+  - **Your magic damage up.** Soft MDEF is INT + VIT/2, so against a Loli Ruri (INT 74 → 37) a
+    Wizard's Fire Bolt goes up **19%**. Worth nothing against a target with no INT to lose — a
+    Ghoul has 1.
+  - **Magic damage you take, way down.** A monster's MATK grows faster than its INT, so halving
+    INT more than halves the hit: the same Loli Ruri's magic goes from 162 to **22** against a
+    Blacksmith, −86%.
+  - **You dodge more.** Its HIT is level + DEX, so halving DEX drops it (152 → 111 there). Its
+    FLEE is untouched — that comes from AGI — so it is no easier to hit, just less accurate.
+
+  The toggle disables itself when the selected monster is neither Undead nor Demon. MVP/boss
+  immunity isn't modelled.
 
 - **The Mailbreaker debuff is now named after itself, and Hammer Fall can apply it.** PS's
   +10% damage-taken debuff comes from two skills — the Assassin's **Venom Dust** and
