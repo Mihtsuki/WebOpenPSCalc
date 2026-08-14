@@ -61,11 +61,24 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
-- **Demon Bane's base-level bonus no longer scales with skill level.** PS gives "+5 per skill
-  level **+0.5 × (1 + Base Level)**" against Undead/Demon, and that second half is a flat term —
-  the calculator was multiplying it by skill level, vanilla-style. The two readings agree at
-  Lv10/base 99 (both +100 ATK), which is how it hid, and disagree everywhere else: at Lv5/base 99
-  it was giving +50 where PS gives +75, and at Lv1 +10 where PS gives +55. Reported by a player.
+- **Grand Cross now matches in-game to the point, with masteries.** A player measured four casts
+  at base 99 against a Loli Ruri, changing one thing at a time: no mastery **40**, Demon Bane Lv1
+  **1060**, Lv10 **1240**, and Lv10 plus Blade Mastery Lv10 **2040**. Two things were wrong and
+  both are fixed — every mastery delta now reproduces exactly.
+  - Masteries land on **both halves** of Grand Cross, physical *and* magic. Blade Mastery Lv10
+    (+40 ATK) moves a wave by 800 damage, but element × ratio here is only 2 × 5, so the
+    effective multiplier on mastery is 20, not 10. Grand Cross is the only skill that sums a
+    physical and a magic hit, so nothing else changes.
+  - **Demon Bane gives Grand Cross +1 ATK per level, not +5.** The two Demon Bane readings pin
+    this without needing the multiplier: (1240−40)/(1060−40) = 1.1765, which is 60/51 — that is
+    (10+50)/(1+50), not (50+50)/(5+50). The wiki's +5/lv is kept for every other skill, since
+    these measurements only constrain Grand Cross and the wiki does say it gets a reduced share.
+
+- **Demon Bane's base-level bonus no longer scales with skill level.** PS gives "+0.5 × (1 + Base
+  Level)" against Undead/Demon on top of the per-level part, and that half is flat — the
+  calculator was multiplying it by skill level, vanilla-style. Reported by a player, and the
+  in-game measurements above confirm it: the +50 at base 99 is there at Demon Bane Lv1 and Lv10
+  alike.
 
 - **Grand Cross no longer takes Demon Bane's flat half.** Against a non-Undead/Demon target,
   Demon Bane's PS-added +4 per level was being added to Grand Cross, which the wiki rules out:

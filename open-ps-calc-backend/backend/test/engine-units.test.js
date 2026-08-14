@@ -1376,7 +1376,16 @@ test("Demon Bane's base-level bonus is flat, and Grand Cross takes only its demo
   // aspect of Demon Bane's mastery bonus benefits Grand Cross, not its flat
   // mastery bonus". Against a demon, Grand Cross still gets the demon half.
   assert.equal(demonBane(10, other, { base_level: 99 }, grandCross), null, "GC gets no flat half");
-  assert.equal(demonBane(10, demon, { base_level: 99 }, grandCross), 100, "GC keeps the demon half");
+
+  // Grand Cross takes only +1 per level, not +5 — measured in-game at base 99 vs a
+  // Demon: no mastery 40, Demon Bane Lv1 1060, Lv10 1240, Lv10 + Blade Mastery Lv10
+  // 2040. Those four pin the per-level shape without needing the multiplier, since
+  // (1240−40)/(1060−40) = 1.1765 = 60/51 = (10+50)/(1+50).
+  assert.equal(demonBane(1, demon, { base_level: 99 }, grandCross), 51, "GC Lv1: 1 + 50");
+  assert.equal(demonBane(10, demon, { base_level: 99 }, grandCross), 60, "GC Lv10: 10 + 50");
+  const gcRatio = demonBane(10, demon, { base_level: 99 }, grandCross)
+    / demonBane(1, demon, { base_level: 99 }, grandCross);
+  assert.ok(Math.abs(gcRatio - 1200 / 1020) < 1e-9, "must reproduce the measured Lv10/Lv1 ratio");
 
   // Never applies to a player target (PvP is out of scope for the bonus).
   assert.equal(demonBane(10, { ...demon, is_pc: true }, { base_level: 99 }, holyCross), null);

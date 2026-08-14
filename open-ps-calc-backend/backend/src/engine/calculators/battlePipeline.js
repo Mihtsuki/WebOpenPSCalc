@@ -523,6 +523,19 @@ class BattlePipeline {
     // MDEF no.) `mdef_: 0` skips the ×(100−MDEF)% step while keeping soft MDEF2.
     matkPmf = calculateMagicDefenseFix({ ...target, mdef_: 0 }, gearBonuses || {}, matkPmf, result);
 
+    // The mastery ATK lands on the MAGIC half as well as the physical one, so a
+    // point of mastery is worth double what "(wd + ad) × element × ratio" alone
+    // would make it. Measured in-game (base 99 Crusader, GC vs Loli Ruri): adding
+    // Blade Mastery Lv10 (+40 ATK, per its wiki table) moved a wave by 800 damage,
+    // and element × ratio here is only 2 × 5 = 10, so the effective multiplier on
+    // mastery is 20. Adding it to both halves is what produces that ×2, and it
+    // reproduces all four measured points exactly (40 / 1060 / 1240 / 2040 for no
+    // mastery / DB1 / DB10 / DB10+BM10). Grand Cross is the only skill that sums a
+    // physical and a magic hit, so nothing else is affected.
+    matkPmf = calculateMasteryFix(weapon, build, target, matkPmf, result, skill, {
+      profile, ctx, step_label: "Mastery Fix (magic half)", quiet_if_zero: true,
+    });
+
     // ── Sum (wd + ad) → Holy element → × ratio (applied LAST, per Hercules) ──
     let pmf = convolve(atkPmf, matkPmf);
     { const [mn, mx, av] = pmfStats(pmf); result.add_step({ name: "ATK part + MATK part", value: av, min_value: mn, max_value: mx, note: "physical (through DEF) + magic (through MDEF) summed", formula: "wd + ad", hercules_ref: "battle.c:3798" }); }

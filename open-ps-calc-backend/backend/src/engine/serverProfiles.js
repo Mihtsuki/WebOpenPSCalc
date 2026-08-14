@@ -208,7 +208,21 @@ const PS_MASTERY_CTX_OVERRIDES = {
     if (target.is_pc) return null;
     const baseLv = ctx && ctx.base_level != null ? ctx.base_level : 1;
     if (target.race === "Undead" || target.race === "Demon" || target.element === 9) {
-      return 5 * lv + Math.floor((baseLv + 1) / 2);
+      const flat = Math.floor((baseLv + 1) / 2);
+      // Grand Cross takes +1 ATK per level, not +5. Measured in-game (base 99,
+      // Crusader, GC vs Loli Ruri — Demon, Dark 4), four points with one variable
+      // moving at a time: no mastery 40, Demon Bane Lv1 1060, Lv10 1240, and Lv10
+      // plus Blade Mastery Lv10 2040. The per-level shape falls out of the data
+      // WITHOUT knowing the damage multiplier, since the ratio of the two Demon
+      // Bane readings is (DB10−40)/(DB1−40) = 1200/1020 = 1.1765 exactly — that is
+      // 60/51, i.e. (10+50)/(1+50). The wiki's +5/lv would give 100/55 = 1.818.
+      // Whether the +5/lv holds for ordinary attacks is untested: the measurements
+      // only constrain Grand Cross, and wiki.payonstories.com/Grand_Cross does say
+      // GC gets a reduced share ("only the demon/undead aspect ... not its flat
+      // mastery bonus"), so the wiki value is kept for every other skill pending a
+      // non-GC measurement.
+      const perLv = skill != null && skill.name === "CR_GRANDCROSS" ? 1 : 5;
+      return perLv * lv + flat;
     }
     // The +4/lv against everything else is the "flat mastery bonus", and
     // wiki.payonstories.com/Grand_Cross is explicit that Grand Cross gets *only*

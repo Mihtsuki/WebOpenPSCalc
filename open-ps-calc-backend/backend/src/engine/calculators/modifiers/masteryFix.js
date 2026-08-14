@@ -26,7 +26,10 @@ function vanillaSecondaryBonus(skillName, lv, target, build) {
 }
 
 function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, opts = {}) {
-  const { profile = STANDARD, ctx = null } = opts;
+  // `step_label` / `quiet_if_zero` exist for Grand Cross, which runs this twice —
+  // once per half — so the breakdown can name which half a bonus landed on, and so
+  // a build with no masteries at all doesn't grow a second "+0" row.
+  const { profile = STANDARD, ctx = null, step_label: stepLabel = "Mastery Fix", quiet_if_zero: quietIfZero = false } = opts;
   const mastery = ctx != null ? ctx.skill_levels : build.mastery_levels;
 
   const psGrandCrossOverride = skill != null && skill.name === "CR_GRANDCROSS" && profile.mechanic_flags.has("PS_GRANDCROSS_MASTERY_APPLIES");
@@ -110,7 +113,9 @@ function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, o
 
   pmf = addFlat(pmf, bonus);
   let [mn, mx, av] = pmfStats(pmf);
-  result.add_step({ name: "Mastery Fix", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note, formula, hercules_ref: "battle.c add_mastery" });
+  if (!(quietIfZero && bonus === 0)) {
+    result.add_step({ name: stepLabel, value: av, min_value: mn, max_value: mx, multiplier: 1.0, note, formula, hercules_ref: "battle.c add_mastery" });
+  }
 
   const ascKatarLv = mastery.ASC_KATAR || 0;
   if (weapon.weapon_type === "Katar" && ascKatarLv > 0) {
