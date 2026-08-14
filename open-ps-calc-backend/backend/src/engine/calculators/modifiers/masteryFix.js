@@ -40,7 +40,10 @@ function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, o
     const secLv = mastery[secSkill] || 0;
     if (secLv === 0) continue;
     const overrideFn = (profile.mastery_ctx_overrides || {})[secSkill];
-    const secBonus = overrideFn ? overrideFn(secLv, target, ctx) : vanillaSecondaryBonus(secSkill, secLv, target, build);
+    // `skill` is passed through because a PS override can depend on which skill is
+    // swinging — Grand Cross takes Demon Bane's demon/undead half but not its flat
+    // half (see PS_MASTERY_CTX_OVERRIDES).
+    const secBonus = overrideFn ? overrideFn(secLv, target, ctx, skill) : vanillaSecondaryBonus(secSkill, secLv, target, build);
     if (secBonus) {
       pmf = addFlat(pmf, secBonus);
       const [mn, mx, av] = pmfStats(pmf);

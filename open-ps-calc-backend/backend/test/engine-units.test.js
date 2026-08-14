@@ -1347,3 +1347,37 @@ test("per-skill cooldowns floor the cast interval, resist Bragi, and bend to bSk
   assert.equal(fuel.gb.skill_cooldown.AM_DEMONSTRATION, -2000, "FUEL Card must register -2s");
   assert.equal(bare.period - fuel.period, 2000, `FUEL should cut 2s (${bare.period} -> ${fuel.period})`);
 });
+
+test("Demon Bane's base-level bonus is flat, and Grand Cross takes only its demon half", () => {
+  const PS = getProfile("payon_stories");
+  const demonBane = PS.mastery_ctx_overrides.AL_DEMONBANE;
+  const demon = { race: "Demon", element: 7, is_pc: false };
+  const undeadEle = { race: "Formless", element: 9, is_pc: false };
+  const other = { race: "Formless", element: 0, is_pc: false };
+  const holyCross = { name: "CR_HOLYCROSS" };
+  const grandCross = { name: "CR_GRANDCROSS" };
+
+  // wiki.payonstories.com/Demon_Bane: "+5 per skill level +0.5 × (1 + Base Level)".
+  // The base-level half does NOT scale with skill level — the bug this pins is the
+  // vanilla-shaped lv × (5 + (BaseLv+1)/20) reading, which happens to agree at
+  // Lv10/base 99 (both 100) and is wrong at every other level.
+  const atBase99 = (lv) => demonBane(lv, demon, { base_level: 99 }, holyCross);
+  assert.equal(atBase99(10), 100, "Lv10/base99: 50 + 50");
+  assert.equal(atBase99(5), 75, "Lv5/base99: 25 + 50 — the level-scaled reading gives 50");
+  assert.equal(atBase99(1), 55, "Lv1/base99: 5 + 50 — the level-scaled reading gives 10");
+  // The flat half tracks base level on its own.
+  assert.equal(demonBane(10, demon, { base_level: 49 }, holyCross), 75, "Lv10/base49: 50 + 25");
+  // Undead ELEMENT counts as well as Demon race.
+  assert.equal(demonBane(10, undeadEle, { base_level: 99 }, holyCross), 100);
+
+  // The +4/lv against everything else has no base-level term...
+  assert.equal(demonBane(10, other, { base_level: 99 }, holyCross), 40);
+  // ...and wiki.payonstories.com/Grand_Cross excludes it: "only the demon/undead
+  // aspect of Demon Bane's mastery bonus benefits Grand Cross, not its flat
+  // mastery bonus". Against a demon, Grand Cross still gets the demon half.
+  assert.equal(demonBane(10, other, { base_level: 99 }, grandCross), null, "GC gets no flat half");
+  assert.equal(demonBane(10, demon, { base_level: 99 }, grandCross), 100, "GC keeps the demon half");
+
+  // Never applies to a player target (PvP is out of scope for the bonus).
+  assert.equal(demonBane(10, { ...demon, is_pc: true }, { base_level: 99 }, holyCross), null);
+});

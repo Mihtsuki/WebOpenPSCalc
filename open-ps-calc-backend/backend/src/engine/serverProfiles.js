@@ -191,17 +191,31 @@ const PS_PASSIVE_OVERRIDES = {
   GS_SINGLEACTION:   { hit_per_lv: 4 },                                                          // wiki.payonstories.com/Single_Action: +4 HIT/lv (+40 at Lv10; vanilla default was +2/lv)
 };
 
-// PS Demon Bane rework (wiki.payonstories.com/Demon_Bane): buffed from vanilla
-// +3/lv to +5/lv vs Undead-element / Demon-race (keeping the (1+BaseLv)/20
-// per-level base scaling → 5×lv × floor(...) = 100 ATK at Lv10 / base 99), and
-// adds a NEW +4/lv vs all other (non-Undead/Demon) targets that vanilla lacked.
+// PS Demon Bane rework (wiki.payonstories.com/Demon_Bane): "+3 per skill level
+// +0.05 * (1 + Base Level)" became "+5 per skill level +0.5 × (1 + Base Level)",
+// and it gained a NEW +4/lv against everything that is NOT Undead/Demon.
+//
+// The base-level half is a FLAT term, not a per-level one. This read as
+// lv × floor(5 + (BaseLv+1)/20) before — i.e. the base-level part multiplied by
+// skill level as vanilla Hercules does it. The two agree at Lv10/base 99 (both
+// 100), which is why the error hid, but they diverge everywhere else: at Lv5/base
+// 99 the level-scaled read gives 50 where PS gives 75, and at Lv1 it gives 10
+// where PS gives 55. Both the wiki's own table (Lv10 = +50, i.e. the 5/lv part
+// alone) and a player's in-game report say the (1+BaseLv)/2 term stands apart
+// from skill level.
 const PS_MASTERY_CTX_OVERRIDES = {
-  AL_DEMONBANE: (lv, target, ctx) => {
+  AL_DEMONBANE: (lv, target, ctx, skill) => {
     if (target.is_pc) return null;
     const baseLv = ctx && ctx.base_level != null ? ctx.base_level : 1;
     if (target.race === "Undead" || target.race === "Demon" || target.element === 9) {
-      return lv * Math.floor(5 + (baseLv + 1) / 20);
+      return 5 * lv + Math.floor((baseLv + 1) / 2);
     }
+    // The +4/lv against everything else is the "flat mastery bonus", and
+    // wiki.payonstories.com/Grand_Cross is explicit that Grand Cross gets *only*
+    // the demon/undead half: "only the demon/undead aspect of Demon Bane's mastery
+    // bonus benefits Grand Cross, not its flat mastery bonus". Every other skill
+    // takes it normally.
+    if (skill != null && skill.name === "CR_GRANDCROSS") return null;
     return lv * 4;
   },
 };

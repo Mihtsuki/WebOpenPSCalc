@@ -61,6 +61,17 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Demon Bane's base-level bonus no longer scales with skill level.** PS gives "+5 per skill
+  level **+0.5 × (1 + Base Level)**" against Undead/Demon, and that second half is a flat term —
+  the calculator was multiplying it by skill level, vanilla-style. The two readings agree at
+  Lv10/base 99 (both +100 ATK), which is how it hid, and disagree everywhere else: at Lv5/base 99
+  it was giving +50 where PS gives +75, and at Lv1 +10 where PS gives +55. Reported by a player.
+
+- **Grand Cross no longer takes Demon Bane's flat half.** Against a non-Undead/Demon target,
+  Demon Bane's PS-added +4 per level was being added to Grand Cross, which the wiki rules out:
+  "only the demon/undead aspect of Demon Bane's mastery bonus benefits Grand Cross". Against
+  demons and undead it applies exactly as before.
+
 - **Pirate Skel Card is a headgear card, not an accessory card.** It was only offered in the
   two accessory slots, so a build could never slot it where it actually goes. It now appears
   in the headgear (top/mid/low) card pickers and no longer in accessories; its auto-Mammonite
