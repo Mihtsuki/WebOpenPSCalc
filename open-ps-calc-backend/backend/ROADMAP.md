@@ -977,10 +977,13 @@ so share URLs made under the old counts stop computing with ranks that don't exi
 `ST_FULLSTRIP` (scrape 3), `PF_FOGWALL` (scrape 1), `CR_ALCHEMY` (dead skill). None scale damage.
 Re-check after any wiki update.
 
-**Adjacent finding — LK_JOINTBEAT has no PS ratio** [med]: it falls through to a flat 100% at
-every rank, but the bundled scrape carries the real table — **40% per level** (40/80/120/160/200%
-at Lv1–5). One line in `PS_BF_WEAPON_RATIOS` (`LK_JOINTBEAT: (lv) => 40 * lv`) plus a golden;
-left out of the max-level change deliberately, since it moves damage numbers.
+~~**Adjacent finding — LK_JOINTBEAT has no PS ratio**~~ — **fixed 2026-08-17.** It had no PS
+entry, so it fell through to vanilla's `50 + 10×lv` (battle.c:2085) — 60% at Lv1 rising to only
+**100% at Lv5**, and flagged "⚠ Vanilla fallback (PS unaudited)" in the breakdown. The bundled
+scrape carries the real PS table: **40% per level** (40/80/120/160/200% at Lv1–5, its PS max),
+now in `PS_BF_WEAPON_RATIOS` with the `lordknight-joint-beat-lv5` golden. So PS Lv5 is **double**
+what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailment multiplier stays
+unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
 - **`bAutoSpellWhenHit` has no consumer at all** [med] — 42 distinct skills across ~90 items

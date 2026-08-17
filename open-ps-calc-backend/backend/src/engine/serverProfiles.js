@@ -438,6 +438,11 @@ const PS_BF_WEAPON_RATIOS = {
   AS_GRIMTOOTH: () => 200,   // PS: flat 200% ATK at all levels (only the AoE range scales). wiki.payonstories.com/Grimtooth (vanilla was 100+20×lv).
   KN_AUTOCOUNTER: () => 200,
   KN_SPEARSTAB: (lv) => 100 + 40 * lv, // 100 + 40×lv, capped at L5 (300%) — PDF-verified prior audit
+  // Joint Beat: PS serves a flat 40% per level (40/80/120/160/200% at Lv1–5, its PS max),
+  // per the bundled ps_skill_db.json per-level table. Vanilla's 50+10×lv (battle.c:2085)
+  // capped out at 100% — half the real Lv5 ratio. The ×2 Break-Neck ailment bonus is
+  // still unmodeled (it needs the target to already carry that status).
+  LK_JOINTBEAT: (lv) => 40 * lv,
   CR_HOLYCROSS: (lv) => 300 + 25 * lv,
   RG_RAID: (lv) => 100 + 100 * lv,
   // PS Alchemist rework (PayonStories Alchemist Rework 2026-08-09 PDF): Acid Terror's

@@ -4821,6 +4821,58 @@
    }
   }
  },
+ "lordknight-joint-beat-lv5": {
+  "status": {
+   "str": 100,
+   "agi": 65,
+   "vit": 46,
+   "int_": 2,
+   "dex": 68,
+   "luk": 23,
+   "batk": 217,
+   "max_hp": 11647,
+   "max_sp": 313,
+   "aspd": 159.6,
+   "cri": 86,
+   "hit": 167,
+   "flee": 164,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 2,
+   "matk_max": 2
+  },
+  "result": {
+   "dps": 523.515,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 808,
+   "normal": {
+    "min": 423,
+    "max": 423,
+    "avg": 423,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Joint Beat Lv5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "incoming-banshee-physical": {
   "status": {
    "str": 67,

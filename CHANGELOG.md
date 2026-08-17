@@ -5,6 +5,18 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-17
+
+### Fixed
+
+- **Joint Beat was priced at half its real damage.** The Lord Knight skill had no Payon Stories
+  ratio of its own, so it fell back to the vanilla formula and topped out at **100% ATK at Lv5** —
+  the breakdown even flagged it as an unaudited fallback. PS gives it a flat **40% per level**
+  (40 / 80 / 120 / 160 / 200% at Lv1–5, its max rank), so a Lv5 Joint Beat is **twice** what the
+  calculator showed, while Lv1 and Lv2 were slightly over-reported. On a Lv99 Lord Knight with a
+  Javelin against a Ghoul, Lv5 goes from 197 to 423. The extra damage Joint Beat deals to a target
+  already suffering its Break-Neck ailment is still not modeled.
+
 ## 2026-08-12
 
 ### Added

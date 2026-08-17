@@ -581,6 +581,16 @@ const scenarios = [
     target: 1036,
   },
 
+  {
+    // Joint Beat on the PS table: 40% per level, so 200% at its Lv5 max — twice the
+    // vanilla 50+10×lv this used to fall back to. Spear (Javelin), since PS gates the
+    // skill to spear-class weapons.
+    name: "lordknight-joint-beat-lv5",
+    build: { job_id: 4008, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 60, vit: 40, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1401 } },
+    skill: { name: "LK_JOINTBEAT", level: 5 },
+    target: 1036,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",
