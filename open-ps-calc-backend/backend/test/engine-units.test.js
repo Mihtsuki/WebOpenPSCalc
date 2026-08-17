@@ -1390,3 +1390,48 @@ test("Demon Bane's base-level bonus is flat, and Grand Cross takes only its demo
   // Never applies to a player target (PvP is out of scope for the bonus).
   assert.equal(demonBane(10, { ...demon, is_pc: true }, { base_level: 99 }, holyCross), null);
 });
+
+// ---------------------------------------------------------------------------
+// Blitz Beat / auto-blitz is BF_MISC: no attacker card bonuses
+// ---------------------------------------------------------------------------
+test("the falcon ignores the attacker's race/boss cards, but the bow attack does not", () => {
+  const { computeFalconDamage } = require("../src/engine/calculators/falconCalc");
+  const config = createBattleConfig();
+  const profile = getProfile("payon_stories");
+
+  const hunter = (cards) => buildFromSaveSchema({
+    job_id: 11, base_level: 99, job_level: 50,
+    base_stats: { str: 1, agi: 99, vit: 1, int: 1, dex: 63, luk: 72 },
+    equipped: { right_hand: 1705, ammo: 1764, ...cards },
+    mastery_levels: { HT_FALCON: 1, HT_BLITZBEAT: 5, HT_STEELCROW: 10 },
+  });
+  // 4× Abysmal Knight Card = +25% vs Boss each.
+  const AK = { right_hand_card1: 4140, right_hand_card2: 4140, right_hand_card3: 4140, right_hand_card4: 4140 };
+  const boss = loader.getMonster(1159); // Phreeoni — Large Brute BOSS
+
+  const run = (cards) => {
+    const [gearBonuses, effBuild, , status] = resolvePlayerState(hunter(cards), config, profile);
+    return computeFalconDamage(status, effBuild, gearBonuses, boss, loader);
+  };
+  const bare = run({});
+  const carded = run(AK);
+
+  // The cards ARE parsed and would be worth +100% if they applied.
+  const [gb] = resolvePlayerState(hunter(AK), config, profile);
+  assert.equal(gb.add_race.RC_Boss, 100, "4x Abysmal Knight must aggregate to +100% vs Boss");
+
+  // …and the falcon must be identical with and without them. Blitz Beat is
+  // BF_MISC (skills.json attack_type "Misc"); Hercules battle_calc_cardfix's
+  // `case BF_MISC` has only a defender (`tsd`) branch — no attacker cardfix.
+  assert.equal(carded.per_hit, bare.per_hit, "falcon per-hit must ignore bAddRace/boss cards");
+  assert.equal(carded.auto_blitz_total, bare.auto_blitz_total);
+
+  // Sanity-check the PS formula it should equal: (LUK + INT/2 + 6*SteelCrow + 20)*2,
+  // Neutral vs Phreeoni's Neutral 3 defence = ×100%.
+  const [, , , st] = resolvePlayerState(hunter(AK), config, profile);
+  assert.equal(bare.per_hit, (st.luk + Math.floor(st.int_ / 2) + 10 * 6 + 20) * 2);
+
+  // Hit count and proc chance still follow job level and LUK.
+  assert.equal(bare.auto_blitz_hits, 5, "job level 50 + Blitz Lv5 = 5 hits");
+  assert.equal(bare.auto_blitz_chance, Math.floor(st.luk / 3));
+});

@@ -591,6 +591,24 @@ const scenarios = [
     target: 1036,
   },
 
+  {
+    // Blitz Beat is BF_MISC, so the attacker's card bonuses do NOT apply to it —
+    // Hercules' battle_calc_cardfix has no attacker branch for BF_MISC. This bow
+    // Hunter wears 4× Abysmal Knight Card (+25% vs Boss each) against Phreeoni, a
+    // boss: the auto-attack damage takes the +100%, the falcon must not.
+    name: "hunter-auto-blitz-vs-boss-ignores-race-cards",
+    build: {
+      job_id: 11, base_level: 99, job_level: 50,
+      base_stats: { str: 1, agi: 99, vit: 1, int: 1, dex: 63, luk: 72 },
+      equipped: {
+        right_hand: 1705, ammo: 1764,
+        right_hand_card1: 4140, right_hand_card2: 4140, right_hand_card3: 4140, right_hand_card4: 4140,
+      },
+      mastery_levels: { HT_FALCON: 1, HT_BLITZBEAT: 5, HT_STEELCROW: 10, HT_BEASTBANE: 10 },
+    },
+    target: 1159, // Phreeoni — Large Brute BOSS, so RC_Boss card bonuses are live
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

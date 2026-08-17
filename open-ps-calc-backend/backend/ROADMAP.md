@@ -986,6 +986,31 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **BF_MISC takes NO attacker card bonuses — traps still do** [med]. Established while chasing a
+  player-reported DPS gap against the jaludev calc. `battle_calc_misc_attack` (battle.c:4341) never
+  calls `battle_calc_defense`, and `battle_calc_cardfix`'s `case BF_MISC` (battle.c:1354) has ONLY a
+  `tsd` (defender) block — unlike `case BF_WEAPON` it has no attacker-side `sd` branch at all, so
+  `right_weapon.addrace[...]` never reaches Misc damage. In PvE `tsd` is NULL, making the whole call
+  a no-op; `battle_calc_cardfix2` is `#ifdef RENEWAL`, dead pre-re. **Fixed for the falcon**
+  (`falconCalc.js`, 2026-08-17 — it was doubling on 4× Abysmal Knight vs a boss). **Still wrong for
+  the traps**: `HT_BLASTMINE` / `HT_LANDMINE` / `HT_CLAYMORETRAP` are the same BF_MISC family (they
+  sit in that same Hercules function) but route through `_runBranch`, which runs `cardFix` — measured
+  Blast Mine Lv5 vs Phreeoni at **1051 bare → 2102 with 4× Abysmal Knight, exactly 2.00×**. They
+  correctly skip Defense Fix already. Fixing them means bypassing `cardFix` for Misc-typed skills
+  rather than special-casing each trap.
+  Two attacker-side terms that ARE legitimate on BF_MISC and are unmodelled: `pc->skillatk_bonus`
+  (`bonus2 bSkillAtk,<skill>,<pct>`, battle.c:4395 — no PS item grants it for these skills today,
+  but it is the correct hook if one appears), and `NK_SPLASHSPLIT`, which an **autocast** Blitz Beat
+  sets when it hits more than one target (damage divided among them) — so auto-blitz is overstated
+  against a pack, though single-target is right.
+- **Auto Blitz Beat proc chance — sources disagree** [low, ~180 DPS]. Ours and the PS wiki say
+  `⌊LUK/3⌋` ("for every 3 points of LUK there is an additional 1% chance") = 38% at LUK 114;
+  Hercules `skill.c:1638` is `rnd()%1000 <= luk*3`, i.e. `(3×LUK+1)/1000` = 34.3%; the jaludev calc
+  uses `1 + 0.3×LUK` = 35.2%. Left on the wiki reading per the source hierarchy (wiki beats battle.c
+  for PS-reworked skills, and Blitz Beat's damage formula IS PS-reworked). Recorded, not silently
+  overridden. NB ours is right where jaludev is wrong on the same skill: hit count is
+  `min(BlitzLv, job_level/10 + 1, 5)`, matching both Hercules and the wiki's "job level 40+ can reach
+  the full 5 hits"; jaludev's `⌊(JobLV−1)/10⌋+1` gives 4 at job level 40.
 - **`bAutoSpellWhenHit` has no consumer at all** [med] — 42 distinct skills across ~90 items
   (Dark Lord Card's Meteor Storm, Ifrit Card's Earthquake, Ring of Resonance's Venom Splasher,
   and a long tail of defensive Heal/Assumptio/Kyrie). `gearBonuses.autocast_when_hit` is

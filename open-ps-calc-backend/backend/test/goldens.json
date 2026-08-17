@@ -4873,6 +4873,98 @@
    }
   }
  },
+ "hunter-auto-blitz-vs-boss-ignores-race-cards": {
+  "status": {
+   "str": 5,
+   "agi": 105,
+   "vit": 3,
+   "int_": 5,
+   "dex": 73,
+   "luk": 76,
+   "batk": 138,
+   "max_hp": 4881,
+   "max_sp": 426,
+   "aspd": 169.5,
+   "cri": 463,
+   "hit": 172,
+   "flee": 204,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 5,
+   "matk_max": 6
+  },
+  "result": {
+   "dps": 1128.279,
+   "dps_valid": true,
+   "hit_chance": 98,
+   "crit_chance": 46.3,
+   "period_ms": 610,
+   "normal": {
+    "min": 166,
+    "max": 220,
+    "avg": 193,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Arrow ATK",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Normal attack)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix (HT_BEASTBANE)",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 414,
+    "max": 414,
+    "avg": 414,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Arrow ATK",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Normal attack)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix (HT_BEASTBANE)",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "proc_branches": {
+    "auto_blitz": {
+     "min": 1580,
+     "max": 1580,
+     "avg": 1580,
+     "steps": [
+      "Auto Blitz Beat (5 hits)"
+     ]
+    }
+   }
+  }
+ },
  "incoming-banshee-physical": {
   "status": {
    "str": 67,

@@ -9,6 +9,15 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **The falcon's damage was inflated by your cards.** Auto Blitz Beat was taking the attacker's
+  race and boss card bonuses, which it should not: Blitz Beat is Misc damage, and those bonuses
+  only apply to weapon damage. A bow Hunter wearing **4× Abysmal Knight Card** (+25% vs Boss each)
+  against **Phreeoni** was getting **double** falcon damage — 804 per hit instead of 402 — and
+  since the falcon is the largest single term in a Hunter's DPS, the total read **6873 instead of
+  4393**. Any race card an archer wears was inflating it the same way, not just boss cards. The
+  falcon still takes the target's elemental weakness and still ignores DEF, both of which are
+  correct. Reported by a player comparing against another calculator, which had this right.
+
 - **Joint Beat was priced at half its real damage.** The Lord Knight skill had no Payon Stories
   ratio of its own, so it fell back to the vanilla formula and topped out at **100% ATK at Lv5** —
   the breakdown even flagged it as an unaudited fallback. PS gives it a flat **40% per level**

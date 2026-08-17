@@ -4,18 +4,19 @@
  * PS formula (wiki.payonstories.com/Blitz_Beat):
  *   per hit = (LUK + floor(INT / 2) + Steel_Crow_lv × 6 + 20) × 2
  *
- * The attack is neutral element, bypasses DEF, and is affected by the
- * target's elemental weakness and the attacker's race/boss damage bonuses
- * from equipment (same as any physical attack).  Size modifiers are NOT
- * applied (the falcon attack does not go through the normal weapon-type size
- * table in eAthena/Hercules pre-renewal).
+ * The attack is neutral element, bypasses DEF, and is affected by the target's
+ * elemental weakness.  Size modifiers are NOT applied (the falcon attack does not
+ * go through the normal weapon-type size table in eAthena/Hercules pre-renewal).
+ *
+ * The attacker's OFFENSIVE card bonuses (bAddRace, and the RC_Boss/RC_NonBoss
+ * boss bonus) do NOT apply.  Blitz Beat is BF_MISC — skills.json types it
+ * `attack_type: "Misc"`, and Hercules computes it in `battle_calc_misc_attack`.
+ * `battle_calc_cardfix`'s `case BF_MISC` (battle.c:1354) has ONLY a `tsd` block —
+ * the defender's reductions.  Unlike `case BF_WEAPON`, it has no attacker-side
+ * (`sd`) branch at all, so `right_weapon.addrace[...]` never touches Misc damage.
+ * This engine used to apply them, which doubled the falcon on a bow build wearing
+ * 4× Abysmal Knight Card (+25% vs Boss each) against a boss.
  */
-
-const RACE_TO_RC = {
-  Formless: "RC_Formless", Undead: "RC_Undead", Brute: "RC_Brute",
-  Plant: "RC_Plant", Insect: "RC_Insect", Fish: "RC_Fish",
-  Demon: "RC_Demon", "Demi-Human": "RC_DemiHuman", Angel: "RC_Angel", Dragon: "RC_Dragon",
-};
 
 const HUNTER_JOB_IDS = new Set([11, 4012]);
 
@@ -24,7 +25,7 @@ const HUNTER_JOB_IDS = new Set([11, 4012]);
  *
  * @param {object} status    — computed status (int_, luk, …)
  * @param {object} build     — raw build object (job_id, mastery_levels)
- * @param {object} gearBonuses — aggregated gear bonuses (effective_mastery, add_race)
+ * @param {object} gearBonuses — aggregated gear bonuses (effective_mastery)
  * @param {object} target    — target object (element, element_level, race, is_boss)
  * @param {object} loader    — dataLoader instance for getAttrFixMultiplier
  */
@@ -40,16 +41,10 @@ function computeFalconDamage(status, build, gearBonuses, target, loader) {
   // Base damage per hit (PS custom formula)
   const base = (status.luk + Math.floor(status.int_ / 2) + steelCrowLv * 6 + 20) * 2;
 
-  // Neutral element (0) vs target's element
+  // Neutral element (0) vs target's element. This is the only target-dependent
+  // term — see the header note on why attacker card bonuses do not apply.
   const elemRatio = loader.getAttrFixMultiplier(0, target.element, target.element_level) / 100;
-  const afterElem = Math.floor(base * elemRatio);
-
-  // Race + boss bonuses from equipment
-  const addRace = gearBonuses.add_race || {};
-  const raceRc = RACE_TO_RC[target.race] || "";
-  const bossRc = target.is_boss ? "RC_Boss" : "RC_NonBoss";
-  const racePct = (addRace[raceRc] || 0) + (addRace[bossRc] || 0);
-  const perHit = racePct ? Math.floor(afterElem * (100 + racePct) / 100) : afterElem;
+  const perHit = Math.floor(base * elemRatio);
 
   // Auto Blitz Beat (triggers on a BOW auto-attack): chance = ⌊LUK/3⌋%, hits =
   // min(Blitz Beat level, ⌊job level/10⌋+1) capped at 5 — requires Blitz Beat
