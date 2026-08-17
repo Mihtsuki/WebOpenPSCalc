@@ -986,6 +986,26 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **AM_SPHEREMINE (Sphere Mine) — BLOCKED ON DATA, not on effort** [med, player-requested].
+  Asked for in Discord (2026-08-17) alongside Acid Terror as the two Alchemist skills whose
+  breakpoints most want a calculator. The *mechanic* is fully pinned down; only one number is
+  missing. `AM_SPHEREMINE` summons `MOBID_MARINE_SPHERE` (mob **1142**) with `AI_SPHERE`
+  (skill.c:12752–12774); it detonates via `NPC_SELFDESTRUCTION`, whose damage is
+  `md.damage = sstatus->hp` (battle.c:4467) — **the sphere's REMAINING HP**. It is BF_MISC, so
+  per the BF_MISC entry above it takes no DEF and no attacker card bonuses; the hit *is* the HP.
+  **What's missing**: PS replaced the HP with a custom per-level formula and never published the
+  numbers. `ps_skill_db.json` says verbatim "Summons a Marine Sphere with a **custom HP formula** …
+  inflicts damage … equal to its remaining HP … The **Maximum HP is based on your skill level**",
+  and stops there. The 2026-08-09 Alchemist rework PDF does not mention the skill at all (it only
+  covers Remote Detonator + Marine Sphere Bottle → 5 Burning stacks, which IS modelled). Vanilla is
+  no guide: it spawns mob 1142 at its flat DB HP (2508 in our data) with **no** level scaling —
+  skill level only sets `maxcount` and `skill_get_time`. So there is nothing to derive the table
+  from, and a guessed HP table is exactly the fabricated number the calc promises not to show.
+  **To unblock**: the sphere's **Max HP at Lv1–5**, either read off the HP bar in game or measured
+  as the detonation damage of an *undamaged* sphere (no DEF/card interference to correct for).
+  With those five numbers this is a small `misc_formulas` branch. **Model it as an upper bound** and
+  say so in the UI: the sphere must be hit to start its 5 s countdown and explodes for *remaining*
+  HP, so a full-HP figure is the ceiling, not the expected hit.
 - **BF_MISC takes NO attacker card bonuses — traps still do** [med]. Established while chasing a
   player-reported DPS gap against the jaludev calc. `battle_calc_misc_attack` (battle.c:4341) never
   calls `battle_calc_defense`, and `battle_calc_cardfix`'s `case BF_MISC` (battle.c:1354) has ONLY a
@@ -1072,6 +1092,20 @@ unmodeled — it needs the target to already carry that status.
   flat DEF-ignoring/accuracy-independent damage add; PF_SPIDERWEB Fire ×2.5 vs webbed target.
 
 ### Confirmed correct (no action — recorded so they aren't re-flagged)
+- **The Alchemist damage kit** — audited end-to-end 2026-08-17 against the 2026-08-09 rework PDF and
+  Hercules, prompted by a player asking whether the class was implemented. All correct, don't
+  re-audit: **Acid Terror** carries the PS rework's `(100+100×SkillLv)%` ATK (600% at its Lv5 max),
+  and behaves right in all three respects that battle.c specifies — it **ignores hard DEF** (battle.c
+  :1476 zeroes `def1`: "Acid Terror ignores only armor defense"), it **still takes soft DEF** from the
+  target's VIT, and it **ignores cards** (measured: a Hydra Card on a Demi-Human target moves
+  Mammonite ×1.191 and Acid Terror ×1.000). **Demonstration** likewise. Both are **BF_WEAPON**, not
+  Misc — they sit in `battle_calc_weapon_attack`'s skillratio switch (battle.c:2262/2271) despite
+  skills.json typing them `attack_type: "Misc"`, so routing them down the physical branch (which the
+  ratio-aware BF_MISC guard already does) is correct, and the BF_MISC no-cards/no-DEF rule does NOT
+  apply to them. **FUEL Card** (`bSkillAtk` +10% to both, `bSkillCooldown` −2 s on Demonstration,
+  +5 FLEE), **Burning**, **Transmutation** (+1%/lv ASPD and MATK, gated to axes/swords), and **Giant
+  Pestle** (id 8430, incl. its base LUK/DEX ≥60 and ≥80 tiers) are all wired. The one gap is
+  Sphere Mine — see the punch-list.
 - **TK_COUNTER** "always hit" — modeled via `damage_type:["IgnoreFlee"]` in skills.json.
 - Cosmetic multi-hit convention (negative `number_of_hits`): CR_HOLYCROSS −2, WZ_VERMILION −10,
   AS_SONICBLOW −8, TK_COUNTER −3 — damage applied once, correct.
