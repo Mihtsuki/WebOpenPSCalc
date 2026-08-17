@@ -360,6 +360,12 @@ function createDamageStep(opts) {
 }
 
 function createDamageResult(overrides = {}) {
+  // `add_step` is declared INSIDE the literal, not assigned after it. The engine is
+  // plain JS (checkJs is off) but its inferred types still reach the .ts routes, and
+  // TS types `result` from this initializer alone — a property attached afterwards is
+  // invisible to a TypeScript caller, which broke `npx tsc --noEmit` (and so CI's
+  // verify job, which gates deploy) the first time a route called result.add_step().
+  // It stays after the spread so an `overrides` key can never clobber it.
   const result = {
     min_damage: 0,
     max_damage: 0,
@@ -369,9 +375,9 @@ function createDamageResult(overrides = {}) {
     steps: [],
     pmf: {},
     ...overrides,
-  };
-  result.add_step = (opts) => {
-    result.steps.push(createDamageStep(opts));
+    add_step(opts) {
+      result.steps.push(createDamageStep(opts));
+    },
   };
   return result;
 }
