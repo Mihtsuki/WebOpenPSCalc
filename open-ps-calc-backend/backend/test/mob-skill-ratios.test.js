@@ -56,7 +56,9 @@ test("flat/special damage skills are marked unmodeled (no fabricated number)", (
   // monster-only 3rd-job skills are renewal-era with no pre-renewal formula — so
   // there is nothing honest to print for either. (NPC_DARKBREATH used to live here;
   // it now has a sourced target-stat formula, asserted in the next test.)
-  for (const s of ["MO_EXTREMITYFIST", "WL_CRIMSONROCK", "SC_MAELSTROM", "NPC_SELFDESTRUCTION", "NPC_SMOKING"]) {
+  // (SC_MAELSTROM used to live here too; it deals no damage at all — it turns cells
+  // into dead cells — so it is classified NO_HP_DAMAGE, asserted below.)
+  for (const s of ["MO_EXTREMITYFIST", "WL_CRIMSONROCK", "NPC_SELFDESTRUCTION", "NPC_SMOKING"]) {
     assert.ok(FLAT_UNMODELED_SKILLS.has(s), `${s} should be flat/unmodeled`);
     assert.ok(!(s in MOB_SKILL_RATIOS), `${s} should not have a ratio`);
   }
@@ -227,4 +229,73 @@ test("Lady Huo's Adoramus and Drain Life are priced, and stay pinned to her cast
   assert.ok(ado.number_of_hits[9] < 0, "negative = cosmetic, damage applied once");
   assert.strictEqual(ado.attack_type, "Magic");
   assert.strictEqual(ado.element[9], "Ele_Holy");
+});
+
+test("Maelstrom deals no HP damage — it creates dead cells", () => {
+  // skills.json already flags it NoDamage, but mob_skill_db.json is GENERATED with
+  // `dmg = (Magic|Weapon && targets a foe)`, and Maelstrom is attack_type Magic aimed
+  // at "around1" — so the generated entry says dmg:true. That is why classifying it
+  // here matters: without it the resolver treats it as a damage skill it merely
+  // cannot price, telling the reader to expect a hit that never lands.
+  assert.ok(NO_HP_DAMAGE_SKILLS.has("SC_MAELSTROM"));
+  assert.ok(!FLAT_UNMODELED_SKILLS.has("SC_MAELSTROM"), "not a damage skill at all");
+  assert.ok(!("SC_MAELSTROM" in MOB_SKILL_RATIOS));
+
+  loader.setProfile(getProfile("payon_stories"));
+  const sk = loader.getSkillByName("SC_MAELSTROM");
+  assert.ok((sk.damage_type || []).includes("NoDamage"), "skills.json agrees");
+
+  // The generated mob entry really does mis-flag it, so this classification is load
+  // bearing rather than belt-and-braces. If a regeneration ever fixes the generator,
+  // this assertion is the thing that says so.
+  const db = require("../src/engine/data/pre-re/db/mob_skill_db.json");
+  const entry = (db["3049"] || []).find((s) => s.name === "SC_MAELSTROM");
+  assert.ok(entry, "Lady Huo is its only caster");
+  assert.strictEqual(entry.dmg, true, "generator still mis-flags it as damage");
+});
+
+test("the defender's size/race/boss resists reduce incoming damage, magic included", () => {
+  // Regression for two silent holes found from a player's Survivability report:
+  //  1. bSubSize was DESCRIBED but never aggregated (bonusDefinitions had no field),
+  //     and playerBuildToTarget hardcoded `sub_size: {}` — so size resistance was
+  //     worth 0 against everything, physical and magic alike.
+  //  2. calculateCardFixMagic read only sub_ele + sub_race.RC_DemiHuman, dropping
+  //     size, the caster's actual race, boss and the ranged rate.
+  const { calculateIncomingMagicDamage } = require("../src/engine/calculators/incomingPipeline");
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+
+  // Stone Buckler = bSubSize,Size_Large,5 · Penomena Card = bSubRace,RC_Formless,30.
+  // Lady Huo (3049) is Formless / Large / boss, so both must bite.
+  const mk = (equipped) => buildFromSaveSchema({
+    job_id: 7, base_level: 99, job_level: 50,
+    base_stats: { str: 60, agi: 50, vit: 80, int: 20, dex: 50, luk: 20 },
+    equipped: { right_hand: 1101, armor: 2302, ...equipped },
+  });
+  const dmg = (equipped) => {
+    const b = mk(equipped);
+    const [gearBonuses, effBuild, weapon, status] = resolvePlayerState(b, config, profile);
+    return {
+      gb: gearBonuses,
+      magic: calculateIncomingMagicDamage(3049, effBuild, status, gearBonuses, weapon,
+        { ratio_override: 1400, ele_override: 6 }).avg_damage,
+    };
+  };
+
+  const bare = dmg({});
+  const buckler = dmg({ left_hand: 2114 });                          // −5% Large
+  const both = dmg({ left_hand: 2114, left_hand_card1: 4314 });      // −5% Large, −30% Formless
+
+  // The bonus must actually reach the aggregator now.
+  assert.deepEqual(buckler.gb.sub_size, { Size_Large: 5 }, "bSubSize must aggregate");
+  assert.deepEqual(both.gb.sub_race, { RC_Formless: 30 });
+
+  // …and reduce the hit. Each was worth exactly nothing before.
+  assert.ok(buckler.magic < bare.magic, "Stone Buckler must reduce incoming magic");
+  assert.ok(both.magic < buckler.magic, "Penomena must reduce it further");
+
+  // ~0.95 × 0.70. Bounded rather than exact so per-step flooring can't flake it.
+  const ratio = both.magic / bare.magic;
+  assert.ok(ratio > 0.660 && ratio < 0.667, `expected ≈0.665, got ${ratio.toFixed(4)}`);
 });

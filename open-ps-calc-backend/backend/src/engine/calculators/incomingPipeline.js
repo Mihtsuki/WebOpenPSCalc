@@ -160,7 +160,10 @@ function calculateIncomingMagicDamage(mobId, build, status, gearBonuses, weapon,
   pmf = calculateMagicDefenseFix(playerTarget, createGearBonuses(), pmf, result);
 
   const magicEleName = ELE_INT_TO_KEY[atkEle] || "Ele_Neutral";
-  pmf = calculateCardFixMagic(playerTarget, magicEleName, pmf, result, null);
+  // Pass the CASTER so the defender's size/race/boss/ranged reductions apply — a mob's
+  // magic used to be cut only by element and magic_def_rate.
+  pmf = calculateCardFixMagic(playerTarget, magicEleName, pmf, result, null,
+    { race: mob.race, size: mob.size, is_boss: mob.is_boss });
 
   pmf = applyLexAeterna(build, pmf, result);
 

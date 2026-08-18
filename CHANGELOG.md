@@ -35,6 +35,23 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Your resist gear wasn't reducing the damage you take.** Reported by a player comparing a
+  Survivability reading against the game. Two separate holes:
+  - **Size resistance did nothing at all** — a **Stone Buckler**'s "reduces damage from Large
+    monsters by 5%" was shown in the item text and then thrown away, against every attack,
+    physical and magic alike. Any card or gear with that kind of line was equally inert.
+  - **Incoming magic only counted element resistance.** Size, race, boss and ranged reductions
+    were all skipped, and race resistance was hardcoded to Demi-Human — so a **Penomena Card**
+    (−30% from Formless) did nothing against **Lady Huo**, who is Formless. Physical hits already
+    counted race correctly; only magic was affected.
+
+  Together those two were most of a defensive setup. Against Lady Huo's Adoramus, a build wearing
+  a Stone Buckler and a Penomena Card now reads **9,019 instead of 13,564** — a third less.
+
+- **Maelstrom is no longer listed as damage.** Lady Huo's cast was described as a hit the
+  calculator couldn't put a number on. It deals no damage at all — it turns an area of ground into
+  dead cells — so it now reads as a status effect, like Quagmire or Dispell.
+
 - **The falcon's damage was inflated by your cards.** Auto Blitz Beat was taking the attacker's
   race and boss card bonuses, which it should not: Blitz Beat is Misc damage, and those bonuses
   only apply to weapon damage. A bow Hunter wearing **4× Abysmal Knight Card** (+25% vs Boss each)

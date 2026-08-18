@@ -986,9 +986,33 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
-- **Monster-cast 3rd-job skills: 5 still unpriced** [low–med] — `FLAT_UNMODELED_SKILLS` in
+- **Incoming cardfix: two defender terms still unmodelled** [low] — `calculateCardFixMagic` now
+  applies the full Hercules BF_MAGIC defender set (battle.c:1132-1156) when a caster is passed:
+  `subele`, `subsize`, `subrace[race]`, `subrace[Boss/NonBoss]`, the LONG ranged rate (magic sets
+  `ad.flag = BF_MAGIC|BF_SKILL` with neither BF_SHORT nor BF_LONG, so the `else` branch always
+  wins — Skotlex's "ranged defense also counts vs magic"), and `magic_def_rate`. Not modelled:
+  **`subrace2`** (RC2 family resists, e.g. an Orc-family card) and **`add_mdef`** (bAddMonsterDef
+  per monster class), neither of which the gear aggregator collects. Also, the PvP path
+  (`calculateCardFixMagic` with no caster) keeps the old Demi-Human-only behaviour: correct for the
+  race term since a player caster IS Demi-Human, but it skips the size (players are Medium) and
+  boss terms. Deliberate — passing a caster there would move PvP numbers with nobody having
+  verified them.
+- **Incoming damage rounds slightly high vs the client** [low, ~1 per reduction step] — Hercules
+  accumulates every cardfix reduction into ONE integer per-mille factor (`cardfix`, starting 1000)
+  and applies a single `damage * cardfix / 1000` at the end, whereas this engine `scaleFloor`s the
+  pmf once per reduction, flooring at each step. With −5% size and −30% race on 13564: Hercules
+  does `1000→950→665` then one multiply = 9020; we do `floor(13564×0.95)=12885` then
+  `floor(12885×0.70)=9019`. Off by one here, and it compounds with the number of reductions — the
+  likely source of a player-reported 10047-vs-10055 gap. Fixing it means accumulating a per-mille
+  factor through `calculateCardFix*` and applying it once, which moves every incoming golden by a
+  point or two, so it wants doing deliberately rather than as a drive-by.
+- **Monster-cast 3rd-job skills: 4 still unpriced** [low–med] — `FLAT_UNMODELED_SKILLS` in
   `mobSkillRatios.js` holds `WL_CRIMSONROCK`, `RK_SONICWAVE`,
-  `SO_CLOUD_KILL`, `LG_RAYOFGENESIS`, `SC_MAELSTROM`. No PS player can learn them, but monsters
+  `SO_CLOUD_KILL`, `LG_RAYOFGENESIS`. (`SC_MAELSTROM` left this list 2026-08-17 — it deals no
+  damage at all, it converts cells to dead cells, so it is now in `NO_HP_DAMAGE_SKILLS`. NB
+  `mob_skill_db.json`'s generator marks it `dmg:true` because its rule is "Magic|Weapon and
+  targets a foe" and Maelstrom is Magic at `around1` — the classification is what corrects it.)
+  No PS player can learn them, but monsters
   cast them, and their vanilla formulas are behind `#ifdef RENEWAL` — so on a pre-renewal server
   whatever they do is custom and undocumented (the wiki's monster pages list a skill's level and
   trigger rate but never a formula, and kokotewa returns "Unknown skill"). They show element and

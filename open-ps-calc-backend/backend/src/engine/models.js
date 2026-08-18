@@ -224,6 +224,7 @@ function createGearBonuses(overrides = {}) {
     magic_add_ele: {},
     sub_ele: {},
     sub_race: {},
+    sub_size: {},  // bSubSize: % damage reduction from a monster SIZE (Stone Buckler, Penomena's sibling cards)
     add_size: {},
     add_ele: {},
     add_atk_ele: {},

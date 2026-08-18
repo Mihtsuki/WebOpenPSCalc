@@ -161,6 +161,14 @@ const NO_HP_DAMAGE_SKILLS = new Set([
   // says plainly that it doesn't. (If Evil Druid builds ever need it, that is a
   // separate branch keyed on the player's armour element, not a ratio.)
   "PR_SANCTUARY",
+  // Maelstrom deals NO damage — it converts an area of cells into dead cells (which
+  // swallow ground-targeted skill units). skills.json already flags it NoDamage, but
+  // mob_skill_db.json is generated with `dmg = (Magic|Weapon && targets a foe)` and
+  // Maelstrom is attack_type Magic aimed at "around1", so the generator marked it
+  // dmg:true and it was filed under "hurts, can't price it" — which told a Lady Huo
+  // (its only caster, Lv3) reader to expect a hit that never lands. Classifying it
+  // here says plainly that it does nothing to your HP.
+  "SC_MAELSTROM",
 ]);
 
 // Damage skills whose power is a flat/special formula that does NOT fit the
@@ -184,7 +192,7 @@ const FLAT_UNMODELED_SKILLS = new Set([
   // and AB_ADORAMUS (1400% MATK) + WL_DRAINLIFE (750% MATK) in PS_BF_MAGIC_RATIOS.
   // The rest stay unpriced until someone supplies their PS numbers the same way.
   "WL_CRIMSONROCK", "RK_SONICWAVE",
-  "SO_CLOUD_KILL", "LG_RAYOFGENESIS", "SC_MAELSTROM",
+  "SO_CLOUD_KILL", "LG_RAYOFGENESIS",
   // Splash for the caster's current HP. In the data these are target:self /
   // dmg:false, so they never reach the damage path here anyway (kept for
   // completeness — the incoming pipeline has no flat/self-HP branch).

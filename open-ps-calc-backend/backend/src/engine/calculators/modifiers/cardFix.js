@@ -73,7 +73,19 @@ function calculateCardFix(build, gearBonuses, atkElement, target, isRanged, pmf,
   return pmf;
 }
 
-function calculateCardFixMagic(target, magicEleName, pmf, result, gearBonuses = null) {
+/**
+ * @param {object|null} caster — the ATTACKER, when the defender is a player. Hercules'
+ *   `battle_calc_cardfix` BF_MAGIC branch (battle.c:1132-1156) reduces incoming magic by
+ *   the defender's `subele`, `subsize[caster size]`, `subrace[caster race]`,
+ *   `subrace[RC_Boss|RC_NonBoss]`, `magic_def_rate`, and — pre-renewal only, per
+ *   Skotlex's "ranged defense also counts vs magic" — the ranged def rate. A magic
+ *   attack sets `ad.flag = BF_MAGIC|BF_SKILL` (battle.c:4025) with NEITHER BF_SHORT nor
+ *   BF_LONG, so the `wflag&BF_SHORT` test is false and it is always the LONG rate.
+ *   Pass `{race, size, is_boss}` for a monster caster. When omitted the caller is the
+ *   player-vs-player path, which keeps the old Demi-Human-only behaviour (a player
+ *   caster IS Demi-Human); its size/boss terms remain unmodelled — see ROADMAP.
+ */
+function calculateCardFixMagic(target, magicEleName, pmf, result, gearBonuses = null, caster = null) {
   const [, , avIn] = pmfStats(pmf);
   // bMagicAddRace/bMagicAddEle key off the TARGET's own race/element (e.g.
   // "magic damage to Fire-element monsters +10%"), not the spell's attack
@@ -101,15 +113,23 @@ function calculateCardFixMagic(target, magicEleName, pmf, result, gearBonuses = 
   }
 
   const tEle = (target.sub_ele[magicEleName] || 0) + (target.sub_ele.Ele_All || 0);
-  const tRace = target.sub_race.RC_DemiHuman || 0;
+  // Caster race/size/boss. Without a caster the attacker is a player: Demi-Human, and
+  // its size/boss terms stay unmodelled exactly as before (keeps PvP output unchanged).
+  const casterRaceRc = caster ? (RACE_TO_RC[caster.race] || "") : "RC_DemiHuman";
+  const tRace = (casterRaceRc && target.sub_race[casterRaceRc]) || 0;
+  const tBoss = caster ? (target.sub_race[caster.is_boss ? "RC_Boss" : "RC_NonBoss"] || 0) : 0;
+  const casterSizeKey = caster ? (SIZE_TO_KEY[caster.size] || "") : "";
+  const tSize = (casterSizeKey && target.sub_size && target.sub_size[casterSizeKey]) || 0;
+  // Magic carries neither BF_SHORT nor BF_LONG, so the LONG rate is the one that applies.
+  const tLong = caster ? (target.long_attack_def_rate || 0) : 0;
   const tMagicDef = target.magic_def_rate;
-  for (const reduction of [tEle, tRace, tMagicDef]) {
+  for (const reduction of [tEle, tSize, tRace, tBoss, tLong, tMagicDef]) {
     if (reduction) pmf = scaleFloor(pmf, 100 - reduction, 100);
   }
 
   [mn, mx, av] = pmfStats(pmf);
   const multiplier = avIn ? av / avIn : 1.0;
-  result.add_step({ name: "Card Fix (Magic)", value: av, min_value: mn, max_value: mx, multiplier, note: `MagicRace+${raceBonus}%  MagicEle ${targetEleKey}+${eleBonus}%  Ele-${tEle}%  Race-${tRace}%  MagicDef-${tMagicDef}%`, formula: "dmg × race/boss/ele(target)/ele(resist)/race/magicdef factors", hercules_ref: "battle.c:1072-1143" });
+  result.add_step({ name: "Card Fix (Magic)", value: av, min_value: mn, max_value: mx, multiplier, note: `MagicRace+${raceBonus}%  MagicEle ${targetEleKey}+${eleBonus}%  Ele-${tEle}%  Size-${tSize}%  Race-${tRace}%  Boss-${tBoss}%  Ranged-${tLong}%  MagicDef-${tMagicDef}%`, formula: "dmg × ele/size/race/boss/ranged/magicdef reductions", hercules_ref: "battle.c:1132-1156" });
   return pmf;
 }
 

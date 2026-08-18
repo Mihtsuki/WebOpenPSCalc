@@ -258,7 +258,10 @@ function playerBuildToTarget(build, status, gearBonuses, weapon, loader) {
     int_: status.int_,
     sub_race: { ...gearBonuses.sub_race },
     sub_ele: subEle,
-    sub_size: {},
+    // Was hardcoded `{}`, which zeroed every bSubSize the player wears (Stone Buckler
+    // and friends) for BOTH incoming pipelines — the physical one already reads
+    // sub_size, it was just always empty.
+    sub_size: { ...gearBonuses.sub_size },
     near_attack_def_rate: gearBonuses.near_atk_def_rate,
     long_attack_def_rate: gearBonuses.long_atk_def_rate,
     magic_def_rate: gearBonuses.magic_def_rate,

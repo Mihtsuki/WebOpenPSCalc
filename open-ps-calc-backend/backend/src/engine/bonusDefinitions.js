@@ -196,7 +196,12 @@ const BONUS2 = {
   // +% physical damage vs a specific monster id (e.g. bonus2 bAddDamageClass,1188,150).
   // Keyed by mob id; applied in cardFix when the target is that monster.
   bAddDamageClass: def((c, v) => `Increases physical damage against monster #${c} by ${v}%.`, "add_damage_class", "dict"),
-  bSubSize: def((s, v) => `Reduces damage from ${size(s)} monsters by ${v}%.`),
+  // Routed to the `sub_size` dict, like its siblings bSubEle/bSubRace above. It used
+  // to carry a description and NO field, so Stone Buckler's `bSubSize,Size_Large,5`
+  // was shown in the item text and then silently dropped by gearBonusAggregator
+  // (`defn.field == null` → return), leaving `gearBonuses.sub_size` undefined and
+  // every size-based damage reduction worth 0 in the Survivability panel.
+  bSubSize: def((s, v) => `Reduces damage from ${size(s)} monsters by ${v}%.`, "sub_size", "dict"),
   bSPGainRace: def((r, v) => `Gains ${v} SP per kill of ${race(r)}.`),
   bAddItemHealRate: def((_id, v) => `Increases healing from items by ${v}%.`),
   bWeaponComaRace: def((r, v) => `${Math.floor(v / 100)}% chance to inflict Coma on ${race(r)} per hit.`),
