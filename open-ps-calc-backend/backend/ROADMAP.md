@@ -986,6 +986,20 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **Monster-cast 3rd-job skills: 4 of 5 still unpriced** [low–med] — `FLAT_UNMODELED_SKILLS` in
+  `mobSkillRatios.js` holds `WL_CRIMSONROCK`, `WL_DRAINLIFE`, `RK_SONICWAVE`, `AB_ADORAMUS`,
+  `SO_CLOUD_KILL`, `LG_RAYOFGENESIS`, `SC_MAELSTROM`. No PS player can learn them, but monsters
+  cast them, and their vanilla formulas are behind `#ifdef RENEWAL` — so on a pre-renewal server
+  whatever they do is custom and undocumented (the wiki's monster pages list a skill's level and
+  trigger rate but never a formula, and kokotewa returns "Unknown skill"). They show element and
+  type only, deliberately. **`GC_DARKCROW` (Dark Claw) came off this list 2026-08-17** when the PS
+  value was supplied directly: **100 × SkillLv per hit, over the skill's 3 hits** — so Twinorc's
+  Lv2 cast is 3 × 200% = 600% of its ATK, at a 40% trigger rate. It lives in
+  `PS_BF_WEAPON_RATIOS` rather than `MOB_SKILL_RATIOS` **on purpose**: the incoming path checks
+  `profile.weapon_ratios` first and reports a hit there as PS-exact, while `MOB_SKILL_RATIOS`
+  flags `estimated: true` (correct for a Hercules-baseline guess, wrong for a known PS value).
+  The `GC_` prefix keeps it out of the player skill picker regardless. The remaining seven unblock
+  the same way — one measured/quoted PS formula each, not code.
 - ~~**AM_SPHEREMINE (Sphere Mine)**~~ — **implemented 2026-08-17** (`_runSphereMineBranch`), gated on
   the `AM_SPHEREMINE_PS_FORMULA` flag. Player-requested in Discord alongside Acid Terror.
   `wiki.payonstories.com/Sphere_Mine`: **`1000 + 200 × SkillLv + 25 × Total VIT`**, Fire element,

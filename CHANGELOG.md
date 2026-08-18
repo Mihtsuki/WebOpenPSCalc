@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Twinorc's Dark Claw now shows a damage number.** The Survivability panel could tell you the
+  cast was physical and Neutral but not how hard it hits, because Dark Claw is a monster-only
+  skill with no pre-renewal formula to fall back on. It deals **100% per skill level, three
+  times** — so Twinorc's Lv2 cast is 3 × 200%, six times its attack, and at 40% trigger rate it is
+  far and away the most dangerous thing it does. Against a Lv99 Swordsman in a Cotton Shirt that's
+  roughly **7,600–9,600**. It's reported as exact, not estimated.
+
 - **Sphere Mine is now in the calculator.** The Alchemist skill was missing entirely — it never even
   appeared in the skill list, because the underlying database still describes it the old way, as a
   summon whose damage came from the sphere's own HP. Payon Stories replaced that with a flat

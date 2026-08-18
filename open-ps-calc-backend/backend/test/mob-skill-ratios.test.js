@@ -156,3 +156,36 @@ test("incoming pipeline scales damage monotonically with ratio_override", () => 
   // multiple is < 3× but should be clearly super-linear vs a small bump.
   assert.ok(at300 > at100 * 1.8, `ratio 300 should be well above 1.8× ratio 100 (got ${(at300 / at100).toFixed(2)}×)`);
 });
+
+test("Dark Claw is priced from the PS profile at 100%/level over its 3 hits", () => {
+  // GC_DARKCROW is a Renewal 3rd-job (Guillotine Cross) skill no PS player can
+  // learn, but monsters cast it — Twinorc (3977) has it at Lv2, 40% rate. It used
+  // to sit in FLAT_UNMODELED_SKILLS ("renewal formula, PS value undocumented");
+  // PS's actual value is 100 × SkillLv PER HIT, over the skill's 3 hits.
+  const profile = getProfile("payon_stories");
+  const fn = profile.weapon_ratios.GC_DARKCROW;
+  assert.equal(typeof fn, "function", "must be priced from the PS profile, not the vanilla table");
+  assert.strictEqual(fn(1), 100);
+  assert.strictEqual(fn(2), 200);
+  assert.strictEqual(fn(5), 500);
+
+  // Living in weapon_ratios (not MOB_SKILL_RATIOS) is what makes the survivability
+  // panel report it as PS-exact instead of an estimated Hercules baseline.
+  assert.ok(!("GC_DARKCROW" in MOB_SKILL_RATIOS), "would be flagged `estimated` there");
+  assert.ok(!FLAT_UNMODELED_SKILLS.has("GC_DARKCROW"), "no longer unmodeled");
+
+  // The hit count comes from skills.json and the caller multiplies the per-hit
+  // ratio by it, so Twinorc's Lv2 cast is 3 × 200% = 600% total. If this ever
+  // reads 1, the per-hit ratio silently becomes the whole skill.
+  loader.setProfile(profile);
+  const sk = loader.getSkillByName("GC_DARKCROW");
+  assert.deepEqual(sk.number_of_hits, [3, 3, 3, 3, 3]);
+  assert.strictEqual(sk.attack_type, "Weapon");
+
+  // And Twinorc really does carry it at Lv2 (guards against a monsters.json
+  // regeneration quietly dropping the entry this was written for).
+  const mobSkills = require("../src/engine/data/pre-re/db/mob_skill_db.json")["3977"];
+  const dc = mobSkills.find((s) => s.name === "GC_DARKCROW");
+  assert.ok(dc, "Twinorc must still list Dark Claw");
+  assert.strictEqual(dc.lv, 2);
+});

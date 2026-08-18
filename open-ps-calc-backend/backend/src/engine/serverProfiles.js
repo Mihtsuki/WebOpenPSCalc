@@ -440,6 +440,16 @@ const PS_BF_WEAPON_RATIOS = {
   AS_GRIMTOOTH: () => 200,   // PS: flat 200% ATK at all levels (only the AoE range scales). wiki.payonstories.com/Grimtooth (vanilla was 100+20×lv).
   KN_AUTOCOUNTER: () => 200,
   KN_SPEARSTAB: (lv) => 100 + 40 * lv, // 100 + 40×lv, capped at L5 (300%) — PDF-verified prior audit
+  // Dark Claw — MOB-CAST ONLY on PS. GC_DARKCROW is a Renewal 3rd-job (Guillotine
+  // Cross) skill, so no player can learn it here and routes/data.ts filters the `GC_`
+  // prefix out of the skill picker; it lives in this map because the incoming
+  // (survivability) path checks profile.weapon_ratios FIRST, and a hit there is
+  // reported as PS-exact rather than `estimated` — which is right, since this is PS's
+  // own value and not the Hercules baseline (that formula is `#ifdef RENEWAL` and
+  // does not apply). Ratio is PER HIT; skills.json carries number_of_hits 3 at every
+  // rank, and the caller multiplies by it — so Twinorc's Lv2 cast is 3 × 200% = 600%
+  // total. Element is Ele_Weapon, i.e. the caster's weapon element (Neutral for a mob).
+  GC_DARKCROW: (lv) => 100 * lv,
   // Joint Beat: PS serves a flat 40% per level (40/80/120/160/200% at Lv1–5, its PS max),
   // per the bundled ps_skill_db.json per-level table. Vanilla's 50+10×lv (battle.c:2085)
   // capped out at 100% — half the real Lv5 ratio. The ×2 Break-Neck ailment bonus is
