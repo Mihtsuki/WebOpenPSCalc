@@ -341,6 +341,8 @@ const PS_MECHANIC_FLAGS = new Set([
   "AS_ENCHANTPOISON_PASSIVE_BONUS",// AS_ENCHANTPOISON: passive +2%/lv damage vs Poison element monsters
   // PS Hunter rework (Hunter_Rework_PayonStories.pdf)
   "HT_TRAP_PS_FORMULA",            // Trap damage: lv × factorA × factorB / divisor (INT/DEX scaling, bypasses DEF)
+  // PS Alchemist (wiki.payonstories.com/Sphere_Mine)
+  "AM_SPHEREMINE_PS_FORMULA",      // Sphere Mine: flat 1000 + 200×lv + 25×Total VIT, Fire, ignores DEF and size
   // PS Monk rework (PSRO_Monk_Rework_2026.pdf)
   "MO_TRIPLEATTACK_PS_BONUS",      // Triple Attack can crit when SC_EXPLOSIONSPIRITS (Fury/Critical Explosion) is active
   // PS Assassin dual-wield (wiki.payonstories.com/Class_Rebalance#Assassin)

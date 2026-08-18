@@ -609,6 +609,21 @@ const scenarios = [
     target: 1159, // Phreeoni — Large Brute BOSS, so RC_Boss card bonuses are live
   },
 
+  {
+    // Sphere Mine: PS replaced vanilla's "sphere explodes for its remaining HP" with a
+    // flat 1000 + 200×SkillLv + 25×Total VIT (wiki.payonstories.com/Sphere_Mine). Fire
+    // element, ignores DEF and weapon size penalties. Ghoul is Undead 1, which Fire
+    // beats, so the element step is visible in the golden.
+    name: "alchemist-sphere-mine-lv5",
+    build: {
+      job_id: 18, base_level: 99, job_level: 50,
+      base_stats: { str: 40, agi: 40, vit: 80, int: 40, dex: 60, luk: 20 },
+      equipped: { right_hand: 1305 },
+    },
+    skill: { name: "AM_SPHEREMINE", level: 5 },
+    target: 1036,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

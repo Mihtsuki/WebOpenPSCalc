@@ -1435,3 +1435,55 @@ test("the falcon ignores the attacker's race/boss cards, but the bow attack does
   assert.equal(bare.auto_blitz_hits, 5, "job level 50 + Blitz Lv5 = 5 hits");
   assert.equal(bare.auto_blitz_chance, Math.floor(st.luk / 3));
 });
+
+// ---------------------------------------------------------------------------
+// Sphere Mine (AM_SPHEREMINE) — PS flat formula
+// ---------------------------------------------------------------------------
+test("Sphere Mine is flat 1000 + 200*lv + 25*total VIT, Fire, and skips DEF/size/cards", () => {
+  const profile = getProfile("payon_stories");
+  const config = createBattleConfig();
+  const pipeline = new BattlePipeline(config);
+
+  const build = (cards = {}) => buildFromSaveSchema({
+    job_id: 18, base_level: 99, job_level: 50,
+    base_stats: { str: 40, agi: 40, vit: 50, int: 40, dex: 60, luk: 20 },
+    equipped: { right_hand: 1305, ...cards },
+  });
+  const tgt = (over = {}) => createTarget({
+    def_: 0, vit: 0, size: "Medium", race: "Formless", element: 0, element_level: 1, ...over,
+  });
+  const dmg = (lv, target, cards = {}) => {
+    const b = build(cards);
+    const [gearBonuses, effBuild, weapon, status] = resolvePlayerState(b, config, profile);
+    const skill = createSkillInstance({ id: loader.getSkillIdByName("AM_SPHEREMINE"), level: lv, name: "AM_SPHEREMINE" });
+    const res = pipeline.calculate(status, weapon, skill, target, effBuild, gearBonuses);
+    return { avg: res.normal.avg_damage, vit: status.vit, valid: res.dps_valid };
+  };
+
+  // The formula itself, on a Neutral 1 target (Fire vs Neutral = ×100%).
+  const neutral = tgt();
+  for (const lv of [1, 3, 5]) {
+    const r = dmg(lv, neutral);
+    assert.equal(r.avg, 1000 + 200 * lv + 25 * r.vit, `Lv${lv} must be 1000 + 200*lv + 25*totalVIT`);
+  }
+
+  // Ignores the target's DEF entirely — hard (wiki: "ignores DEF") and soft.
+  const base = dmg(5, neutral).avg;
+  assert.equal(dmg(5, tgt({ def_: 99 })).avg, base, "hard DEF must not reduce it");
+  assert.equal(dmg(5, tgt({ vit: 99 })).avg, base, "soft DEF must not reduce it");
+
+  // "not affected by weapon size penalties" — and there is no weapon roll anyway.
+  for (const size of ["Small", "Medium", "Large"]) {
+    assert.equal(dmg(5, tgt({ size })).avg, base, `${size} must not change it`);
+  }
+
+  // Fire element IS applied. Pre-re attr table: Fire vs Water 1 = 50%, vs Earth 1 = 150%.
+  assert.equal(dmg(5, tgt({ element: 1 })).avg, Math.floor(base * 0.5), "Fire vs Water 1 = 50%");
+  assert.equal(dmg(5, tgt({ element: 2 })).avg, Math.floor(base * 1.5), "Fire vs Earth 1 = 150%");
+
+  // Attacker card bonuses do NOT apply (summon-detonation damage is the BF_MISC
+  // family; the wiki lists DEF and size as skipped and never grants cards).
+  const dh = tgt({ race: "Demi-Human" });
+  assert.equal(dmg(5, dh, { right_hand_card1: 4035 }).avg, dmg(5, dh).avg,
+    "Hydra Card must not raise Sphere Mine");
+});

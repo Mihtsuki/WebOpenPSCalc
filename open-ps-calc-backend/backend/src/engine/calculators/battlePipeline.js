@@ -1005,6 +1005,80 @@ class BattlePipeline {
   }
 
   /**
+   * Sphere Mine (AM_SPHEREMINE). PS reworked this away from its vanilla mechanic
+   * entirely, so Hercules is no guide: vanilla summons mob 1142 and detonates it via
+   * NPC_SELFDESTRUCTION for `sstatus->hp` (battle.c:4467), i.e. the sphere's remaining
+   * HP. PS replaced that with a flat formula, per wiki.payonstories.com/Sphere_Mine:
+   *
+   *   damage = 1000 + 200 × SkillLv + 25 × Total VIT
+   *
+   * The wiki's Notes are explicit about what it skips: "The damage from Sphere Mine
+   * ignores DEF, and is Fire element. The damage from Sphere Mine is not affected by
+   * weapon size penalties." It also records that the old formula was 2000 + 400×SkillLv
+   * and that the Marine Sphere Bottle cost was removed.
+   *
+   * VIT is TOTAL VIT (base + gear + buffs), which is what `status.vit` holds.
+   *
+   * Fixed damage — no weapon roll, so no ATK, no size term (it could not apply anyway)
+   * and no crit. DEF is skipped per the wiki. Element IS applied: the hit is Fire, and
+   * it is priced against the target's defensive element.
+   *
+   * NB the wiki's "The summoned Marine Sphere is Water 3 property" describes the
+   * SPHERE's own defence — what it takes damage as, which is how a Demonstration can
+   * launch spheres without hurting them. It is NOT the element of the explosion, which
+   * the same Notes section states is Fire.
+   *
+   * ASSUMPTION — attacker card bonuses (bAddRace/size/element cards) are NOT applied.
+   * The wiki enumerates DEF and size but is silent on cards, and this is summon-
+   * detonation damage, i.e. the BF_MISC family, for which Hercules'
+   * battle_calc_cardfix has no attacker-side branch at all (battle.c:1354 — see the
+   * falcon fix and the ROADMAP BF_MISC entry). `bSkillAtk` IS applied: it is the one
+   * attacker-side term battle_calc_misc_attack does honour (battle.c:4395).
+   */
+  _runSphereMineBranch(status, weapon, skill, target, build, opts = {}) {
+    const { gear_bonuses: gearBonuses } = opts;
+    const result = createDamageResult();
+    const vit = status.vit || 0;
+    const lv = skill.level;
+
+    const baseDmg = 1000 + 200 * lv + 25 * vit;
+    let pmf = uniformPmf(baseDmg, baseDmg);
+    result.add_step({
+      name: "Sphere Mine Base",
+      value: baseDmg, min_value: baseDmg, max_value: baseDmg,
+      note: `1000 + 200×Lv${lv} (${200 * lv}) + 25×VIT ${vit} (${25 * vit})`,
+      formula: "1000 + 200 × SkillLv + 25 × Total VIT",
+      hercules_ref: "wiki.payonstories.com/Sphere_Mine",
+    });
+
+    const skillAtkBonus = gearBonuses ? (gearBonuses.skill_atk[skill.name] || 0) : 0;
+    if (skillAtkBonus) {
+      pmf = scaleFloor(pmf, 100 + skillAtkBonus, 100);
+      const [mn2, mx2, av2] = pmfStats(pmf);
+      result.add_step({
+        name: "Skill ATK Bonus", value: av2, min_value: mn2, max_value: mx2,
+        multiplier: (100 + skillAtkBonus) / 100,
+        note: `bSkillAtk: ${skill.name} +${skillAtkBonus}%`,
+        formula: `dmg × (100+${skillAtkBonus})/100`,
+        hercules_ref: "pc.c:3513-3527",
+      });
+    }
+
+    // Ignores DEF (wiki) — no defenseFix step. Fire element vs the target's defence.
+    pmf = calculateAttrFix(weapon, target, pmf, result, build, 3 /* Fire */);
+    pmf = floorAt(pmf, 1);
+
+    const [mn, mx, av] = pmfStats(pmf);
+    result.add_step({
+      name: "Final Damage", value: av, min_value: mn, max_value: mx,
+      note: "Sphere Mine branch — fixed damage, ignores DEF and weapon size penalties",
+      formula: "", hercules_ref: "",
+    });
+    result.min_damage = mn; result.max_damage = mx; result.avg_damage = av; result.pmf = pmf;
+    return result;
+  }
+
+  /**
    * Manual Blitz Beat (HT_BLITZBEAT). PS formula (wiki.payonstories.com/Blitz_Beat):
    * per hit = (LUK + floor(INT/2) + 6×Steel_Crow_lv + 20) × 2; number of hits =
    * the skill level (Lv1→1 … Lv5→5). Neutral element, bypasses DEF, unaffected by
@@ -1667,6 +1741,22 @@ class BattlePipeline {
       return createBattleResult({
         normal: ksResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
         dps: calculateDps(attacks), attacks, period_ms: ksPeriod, dps_valid: true,
+      });
+    }
+
+    // Sphere Mine. Dispatched HERE, above the NoDamage guard: the vanilla DB types it
+    // "Place"/NoDamage with no attack_type (it summons a mob, and vanilla damage comes
+    // from the sphere self-destructing), so the guard would zero it before the branch
+    // ever ran. PS gave it a real, flat formula — see _runSphereMineBranch.
+    if (skillName === "AM_SPHEREMINE" && profile.mechanic_flags.has("AM_SPHEREMINE_PS_FORMULA")) {
+      const smResult = this._runSphereMineBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
+      let castMs = 0, delayMs = 0;
+      if (skillData) [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
+      const smPeriod = Math.max(castMs + delayMs, profile.min_cast_period_ms || 100);
+      const smAttacks = [createAttackDefinition(smResult.avg_damage, 0.0, smPeriod, 1.0)];
+      return createBattleResult({
+        normal: smResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
+        dps: calculateDps(smAttacks), attacks: smAttacks, period_ms: smPeriod, dps_valid: true,
       });
     }
 

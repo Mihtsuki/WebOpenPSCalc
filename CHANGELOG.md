@@ -7,6 +7,19 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-17
 
+### Added
+
+- **Sphere Mine is now in the calculator.** The Alchemist skill was missing entirely — it never even
+  appeared in the skill list, because the underlying database still describes it the old way, as a
+  summon whose damage came from the sphere's own HP. Payon Stories replaced that with a flat
+  formula: **1000 + 200 × skill level + 25 × your total VIT**. Pick it like any other skill and you
+  get the full breakdown. It is **Fire** element, so it hits Earth and Undead monsters hard and is
+  halved against Water; it **ignores the target's DEF** entirely, and takes no size penalty — a Lv5
+  Sphere Mine on an 80-VIT Alchemist reads 4075 before element, the same whether the target has 0
+  or 99 DEF. Requested by a player. One thing to know: the wiki's note that the sphere is "Water 3"
+  is the sphere's *own* defence — that's what lets a Bomb launch spheres without hurting them — not
+  the element of the explosion.
+
 ### Fixed
 
 - **The falcon's damage was inflated by your cards.** Auto Blitz Beat was taking the attacker's

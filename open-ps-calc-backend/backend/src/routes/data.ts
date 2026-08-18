@@ -249,9 +249,15 @@ router.get("/skills", (req: Request, res: Response) => {
       // Shield's DPS isn't calculable (it reflects damage taken); Blitz Beat needs
       // a Falcon to produce damage but is a real, selectable skill.
       const isBranchMisc = name === "CR_REFLECTSHIELD" || name === "HT_BLITZBEAT";
+      // Sphere Mine is typed "Place"/NoDamage with no attack_type (vanilla summons a
+      // mob and the damage comes from it self-destructing), but PS gave it a flat
+      // formula the engine computes in its own branch.
+      const isSphereMine =
+        profile.mechanic_flags.has("AM_SPHEREMINE_PS_FORMULA") && name === "AM_SPHEREMINE";
       const computable =
         isTrap ||
         isBranchMisc ||
+        isSphereMine ||
         Object.prototype.hasOwnProperty.call(wr, name) ||
         Object.prototype.hasOwnProperty.call(mr, name);
       // Pure support skills carry the NoDamage flag. Hide them from a *damage*
