@@ -9,6 +9,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Lady Huo's two big spells now show damage numbers.** Both were listed as "can't be modelled":
+  **Adoramus** hits for **1400% MATK** as **Holy** — so Holy resistance is the counter, and against
+  a Lv99 Swordsman in a Cotton Shirt it lands around **13,600** — and **Drain Life** for **750%
+  MATK**, Neutral, at 10%. Adoramus fires at a 20% rate, making it the cast to plan around. (Drain
+  Life also heals her for part of what it deals; that half isn't modelled yet.)
+
 - **Twinorc's Dark Claw now shows a damage number.** The Survivability panel could tell you the
   cast was physical and Neutral but not how hard it hits, because Dark Claw is a monster-only
   skill with no pre-renewal formula to fall back on. It deals **100% per skill level, three

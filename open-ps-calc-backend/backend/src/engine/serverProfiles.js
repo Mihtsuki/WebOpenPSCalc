@@ -547,6 +547,22 @@ const PS_WEAPON_VANILLA_OK = new Set([
 
 // core/server_profiles.py's _PS_BF_MAGIC_RATIOS.
 const PS_BF_MAGIC_RATIOS = {
+  // MOB-CAST ONLY. Adoramus (Arch Bishop) and Drain Life (Warlock) are Renewal
+  // 3rd-job skills no PS player can learn — routes/data.ts filters the `AB_`/`WL_`
+  // prefixes out of the skill picker — but Lady Huo (mob 3049) casts both, and their
+  // vanilla formulas are behind `#ifdef RENEWAL`, so they had no honest number and
+  // showed element/type only. These are PS's values.
+  //
+  // **Each is verified ONLY at the level Lady Huo actually casts** — Adoramus Lv10
+  // (20% rate) and Drain Life Lv3 of 5 (10% rate) — and she is the sole caster of
+  // either. Per-level scaling is NOT known, so these are deliberately flat rather
+  // than a `×lv` guessed from one data point (1400/10 and 750/3 both divide evenly,
+  // which is suggestive and not evidence). A test asserts that Lady Huo remains the
+  // only caster and that the levels are unchanged, so if a monsters.json
+  // regeneration introduces another caster or level the suite fails loudly — at
+  // which point get that level's real value instead of trusting these constants.
+  AB_ADORAMUS: () => 1400,   // Lv10 = 1400% MATK. Holy. number_of_hits is −10 = cosmetic, applied once.
+  WL_DRAINLIFE: () => 750,   // Lv3  =  750% MATK. Neutral. Also drains HP (not modelled).
   MG_FIREBALL: (lv) => 40 + 30 * lv,
   WZ_EARTHSPIKE: () => 140,
   WZ_HEAVENDRIVE: () => 140,

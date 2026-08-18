@@ -189,3 +189,42 @@ test("Dark Claw is priced from the PS profile at 100%/level over its 3 hits", ()
   assert.ok(dc, "Twinorc must still list Dark Claw");
   assert.strictEqual(dc.lv, 2);
 });
+
+test("Lady Huo's Adoramus and Drain Life are priced, and stay pinned to her cast levels", () => {
+  // Both are Renewal 3rd-job skills (Arch Bishop / Warlock) that no PS player can
+  // learn, so their formulas are behind #ifdef RENEWAL and they used to print no
+  // number. PS's values were supplied for the levels Lady Huo actually casts.
+  const profile = getProfile("payon_stories");
+  assert.strictEqual(profile.magic_ratios.AB_ADORAMUS(10), 1400);
+  assert.strictEqual(profile.magic_ratios.WL_DRAINLIFE(3), 750);
+
+  // magic_ratios (not MOB_SKILL_RATIOS) is what reports them as PS-exact.
+  for (const n of ["AB_ADORAMUS", "WL_DRAINLIFE"]) {
+    assert.ok(!(n in MOB_SKILL_RATIOS), `${n} would be flagged estimated there`);
+    assert.ok(!FLAT_UNMODELED_SKILLS.has(n), `${n} is no longer unmodeled`);
+  }
+
+  // The ratios are FLAT and verified at ONE level each, because Lady Huo is the only
+  // caster of either. If a monsters.json regeneration adds another caster, or moves
+  // her cast level, the flat constant silently becomes a fabricated number for that
+  // level — so fail here instead and go get the real value.
+  const db = require("../src/engine/data/pre-re/db/mob_skill_db.json");
+  const casters = { AB_ADORAMUS: [], WL_DRAINLIFE: [] };
+  for (const [mobId, list] of Object.entries(db)) {
+    for (const s of Array.isArray(list) ? list : []) {
+      if (s.name in casters) casters[s.name].push({ mobId, lv: s.lv });
+    }
+  }
+  assert.deepEqual(casters.AB_ADORAMUS, [{ mobId: "3049", lv: 10 }],
+    "only Lady Huo casts Adoramus, at Lv10 — the level 1400% was verified at");
+  assert.deepEqual(casters.WL_DRAINLIFE, [{ mobId: "3049", lv: 3 }],
+    "only Lady Huo casts Drain Life, at Lv3 — the level 750% was verified at");
+
+  // Adoramus carries a NEGATIVE number_of_hits (cosmetic multi-hit): the ratio is the
+  // whole skill and must be applied once, not ten times.
+  loader.setProfile(profile);
+  const ado = loader.getSkillByName("AB_ADORAMUS");
+  assert.ok(ado.number_of_hits[9] < 0, "negative = cosmetic, damage applied once");
+  assert.strictEqual(ado.attack_type, "Magic");
+  assert.strictEqual(ado.element[9], "Ele_Holy");
+});

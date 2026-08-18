@@ -178,11 +178,12 @@ const FLAT_UNMODELED_SKILLS = new Set([
   // RENEWAL` in battle.c and PS is pre-renewal, so whatever these do on PS is
   // custom and undocumented — kokotewa has no formula for them either (it returns
   // "Unknown skill" for SC_MAELSTROM). Element and type only, deliberately.
-  // NB GC_DARKCROW (Dark Claw) used to be in this list and is NOT any more: PS's
-  // value is 100×SkillLv per hit over the skill's 3 hits, and it now lives in
-  // PS_BF_WEAPON_RATIOS so it prices as PS-exact. The rest stay unpriced until
-  // someone supplies their PS numbers the same way.
-  "WL_CRIMSONROCK", "WL_DRAINLIFE", "RK_SONICWAVE", "AB_ADORAMUS",
+  // NB three have come OFF this list as their PS values were supplied, and now live
+  // in the profile ratio maps so they price as PS-exact rather than `estimated`:
+  // GC_DARKCROW (Dark Claw, 100×SkillLv per hit × 3 hits) in PS_BF_WEAPON_RATIOS,
+  // and AB_ADORAMUS (1400% MATK) + WL_DRAINLIFE (750% MATK) in PS_BF_MAGIC_RATIOS.
+  // The rest stay unpriced until someone supplies their PS numbers the same way.
+  "WL_CRIMSONROCK", "RK_SONICWAVE",
   "SO_CLOUD_KILL", "LG_RAYOFGENESIS", "SC_MAELSTROM",
   // Splash for the caster's current HP. In the data these are target:self /
   // dmg:false, so they never reach the damage path here anyway (kept for

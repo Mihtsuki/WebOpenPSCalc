@@ -986,8 +986,8 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
-- **Monster-cast 3rd-job skills: 4 of 5 still unpriced** [low–med] — `FLAT_UNMODELED_SKILLS` in
-  `mobSkillRatios.js` holds `WL_CRIMSONROCK`, `WL_DRAINLIFE`, `RK_SONICWAVE`, `AB_ADORAMUS`,
+- **Monster-cast 3rd-job skills: 5 still unpriced** [low–med] — `FLAT_UNMODELED_SKILLS` in
+  `mobSkillRatios.js` holds `WL_CRIMSONROCK`, `RK_SONICWAVE`,
   `SO_CLOUD_KILL`, `LG_RAYOFGENESIS`, `SC_MAELSTROM`. No PS player can learn them, but monsters
   cast them, and their vanilla formulas are behind `#ifdef RENEWAL` — so on a pre-renewal server
   whatever they do is custom and undocumented (the wiki's monster pages list a skill's level and
@@ -998,8 +998,17 @@ unmodeled — it needs the target to already carry that status.
   `PS_BF_WEAPON_RATIOS` rather than `MOB_SKILL_RATIOS` **on purpose**: the incoming path checks
   `profile.weapon_ratios` first and reports a hit there as PS-exact, while `MOB_SKILL_RATIOS`
   flags `estimated: true` (correct for a Hercules-baseline guess, wrong for a known PS value).
-  The `GC_` prefix keeps it out of the player skill picker regardless. The remaining seven unblock
-  the same way — one measured/quoted PS formula each, not code.
+  The `GC_` prefix keeps it out of the player skill picker regardless.
+  **`AB_ADORAMUS` and `WL_DRAINLIFE` came off the same day**, into `PS_BF_MAGIC_RATIOS` for the
+  same reason: **Adoramus 1400% MATK** (Holy; its `number_of_hits` is −10, i.e. cosmetic, so the
+  ratio is the whole skill and lands once) and **Drain Life 750% MATK** (Neutral; its HP drain is
+  not modelled). **Both are FLAT and verified at exactly one level** — Lady Huo (mob 3049) is the
+  sole caster of either, at Adoramus Lv10 and Drain Life Lv3. Per-level scaling is unknown and was
+  deliberately NOT guessed (1400/10 and 750/3 both divide evenly, which is suggestive, not
+  evidence). A test pins the caster-and-level set for both, so a `monsters.json` regeneration that
+  adds a caster or shifts a level fails loudly rather than letting a flat constant quietly become
+  a fabricated number at a level nobody verified.
+  The remaining five unblock the same way — one measured/quoted PS formula each, not code.
 - ~~**AM_SPHEREMINE (Sphere Mine)**~~ — **implemented 2026-08-17** (`_runSphereMineBranch`), gated on
   the `AM_SPHEREMINE_PS_FORMULA` flag. Player-requested in Discord alongside Acid Terror.
   `wiki.payonstories.com/Sphere_Mine`: **`1000 + 200 × SkillLv + 25 × Total VIT`**, Fire element,
