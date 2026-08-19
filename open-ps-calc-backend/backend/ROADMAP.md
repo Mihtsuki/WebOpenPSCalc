@@ -245,6 +245,18 @@ without re-auditing everything from scratch.
   no UI for), consumables, target selection, skill selection, and the
   damage breakdown — still not full parity (no combat-controls panel, no
   build-vs-build comparison).
+  **Performer stats closed a silent hole here (2026-08-17)**: `statusCalculator`
+  had always read the PERFORMER's stats and Lesson level per song
+  (`SC_POEMBRAGI_dex`, `SC_WHISTLE_agi`, …) but nothing ever wrote them, so every
+  song computed at stat 1 / Lesson 0 — the weakest possible Bard. The panel now
+  exposes one shared block per class (`bard_*` / `dancer_*` in `song_state`), which
+  each song falls back to via `performerStat`/`performerLesson`; the older per-song
+  keys still take precedence so pre-existing share URLs are unchanged. Also added
+  **Service for You**, which the engine implemented (Max SP + SP-cost cut, matching
+  the wiki's +25%/−50% at Lv10) but the picker never listed. Marked **beta**: the
+  wiki publishes each song's endpoints and says the performer's stats affect them,
+  but not the per-point rates — those are the pre-renewal emulator's
+  (`skill.c:13556` for Bragi), unverified against in-game numbers.
 - **Incoming damage from the target monster's *skills*** — _largely done_
   (`mobSkillRatios.js`, `resolveMobSkillDamage` in `routes/calculate.ts`,
   `components/SurvivabilityView.tsx`). A picked cast skill is priced through the

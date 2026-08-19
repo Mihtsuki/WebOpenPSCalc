@@ -1487,3 +1487,58 @@ test("Sphere Mine is flat 1000 + 200*lv + 25*total VIT, Fire, and skips DEF/size
   assert.equal(dmg(5, dh, { right_hand_card1: 4035 }).avg, dmg(5, dh).avg,
     "Hydra Card must not raise Sphere Mine");
 });
+
+// ---------------------------------------------------------------------------
+// Bard / Dancer songs scale with the PERFORMER, not the listener
+// ---------------------------------------------------------------------------
+test("song strength comes from the performer's stats and Lesson level", () => {
+  const { StatusCalculator } = require("../src/engine/calculators/statusCalculator");
+  const profile = getProfile("payon_stories");
+  const config = createBattleConfig();
+
+  const statusWith = (song) => {
+    const b = buildFromSaveSchema({
+      job_id: 7, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 60, vit: 50, int: 30, dex: 60, luk: 40 },
+      equipped: { right_hand: 1101 },
+      song_state: song,
+    });
+    const [gb, eff, weapon] = resolvePlayerState(b, config, profile);
+    return new StatusCalculator(config).calculate(eff, weapon, gb);
+  };
+
+  const songs = { SC_WHISTLE: 10, SC_FORTUNE: 10, SC_POEMBRAGI: 10, SC_HUMMING: 10 };
+
+  // Unset performer = the old silent default of stat 1 / Lesson 0. A Lv10 Whistle
+  // from a 1-AGI Bard is +10 flee; Bragi caps at its published −30% / −50%.
+  const bare = statusWith(songs);
+
+  // A real Bard/Dancer. Every one of these is a term the calculator used to ignore.
+  const real = statusWith({
+    ...songs,
+    bard_agi: 90, bard_luk: 80, bard_dex: 99, bard_int: 60, bard_lesson: 10,
+    dancer_dex: 90, dancer_luk: 90, dancer_lesson: 10,
+  });
+
+  assert.ok(real.flee > bare.flee, "Whistle: performer AGI + Musical Lesson raise flee");
+  assert.ok(real.flee2 > bare.flee2, "Whistle: performer LUK raises perfect dodge");
+  assert.ok(real.cri > bare.cri, "Fortune's Kiss: performer LUK + Dancing Lesson raise crit");
+  assert.ok(real.hit > bare.hit, "Humming: performer DEX + Dancing Lesson raise hit");
+
+  // Bragi, the one with published endpoints: 3%/lv cast (30% at Lv10) and 50% delay
+  // at Lv10, THEN + DEX/10 + 2×Lesson and + INT/5 + 2×Lesson.
+  // wiki.payonstories.com/A_Poem_of_Bragi
+  assert.strictEqual(bare.cast_time_reduction_pct, 30);
+  assert.strictEqual(bare.after_cast_delay_reduction_pct, 50);
+  assert.strictEqual(real.cast_time_reduction_pct, 30 + Math.floor(99 / 10) + 2 * 10);
+  assert.strictEqual(real.after_cast_delay_reduction_pct, 50 + Math.floor(60 / 5) + 2 * 10);
+
+  // A per-song override still beats the shared block, so share URLs written before
+  // the performer block keep computing exactly what they used to.
+  const override = statusWith({ SC_WHISTLE: 10, SC_WHISTLE_agi: 50, bard_agi: 90, bard_lesson: 10 });
+  const shared = statusWith({ SC_WHISTLE: 10, bard_agi: 90, bard_lesson: 10 });
+  assert.ok(override.flee < shared.flee, "SC_WHISTLE_agi 50 must win over bard_agi 90");
+
+  // A performer stat of 0 means "not filled in", not a 0-stat Bard.
+  assert.strictEqual(statusWith({ ...songs, bard_agi: 0 }).flee, bare.flee);
+});

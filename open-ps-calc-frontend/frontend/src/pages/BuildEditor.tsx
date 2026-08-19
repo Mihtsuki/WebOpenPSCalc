@@ -423,22 +423,60 @@ function partyBuffsFrom(source: string, jobId: number) {
   return PARTY_BUFFS.filter((b) => b.source === source && !partyBuffSupersededBySelf(b.key, jobId));
 }
 
+// `hint` becomes the field's tooltip, after the SC key. Keep the parenthetical in
+// `label` to a word or two — the picker is a narrow grid and these wrap — and put
+// any caveat (weapon restrictions, what exactly is boosted) in the hint instead.
 const SONG_BUFFS = [
-  { key: "SC_DRUMBATTLE", label: "Battle Theme (Drum)", max: 10 },
-  { key: "SC_NIBELUNGEN", label: "Ring of Nibelungen", max: 10 },
-  { key: "SC_ASSNCROS", label: "Assassin Cross of Sunset", max: 10 },
-  { key: "SC_HUMMING", label: "Humming", max: 10 },
-  { key: "SC_FORTUNE", label: "Fortune's Kiss", max: 10 },
+  { key: "SC_DRUMBATTLE", label: "Battle Theme (ATK + DEF)", max: 10, hint: "Ensemble. +(Lv+1)×25 weapon ATK and +(Lv+1)×2 DEF." },
+  { key: "SC_NIBELUNGEN", label: "Ring of Nibelungen (ATK)", max: 10, hint: "Ensemble. +(Lv+2)×25 weapon ATK — only with a level 4 weapon." },
+  { key: "SC_ASSNCROS", label: "Assassin Cross of Sunset (ASPD)", max: 10, hint: "Raises ASPD. No effect while a bow or gun is equipped." },
+  { key: "SC_HUMMING", label: "Humming (Hit)", max: 10, hint: "Raises Hit." },
+  { key: "SC_FORTUNE", label: "Fortune's Kiss (Crit)", max: 10, hint: "Raises critical rate." },
   // Reduces cast time + after-cast delay (skillTiming.js), not ASPD
   // directly -- only shows up in DPS when testing an actual skill, not a
   // normal attack, since normal-attack period is ASPD-only.
-  { key: "SC_POEMBRAGI", label: "A Poem of Bragi", max: 10 },
+  { key: "SC_POEMBRAGI", label: "A Poem of Bragi (Cast)", max: 10, hint: "Cuts cast time and after-cast delay. Only shows in DPS when a skill is selected — a normal attack's rate is ASPD-only." },
   // Defensive/utility Bard songs — statusCalculator.js applies these to the
   // character status (flee / perfect dodge / Max HP), so they show in the
   // combat-stat readout even though they don't change outgoing damage.
-  { key: "SC_WHISTLE", label: "A Whistle (Flee)", max: 10 },
-  { key: "SC_APPLEIDUN", label: "The Apple of Idun (Max HP)", max: 10 },
+  { key: "SC_WHISTLE", label: "A Whistle (Flee)", max: 10, hint: "Raises Flee and perfect dodge." },
+  { key: "SC_APPLEIDUN", label: "The Apple of Idun (Max HP)", max: 10, hint: "Raises Max HP by a percentage." },
+  { key: "SC_SERVICEFORYU", label: "Service for You (Max SP)", max: 10, hint: "Raises Max SP and cuts every skill's SP cost." },
 ] as const;
+
+// Every song scales with the PERFORMER's stats and Lesson level, not yours —
+// wiki.payonstories.com/A_Poem_of_Bragi: its reductions are "further affected by
+// the Bard's DEX and Musical Lesson level". These write into `song_state` next to
+// the song levels, and the engine falls back to them per song.
+// Split by class because a party's Bard and Dancer are two different characters.
+const BARD_SONG_KEYS = ["SC_DRUMBATTLE", "SC_NIBELUNGEN", "SC_ASSNCROS", "SC_POEMBRAGI", "SC_WHISTLE", "SC_APPLEIDUN"];
+const DANCER_SONG_KEYS = ["SC_HUMMING", "SC_FORTUNE", "SC_SERVICEFORYU"];
+
+// The stats get base-stat-style cards (short uppercase name, centred input). The
+// Lesson is a SKILL LEVEL, not a stat, so it keeps the ordinary labelled-field
+// shape the song levels use and stays out of the card row.
+type PerformerField = { key: string; label: string; max: number; hint: string };
+type PerformerSpec = { who: string; stats: PerformerField[]; lesson: PerformerField };
+const BARD_PERFORMER: PerformerSpec = {
+  who: "Bard",
+  stats: [
+    { key: "bard_agi", label: "AGI", max: 200, hint: "Bard's AGI — Assassin Cross of Sunset (ASPD) and A Whistle (Flee), +1 per 10 AGI" },
+    { key: "bard_dex", label: "DEX", max: 200, hint: "Bard's DEX — A Poem of Bragi's cast-time cut, +1% per 10 DEX" },
+    { key: "bard_int", label: "INT", max: 200, hint: "Bard's INT — A Poem of Bragi's after-cast delay cut, +1% per full 5 INT" },
+    { key: "bard_vit", label: "VIT", max: 200, hint: "Bard's VIT — The Apple of Idun's Max HP, +1% per 10 VIT" },
+    { key: "bard_luk", label: "LUK", max: 200, hint: "Bard's LUK — A Whistle's perfect dodge, +1 per 10 LUK" },
+  ],
+  lesson: { key: "bard_lesson", label: "Musical Lesson", max: 10, hint: "BA_MUSICALLESSON — adds to every Bard song above" },
+};
+const DANCER_PERFORMER: PerformerSpec = {
+  who: "Dancer",
+  stats: [
+    { key: "dancer_dex", label: "DEX", max: 200, hint: "Dancer's DEX — Humming's Hit bonus, +1 per 10 DEX" },
+    { key: "dancer_int", label: "INT", max: 200, hint: "Dancer's INT — Service for You's Max SP and SP-cost cut, +1% per 10 INT" },
+    { key: "dancer_luk", label: "LUK", max: 200, hint: "Dancer's LUK — Fortune's Kiss crit, +1 per 10 LUK" },
+  ],
+  lesson: { key: "dancer_lesson", label: "Dancing Lesson", max: 10, hint: "DC_DANCINGLESSON — adds to every Dancer song above" },
+};
 
 // Passive skills and buffs that add to flat base stats.
 // SC_CONCENTRATION is a % of current AGI/DEX — approximated using pre-bonus
@@ -2566,6 +2604,12 @@ export default function BuildEditor() {
               // computes it for those jobs, so gate the selector to match.
               const isSageLine = [16, 4017].includes(data.job_id);
               const autoSpellLv = Number(supportBuffs.auto_spell_lv || 0);
+              // Performer stats only matter once a song is actually running, so each
+              // block appears with the first song of that class — and doubles as a
+              // reminder of which performer owns which song.
+              const songState = data.song_state || {};
+              const hasBardSong = BARD_SONG_KEYS.some((k) => Number(songState[k] || 0) > 0);
+              const hasDancerSong = DANCER_SONG_KEYS.some((k) => Number(songState[k] || 0) > 0);
               return (
                 <>
                   {!hasSelfSection ? (
@@ -2775,7 +2819,7 @@ export default function BuildEditor() {
                   <div className="passive-grid">
                     {SONG_BUFFS.map((b) => (
                       <div className="field" key={b.key}>
-                        <label title={b.key}>{b.label}</label>
+                        <label title={`${b.key}${b.hint ? ` — ${b.hint}` : ""}`}>{b.label}</label>
                         <input
                           className="mono"
                           type="number"
@@ -2788,6 +2832,61 @@ export default function BuildEditor() {
                       </div>
                     ))}
                   </div>
+
+                  {(hasBardSong || hasDancerSong) && (
+                    <>
+                      <div
+                        className="buff-section-header"
+                        title="A song's strength comes from the performer's stats, not yours. Left blank, each is treated as 1 — the weakest possible performer."
+                      >
+                        Performer stats
+                        <span
+                          className="beta-badge"
+                          title="Beta — the PS wiki confirms each song's published endpoints (Bragi −30% cast / −50% delay at Lv10, Service for You +25% MaxSP / −50% SP cost) and states that the performer's stats and Lesson level affect them, but it does not publish the per-point rates. Those come from the pre-renewal emulator, so the totals in between are unverified against in-game numbers."
+                        >
+                          beta
+                        </span>
+                      </div>
+                      {([
+                        [BARD_PERFORMER, hasBardSong],
+                        [DANCER_PERFORMER, hasDancerSong],
+                      ] as const).map(([perf, show]) => show && (
+                        <div className="buff-group" key={perf.who}>
+                          <span className="buff-group-label">{perf.who}</span>
+                          <div className="perf-stat-grid">
+                            {perf.stats.map((f) => (
+                              <div className="perf-stat-card" key={f.key} title={f.hint}>
+                                <div className="perf-stat-name">{f.label}</div>
+                                <input
+                                  className="mono"
+                                  type="number"
+                                  min={0}
+                                  max={f.max}
+                                  value={data.song_state?.[f.key] ?? 0}
+                                  onFocus={(e) => e.target.select()}
+                                  onChange={(e) => updateBuffField("song_state", f.key, Math.max(0, Math.min(f.max, Number(e.target.value))))}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="passive-grid perf-lesson-row">
+                            <div className="field">
+                              <label title={perf.lesson.hint}>{perf.lesson.label}</label>
+                              <input
+                                className="mono"
+                                type="number"
+                                min={0}
+                                max={perf.lesson.max}
+                                value={data.song_state?.[perf.lesson.key] ?? 0}
+                                onFocus={(e) => e.target.select()}
+                                onChange={(e) => updateBuffField("song_state", perf.lesson.key, Math.max(0, Math.min(perf.lesson.max, Number(e.target.value))))}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
 
                   <div className="buff-section-header">Clan</div>
                   <div className="passive-grid">

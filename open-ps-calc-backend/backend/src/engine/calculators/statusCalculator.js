@@ -18,6 +18,33 @@ const ADRENALINE_WEAPONS = new Set(["1HAxe", "2HAxe", "Mace", "2HMace"]);
 const BOW_GUN_WEAPONS = new Set(["Bow", "Revolver", "Rifle", "Gatling", "Shotgun", "Grenade"]);
 const TF_MISS_JOBL2 = new Set([12, 17, 4013, 4018]);
 const DUAL_WIELD_JOBS = new Set([12, 4013]);
+// A song's strength scales with the PERFORMER's stats and Lesson level, not the
+// listener's — wiki.payonstories.com/A_Poem_of_Bragi: its reductions are "further
+// affected by the Bard's DEX and Musical Lesson level". Those inputs live in
+// `song_state` alongside the song levels.
+//
+// Two shapes are supported, in this precedence order:
+//   1. a per-song override  (`SC_POEMBRAGI_dex`)  — the original shape; share URLs
+//      written before the performer block existed still carry these, so they win;
+//   2. the shared performer block (`bard_dex` / `dancer_luk`, `bard_lesson` /
+//      `dancer_lesson`) — one Bard and one Dancer, which is how a party actually
+//      works, instead of restating the same stat on every song;
+//   3. the old silent default — stat 1, Lesson 0.
+// Everything here reads `song_state`, which `buildFromSaveSchema` passes through
+// verbatim, so no save-schema change was needed for the new keys.
+function performerStat(song, songKey, stat, sharedKey) {
+  const perSong = song[`${songKey}_${stat}`];
+  if (perSong != null && perSong !== "") return Number(perSong) || 1;
+  const shared = song[sharedKey];
+  if (shared != null && shared !== "") return Number(shared) || 1;
+  return 1;
+}
+function performerLesson(song, songKey, sharedKey) {
+  const perSong = song[`${songKey}_lesson`];
+  if (perSong != null && perSong !== "") return Number(perSong) || 0;
+  return Number(song[sharedKey] || 0);
+}
+
 const DELUGE_EFF = [5, 9, 12, 14, 15];
 const PS_VG_FLEE = [3, 8, 15];
 const PS_VOL_MATK_PCT = [2, 4, 6];
@@ -398,8 +425,8 @@ class StatusCalculator {
     const song = build.song_state;
     if (song.SC_ASSNCROS && !BOW_GUN_WEAPONS.has(weapon.weapon_type)) {
       const songLv = Number(song.SC_ASSNCROS);
-      const musLv = Number(song.SC_ASSNCROS_lesson || 0);
-      const sAgi = Number(song.SC_ASSNCROS_agi ?? 1);
+      const musLv = performerLesson(song, "SC_ASSNCROS", "bard_lesson");
+      const sAgi = performerStat(song, "SC_ASSNCROS", "agi", "bard_agi");
       const val2 = (Math.floor(musLv / 2) + 10 + songLv + Math.floor(sAgi / 10)) * 10;
       scAspdMax = Math.max(scAspdMax, val2);
     }
@@ -580,9 +607,9 @@ class StatusCalculator {
     // === BARD SONGS ===
     if (song.SC_WHISTLE) {
       const songLv = Number(song.SC_WHISTLE);
-      const musLv = Number(song.SC_WHISTLE_lesson || 0);
-      const sAgi = Number(song.SC_WHISTLE_agi ?? 1);
-      const sLuk = Number(song.SC_WHISTLE_luk ?? 1);
+      const musLv = performerLesson(song, "SC_WHISTLE", "bard_lesson");
+      const sAgi = performerStat(song, "SC_WHISTLE", "agi", "bard_agi");
+      const sLuk = performerStat(song, "SC_WHISTLE", "luk", "bard_luk");
       const whistleFlee = songLv + Math.floor(sAgi / 10) + musLv;
       const whistleFlee2 = (Math.floor((songLv + 1) / 2) + Math.floor(sLuk / 10) + musLv) * 10;
       status.flee += whistleFlee;
@@ -591,8 +618,8 @@ class StatusCalculator {
 
     if (song.SC_APPLEIDUN) {
       const songLv = Number(song.SC_APPLEIDUN);
-      const musLv = Number(song.SC_APPLEIDUN_lesson || 0);
-      const sVit = Number(song.SC_APPLEIDUN_vit ?? 1);
+      const musLv = performerLesson(song, "SC_APPLEIDUN", "bard_lesson");
+      const sVit = performerStat(song, "SC_APPLEIDUN", "vit", "bard_vit");
       const val2 = 5 + 2 * songLv + Math.floor(sVit / 10) + musLv;
       status.max_hp += Math.floor(status.max_hp * val2 / 100);
     }
@@ -605,35 +632,45 @@ class StatusCalculator {
 
     if (song.SC_POEMBRAGI) {
       const songLv = Number(song.SC_POEMBRAGI);
-      const musLv = Number(song.SC_POEMBRAGI_lesson || 0);
-      const sDex = Number(song.SC_POEMBRAGI_dex ?? 1);
-      const sInt = Number(song.SC_POEMBRAGI_int ?? 1);
-      status.cast_time_reduction_pct = 3 * songLv + Math.floor(sDex / 10) + 2 * musLv;
-      status.after_cast_delay_reduction_pct = (songLv < 10 ? 3 * songLv : 50) + Math.floor(sInt / 5) + 2 * musLv;
+      const musLv = performerLesson(song, "SC_POEMBRAGI", "bard_lesson");
+      const sDex = performerStat(song, "SC_POEMBRAGI", "dex", "bard_dex");
+      const sInt = performerStat(song, "SC_POEMBRAGI", "int", "bard_int");
+      // skill.c:13556 (BA_POEMBRAGI), verbatim:
+      //   val1 = 3 * skill_lv + st->dex / 10;                        // cast time
+      //   val2 = (skill_lv < 10 ? 3 * skill_lv : 50) + st->int_ / 5; // after-cast delay
+      //   val1 += 2 * MusicalLesson;  val2 += 2 * MusicalLesson;
+      // i.e. at Bragi 10 + Musical Lesson 10 the delay cut is 50 + 20 + 1% per FULL
+      // 5 INT (integer division — INT 9 is still only +1). The "50 at level 10" jump
+      // is the documented quirk, matching the wiki's -3%/lv → -50% endpoints.
+      // Capped at 100: a >100% reduction is not a meaningful readout. skillTiming
+      // already floors the resulting delay at MIN_SKILL_DELAY_MS, so this only
+      // affects the reported percentage, never the timing.
+      status.cast_time_reduction_pct = Math.min(100, 3 * songLv + Math.floor(sDex / 10) + 2 * musLv);
+      status.after_cast_delay_reduction_pct = Math.min(100, (songLv < 10 ? 3 * songLv : 50) + Math.floor(sInt / 5) + 2 * musLv);
     }
 
     if ("SC_PS_HYPOTHERMIA" in playerScs) status.cast_time_penalty_pct += 20;
 
     if (song.SC_HUMMING) {
       const songLv = Number(song.SC_HUMMING);
-      const danceLv = Number(song.SC_HUMMING_lesson || 0);
-      const sDex = Number(song.SC_HUMMING_dex ?? 1);
+      const danceLv = performerLesson(song, "SC_HUMMING", "dancer_lesson");
+      const sDex = performerStat(song, "SC_HUMMING", "dex", "dancer_dex");
       const humHit = 2 * songLv + Math.floor(sDex / 10) + danceLv;
       status.hit += humHit;
     }
 
     if (song.SC_FORTUNE) {
       const songLv = Number(song.SC_FORTUNE);
-      const danceLv = Number(song.SC_FORTUNE_lesson || 0);
-      const sLuk = Number(song.SC_FORTUNE_luk ?? 1);
+      const danceLv = performerLesson(song, "SC_FORTUNE", "dancer_lesson");
+      const sLuk = performerStat(song, "SC_FORTUNE", "luk", "dancer_luk");
       const fortuneCri = (10 + songLv + Math.floor(sLuk / 10) + danceLv) * 10;
       status.cri += fortuneCri;
     }
 
     if (song.SC_SERVICEFORYU) {
       const songLv = Number(song.SC_SERVICEFORYU);
-      const danceLv = Number(song.SC_SERVICEFORYU_lesson || 0);
-      const sInt = Number(song.SC_SERVICEFORYU_int ?? 1);
+      const danceLv = performerLesson(song, "SC_SERVICEFORYU", "dancer_lesson");
+      const sInt = performerStat(song, "SC_SERVICEFORYU", "int", "dancer_int");
       const val2 = 15 + songLv + Math.floor(sInt / 10) + Math.floor(danceLv / 2);
       const val3 = 20 + 3 * songLv + Math.floor(sInt / 10) + Math.floor(danceLv / 2);
       status.max_sp += Math.floor(status.max_sp * val2 / 100);

@@ -605,6 +605,31 @@ label {
 .ro-stat-bonus--buff  { color: var(--accent); }
 .ro-stat-bonus--manual { color: var(--text-dim); }
 .ro-stat-cost { font-family: var(--mono); font-size: 0.65rem; color: var(--text-faint); margin-top: 0.2rem; }
+
+/* Performer stats reuse the base-stat card shape — same raised panel, soft border
+   and centred layout — at a smaller scale, so a six-field Bard row fits inside the
+   buff panel without dominating it. No big total line: unlike a base stat, the
+   number you type IS the value, so a total above the input would just repeat it. */
+.perf-stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 0.4rem; }
+.perf-stat-card {
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.3rem;
+  text-align: center;
+  min-width: 0;
+}
+.perf-stat-name {
+  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-dim); margin-bottom: 0.25rem; white-space: nowrap;
+}
+.perf-stat-card input[type="number"] {
+  width: 100%; min-width: 0; text-align: center;
+  padding: 0.25rem 0.2rem; font-size: 0.85rem;
+}
+/* Musical / Dancing Lesson is a skill LEVEL, not a stat, so it sits below the stat
+   cards as an ordinary labelled field — the same shape the song levels use. */
+.perf-lesson-row { margin-top: 0.45rem; }
 .stat-pts-counter { margin-left: auto; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.45rem; }
 .stat-pts-counter--low  { color: var(--accent); }
 .stat-pts-counter--over { color: var(--crit); }
@@ -655,6 +680,22 @@ label {
   padding-bottom: 0.3rem; margin-top: 1rem; margin-bottom: 0.5rem;
 }
 .buff-section-header:first-child { margin-top: 0; }
+
+/* "beta" marker for a section whose numbers aren't fully confirmed in game yet.
+   Deliberately muted rather than --accent: gold reads as a damage figure here, and
+   this is a caveat, not a readout. */
+.beta-badge {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+  cursor: help;
+}
 
 .buff-group { margin-top: 0.6rem; }
 .buff-group + .buff-group { margin-top: 1rem; }

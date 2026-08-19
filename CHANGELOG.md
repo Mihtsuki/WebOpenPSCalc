@@ -9,6 +9,32 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Bard and Dancer songs now take the performer's stats.** A song's strength comes from the
+  *performer*, not from you — and the calculator had been treating every one as if it came from a
+  Bard with 1 in every stat and no Lesson, which is the weakest possible version of each. Turn on
+  any song and a **Performer stats** block appears where you enter the Bard's and Dancer's stats
+  and their Musical / Dancing Lesson level. It shows only the stats that matter, and only for the
+  class whose songs you actually have running.
+
+  On a Lv99 character with Whistle, Fortune's Kiss, Bragi and Humming at 10, filling in a real
+  performer moves flee 171 → 190, crit 356 → 546, and Bragi's after-cast delay cut from −50% to
+  −82%. **A Poem of Bragi** at Lv10 with Musical Lesson 10 is −50%, −20%, and −1% per full 5 of
+  the Bard's INT — so a 30-INT Bard leaves you at 24% delay and a 99-INT one at 11%.
+
+  Marked **beta**: the wiki confirms each song's published endpoints and says the performer's
+  stats and Lesson affect them, but it doesn't publish the per-point rates, so the totals in
+  between aren't verified against in-game numbers yet.
+
+- **Service for You is now in the song list.** It raises Max SP and cuts every skill's SP cost
+  (+25% / −50% at Lv10) and was already fully modelled — it simply had no entry in the picker, so
+  there was no way to switch it on.
+
+- **Every song now says what it does.** Battle Theme (ATK + DEF), Ring of Nibelungen (ATK),
+  Assassin Cross of Sunset (ASPD), Humming (Hit), Fortune's Kiss (Crit) and A Poem of Bragi (Cast)
+  join the ones that already did. Hovering any of them explains the catch where there is one —
+  Nibelungen only works with a level 4 weapon, Assassin Cross does nothing while you hold a bow
+  or gun, and Bragi only moves DPS when you have a skill selected.
+
 - **Lady Huo's two big spells now show damage numbers.** Both were listed as "can't be modelled":
   **Adoramus** hits for **1400% MATK** as **Holy** — so Holy resistance is the counter, and against
   a Lv99 Swordsman in a Cotton Shirt it lands around **13,600** — and **Drain Life** for **750%

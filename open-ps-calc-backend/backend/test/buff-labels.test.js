@@ -74,6 +74,10 @@ const BUFF_SKILL = {
   SC_POEMBRAGI: "BA_POEMBRAGI",               // A Poem of Bragi
   SC_WHISTLE: "BA_WHISTLE",                   // A Whistle
   SC_APPLEIDUN: "BA_APPLEIDUN",               // The Apple of Idun
+  // NB the vanilla `description` for this one is the TRANS name, "Gypsy's Kiss";
+  // getSkillDisplayName under the PS profile resolves it to "Service for You",
+  // which is what wiki.payonstories.com/Service_for_You calls it for a Dancer.
+  SC_SERVICEFORYU: "DC_SERVICEFORYOU",        // Service for You
 };
 
 // Buffs whose label is DELIBERATELY not the DB name (PS wiki uses a different
