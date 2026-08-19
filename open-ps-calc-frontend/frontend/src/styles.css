@@ -268,6 +268,28 @@ label {
 /* Ko-fi's form is ~680px tall; the pane scrolls it on short viewports. The top
    padding gives the embedded cover image breathing room below our header. */
 .kofi-modal-frame { flex: 1; min-height: 0; overflow-y: auto; background: #f9f9f9; padding-top: 10px; }
+/* The iframe fills the pane rather than carrying a hardcoded 680px height, which
+   was taller than a phone viewport and produced a scrollbox inside a scrollbox.
+   min-height keeps the form usable on a short desktop window, where the pane can
+   scroll it as before. */
+.kofi-iframe { border: none; width: 100%; height: 100%; min-height: 420px; display: block; }
+/* Shown in place of the iframe when the embed is blocked (see KofiModal). Styled
+   on the pane's light background, not the app's dark panel. */
+.kofi-fallback { padding: 1.4rem 1.2rem; text-align: center; color: #2b2b2b; font-family: inherit; }
+.kofi-fallback-title { margin: 0 0 .35rem; font-weight: 600; font-size: .95rem; }
+.kofi-fallback-sub { margin: 0 0 1rem; font-size: .82rem; line-height: 1.5; color: #5a5a5a; }
+.kofi-fallback-cta {
+  display: inline-block; padding: .6rem 1.1rem; border-radius: 6px;
+  background: var(--accent); color: var(--on-accent);
+  font-weight: 700; font-size: .9rem; text-decoration: none;
+}
+.kofi-fallback-cta:hover { filter: brightness(1.08); }
+.kofi-modal-foot {
+  flex-shrink: 0; padding: .55rem 1.2rem; border-top: 1px solid var(--border-soft);
+  text-align: center; font-size: .76rem;
+}
+.kofi-modal-foot a { color: var(--text-dim); text-decoration: none; }
+.kofi-modal-foot a:hover { color: var(--link); text-decoration: underline; }
 
 .topbar {
   display: flex;

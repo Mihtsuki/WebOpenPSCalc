@@ -7,6 +7,15 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-17
 
+### Fixed
+
+- **The support form failed silently for some people.** The Ko-fi form is embedded from another
+  site, and privacy extensions, Brave shields, Firefox's strict mode and Safari all block that kind
+  of embed — so instead of a form you got a blank white box with no way forward. It now detects
+  that and offers a direct "Open Ko-fi in a new tab" link, and there's a permanent one at the
+  bottom of the panel regardless. The form also sizes itself to the window now instead of being a
+  fixed 680px, which on a phone meant scrolling a box inside a box.
+
 ### Added
 
 - **Links to the site now show a preview card everywhere.** Sharing a build guide or a mechanics

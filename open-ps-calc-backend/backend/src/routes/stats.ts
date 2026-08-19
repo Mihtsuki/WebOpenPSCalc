@@ -37,6 +37,31 @@ function checkPassword(req: Request, res: Response): boolean {
 }
 
 // Read NDJSON event log and return events in [fromTs, toTs].
+// Country names come from ip-api.com, which has renamed some countries over the
+// years — so rows logged months apart can name the same place differently and
+// show up as two rows in the panel. Observed live: "The Netherlands" (464) and
+// "Netherlands" (222) listed separately, which also pushed the combined 686 out
+// of its real rank. Normalising at READ time fixes the whole history without
+// rewriting any stored events, and keeps working if ip-api renames another one.
+const COUNTRY_ALIASES: Record<string, string> = {
+  "the netherlands": "Netherlands",
+  "holland": "Netherlands",
+  "united states of america": "United States",
+  "usa": "United States",
+  "czech republic": "Czechia",
+  "republic of korea": "South Korea",
+  "korea (republic of)": "South Korea",
+  "russian federation": "Russia",
+  "viet nam": "Vietnam",
+  "the philippines": "Philippines",
+  "united kingdom of great britain and northern ireland": "United Kingdom",
+};
+function normalizeCountry(raw: unknown): string {
+  const name = String(raw || "").trim();
+  if (!name) return "Unknown";
+  return COUNTRY_ALIASES[name.toLowerCase()] || name;
+}
+
 function readNdjsonEvents(fromTs: number, toTs: number): any[] {
   if (!fs.existsSync(STATS_FILE)) return [];
   const lines = fs.readFileSync(STATS_FILE, "utf8").split("\n").filter(Boolean);
@@ -138,14 +163,23 @@ router.get("/data", async (req: Request, res: Response) => {
     if (e.ip) uniqueIps.add(e.ip);
     const day = new Date(e.ts).toISOString().slice(0, 10);
     if (!byDay[day]) byDay[day] = { date: day, views: 0, calcs: 0 };
-    const country = e.country || "Unknown";
-    countryCounts[country] = (countryCounts[country] || 0) + 1;
-    const region = e.region || "Unknown";
-    (regionsByCountry[country] ||= {})[region] = (regionsByCountry[country][region] || 0) + 1;
 
     if (e.type === "page_view") {
       totalViews++;
       byDay[day].views++;
+      // Country/region are counted PER PAGE VIEW, exactly like browser/OS/device
+      // below. They used to be counted for every event in `allEvents`, which also
+      // holds `calculate` events — so the panel summed to page views PLUS calcs
+      // (~12.9k against 5.06k views over 30 days) while the OS panel next to it
+      // summed to page views alone. Two panels labelled "Visitors by …" with
+      // different denominators cannot be read against each other, and the country
+      // one was really "activity by country": a single visitor who recalculated
+      // fifty times outweighed fifty visitors who looked once.
+      const country = normalizeCountry(e.country);
+      countryCounts[country] = (countryCounts[country] || 0) + 1;
+      const region = e.region || "Unknown";
+      (regionsByCountry[country] ||= {})[region] = (regionsByCountry[country][region] || 0) + 1;
+
       const { browser, os, device } = parseUserAgent(e.ua || "");
       browserCounts[browser] = (browserCounts[browser] || 0) + 1;
       osCounts[os] = (osCounts[os] || 0) + 1;
