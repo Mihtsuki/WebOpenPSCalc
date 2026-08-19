@@ -22,6 +22,65 @@
         "isAccessibleForFree": true
       }
     </script>
+    <!-- The site itself, so the two hub pages are discoverable as part of one work
+         rather than three unrelated documents. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Open PS Calc",
+        "alternateName": "Payon Stories Damage Calculator",
+        "url": "https://openpscalc.com/",
+        "inLanguage": "en",
+        "publisher": { "@type": "Organization", "name": "Open PS Calc", "url": "https://openpscalc.com/" },
+        "hasPart": [
+          { "@type": "CollectionPage", "name": "Payon Stories build guides", "url": "https://openpscalc.com/guides.html" },
+          { "@type": "CollectionPage", "name": "Payon Stories mechanics reference", "url": "https://openpscalc.com/mechanics.html" }
+        ]
+      }
+    </script>
+    <!-- Every guide and mechanics page carries an FAQPage; the home page — the one
+         that actually ranks for "payon stories damage calculator" — did not. These
+         answer the questions the tool is genuinely asked, and each is answerable
+         from the page's own visible content. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Open PS Calc official?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. It is an unofficial, free, fan-made community project, not affiliated with or endorsed by Payon Stories." }
+          },
+          {
+            "@type": "Question",
+            "name": "Which classes does the Payon Stories damage calculator support?",
+            "acceptedAnswer": { "@type": "Answer", "text": "All 16 base and second-job classes, including Gunslinger, Ninja and Super Novice. Transcendent and third-job classes are out of scope, because Payon Stories is a pre-renewal server." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does it model Payon Stories' reworked skills, or vanilla Ragnarok Online?",
+            "acceptedAnswer": { "@type": "Answer", "text": "The server's own reworks. Formulas follow the Payon Stories wiki and the class-rework notes — Asura Strike, Grand Cross, Reflect Shield, the Hunter traps, Acid Terror and the rest all use the server's values, not vanilla pre-renewal ones. Where the server matches vanilla, the vanilla formula is used and marked as such." }
+          },
+          {
+            "@type": "Question",
+            "name": "What does the calculator do when it cannot model something?",
+            "acceptedAnswer": { "@type": "Answer", "text": "It says so instead of showing a number. A skill whose Payon Stories formula is not documented is shown with its element and type but no damage figure, and a vanilla fallback is flagged in the breakdown, so a fabricated number is never presented as a real one." }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I share a build with someone else?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. The whole build — stats, gear, cards, skill, buffs and target — is encoded in the page URL, so copying the address bar shares the exact build. No account or sign-in is needed." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does it show how the damage number was reached?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Every result is a step-by-step breakdown — base damage, skill ratio, defence, masteries, element and cards, in the order the server applies them — alongside ASPD, cast and hit breakpoints, time-to-kill against any monster, and incoming damage for survivability." }
+          }
+        ]
+      }
+    </script>
 
     <!-- Favicons & app icons (served from /public) -->
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -62,6 +121,10 @@
       #seo-hero ul { list-style: none; padding: 0; margin: .25rem 0; display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; justify-content: center; max-width: 700px; color: #9a9fb0; font-size: .9rem; }
       #seo-hero .seo-load { color: #5d6276; font-size: .85rem; }
       #seo-hero a { color: #8fb4d9; }
+      #seo-faq { max-width: 700px; margin: 0 auto; padding: 0 2rem 3rem; background: #12141c; color: #9a9fb0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; }
+      #seo-faq h2 { font-size: 1.1rem; color: #e8e6df; border-bottom: 1px solid #2a2f40; padding-bottom: .3rem; }
+      #seo-faq h3 { font-size: .95rem; color: #e8e6df; margin: 1.2rem 0 .2rem; }
+      #seo-faq p { margin: 0; }
     </style>
   </head>
   <body>
@@ -81,6 +144,31 @@
         <p style="margin:.25rem 0"><a href="/mechanics.html">How Payon Stories damage actually works →</a></p>
         <p class="seo-load">Loading the calculator…</p>
         <p style="font-size:.8rem;color:#5d6276">Unofficial fan project · <a href="https://discord.gg/payonstories" rel="noopener">Payon Stories Discord</a></p>
+      </div>
+      <!-- Visible counterpart of the FAQPage JSON-LD above. Structured data has to
+           be backed by content on the page, and React replaces #root on mount — so
+           this is what crawlers, answer engines and no-JS visitors actually read.
+           Keep the wording here and in the JSON-LD in step. -->
+      <div id="seo-faq">
+        <h2>Payon Stories damage calculator — common questions</h2>
+
+        <h3>Is Open PS Calc official?</h3>
+        <p>No. It is an unofficial, free, fan-made community project, not affiliated with or endorsed by Payon Stories.</p>
+
+        <h3>Which classes does the Payon Stories damage calculator support?</h3>
+        <p>All 16 base and second-job classes, including Gunslinger, Ninja and Super Novice. Transcendent and third-job classes are out of scope, because Payon Stories is a pre-renewal server.</p>
+
+        <h3>Does it model Payon Stories' reworked skills, or vanilla Ragnarok Online?</h3>
+        <p>The server's own reworks. Formulas follow the Payon Stories wiki and the class-rework notes — Asura Strike, Grand Cross, Reflect Shield, the Hunter traps, Acid Terror and the rest all use the server's values, not vanilla pre-renewal ones. Where the server matches vanilla, the vanilla formula is used and marked as such.</p>
+
+        <h3>What does the calculator do when it cannot model something?</h3>
+        <p>It says so instead of showing a number. A skill whose Payon Stories formula is not documented is shown with its element and type but no damage figure, and a vanilla fallback is flagged in the breakdown, so a fabricated number is never presented as a real one.</p>
+
+        <h3>Can I share a build with someone else?</h3>
+        <p>Yes. The whole build — stats, gear, cards, skill, buffs and target — is encoded in the page URL, so copying the address bar shares the exact build. No account or sign-in is needed.</p>
+
+        <h3>Does it show how the damage number was reached?</h3>
+        <p>Yes. Every result is a step-by-step breakdown — base damage, skill ratio, defence, masteries, element and cards, in the order the server applies them — alongside ASPD, cast and hit breakpoints, time-to-kill against any monster, and incoming damage for survivability.</p>
       </div>
     </div>
     <noscript>

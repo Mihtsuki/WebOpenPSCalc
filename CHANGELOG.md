@@ -9,6 +9,17 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Links to the site now show a preview card everywhere.** Sharing a build guide or a mechanics
+  page in Discord, on X or anywhere else produced a bare link, because only the home page carried
+  the tags that generate a preview. All 30 guide and mechanics pages now have them, so a shared
+  link shows its title, description and icon.
+
+- **The home page answers common questions directly.** It now carries a short FAQ — whether the
+  calculator is official, which classes it covers, whether it models Payon Stories' reworks or
+  vanilla, what it does when it can't model something, and how build sharing works — as readable
+  text and as structured data, so search engines and AI assistants can quote it accurately instead
+  of guessing. The same answers were added to the machine-readable site summary.
+
 - **Bard and Dancer songs now take the performer's stats.** A song's strength comes from the
   *performer*, not from you — and the calculator had been treating every one as if it came from a
   Bard with 1 in every stat and no Lesson, which is the weakest possible version of each. Turn on

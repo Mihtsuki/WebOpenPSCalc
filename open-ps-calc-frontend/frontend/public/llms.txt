@@ -44,6 +44,15 @@ calculator implements and what it was verified against.
 - [Gunslinger — Desperado](https://openpscalc.com/guides/gunslinger-desperado.html): The revolver Desperado Gunslinger — a rapid multi-hit AoE that scales primarily with DEX. Max DEX for damage, mid INT for the SP to keep firing, and the rest in VIT for survivability while you burst a gathered mob down.
 - [Ninja — Throwing (DEX)](https://openpscalc.com/guides/ninja-throwing.html): The Throwing Ninja, hurling Huuma Shuriken for heavy ranged AoE. Throwing is a physical hit, so STR is the primary damage stat alongside DEX for hit and consistency, with INT feeding the SP for sustained throwing. A strong, mobile ranged nuker.
 
+## Frequently asked questions
+Answers are kept in step with the FAQ shown on the home page and its FAQPage structured data.
+- **Is Open PS Calc official?** No. It is an unofficial, free, fan-made community project, not affiliated with or endorsed by Payon Stories.
+- **Which classes does the Payon Stories damage calculator support?** All 16 base and second-job classes, including Gunslinger, Ninja and Super Novice. Transcendent and third-job classes are out of scope, because Payon Stories is a pre-renewal server.
+- **Does it model Payon Stories' reworked skills, or vanilla Ragnarok Online?** The server's own reworks. Formulas follow the Payon Stories wiki and the class-rework notes — Asura Strike, Grand Cross, Reflect Shield, the Hunter traps, Acid Terror and the rest all use the server's values, not vanilla pre-renewal ones. Where the server matches vanilla, the vanilla formula is used and marked as such.
+- **What does the calculator do when it cannot model something?** It says so instead of showing a number. A skill whose Payon Stories formula is not documented is shown with its element and type but no damage figure, and a vanilla fallback is flagged in the breakdown, so a fabricated number is never presented as a real one.
+- **Can I share a build with someone else?** Yes. The whole build — stats, gear, cards, skill, buffs and target — is encoded in the page URL, so copying the address bar shares the exact build. No account or sign-in is needed.
+- **Does it show how the damage number was reached?** Yes. Every result is a step-by-step breakdown — base damage, skill ratio, defence, masteries, element and cards, in the order the server applies them — alongside ASPD, cast and hit breakpoints, time-to-kill against any monster, and incoming damage for survivability.
+
 ## About
 - Pre-renewal mechanics only (no 3rd-job / homunculus / renewal formulas).
 - Formulas follow the Payon Stories wiki and class-rework notes; the calculator is honest about what it can't yet model rather than showing fabricated numbers.
