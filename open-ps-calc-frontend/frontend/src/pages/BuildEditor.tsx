@@ -1437,9 +1437,15 @@ export default function BuildEditor() {
         if (equippedId == null) continue; // slot is empty — skip
         for (let i = 1; i <= 4; i++) delete equippedOverride[`${slotKey}_card${i}`];
         const stored = data.wildcard_slots?.[slotKey] || [];
-        // Weapon's real slot count; fall back to stored length if the item's
-        // data hasn't loaded into the cache yet (so nothing is dropped mid-switch).
-        const slotCount = (itemCache[equippedId]?.slots ?? 0) || stored.length;
+        // Weapon's real slot count; fall back to the stored length ONLY while the
+        // item's data hasn't reached the cache yet, so nothing is dropped mid-switch.
+        // This used to be `(cached?.slots ?? 0) || stored.length`, which could not
+        // tell "not loaded yet" from "loaded, and it genuinely has zero slots": an
+        // unslotted weapon has slots === 0, which is falsy, so `||` fell through to
+        // the stale rows from the PREVIOUS weapon and kept applying its wildcards.
+        // Presence in the cache is the real signal, so test that instead.
+        const cached = itemCache[equippedId];
+        const slotCount = cached ? (cached.slots ?? 0) : stored.length;
         for (let i = 0; i < slotCount; i++) {
           const ws = stored[i] ?? WILDCARD_DEFAULT;
           const key = ws.type === "race" ? "RC_All" : ws.type === "size" ? "Size_All" : ws.type === "family" ? "Type_All" : "Ele_All";

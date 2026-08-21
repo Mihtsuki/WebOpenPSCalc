@@ -17,6 +17,42 @@ const RC_FANOUT = {
   RC_NonPlayer: ["RC_Formless", "RC_Undead", "RC_Brute", "RC_Plant", "RC_Insect", "RC_Fish", "RC_Demon", "RC_DemiHuman", "RC_Angel", "RC_Dragon"],
 };
 
+// Which weapons can actually FIRE a given kind of ammo. In game the ammo slot is
+// gated at equip time (pc_equipitem): you cannot put bullets on a mace user at all.
+// The calculator has no equip validation, so an incompatible ammo's script was being
+// aggregated anyway — a mace-wielding Alchemist with a Hollow-Point Bullet collected
+// its "+20% vs Demi-Human" on every carded skill.
+//
+// Only the weapon-FIRED families are listed. Shuriken, kunai, throwing daggers
+// (Venom Knife), bombs and cannonballs are thrown by hand or by a skill and carry no
+// weapon requirement, so they are deliberately absent and stay unrestricted.
+//
+// NB A_ARROW is not bow-only: on PS a Bard's Musical Strike and a Dancer's Throw
+// Arrow both consume arrows and take their element, so instruments and whips belong
+// here too — the same set as RANGED_WEAPON_TYPES minus the guns.
+const AMMO_WEAPONS = {
+  A_ARROW:   new Set(["Bow", "MusicalInstrument", "Whip"]),
+  A_BULLET:  new Set(["Revolver", "Rifle", "Gatling", "Shotgun"]),
+  A_GRENADE: new Set(["Grenade"]),
+};
+
+/**
+ * True when the equipped weapon can use this ammo — or when we cannot tell, in
+ * which case the ammo is allowed through. Being permissive on unknowns is
+ * deliberate: wrongly DROPPING a real bonus is worse than the leak this closes,
+ * and every bundled ammo row now carries a subtype (the PS bullets and grenades
+ * were tagged in ps_item_manual.json for exactly this).
+ */
+function ammoFitsWeapon(equipped, ammoItem) {
+  const need = AMMO_WEAPONS[ammoItem && ammoItem.subtype];
+  if (!need) return true;                       // thrown, or subtype unknown
+  const weaponId = equipped.right_hand;
+  if (weaponId == null) return false;           // bare-handed: nothing to fire it
+  const weapon = loader.getItem(weaponId);
+  if (weapon == null || weapon.type !== "IT_WEAPON") return false;
+  return need.has(weapon.weapon_type);
+}
+
 function scriptCtxFromBuild(build, status = null) {
   let maxHp = null, maxSp = null, hp = null, sp = null;
   if (status != null) {
@@ -158,6 +194,10 @@ function compute(equipped, refineLevels = null, scriptCtx = null, forceProcs = f
     if (itemId == null) continue;
     const item = loader.getItem(itemId);
     if (item == null) continue;
+
+    // Ammo the equipped weapon cannot fire contributes nothing — see ammoFitsWeapon.
+    // (The arrow's ATK roll is gated separately, on weapon type, in baseDamage.js.)
+    if (slot === "ammo" && !ammoFitsWeapon(equipped, item)) continue;
 
     if (item.type === "IT_ARMOR") {
       bonuses.def_ += item.def || 0;

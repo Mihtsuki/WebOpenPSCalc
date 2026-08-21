@@ -998,6 +998,22 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **Gunslinger coins + Fling** [med, player-requested 2026-08-18] — reported as two separate gaps
+  ("Fling isn't in the calc", "GS coins aren't there"); they are one. Coins are a Gunslinger
+  resource the calculator models nowhere, and Fling spends them:
+  wiki.payonstories.com/Fling — max level **1**, consumes coins, reduces the target's **Hard DEF by
+  3% per coin** (3/6/9/12/15% for 1–5 coins), lasts 20 s, and deals `(jobLvl + baseLvl)` damage per
+  coin which is "not affected by Barrage, target defense or element". Against players it reduces
+  Soft DEF only. Needs: a coin count in the build state, an `SC_FLING` consumer in `defenseFix.js`
+  (which today reads only `SC_STONE`/`SC_FREEZE`/`SC_ETERNALCHAOS`), a target-debuff toggle in the
+  UI, and an audit of which OTHER GS skills consume coins before the coin input is presented as
+  general rather than Fling-specific.
+- **Wildcard card mix for SHIELDS (racial resist)** [low, player-requested 2026-08-18] — the
+  wildcard system covers the OFFENSIVE dicts (`add_race`/`add_size`/`add_ele`/`add_race2`, merged in
+  `playerStateBuilder`). A shield wildcard wants the DEFENSIVE side (`sub_race`), a different dict on
+  a different path. **Verify rather than assume it lands**: `bSubSize` turned out never to be
+  aggregated at all (fixed 2026-08-17), so the defensive path has a track record of silently
+  dropping bonuses — write the assertion first.
 - **Incoming cardfix: two defender terms still unmodelled** [low] — `calculateCardFixMagic` now
   applies the full Hercules BF_MAGIC defender set (battle.c:1132-1156) when a caster is passed:
   `subele`, `subsize`, `subrace[race]`, `subrace[Boss/NonBoss]`, the LONG ranged rate (magic sets
@@ -1173,7 +1189,15 @@ unmodeled — it needs the target to already carry that status.
 - Forced elements for traps (Land/Blast/Claymore), GS_MAGICALBULLET (Ghost), the Ninja/Wizard bolts,
   and Grand Cross/Holy Cross (Holy) all resolve correctly; TF_POISON intentionally reverts to weapon
   element on PS (`TF_POISON_USES_WEAPON_ELEMENT`).
-- DEF-reduction debuffs (Signum Crucis, Strip Shield/Armor, Mind Breaker, Fling, Eternal Chaos, Steel
+- DEF-reduction debuffs (Signum Crucis, Strip Shield/Armor, Mind Breaker, Eternal Chaos, Steel
   Body, Stone Curse) are representable via `target_active_scs` and consumed by `defenseFix.js` — they
   apply when the caller injects the matching status. (Minor: the *vanilla* Strip Armor branch models
   the MDEF cut as a VIT cut; the PS branch is correct.)
+  **CORRECTION (2026-08-18): Fling was listed here and does NOT belong.** `defenseFix.js` reads only
+  `SC_STONE`, `SC_FREEZE` and `SC_ETERNALCHAOS` — nothing consumes `SC_FLING`, and the UI never
+  offered it, so a player asking for Fling was right that it is simply absent. It is also
+  coin-driven, which the calculator has no concept of: wiki.payonstories.com/Fling — Lv1 only,
+  consumes coins, "Reduces targets Hard Def by 3*coins used" (3% per coin, 15% at 5), 20 s, and
+  deals `(jobLvl + baseLvl)` damage per coin, unaffected by Barrage, target defence or element;
+  against players it cuts Soft DEF only. So Fling and the missing Gunslinger coin resource are ONE
+  piece of work, not two — see the punch-list.

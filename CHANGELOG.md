@@ -9,6 +9,22 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Ammo counted even when your weapon couldn't fire it.** Equipping a Gunslinger bullet while
+  holding a mace still handed you the bullet's bonuses — a Hollow-Point Bullet's +20% against
+  Demi-Humans applied to an Alchemist's Mammonite, taking it from 1,820 to 2,167. In game you
+  can't put bullets on a mace user at all. Ammo now only counts when the weapon can actually use
+  it. Bows, **and instruments and whips**, keep their arrows, since Musical Strike and Throw Arrow
+  consume them too; thrown items like Venom Knife are unaffected. Reported by a player.
+
+- **Wildcard cards stuck to an unslotted weapon.** Setting up a wildcard card mix and then
+  switching to a weapon with no card slots left the old wildcards applied, inflating the damage of
+  a weapon that can't hold a card at all. Reported by a player.
+
+- **Mineral Card had its old effect.** It was still using the pre-rework version — a 25 ATK
+  penalty and +3 DEF. On Payon Stories there is no ATK penalty, and it adds **+30 Soft DEF** while
+  you're above 80% HP on top of the +3 DEF. The calculator prices every build at full HP, so that
+  condition is treated as met. Reported by a player.
+
 - **The support form failed silently for some people.** The Ko-fi form is embedded from another
   site, and privacy extensions, Brave shields, Firefox's strict mode and Safari all block that kind
   of embed — so instead of a form you got a blank white box with no way forward. It now detects

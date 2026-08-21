@@ -1542,3 +1542,83 @@ test("song strength comes from the performer's stats and Lesson level", () => {
   // A performer stat of 0 means "not filled in", not a 0-stat Bard.
   assert.strictEqual(statusWith({ ...songs, bard_agi: 0 }).flee, bare.flee);
 });
+
+// ---------------------------------------------------------------------------
+// Ammo only counts when the equipped weapon can actually fire it
+// ---------------------------------------------------------------------------
+test("ammo bonuses need a compatible weapon, and arrows still reach bows/instruments/whips", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+
+  // Every bundled ammo row must carry a subtype — the gate is a no-op without one,
+  // and the PS bullets/grenades shipped untagged, which is what let this through.
+  const untagged = (loader.getItemsByType("IT_AMMO") || []).filter((i) => !i.subtype);
+  assert.deepEqual(untagged.map((i) => i.id), [], "every ammo item needs a subtype");
+
+  const bonusesFor = (weaponId, ammoId) => {
+    const b = buildFromSaveSchema({
+      job_id: 24, base_level: 99, job_level: 50,
+      base_stats: { str: 40, agi: 60, vit: 40, int: 40, dex: 90, luk: 20 },
+      equipped: { right_hand: weaponId, ...(ammoId ? { ammo: ammoId } : {}) },
+    });
+    const [gb] = resolvePlayerState(b, config, profile);
+    return gb;
+  };
+
+  // Measure the ammo's DELTA, never an absolute: a weapon can carry the same bonus
+  // itself (Cleaver has `bAddRace,RC_DemiPlayer,5`, which fans out to RC_DemiHuman),
+  // so asserting a bare 0 would fail for reasons that have nothing to do with ammo.
+  const delta = (weaponId, ammoId, key) =>
+    (bonusesFor(weaponId, ammoId).add_race[key] || 0) - (bonusesFor(weaponId, null).add_race[key] || 0);
+
+  // Hollow-Point Bullet (13234) = bonus2 bAddRace,RC_DemiHuman,20 — a GUN bullet.
+  const MACE = 1504, REVOLVER = 13100, BOW = 1707, LUTE = 1905, WHIP = 1950;
+  assert.equal(delta(MACE, 13234, "RC_DemiHuman"), 0,
+    "a mace cannot fire a bullet, so its bonus must not apply");
+  assert.equal(delta(REVOLVER, 13234, "RC_DemiHuman"), 20,
+    "a revolver CAN fire it — the bonus must survive");
+
+  // Holy Arrow (1772) = bonus2 bAddRace,RC_Demon,5. Arrows are not bow-only on PS:
+  // Musical Strike and Throw Arrow consume them too.
+  for (const [label, wpn] of [["bow", BOW], ["instrument", LUTE], ["whip", WHIP]]) {
+    assert.equal(delta(wpn, 1772, "RC_Demon"), 5, `${label} must keep the arrow bonus`);
+  }
+  assert.equal(delta(MACE, 1772, "RC_Demon"), 0, "a mace cannot fire an arrow");
+
+  // Thrown ammo carries no weapon requirement and stays unrestricted: Venom Knife
+  // (1774, A_DAGGER) is thrown by AS_VENOMKNIFE whatever you are holding.
+  const knife = loader.getItem(1771);
+  assert.equal(knife.subtype, "A_DAGGER");
+  assert.ok(!(["A_ARROW", "A_BULLET", "A_GRENADE"].includes(knife.subtype)),
+    "thrown ammo must not be gated on weapon type");
+});
+
+// ---------------------------------------------------------------------------
+// Mineral Card: PS effect, not vanilla's
+// ---------------------------------------------------------------------------
+test("Mineral Card gives DEF and soft DEF, with no vanilla ATK penalty", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+  const { StatusCalculator } = require("../src/engine/calculators/statusCalculator");
+
+  const stat = (cards) => {
+    const b = buildFromSaveSchema({
+      job_id: 7, base_level: 99, job_level: 50,
+      base_stats: { str: 80, agi: 50, vit: 60, int: 20, dex: 50, luk: 20 },
+      equipped: { right_hand: 1101, armor: 2302, ...cards },
+    });
+    const [gb, eff, weapon] = resolvePlayerState(b, config, profile);
+    return new StatusCalculator(config).calculate(eff, weapon, gb);
+  };
+  const bare = stat({});
+  const mineral = stat({ armor_card1: 4339 });
+
+  // tools.payonstories.com/api/pc/item?name=Mineral+Card — "DEF + 3 | While your
+  // current HP is at 80% or higher, Soft DEF + 30". Vanilla's `bonus bBaseAtk,-25`
+  // is gone; the calculator prices at full HP so the clause always holds.
+  assert.equal(mineral.def_ - bare.def_, 3, "hard DEF +3");
+  assert.equal(mineral.def2 - bare.def2, 30, "soft DEF +30");
+  assert.equal(mineral.batk, bare.batk, "the vanilla -25 ATK penalty must be gone");
+});
