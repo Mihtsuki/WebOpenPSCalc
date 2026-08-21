@@ -20,10 +20,16 @@ instead of release version. Dates are taken from actual git commit history.
   target's other debuffs there's now **Fling (−3% DEF per coin)**, up to −15% at 5 coins, for when
   someone else in your party is the Gunslinger.
 
-  Two things worth knowing: no damage-per-second figure is shown for Fling, because coins are a
-  finite pool rather than something you can sustain; and whether MVPs resist the DEF cut isn't
-  documented anywhere, so it's applied to them — treat that number as optimistic until someone
-  confirms it in game.
+  The calculator also now tracks what your coins are being **spent** on. Tick Barrage (2 coins) or
+  Run and Gun (1), pick a skill that costs one, and the Coins box tells you **"Spending 3 of 10"** —
+  or turns red with **"Needs 7 — 2 short"** when the build is asking for more coins than it holds.
+  And **Barrage and Run and Gun now turn each other off**, because in game each replaces the other;
+  before this you could tick both and get two buffs no character can have at once.
+
+  One thing worth knowing: no damage-per-second figure is shown for Fling, because coins are a
+  finite pool rather than something you can sustain. **MVPs do not resist Fling's DEF cut** — that
+  was checked in the emulator rather than guessed: Provoke is explicitly blocked against bosses and
+  Fling has no such block, so the full −15% applies to them.
 
 ### Fixed
 

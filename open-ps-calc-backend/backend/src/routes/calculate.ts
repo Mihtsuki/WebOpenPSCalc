@@ -370,9 +370,19 @@ router.post("/", (req: Request, res: Response) => {
       // monster (1510-11) — so the wiki's "Only reduces Soft Def against players"
       // falls straight out of the shared field instead of needing a special case.
       //
-      // NOT gated on boss, unlike Provoke: no source says Fling is boss-immune, and
-      // inventing a restriction would understate MVP damage as surely as omitting one
-      // overstates it. Flagged as unverified in the UI and ROADMAP.
+      // NOT gated on boss, unlike Provoke — and this is now VERIFIED, not assumed.
+      // Hercules gates boss status-immunity two ways: an explicit per-skill guard
+      // (Provoke has one, skill.c:7691 `tstatus->mode&MD_BOSS` -> fail) and the
+      // generic `is_boss_resist_sc()` check in status_change_start, which returns
+      // true only for common ailments or a status flagged `NoBoss` in
+      // db/pre-re/sc_config.conf. GS_FLING has NEITHER: its call site
+      // (skill.c:2032) is a bare `sc_start(..., SC_FLING, 100, ...)` with no mode
+      // check, and its sc_config entry carries no Flags block at all —
+      //     SC_FLING: { CalcFlags: { DefPerc: true }  Skill: "GS_FLING" }
+      // where SC_PROVOKE, by contrast, has `Flags: { Debuff: true  NoBoss: true }`.
+      // 40 statuses do carry NoBoss in pre-re, so the absence is meaningful rather
+      // than an empty file. That entry also confirms the field used here: DefPerc
+      // IS def_percent.
       const flingCoins = Math.max(0, Math.min(5, Number(targetModsInput.fling) || 0));
       if (flingCoins > 0) {
         target.def_percent = Math.max(0, (target.def_percent ?? 100) - 3 * flingCoins);

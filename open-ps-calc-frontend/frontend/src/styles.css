@@ -652,6 +652,16 @@ label {
 /* Musical / Dancing Lesson is a skill LEVEL, not a stat, so it sits below the stat
    cards as an ordinary labelled field — the same shape the song levels use. */
 .perf-lesson-row { margin-top: 0.45rem; }
+
+/* Coin budget under the Gunslinger coin input. Muted while the build can afford
+   what it has ticked, --crit once it cannot: a shortfall means the setup being
+   priced is one the character could not actually assemble. */
+.coin-spend {
+  display: block; margin-top: 0.25rem;
+  font-family: var(--mono); font-size: 0.68rem;
+  color: var(--text-faint); cursor: help;
+}
+.coin-spend--short { color: var(--crit); }
 .stat-pts-counter { margin-left: auto; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.45rem; }
 .stat-pts-counter--low  { color: var(--accent); }
 .stat-pts-counter--over { color: var(--crit); }

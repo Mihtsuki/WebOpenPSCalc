@@ -1017,9 +1017,18 @@ unmodeled — it needs the target to already carry that status.
   "Not affected by Barrage" is why the damage has its own branch instead of the normal chain:
   Barrage is the Gunslinger's +30% damage buff (`rate_bonuses.SC_GS_MADNESSCANCEL`) that every
   OTHER Gunslinger skill does get.
-  **Unverified**: whether Boss monsters resist Fling. Provoke is boss-gated here; no source says
-  Fling is, and inventing a restriction understates MVP damage as surely as omitting one
-  overstates it — so it applies to bosses, flagged in the UI tooltip. Settle it in game.
+  **Boss behaviour — VERIFIED 2026-08-21, no longer an assumption: Fling DOES affect bosses.**
+  Hercules gates boss status-immunity two independent ways and GS_FLING passes both. (1) An
+  explicit per-skill guard: Provoke has one (`skill.c:7691`, `if ((tstatus->mode&MD_BOSS) || ...)
+  return 1`), Fling's call site does not — `skill.c:2032` is a bare
+  `sc_start(src, bl, SC_FLING, 100, ...)` inside `skill_additional_effect` with no mode check.
+  (2) The generic `is_boss_resist_sc(type)` in `status_change_start`, which returns true only for
+  common ailments or a status carrying the `NoBoss` flag from `db/pre-re/sc_config.conf`. That file
+  gives SC_FLING no Flags block at all —
+  `SC_FLING: { CalcFlags: { DefPerc: true }  Skill: "GS_FLING" }` — while SC_PROVOKE has
+  `Flags: { Debuff: true  NoBoss: true }`. 40 statuses carry NoBoss in pre-re, so the absence is
+  meaningful rather than an empty file. That entry independently confirms the field this uses:
+  `DefPerc` IS `def_percent`.
 - **The rest of the coin economy is documented but unmodelled** [low–med] — from the **Gunslinger
   Release Patch Notes PDF** (Downloads folder, Friekshow, 2025-03-01), the authoritative source for
   this class, which had not previously been read. Coin costs: **Barrage 2** (+20% ASPD, +30% DMG,
@@ -1028,10 +1037,17 @@ unmodeled — it needs the target to already carry that status.
   (`100 + DEX + BaseLvl` ×3, Ghost), **Tranq Shot 1** (100% ATK, ignores DEF, not affected by
   cards), **Disarm 1**. Coin Flip itself: `(2×lv)²` zeny for `2×lv` coins, 3 s cast reducible by
   DEX, `(2×lv)%` chance to cost no zeny.
-  Barrage's +30% and Gatling Fever's +40% are ALREADY modelled (`rate_bonuses`), so what is missing
-  is only the coin ACCOUNTING — nothing checks that you can afford the buffs you have ticked, or
-  that Barrage and Run and Gun exclude each other. Also unmodelled: `GS_BULLSEYE`'s bleed chance,
-  which the PS description says differs "with coins".
+  Barrage's +30% and Gatling Fever's +40% were ALREADY modelled (`rate_bonuses`).
+  **Coin accounting added 2026-08-21** (frontend): the Buffs panel totals what a build is asking
+  its pool to pay for — Barrage 2, Run and Gun 1, plus the selected skill (Soul Bullet / Tranq Shot
+  / Disarm 1 each, Fling up to 5) — and says "Spending N of M" or "Needs N — X short" in `--crit`.
+  Fling counts ONLY when it is the selected skill: the Fling entry under target debuffs is someone
+  else's Gunslinger, whose coins are not yours. The engine still prices exactly what was asked for
+  rather than silently shrinking Fling to what is affordable; the panel reports the shortfall
+  instead. **Barrage and Run and Gun are now mutually exclusive** (each "replaces" the other per the
+  PDF), enforced inside `updateBuffField` so it holds however the buff is set.
+  Still unmodelled: `GS_BULLSEYE`'s bleed chance, which the PS description says differs "with
+  coins".
 - **Wildcard card mix for SHIELDS (racial resist)** [low, player-requested 2026-08-18] — the
   wildcard system covers the OFFENSIVE dicts (`add_race`/`add_size`/`add_ele`/`add_race2`, merged in
   `playerStateBuilder`). A shield wildcard wants the DEFENSIVE side (`sub_race`), a different dict on

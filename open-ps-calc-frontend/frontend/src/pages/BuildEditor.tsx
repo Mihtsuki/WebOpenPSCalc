@@ -27,6 +27,29 @@ import {
 const ELEMENT_NAMES = ["Neutral", "Water", "Earth", "Fire", "Wind", "Poison", "Holy", "Dark", "Ghost", "Undead"] as const;
 
 const WILDCARD_BONUS_OPTIONS = [4, 10, 15, 20, 30];
+// Gunslinger coin costs, from the Gunslinger Release Patch Notes PDF (Friekshow,
+// 2025-03-01) and wiki.payonstories.com/Fling. Coins are a finite pool from Coin
+// Flip (max 10), so a build can ask for more than it holds — this is what lets the
+// panel say so instead of silently pricing an impossible setup.
+const GS_BUFF_COIN_COST: Record<string, number> = {
+  SC_GS_MADNESSCANCEL: 2, // Barrage
+  SC_GS_ADJUSTMENT: 1,    // Run and Gun
+};
+// Skill ids that cost a coin to cast. Fling is absent because it is variable —
+// it spends up to 5 and is handled separately.
+const GS_SKILL_COIN_COST: Record<number, number> = {
+  507: 1, // Soul Bullet (GS_MAGICALBULLET)
+  503: 1, // Tranq Shot  (GS_BULLSEYE)
+  513: 1, // Disarm      (GS_DISARM)
+};
+const GS_FLING_SKILL_ID = 501;
+// Barrage and Run and Gun each "replace" the other per the PDF, so they can never
+// both be up. Ticking one clears the other rather than quietly pricing both.
+const GS_EXCLUSIVE_BUFFS: Record<string, string> = {
+  SC_GS_MADNESSCANCEL: "SC_GS_ADJUSTMENT",
+  SC_GS_ADJUSTMENT: "SC_GS_MADNESSCANCEL",
+};
+
 const WILDCARD_DEFAULT_BONUS: Record<WildcardSlot["type"], number> = {
   race: 20, size: 15, ele: 20, family: 30,
 };
@@ -1364,6 +1387,12 @@ export default function BuildEditor() {
       const next: Record<string, unknown> = { ...((prev[group] as Record<string, unknown>) || {}) };
       if (level <= 0) delete next[key];
       else next[key] = level;
+      // Barrage and Run and Gun replace one another (Gunslinger PDF), so turning
+      // one on turns the other off. Done here, in the one toggle path, rather than
+      // at the call site, so it holds however the buff is set.
+      if (level > 0 && group === "active_buffs" && GS_EXCLUSIVE_BUFFS[key]) {
+        delete next[GS_EXCLUSIVE_BUFFS[key]];
+      }
       return { ...prev, [group]: next };
     });
   }, []);
@@ -2595,6 +2624,24 @@ export default function BuildEditor() {
               // Monk (15) / Champion (4016): active spirit spheres add +3 ATK each.
               const isMonkLine = [15, 4016].includes(data.job_id);
               const isGunslinger = data.job_id === 24;
+              // What this build is asking its coin pool to pay for. Fling is counted
+              // only when it is the SELECTED skill: the Fling entry under target
+              // debuffs represents someone ELSE's Gunslinger, whose coins aren't yours.
+              const coinsHeld = Number(data.flags?.gs_coins) || 0;
+              const coinSpend: { label: string; cost: number }[] = [];
+              for (const [sc, cost] of Object.entries(GS_BUFF_COIN_COST)) {
+                if (Number((data.active_buffs || {})[sc]) > 0) {
+                  coinSpend.push({ label: sc === "SC_GS_MADNESSCANCEL" ? "Barrage" : "Run and Gun", cost });
+                }
+              }
+              if (skill.id === GS_FLING_SKILL_ID) {
+                const thrown = Math.min(5, coinsHeld);
+                if (thrown > 0) coinSpend.push({ label: "Fling", cost: thrown });
+              } else if (GS_SKILL_COIN_COST[skill.id]) {
+                coinSpend.push({ label: skill.label || "skill", cost: GS_SKILL_COIN_COST[skill.id] });
+              }
+              const coinsSpent = coinSpend.reduce((n, c) => n + c.cost, 0);
+              const coinsShort = coinsSpent > coinsHeld;
               const maxSpheres = data.job_id === 4016 ? 15 : 5;
               // Super Novice (23): never-died bonus (+10 all stats at job 70+).
               const isSuperNovice = data.job_id === 23;
@@ -2716,6 +2763,16 @@ export default function BuildEditor() {
                                 setData((prev) => ({ ...prev, flags: { ...(prev.flags || {}), gs_coins: v || undefined } }));
                               }}
                             />
+                            {coinSpend.length > 0 && (
+                              <span
+                                className={`coin-spend${coinsShort ? " coin-spend--short" : ""}`}
+                                title={coinSpend.map((c) => `${c.label}: ${c.cost}`).join(" · ")}
+                              >
+                                {coinsShort
+                                  ? `Needs ${coinsSpent} — ${coinsSpent - coinsHeld} short`
+                                  : `Spending ${coinsSpent} of ${coinsHeld}`}
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
