@@ -87,6 +87,11 @@ function createPlayerBuild(overrides = {}) {
     current_hp: null,
     current_sp: null,
     spirit_spheres: 0, // active Monk spirit spheres (+3 ATK each for Monk/Champion)
+    // Gunslinger coins in hand (Coin Flip / GS_GLITTERING). Max 10 on PS
+    // (wiki.payonstories.com/Flip_the_Coin: "Caster can have maximum 10 coins").
+    // A spendable RESOURCE, not a buff — several skills consume coins and scale
+    // with how many were spent, Fling most directly.
+    gs_coins: 0,
 
     wildcard_bonuses: {},
 

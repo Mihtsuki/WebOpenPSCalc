@@ -58,6 +58,7 @@ function buildToSaveSchema(build, loader) {
       no_sizefix: build.no_sizefix,
       armor_element: build.armor_element,
       spirit_spheres: build.spirit_spheres,
+      gs_coins: build.gs_coins,
       sn_never_died: build.sn_never_died,
       plagiarism: build.plagiarized_skill,
     },
@@ -181,6 +182,7 @@ function buildFromSaveSchema(data) {
     sn_never_died: flags.sn_never_died ?? false,
     armor_element: flags.armor_element ?? 0,
     spirit_spheres: flags.spirit_spheres ?? 0,
+    gs_coins: flags.gs_coins ?? 0,
     // Plagiarism (Rogue/Stalker): { name, level }. Rides in `flags` so it
     // round-trips through the existing share-URL key rather than needing a new
     // positional Z3 code. Anything malformed is treated as "nothing copied".

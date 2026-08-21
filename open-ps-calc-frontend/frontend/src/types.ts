@@ -115,6 +115,7 @@ export interface TargetMods {
   quagmire: number; // WZ_QUAGMIRE level 0–5 (0 = off). Legacy shared URLs may carry a boolean.
   signum_crucis: boolean;
   provoke: number; // SC_PROVOKE level 0–10 (0 = off). Legacy shared URLs may carry a boolean.
+  fling?: number; // GS_FLING: coins thrown, 0–5. Each cuts the target's DEF by 3%.
   sleep: boolean;
   stun: boolean;
   blind: boolean; // SC_BLIND: −25% of the target's flee (not an auto-hit).

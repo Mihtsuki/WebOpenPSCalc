@@ -359,6 +359,24 @@ router.post("/", (req: Request, res: Response) => {
       if (provokeLv > 0 && !target.is_boss) {
         target.def_percent = Math.max(0, (target.def_percent ?? 100) - (5 + 5 * provokeLv));
       }
+      // Fling (GS_FLING) — a Gunslinger spends coins to cut the target's defence.
+      // wiki.payonstories.com/Fling: "Consumes up to 5 coins", "Reduces targets Hard
+      // Def by 3*coins used" (3/6/9/12/15%), 20 s. PS retuned the rate: Hercules is
+      // `val2 = 5*val1` (status.c:8714), 5% per coin.
+      //
+      // It rides `def_percent`, the same field as Provoke, and that is exactly right
+      // rather than a convenience: Hercules applies def_percent to the SOFT defence
+      // only when the target is a player (battle.c:1494) but to hard AND soft for a
+      // monster (1510-11) — so the wiki's "Only reduces Soft Def against players"
+      // falls straight out of the shared field instead of needing a special case.
+      //
+      // NOT gated on boss, unlike Provoke: no source says Fling is boss-immune, and
+      // inventing a restriction would understate MVP damage as surely as omitting one
+      // overstates it. Flagged as unverified in the UI and ROADMAP.
+      const flingCoins = Math.max(0, Math.min(5, Number(targetModsInput.fling) || 0));
+      if (flingCoins > 0) {
+        target.def_percent = Math.max(0, (target.def_percent ?? 100) - 3 * flingCoins);
+      }
       // Quagmire (PS, WZ_QUAGMIRE): the marshland cuts the target's AGI and DEX
       // by 10% per level (max 50% at Lv5), which lowers its flee — it does NOT
       // grant auto-hit. Bosses are immune (only their move speed drops, not

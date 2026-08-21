@@ -7,6 +7,24 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-17
 
+### Added
+
+- **Gunslinger coins, and Fling.** Coins were missing entirely and Fling wasn't in the calculator —
+  they turned out to be one feature, since Fling is what spends them. Playing a Gunslinger, the
+  Buffs panel now has a **Coins (0–10)** box for what Coin Flip has given you.
+
+  **Fling** is in twice, because it does two things. Pick it as a skill and it throws up to 5 coins
+  for **(job level + base level) damage each** — a Lv99 / job 50 Gunslinger with 5 coins does 745,
+  and unusually that ignores your ATK, the target's defence, its element, *and* Barrage, so it's the
+  one Gunslinger skill your +30% damage buff doesn't touch. It's also a **target debuff**: under the
+  target's other debuffs there's now **Fling (−3% DEF per coin)**, up to −15% at 5 coins, for when
+  someone else in your party is the Gunslinger.
+
+  Two things worth knowing: no damage-per-second figure is shown for Fling, because coins are a
+  finite pool rather than something you can sustain; and whether MVPs resist the DEF cut isn't
+  documented anywhere, so it's applied to them — treat that number as optimistic until someone
+  confirms it in game.
+
 ### Fixed
 
 - **Ammo counted even when your weapon couldn't fire it.** Equipping a Gunslinger bullet while

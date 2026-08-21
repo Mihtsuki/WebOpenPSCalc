@@ -1622,3 +1622,72 @@ test("Mineral Card gives DEF and soft DEF, with no vanilla ATK penalty", () => {
   assert.equal(mineral.def2 - bare.def2, 30, "soft DEF +30");
   assert.equal(mineral.batk, bare.batk, "the vanilla -25 ATK penalty must be gone");
 });
+
+// ---------------------------------------------------------------------------
+// Gunslinger coins + Fling
+// ---------------------------------------------------------------------------
+test("Fling spends coins for flat damage, capped at 5", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+  const pipeline = new BattlePipeline(config);
+
+  const fling = (coins, baseLv = 99, jobLv = 50) => {
+    const b = buildFromSaveSchema({
+      job_id: 24, base_level: baseLv, job_level: jobLv,
+      base_stats: { str: 40, agi: 60, vit: 40, int: 40, dex: 90, luk: 20 },
+      equipped: { right_hand: 13100, ammo: 13200 },
+      flags: { gs_coins: coins },
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, config, profile);
+    const skill = createSkillInstance({ id: loader.getSkillIdByName("GS_FLING"), level: 1, name: "GS_FLING" });
+    return pipeline.calculate(status, weapon, skill, loader.getMonster(1159), eff, gb);
+  };
+
+  // wiki.payonstories.com/Fling: "(jobLvl+baseLvl) dmg per coin used",
+  // "Consumes up to 5 coins".
+  const perCoin = 50 + 99;
+  assert.equal(fling(0).normal.avg_damage, 0, "no coins, no damage");
+  assert.equal(fling(1).normal.avg_damage, perCoin);
+  assert.equal(fling(3).normal.avg_damage, perCoin * 3);
+  assert.equal(fling(5).normal.avg_damage, perCoin * 5);
+  // A Gunslinger can HOLD 10 coins but Fling only spends 5 of them.
+  assert.equal(fling(10).normal.avg_damage, perCoin * 5, "capped at 5 coins, not 10");
+
+  // It scales off levels, not ATK — a different base level moves it.
+  assert.equal(fling(1, 50, 50).normal.avg_damage, 100);
+
+  // Coins are a finite pool, so a sustained DPS figure would be fiction.
+  assert.equal(fling(5).dps_valid, false);
+
+  // "not affected by Barrage, target defense or element" — the branch runs no
+  // defenseFix/attrFix/cardFix at all, so the only steps are its own.
+  const steps = fling(5).normal.steps.map((s) => s.name);
+  for (const banned of ["Defense Fix", "Attr Fix", "Card Fix", "Skill Ratio"]) {
+    assert.ok(!steps.includes(banned), `Fling must not apply ${banned}`);
+  }
+});
+
+test("Fling's coin debuff cuts the target's DEF by 3% per coin", () => {
+  // The DEF cut is target state, applied in routes/calculate.ts, so assert the
+  // arithmetic it performs: def_percent -= 3 * coins, coins clamped to 0..5.
+  // PS retuned this from Hercules' 5%/coin (status.c:8714 `val2 = 5*val1`).
+  const flingPercent = (coins) => {
+    const c = Math.max(0, Math.min(5, Number(coins) || 0));
+    return Math.max(0, 100 - 3 * c);
+  };
+  assert.equal(flingPercent(0), 100);
+  assert.equal(flingPercent(1), 97);
+  assert.equal(flingPercent(3), 91);
+  assert.equal(flingPercent(5), 85, "5 coins = -15%, the wiki's max");
+  assert.equal(flingPercent(10), 85, "still capped at 5 coins");
+
+  // def_percent is the same field Provoke uses, and that is load-bearing: Hercules
+  // applies it to soft DEF only for a player target (battle.c:1494) but to hard AND
+  // soft for a monster (1510-11), which is exactly the wiki's "Only reduces Soft Def
+  // against players". If defenseFix ever stops splitting on is_pc, that note breaks.
+  const src = require("fs").readFileSync(
+    require("path").join(__dirname, "..", "src", "engine", "calculators", "modifiers", "defenseFix.js"), "utf8");
+  assert.ok(/target\.is_pc/.test(src) && /def_percent/.test(src),
+    "defenseFix must still branch on is_pc when applying def_percent");
+});

@@ -254,10 +254,15 @@ router.get("/skills", (req: Request, res: Response) => {
       // formula the engine computes in its own branch.
       const isSphereMine =
         profile.mechanic_flags.has("AM_SPHEREMINE_PS_FORMULA") && name === "AM_SPHEREMINE";
+      // Fling is typed Misc with no ratio (its damage is flat, per coin), so the
+      // Weapon/Magic test below would drop it. Its own branch computes it.
+      const isFling =
+        profile.mechanic_flags.has("GS_FLING_PS_FORMULA") && name === "GS_FLING";
       const computable =
         isTrap ||
         isBranchMisc ||
         isSphereMine ||
+        isFling ||
         Object.prototype.hasOwnProperty.call(wr, name) ||
         Object.prototype.hasOwnProperty.call(mr, name);
       // Pure support skills carry the NoDamage flag. Hide them from a *damage*

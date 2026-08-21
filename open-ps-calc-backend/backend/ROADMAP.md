@@ -213,20 +213,19 @@ without re-auditing everything from scratch.
 ## Not yet started
 
 - BF_MISC skills beyond Grand Cross and the PS trap branch
-  (TF_THROWSTONE, NJ_ZENYNAGE, GS_FLING, BA_DISSONANCE, etc.) — still
+  (TF_THROWSTONE, NJ_ZENYNAGE, BA_DISSONANCE, etc.; GS_FLING now has its own
+  branch) — still
   return "not yet implemented". HT_LANDMINE / HT_BLASTMINE /
   HT_FREEZINGTRAP / HT_CLAYMORETRAP are now implemented for the
   `PAYON_STORIES` profile (see "Done this pass"); non-PS profiles still
   return "not yet implemented" for these four.
 - `GS_CHAINACTION` proc — same mechanic shape as `TF_DOUBLE` and the
   now-implemented `MO_TRIPLEATTACK`, not yet ported.
-- Gunslinger's coin economy (Flip the Coin / `GS_GLITTERING`, and every
-  skill whose damage or effect scales with coins held — e.g. PS's
-  `GS_BULLSEYE` bleed chance is explicitly different "with coins") has no
-  representation anywhere in the engine — no build field for coin count,
-  no skill_ratio entries reading one. Surfaced by a user report asking for
-  "Coin amount" in the buffs panel; not implemented since there's nothing
-  in the engine yet to wire a UI control to.
+- ~~Gunslinger's coin economy~~ — **partly done 2026-08-21.** `build.gs_coins` now exists
+  (0–10, Gunslinger-gated in the Buffs panel) and Fling consumes it. Asked for twice: an earlier
+  report wanted "Coin amount" in the buffs panel, and a 2026-08-18 report asked for coins and Fling
+  separately without realising they are one feature. Still unmodelled: coin ACCOUNTING for the
+  buffs that cost coins, and `GS_BULLSEYE`'s "with coins" bleed chance — see the punch-list.
 - `GS_FULLBUSTER` / `GS_SPREADATTACK` grant a passive elemental resist at
   skill level 10 with a Shotgun equipped (`profile.passive_resists` in
   `serverProfiles.js` — already engine-supported). Not surfaced in the
@@ -998,16 +997,41 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
-- **Gunslinger coins + Fling** [med, player-requested 2026-08-18] — reported as two separate gaps
-  ("Fling isn't in the calc", "GS coins aren't there"); they are one. Coins are a Gunslinger
-  resource the calculator models nowhere, and Fling spends them:
-  wiki.payonstories.com/Fling — max level **1**, consumes coins, reduces the target's **Hard DEF by
-  3% per coin** (3/6/9/12/15% for 1–5 coins), lasts 20 s, and deals `(jobLvl + baseLvl)` damage per
-  coin which is "not affected by Barrage, target defense or element". Against players it reduces
-  Soft DEF only. Needs: a coin count in the build state, an `SC_FLING` consumer in `defenseFix.js`
-  (which today reads only `SC_STONE`/`SC_FREEZE`/`SC_ETERNALCHAOS`), a target-debuff toggle in the
-  UI, and an audit of which OTHER GS skills consume coins before the coin input is presented as
-  general rather than Fling-specific.
+- ~~**Gunslinger coins + Fling**~~ — **implemented 2026-08-21**, gated on `GS_FLING_PS_FORMULA`.
+  Coins are now a build resource (`gs_coins`, 0–10, serialised under `flags` like `spirit_spheres`,
+  Gunslinger-gated in the Buffs panel). Fling is BOTH halves, deliberately split: its **damage** is
+  `_runFlingBranch` — `(jobLvl + baseLvl)` per coin, capped at the 5 the skill spends even though 10
+  can be held — and its **DEF cut** is a target debuff (`target_mods.fling`, 0–5 coins,
+  `def_percent -= 3 × coins`), because a Gunslinger in your party can Fling for everyone.
+  `dps_valid: false`: coins are a finite pool, not a rate.
+  Sources: wiki.payonstories.com/Fling (raw page, not a model summary — "Consumes up to 5 coins",
+  "Reduces targets Hard Def by 3*coins used", "Does (jobLvl+baseLvl) dmg per coin used. This damage
+  is not affected by Barrage, target defense or element", "Only reduces Soft Def against players")
+  and wiki.payonstories.com/Flip_the_Coin ("Caster can have maximum 10 coins").
+  **PS retuned the rate**: Hercules is 5%/coin (`status.c:8714`, `val2 = 5*val1`); PS is 3%.
+  The DEF cut rides `def_percent`, the SAME field as Provoke, and that is load-bearing rather than
+  lazy: Hercules applies def_percent to soft DEF only when the target is a player (`battle.c:1494`)
+  but to hard AND soft for a monster (`1510-11`), so the wiki's "Only reduces Soft Def against
+  players" falls out of the shared field with no special case. A test asserts `defenseFix` still
+  branches on `is_pc`, since that note breaks silently if it stops.
+  "Not affected by Barrage" is why the damage has its own branch instead of the normal chain:
+  Barrage is the Gunslinger's +30% damage buff (`rate_bonuses.SC_GS_MADNESSCANCEL`) that every
+  OTHER Gunslinger skill does get.
+  **Unverified**: whether Boss monsters resist Fling. Provoke is boss-gated here; no source says
+  Fling is, and inventing a restriction understates MVP damage as surely as omitting one
+  overstates it — so it applies to bosses, flagged in the UI tooltip. Settle it in game.
+- **The rest of the coin economy is documented but unmodelled** [low–med] — from the **Gunslinger
+  Release Patch Notes PDF** (Downloads folder, Friekshow, 2025-03-01), the authoritative source for
+  this class, which had not previously been read. Coin costs: **Barrage 2** (+20% ASPD, +30% DMG,
+  20 s — replaces the Run and Gun buff), **Run and Gun 1** (+30% ranged resist, +30 FLEE, 1 min —
+  replaces the Barrage buff; the two are mutually exclusive), **Soul Bullet 1**
+  (`100 + DEX + BaseLvl` ×3, Ghost), **Tranq Shot 1** (100% ATK, ignores DEF, not affected by
+  cards), **Disarm 1**. Coin Flip itself: `(2×lv)²` zeny for `2×lv` coins, 3 s cast reducible by
+  DEX, `(2×lv)%` chance to cost no zeny.
+  Barrage's +30% and Gatling Fever's +40% are ALREADY modelled (`rate_bonuses`), so what is missing
+  is only the coin ACCOUNTING — nothing checks that you can afford the buffs you have ticked, or
+  that Barrage and Run and Gun exclude each other. Also unmodelled: `GS_BULLSEYE`'s bleed chance,
+  which the PS description says differs "with coins".
 - **Wildcard card mix for SHIELDS (racial resist)** [low, player-requested 2026-08-18] — the
   wildcard system covers the OFFENSIVE dicts (`add_race`/`add_size`/`add_ele`/`add_race2`, merged in
   `playerStateBuilder`). A shield wildcard wants the DEFENSIVE side (`sub_race`), a different dict on

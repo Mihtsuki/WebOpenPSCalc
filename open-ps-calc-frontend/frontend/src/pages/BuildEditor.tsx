@@ -556,6 +556,7 @@ const DEFAULT_TARGET_MODS: TargetMods = {
   quagmire: 0,
   signum_crucis: false,
   provoke: 0,
+  fling: 0,
   sleep: false,
   stun: false,
   blind: false,
@@ -666,6 +667,7 @@ const Z3_KEYS: string[] = [
   "blind", // target Blind (targetMods.blind)
   "mailbreaker", // targetMods.mailbreaker — was `venom_dust`, whose code stays above
   "offensive_blessing", // targetMods.offensive_blessing (Blessing cast on Undead/Demon)
+  "fling", // targetMods.fling — Gunslinger coins thrown (0-5), each -3% target DEF
 ];
 const Z3_ENC: Record<string, string> = {};
 const Z3_DEC: Record<string, string> = {};
@@ -2592,6 +2594,7 @@ export default function BuildEditor() {
               const isKnightLine = [7, 14, 4008, 4015].includes(data.job_id);
               // Monk (15) / Champion (4016): active spirit spheres add +3 ATK each.
               const isMonkLine = [15, 4016].includes(data.job_id);
+              const isGunslinger = data.job_id === 24;
               const maxSpheres = data.job_id === 4016 ? 15 : 5;
               // Super Novice (23): never-died bonus (+10 all stats at job 70+).
               const isSuperNovice = data.job_id === 23;
@@ -2692,6 +2695,25 @@ export default function BuildEditor() {
                               onChange={(e) => {
                                 const v = Math.max(0, Math.min(maxSpheres, Number(e.target.value) || 0));
                                 setData((prev) => ({ ...prev, flags: { ...(prev.flags || {}), spirit_spheres: v || undefined } }));
+                              }}
+                            />
+                          </div>
+                        )}
+                        {isGunslinger && (
+                          <div className="field" key="__gs_coins">
+                            <label title="Coins in hand from Coin Flip. A spendable resource, not a buff: Fling throws up to 5 of them for (job level + base level) damage each and cuts the target's DEF by 3% per coin. Barrage costs 2, and Run and Gun, Soul Bullet, Tranq Shot and Disarm cost 1 each. Max 10.">
+                              Coins (0–10)
+                            </label>
+                            <input
+                              className="mono"
+                              type="number"
+                              min={0}
+                              max={10}
+                              value={(data.flags?.gs_coins as number) ?? 0}
+                              onFocus={(e) => e.target.select()}
+                              onChange={(e) => {
+                                const v = Math.max(0, Math.min(10, Number(e.target.value) || 0));
+                                setData((prev) => ({ ...prev, flags: { ...(prev.flags || {}), gs_coins: v || undefined } }));
                               }}
                             />
                           </div>
@@ -3211,6 +3233,20 @@ export default function BuildEditor() {
                 <option value={0}>Off</option>
                 {Array.from({ length: 10 }, (_, i) => i + 1).map((lv) => (
                   <option key={lv} value={lv}>Lv {lv}{lv === 10 ? " (max)" : ""}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field debuff-field">
+              <label title="GS_FLING: a Gunslinger throws coins at the target — each one cut its DEF by 3% for 20s (15% at the full 5 coins). Against a monster this reduces hard and soft DEF; against a player, soft DEF only. Whether Boss monsters resist it is not documented, so it is applied to them too.">
+                Fling (−3% DEF per coin)
+              </label>
+              <select
+                value={Number(targetMods.fling) || 0}
+                onChange={(e) => setTargetMods((m) => ({ ...m, fling: Number(e.target.value) }))}
+              >
+                <option value={0}>Off</option>
+                {Array.from({ length: 5 }, (_, i) => i + 1).map((c) => (
+                  <option key={c} value={c}>{c} coin{c === 1 ? "" : "s"} (−{3 * c}%){c === 5 ? " (max)" : ""}</option>
                 ))}
               </select>
             </div>

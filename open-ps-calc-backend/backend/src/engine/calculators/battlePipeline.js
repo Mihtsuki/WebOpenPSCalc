@@ -1005,6 +1005,59 @@ class BattlePipeline {
   }
 
   /**
+   * Fling (GS_FLING). A Gunslinger throws coins: it is both a debuff and a hit, and
+   * this branch is only the hit — the DEF cut is a TARGET state (routes/calculate.ts
+   * `target_mods.fling`), because a Gunslinger in your party can Fling for everyone.
+   *
+   * wiki.payonstories.com/Fling: "Consumes up to 5 coins", "Does (jobLvl+baseLvl) dmg
+   * per coin used. This damage is not affected by Barrage, target defense or element."
+   *
+   * So the damage is flat: no weapon, no ATK, no ratio, no crit — and three explicit
+   * exclusions. "Not affected by Barrage" matters most, because Barrage is the
+   * Gunslinger's +30% damage buff (`rate_bonuses.SC_GS_MADNESSCANCEL`) which every
+   * other Gunslinger skill DOES get; running this through the normal chain would hand
+   * Fling a 30% bonus the wiki explicitly denies it. Nothing here touches defenseFix,
+   * attrFix or cardFix either, so "target defense or element" hold by construction.
+   *
+   * Coins come from the build's own pool (`gs_coins`), capped at the 5 the skill can
+   * spend even though a Gunslinger may hold 10.
+   */
+  _runFlingBranch(status, weapon, skill, target, build, opts = {}) {
+    const result = createDamageResult();
+    const held = Math.max(0, Number(build.gs_coins) || 0);
+    const coins = Math.min(5, held);
+    const perCoin = (build.job_level || 1) + (build.base_level || 1);
+    const total = perCoin * coins;
+
+    result.add_step({
+      name: "Coins spent",
+      value: coins, min_value: coins, max_value: coins,
+      note: coins === 0
+        ? "No coins in hand — Fling deals nothing. Set the Gunslinger's coins in the Buffs panel."
+        : `${coins} of ${held} coin${held === 1 ? "" : "s"} held (Fling spends at most 5)`,
+      formula: "min(coins held, 5)", hercules_ref: "wiki.payonstories.com/Fling",
+      info: true,
+    });
+    result.add_step({
+      name: "Damage per coin",
+      value: perCoin, min_value: perCoin, max_value: perCoin,
+      note: `job level ${build.job_level || 1} + base level ${build.base_level || 1}`,
+      formula: "jobLvl + baseLvl", hercules_ref: "wiki.payonstories.com/Fling",
+      info: true,
+    });
+
+    const pmf = { [total]: 1.0 };
+    result.add_step({
+      name: "Final Damage", value: total, min_value: total, max_value: total,
+      note: "Flat damage — unaffected by Barrage, the target's defence, or element",
+      formula: "(jobLvl + baseLvl) × coins", hercules_ref: "",
+    });
+    result.min_damage = total; result.max_damage = total; result.avg_damage = total;
+    result.pmf = pmf;
+    return result;
+  }
+
+  /**
    * Sphere Mine (AM_SPHEREMINE). PS reworked this away from its vanilla mechanic
    * entirely, so Hercules is no guide: vanilla summons mob 1142 and detonates it via
    * NPC_SELFDESTRUCTION for `sstatus->hp` (battle.c:4467), i.e. the sphere's remaining
@@ -1741,6 +1794,23 @@ class BattlePipeline {
       return createBattleResult({
         normal: ksResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
         dps: calculateDps(attacks), attacks, period_ms: ksPeriod, dps_valid: true,
+      });
+    }
+
+    // Fling. Typed BF_MISC with no PS ratio, so without this it fell into the
+    // BF_MISC catch-all and reported "not yet implemented" (ROADMAP listed it there).
+    if (skillName === "GS_FLING" && profile.mechanic_flags.has("GS_FLING_PS_FORMULA")) {
+      const flResult = this._runFlingBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
+      let castMs = 0, delayMs = 0;
+      if (skillData) [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
+      const flPeriod = Math.max(castMs + delayMs, profile.min_cast_period_ms || 100);
+      const flAttacks = [createAttackDefinition(flResult.avg_damage, 0.0, flPeriod, 1.0)];
+      return createBattleResult({
+        normal: flResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
+        dps: calculateDps(flAttacks), attacks: flAttacks, period_ms: flPeriod,
+        // Coins are a finite pool, not a rate: you cannot sustain Fling the way you
+        // spam a normal skill, so a DPS figure would be fiction after the 2nd cast.
+        dps_valid: false,
       });
     }
 
