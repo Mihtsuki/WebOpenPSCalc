@@ -364,7 +364,11 @@ const SELF_BUFFS = [
   // Crazy Uproar (MC_LOUD) — PS Merchant rework: 4 ranks, +1 STR / +1 VIT per level
   // and +3×lv soft DEF to the caster. Merchant line (Merchant/Blacksmith/Alchemist
   // and their transcendent forms) — it is a Merchant tree skill, not a Blacksmith one.
-  { key: "SC_SHOUT",           label: "Crazy Uproar",          max: 4,  jobs: [5, 10, 18, 4011, 4019] },
+  // Super Novice (23) is on this list because Payon Stories has ALWAYS granted it Crazy
+  // Uproar and Cart Revolution — the 2026-08-18 client hotfix only moved them from the Etc.
+  // tab to the Novice tab. The vanilla Hercules skill_tree.conf we scrape doesn't list
+  // either for job 23, which is why this was missed. See PS_SOURCES.md.
+  { key: "SC_SHOUT",           label: "Crazy Uproar",          max: 4,  jobs: [5, 10, 18, 23, 4011, 4019] },
   // Monk / Champion
   { key: "SC_EXPLOSIONSPIRITS", label: "Critical Explosion",                 max: 5,  jobs: [15, 4016] },
   // Gunslinger — SC_GS_ACCURACY adds AGI+4/DEX+4 in statusCalculator.js.

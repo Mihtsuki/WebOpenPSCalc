@@ -316,6 +316,14 @@ const scenarios = [
     target: 1036,
   },
   {
+    // Tracking — the 2026-08-22 audit corrected this from 100+160×lv to a flat 160×lv
+    // (Gunslinger PDF: "1600% at Skill Lvl 10"). A rifle skill, so it needs a rifle.
+    name: "gunslinger-tracking-lv10",
+    build: { job_id: 24, base_level: 99, job_level: 50, base_stats: { str: 80, agi: 90, vit: 1, int: 1, dex: 80, luk: 1 }, equipped: { right_hand: 13150 } },
+    skill: { name: "GS_TRACKING", level: 10 },
+    target: 1002,
+  },
+  {
     // Gunslinger Chain Action (GS_CHAINACTION): revolver normal attacks proc a
     // second hit at 7%/lv (70% at Lv10). Normal attack (no skill). Regression
     // that the double-attack shows up in DPS with a revolver equipped.

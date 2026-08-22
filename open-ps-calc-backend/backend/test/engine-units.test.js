@@ -1964,3 +1964,40 @@ test("ASPD steps in 0.1, and each step is a real 2 ms of attack delay", () => {
   assert.equal(delay(170.7) - delay(170.8), 2, "0.1 ASPD must be worth 2 ms");
   assert.equal(delay(170.7) - delay(171.7), 20, "1.0 ASPD must be worth 20 ms");
 });
+
+// ---------------------------------------------------------------------------
+// Sources that disagree — the ratios the 2026-08-22 audit pinned down
+// ---------------------------------------------------------------------------
+test("audited skill ratios follow the rework PDFs, not the stale wiki", () => {
+  const r = PS.weapon_ratios;
+  // Tracking: Gunslinger PDF "Increased damage to 160 × Skill Lvl, so 1600% at Skill Lvl 10".
+  // The wiki TABLE says 260…1700 (i.e. 100+160×lv) but contradicts its own prose and
+  // mis-steps at Lv4, so it loses. This was the one live ratio bug the audit found.
+  assert.equal(r.GS_TRACKING(1), 160);
+  assert.equal(r.GS_TRACKING(10), 1600, "PDF states 1600% at Lv10, not 1700%");
+
+  // These four are ones where the WIKI is stale and we are right — pinned so a future
+  // wiki-driven pass doesn't "correct" them back. Each cites a rework PDF in PS_SOURCES.md.
+  assert.equal(r.KN_SPEARSTAB(5), 300, "Knight PDF: 100+40*SkillLevel (wiki still says 100+20)");
+  assert.equal(r.AM_ACIDTERROR(5), 600, "Alchemist PDF: NEW FORMULA (100+100*SkillLv)% (wiki says 500)");
+  assert.equal(r.RG_BACKSTAP(10), 500, "Rogue PDF: reduced to 200%+30%*Skill_Level (wiki says 600)");
+  assert.equal(r.KN_BOWLINGBASH(10), 400, "wiki table 100+30*lv; ps_skill_db is stale at 100+40*lv");
+});
+
+test("items audited against the live PS item API", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const script = (id) => String(loader.getItem(id).script || "");
+
+  // SCOUT Card: the Monk rework REMOVED the -10% Throw Spirit Sphere cast time.
+  // We were still granting it, which inflated TSS Monk DPS.
+  assert.ok(/bonus\s+bStr\s*,\s*1/.test(script(90001)), "SCOUT keeps its +1 STR");
+  assert.ok(!/bCastrate/.test(script(90001)), "the removed cast-time bonus must be gone");
+
+  // Purple Cowboy Hat had NO script at all, so "Atk +15, Flee -5" did nothing.
+  assert.ok(/bBaseAtk\s*,\s*15/.test(script(5816)) && /bFlee\s*,\s*-5/.test(script(5816)));
+
+  // Witch's Pumpkin Hat carried a vanilla script for an id PS repurposed (MDEF 10 vs 4).
+  assert.ok(/bMdef\s*,\s*4/.test(script(18656)), "MDEF is 4 per the item API, not 10");
+  assert.ok(!/bStr|bInt/.test(script(18656)), "STR/INT are not in the PS description");
+});

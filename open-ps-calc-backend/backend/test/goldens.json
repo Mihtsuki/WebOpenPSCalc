@@ -2540,6 +2540,84 @@
    }
   }
  },
+ "gunslinger-tracking-lv10": {
+  "status": {
+   "str": 83,
+   "agi": 93,
+   "vit": 1,
+   "int_": 1,
+   "dex": 90,
+   "luk": 6,
+   "batk": 188,
+   "max_hp": 4545,
+   "max_sp": 460,
+   "aspd": 159.6,
+   "cri": 130,
+   "hit": 199,
+   "flee": 192,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 1,
+   "matk_max": 1
+  },
+  "result": {
+   "dps": 1891.971,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 13,
+   "period_ms": 2100,
+   "normal": {
+    "min": 3791,
+    "max": 4111,
+    "avg": 3950,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Tracking Lv10)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   },
+   "crit": {
+    "min": 4128,
+    "max": 4128,
+    "avg": 4128,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Branch",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Tracking Lv10)",
+     "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "gunslinger-chain-action-revolver": {
   "status": {
    "str": 83,

@@ -1222,7 +1222,8 @@
   ],
   "slots": 0,
   "aegis_name": "SCOUT_Card",
-  "script": "bonus bStr,1; bonus2 bCastrate,MO_THROWSPIRIT,-10;"
+  "script": "bonus bStr,1;",
+  "_note": "Monk Rework PDF: \"Old: +1 STR, -10% cast time of Throw Spirit Sphere, refunds 3 Spirit Spheres when Throw Spirit Sphere kills a target. New: +1 STR.\" The cast-time bonus is gone — the live item API description confirms it lists only STR +1 plus two knockback effects, and knockback is not modelled. See PS_SOURCES.md (Monk)."
  },
  "90002": {
   "type": "IT_CARD",
@@ -2609,5 +2610,15 @@
   "refineable": true,
   "_note": "PS Alchemist rework 2026-08-09. Base LUK and base DEX 60-79 give +3 ATK per Pharmacy level; 80+ raises that to +12 per level (the PDF states the 80+ figure is the TOTAL bonus, not an addition). The Potion Pitcher extra-target chance (5% / 20%) is a support effect with no damage term. Re-keyed 2026-08-10 from the provisional 95002 to its real id 8430, published by tools.payonstories.com/api/pc/item; every stat here (Mace, ATK 100, weight 130, weapon level 3, level req 58, 1 slot, Alchemist) matches that entry.",
   "script": "if(readparam(bLuk)>=80 && readparam(bDex)>=80) { bonus bBaseAtk,12*getskilllv(AM_PHARMACY); } else { if(readparam(bLuk)>=60 && readparam(bDex)>=60) { bonus bBaseAtk,3*getskilllv(AM_PHARMACY); } }"
+ },
+ "5816": {
+  "aegis_name": "Purple_Cowboy_Hat",
+  "script": "bonus bBaseAtk,15; bonus bFlee,-5;",
+  "_note": "Had no script in vanilla item_db, so its whole effect did nothing. Live item API (tools.payonstories.com/api/pc/item?id=5816): \"Atk +15, Flee -5\"."
+ },
+ "18656": {
+  "aegis_name": "Wit_Pumpkin_Hat",
+  "script": "bonus bMdef,4; bonus2 bMagicAddRace,RC_Undead,15; bonus2 bMagicAddRace,RC_Demon,15;",
+  "_note": "The vanilla item_db script for this id (bMdef,10 + bStr,2 + bInt,2) is for a different item — PS repurposed the id. Live item API: \"Mdef +4. Increase Damage against Undead and Demon monsters by 15%.\" MDEF corrected 10->4 and the unlisted STR/INT dropped. The +15% is kept MAGIC-only (bMagicAddRace, as vanilla had it) because the PS text says \"Damage\" without qualifying it — if a player reports it working on physical hits, switch to bAddRace."
  }
 }

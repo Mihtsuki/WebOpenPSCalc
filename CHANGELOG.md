@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Super Novice can now use Crazy Uproar.** The buff was missing from the Super Novice list, so
+  the +STR/+VIT it grants couldn't be switched on. Payon Stories has always given Super Novices
+  Crazy Uproar and Cart Revolution — the 18 August client patch only moved them into the Novice
+  tab — so this was a long-standing gap on our side, not a new skill. Cart Revolution already
+  worked.
+
+
 - **Mirror Image now counts towards Killing Stroke.** The Ninja buff raises Killing Stroke's damage
   by 10% to 30%, depending on how many images you still have up when you cast — and it wasn't in the
   calculator at all. It's now in the Buffs panel as **Mirror Image (images left)**. Set it to the
@@ -33,6 +40,24 @@ instead of release version. Dates are taken from actual git commit history.
 
 
 ### Fixed
+
+- **Tracking was doing more damage than it should.** The Gunslinger skill was priced at
+  100% + 160% per level; Payon Stories' own release notes say a flat 160% per level, so 1600% at
+  Lv10 rather than 1700%. The wiki's table backed the old number, but it disagrees with the prose
+  on the same page and skips a step at level 4, so the patch notes win. Biggest change is at low
+  levels: Lv1 drops from 260% to 160%.
+
+- **SCOUT Card was still giving a cast-time bonus the Monk rework removed.** It cut Throw Spirit
+  Sphere's cast time by 10%, which the rework replaced with knockback. Anyone theorycrafting a
+  Throw Spirit Sphere Monk was seeing DPS they can't reach in game. The card now just gives +1 STR.
+
+- **Purple Cowboy Hat did nothing.** Its "Atk +15, Flee −5" was never implemented, so the hat was
+  dead weight in the calculator.
+
+- **Witch's Pumpkin Hat had the wrong item's stats.** It was carrying MDEF +10 plus STR and INT
+  bonuses from an unrelated item that shares its id. It's MDEF +4 on Payon Stories, with the +15%
+  against Undead and Demon unchanged.
+
 
 - **Killing Stroke claimed you could cast it ten times a second.** It has no cast time or delay
   recorded anywhere, and the calculator filled that gap with its minimum period — which came out as

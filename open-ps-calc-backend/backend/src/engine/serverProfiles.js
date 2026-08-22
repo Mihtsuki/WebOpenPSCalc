@@ -505,7 +505,12 @@ const PS_BF_WEAPON_RATIOS = {
   BA_MUSICALSTRIKE: (lv, tgt, ctx) => 175 + 25 * lv + (ctx && ctx.skill_params.PS_PERFORMING_active ? 100 : 0),
   DC_THROWARROW:    (lv, tgt, ctx) => 175 + 25 * lv + (ctx && ctx.skill_params.PS_PERFORMING_active ? 100 : 0),
   GS_TRIPLEACTION: () => 140,
-  GS_TRACKING: (lv) => 100 + 160 * lv,
+  // 160×lv — NOT 100+160×lv. The Gunslinger Release PDF is explicit and self-consistent
+  // ("Increased damage to 160 × Skill Lvl, so 1600% at Skill Lvl 10"), the wiki PROSE says
+  // "Does 160*SkillLvl% damage", and ps_skill_db.json lists 160…1600. The only source for
+  // the old +100 was the wiki's own TABLE, which contradicts its own prose and mis-steps at
+  // Lv4 (640, breaking its +160 progression). See PS_SOURCES.md (Gunslinger).
+  GS_TRACKING: (lv) => 160 * lv,
   GS_DESPERADO: (lv) => 100 + 20 * lv,
   GS_DUST: (lv) => 100 + 30 * lv,
   GS_FULLBUSTER: (lv) => 350 + 75 * lv,

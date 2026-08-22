@@ -318,6 +318,54 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Full skill + item audit against the wiki, the scraped PS DB and the rework PDFs
+  (2026-08-22).** Pulled all 399 base/2nd-job wiki pages as raw wikitext through the wiki's
+  MediaWiki API (`wiki.payonstories.com/api.php` is open — no HTML scraping, no summarising),
+  extracted the per-level damage tables and prose formulas, and diffed them against all 56 PS
+  ratios we model, `ps_skill_db.json`, and all 15 rework PDFs. **Every source is now recorded
+  verbatim in `PS_SOURCES.md`** so this never again requires the PDFs, which live outside the
+  repo. Findings:
+  - **FIXED — `GS_TRACKING` was overstated.** Was `100 + 160×lv`; the Gunslinger PDF says
+    "Increased damage to 160 × Skill Lvl, so 1600% at Skill Lvl 10", the wiki PROSE says
+    "Does 160*SkillLvl% damage", and `ps_skill_db.json` lists 160…1600. The only source for
+    the extra +100 was the wiki's own TABLE, which contradicts its own prose and mis-steps at
+    Lv4 (640, breaking its +160 progression). Lv1 260%→160%, Lv10 1700%→1600%.
+  - **OPEN — Shield Boomerang Lv1.** Wiki table says 130%; ours and `ps_skill_db` say 140%.
+    Levels 2-5 agree exactly (180/220/260/300). The same wiki page's prose says
+    `2.5*(ATK+Shield Weight)` at rank 5 while its table says 300%, so that page is internally
+    inconsistent. Left at 140 (4 of 5 levels fit `100+40×lv`); needs an in-game check.
+  - **Six skills where the WIKI is stale and we are right** — `KN_SPEARSTAB` (Knight PDF
+    `100+40*SkillLevel`, wiki still shows `100+20`), `AM_ACIDTERROR` (Alchemist PDF "NEW
+    FORMULA: (100+100*SkillLv)%", wiki + DB still 500% max), `RG_BACKSTAP` (Rogue PDF
+    "reduced ... to 200%+30%*Skill_Level", wiki shows `200+40×lv`), `KN_BOWLINGBASH`,
+    `AS_GRIMTOOTH`, `MO_FINGEROFFENSIVE`. **Now pinned by tests** so a future wiki-driven
+    pass can't "correct" them back. Two of these were nearly filed as bugs off the wiki alone
+    — the PDFs reversed both, which is why the source hierarchy matters.
+  - `ps_skill_db.json` "differences" for `MO_TRIPLEATTACK` (28/26/24…), `GS_PIERCINGSHOT`
+    (3/6/9…) and `WZ_METEOR` (5/10/15…) are **scraper artifacts** — proc chance and bleed
+    chance picked up as damage. Not real; recorded so they aren't re-flagged.
+  - **Two modelling gaps, not ratio errors.** `WZ_METEOR`: we apply 100% MATK ×
+    `number_of_hits`, but that array is *hits per meteor*; the wiki gives a separate meteor
+    count that also scales (2→7), so a target under the full storm can take 7×5 = 35 hits
+    (~3500% MATK) where we cap at 500%. `WZ_VERMILION`: our 2000% total at Lv10 matches the
+    wiki's summed waves, but we apply it as ONE lump where the wiki says 4 bundles of 20
+    hits — and since soft MDEF is subtracted per hit, lumping OVERestimates damage vs
+    high-MDEF targets, the exact trap the magic branch's own comment warns about for bolts.
+  - **Items** — checked all 241 hand-authored plus 940 PS-overridden entries against the live
+    item API (`?id=` works and is exact). Fixed three: **SCOUT Card** still granted
+    `bCastrate,MO_THROWSPIRIT,-10` that the Monk rework removed ("Old: +1 STR, -10% cast time
+    …; New: +1 STR") — a free DPS bonus for TSS Monks; **Purple Cowboy Hat (5816)** had no
+    script at all so its "Atk +15, Flee -5" did nothing; **Witch's Pumpkin Hat (18656)**
+    carried the vanilla script for an id PS repurposed (MDEF 10 vs the API's 4, plus STR/INT
+    the PS text doesn't list). Its +15% vs Undead/Demon is kept magic-only — the PS wording
+    says "Damage" unqualified, so that half is a judgement call recorded in its `_note`.
+  - **15 items have stale DESCRIPTIONS but correct scripts** (Grizzly 30→100%, Flame Beetle
+    20→50%, Tengu 25→10%, Ancient Mummy Lv5/10 → Lv3/5, …). The scripts are hand-maintained
+    and the text is scraped, so damage is right and only the tooltip misleads. Not yet fixed.
+  - Set/combo bonuses flagged by the scan (Dark Knight Belt, Diabolus Robe, Bloody Iron Ball,
+    Fur Seal set) **are** covered by the combo DB — false positives. `Manteau of Survival`'s
+    "[+ Rod of Survival]" combo genuinely has no entry, but it's a rental; left alone.
+
 - **ASPD breakpoints report 0.1 steps, not just integer crossings** (`aspdBreaks` in
   `routes/calculate.ts`). The atomic ASPD step is **0.1, not 1**: `statusCalculator`
   sets `aspd = (2000 - amotion) / 10` from an INTEGER `amotion`, and `amotion` IS the
