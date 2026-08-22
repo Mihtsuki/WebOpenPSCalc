@@ -31,6 +31,13 @@ instead of release version. Dates are taken from actual git commit history.
   was checked in the emulator rather than guessed: Provoke is explicitly blocked against bosses and
   Fling has no such block, so the full −15% applies to them.
 
+### Changed
+
+- **The damage breakdown now explains the arrow line.** If you hold a bow, your ammo's ATK is added
+  to *every* weapon skill you use — not just bow skills — so a bow Rogue's borrowed Acid Terror
+  really does hit harder with better arrows. That's how the game works, but the breakdown only said
+  "Ammo ID 1765", which read like a mistake. It now names the arrow and says why it counts.
+
 ### Fixed
 
 - **Ammo counted even when your weapon couldn't fire it.** Equipping a Gunslinger bullet while

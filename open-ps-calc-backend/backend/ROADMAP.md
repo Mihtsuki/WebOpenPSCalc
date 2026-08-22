@@ -1208,6 +1208,33 @@ unmodeled — it needs the target to already carry that status.
   flat DEF-ignoring/accuracy-independent damage add; PF_SPIDERWEB Fire ×2.5 vs webbed target.
 
 ### Confirmed correct (no action — recorded so they aren't re-flagged)
+- **Arrow ATK on a bow user's NON-bow skills is CORRECT** — investigated 2026-08-21 from a player
+  report ("if you add oridecon arrows, it adds damage to acid terror") with a share link. The build
+  was a **bow Rogue casting plagiarised Acid Terror**, which is why an earlier attempt to reproduce
+  it failed: that test used an Alchemist with a mace, where `isRanged` is false and no arrow ATK
+  applies at all. With a bow, Oridecon Arrow (ATK 50) moves Acid Terror 1899 → 2045.
+  That is what the emulator does. `sd->state.arrow_atk` is `weapontype == W_BOW || <guns>` and
+  nothing to do with the skill (`battle.c:6852`); `flag.arrow` is set from it for any player
+  (`battle.c:4890`); the arrow roll is added in `battle_calc_base_damage` behind `flag&2`
+  (`battle.c:661`), and Acid Terror — BF_WEAPON — takes the default `GET_NORMAL_ATTACK(i, …)` path
+  where `i` carries that bit (`battle.c:5520`). Hercules even refuses the attack outright if a bow
+  user has no arrows (`battle->check_arrows`, `battle.c:6855`). wiki.payonstories.com/Acid_Terror
+  agrees in words: "This skill is affected by weapon size penalties, and **benefits from weapon
+  ATK**." An arrow's ATK is a bow user's weapon ATK.
+  Also checked, since it would have been the real bug: **the arrow's ELEMENT does not leak.** PS
+  says "The damage of this skill is always neutral element", and it is — a Fire Arrow build reads
+  474 against Ghost 1 versus 1899 against Water 1, i.e. quartered, which is Neutral behaviour; a
+  Fire hit would not be. The arrow only ever moved damage by a flat amount equal to its ATK.
+  Every other note on that wiki page also matches the implementation: ignores armour DEF but not
+  VIT DEF, hits regardless of Flee, +ATK cards count but %-cards do not, size penalty applies,
+  Axe/Sword Mastery applies.
+  The `Arrow ATK` breakdown step now names the ammo and says a bow adds it to *every* weapon skill,
+  so the next reader can see why it is there instead of filing this again.
+  **Conflict worth knowing**: that same wiki page still lists Acid Terror at **180/260/340/420/500%**,
+  the PRE-rework table. The Alchemist rework PDF (2026-08-09) says "Damage increased from 500% to
+  600% ATK at max level; NEW FORMULA: (100+100*SkillLv)%", which is what the engine implements
+  (200–600%). The wiki page is stale for this skill; the PDF is newer and self-consistent. Do not
+  "fix" the ratio to match the wiki.
 - **The Alchemist damage kit** — audited end-to-end 2026-08-17 against the 2026-08-09 rework PDF and
   Hercules, prompted by a player asking whether the class was implemented. All correct, don't
   re-audit: **Acid Terror** carries the PS rework's `(100+100×SkillLv)%` ATK (600% at its Lv5 max),

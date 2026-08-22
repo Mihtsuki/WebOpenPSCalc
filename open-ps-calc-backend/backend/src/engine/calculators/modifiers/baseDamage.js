@@ -86,7 +86,18 @@ function calculateBaseDamage(status, weapon, build, target, skill, result, opts 
     if (isCrit) pmf = addFlat(pmf, arrowAtk);
     else pmf = convolve(pmf, uniformPmf(0, arrowAtk - 1));
     const [aMin, aMax, aAvg] = pmfStats(pmf);
-    result.add_step({ name: "Arrow ATK", value: aAvg, min_value: aMin, max_value: aMax, note: `Ammo ID ${ammoId}: +${arrowAtk} ATK`, formula: "damage += arrow roll", hercules_ref: "battle.c:658-660" });
+    // Name the ammo and say WHY it counts. This step applies to EVERY weapon skill
+    // a bow/gun user casts, not just bow skills — Hercules sets `flag.arrow` from
+    // `sd->state.arrow_atk`, which is `weapontype == W_BOW || <guns>` and nothing to
+    // do with the skill (battle.c:4890 and 6852). A bow Rogue's plagiarised Acid
+    // Terror therefore gains the arrow's ATK, which reads like a bug without this.
+    const ammoItem = loader.getItem(ammoId);
+    const ammoName = (ammoItem && ammoItem.name) || `ammo ${ammoId}`;
+    result.add_step({
+      name: "Arrow ATK", value: aAvg, min_value: aMin, max_value: aMax,
+      note: `${ammoName}: +${arrowAtk} ATK — a bow or gun adds its ammo's ATK to every weapon skill, not only to bow skills`,
+      formula: "damage += arrow roll", hercules_ref: "battle.c:658-660, 4890, 6852",
+    });
   }
 
   // Weapon Perfection (BS_WEAPONPERFECT) nullifies the size penalty outright —
