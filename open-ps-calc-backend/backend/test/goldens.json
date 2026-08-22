@@ -2100,22 +2100,107 @@
    "matk_max": 684
   },
   "result": {
-   "dps": 901.371,
+   "dps": 896.414,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 9480,
    "normal": {
-    "min": 6161,
-    "max": 10929,
-    "avg": 8545,
+    "min": 6114,
+    "max": 10882,
+    "avg": 8498,
     "steps": [
      "Base MATK",
      "Skill Ratio (ID 85 Lv 10)",
      "Magic Defense Fix",
      "Attr Fix",
      "Card Fix (Magic)",
+     "Final Damage",
+     "Lord of Vermilion — 4 waves"
+    ]
+   }
+  }
+ },
+ "wizard-meteor-storm-lv10": {
+  "status": {
+   "str": 2,
+   "agi": 9,
+   "vit": 2,
+   "int_": 111,
+   "dex": 86,
+   "luk": 3,
+   "batk": 19,
+   "max_hp": 3319,
+   "max_sp": 1901,
+   "aspd": 145.1,
+   "cri": 20,
+   "hit": 185,
+   "flee": 108,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 386,
+   "matk_max": 684
+  },
+  "result": {
+   "dps": 1921.711,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 11266,
+   "normal": {
+    "min": 15365,
+    "max": 27930,
+    "avg": 21650,
+    "steps": [
+     "Base MATK",
+     "Skill Ratio (ID 83 Lv 10)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "× 35 hits",
      "Final Damage"
+    ]
+   }
+  }
+ },
+ "wizard-lord-of-vermillion-lv1-high-mdef": {
+  "status": {
+   "str": 2,
+   "agi": 9,
+   "vit": 2,
+   "int_": 52,
+   "dex": 86,
+   "luk": 3,
+   "batk": 19,
+   "max_hp": 3319,
+   "max_sp": 1369,
+   "aspd": 145.1,
+   "cri": 20,
+   "hit": 185,
+   "flee": 108,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 116,
+   "matk_max": 174
+  },
+  "result": {
+   "dps": 14.825,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 11400,
+   "normal": {
+    "min": 122,
+    "max": 216,
+    "avg": 169,
+    "steps": [
+     "Base MATK",
+     "Skill Ratio (ID 85 Lv 1)",
+     "Magic Defense Fix",
+     "Attr Fix",
+     "Card Fix (Magic)",
+     "Final Damage",
+     "Lord of Vermilion — 4 waves"
     ]
    }
   }

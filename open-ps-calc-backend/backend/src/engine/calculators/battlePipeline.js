@@ -379,6 +379,55 @@ class BattlePipeline {
   }
 
   /**
+   * Lord of Vermilion (WZ_VERMILION) — four waves, not one lump.
+   *
+   * The wiki's table gives only the TOTAL for all four waves (200×lv), and pricing
+   * it as a single hit subtracted the target's SOFT MDEF once where the game
+   * subtracts it four times. Each wave is `(20 × SkillLv × waveNumber)%` MATK, so
+   * at Lv10 the four waves are 200 / 400 / 600 / 800% — escalating, which is why
+   * this cannot be modelled as four equal hits through `magic_hit_counts`.
+   *
+   * Four EQUAL waves of 50×lv would agree to within 2 damage in most cases, since
+   * soft MDEF is a flat per-hit subtraction and everything after it is
+   * multiplicative — but they diverge badly once a single wave floors at minimum
+   * damage, which needs wave 1 (20×lv% MATK) to fall below the target's soft MDEF.
+   * At Lv10 that takes an absurdly low MATK, but at Lv1 wave 1 is only 20% MATK and
+   * the equal-wave shortcut was overstating the loss by up to 97% against a
+   * high-INT target. Measured, not assumed — hence the exact per-wave model here.
+   *
+   * A target takes one hit per wave rather than one per bolt: the wiki ties both
+   * flinch ("1 second per wave that they are hit by") and the Silence roll
+   * ("1% × Skill Level per wave") to waves, not to the 20 bolts each wave draws.
+   * wiki.payonstories.com/Lord_of_Vermilion
+   */
+  _runVermilionBranch(status, weapon, skill, target, build, opts = {}) {
+    const WAVES = 4;
+    let combined = null;
+    let steps = null;
+    const perWave = [];
+    for (let wave = 1; wave <= WAVES; wave++) {
+      const waveBuild = {
+        ...build,
+        skill_params: { ...(build.skill_params || {}), lov_wave: wave },
+      };
+      const r = this._runMagicBranch(status, weapon, skill, target, waveBuild, opts);
+      perWave.push(r);
+      if (steps === null) steps = r.steps.slice();   // wave 1's working, for transparency
+      combined = combined === null ? { ...(r.pmf || {}) } : convolve(combined, r.pmf || {});
+    }
+    const [mn, mx, av] = pmfStats(combined);
+    const result = createDamageResult({ steps, min_damage: mn, max_damage: mx, avg_damage: av, pmf: combined });
+    result.add_step({
+      name: `Lord of Vermilion — ${WAVES} waves`, value: av, min_value: mn, max_value: mx,
+      note: `per-wave damage ${perWave.map((r) => r.avg_damage).join(" + ")} `
+            + `(each wave takes the target's MDEF separately); steps above are wave 1`,
+      formula: "Σ over waves of (20 × SkillLv × waveNumber)% MATK",
+      hercules_ref: "wiki.payonstories.com/Lord_of_Vermilion",
+    });
+    return result;
+  }
+
+  /**
    * PS Auto Spell / "Hindsight" (SA_AUTOSPELL) autocast branch. Given the
    * activated Hindsight level, builds a magic damage result for the mapped spell
    * via the normal magic branch — a uniform pmf mixture over the level's `casts`
@@ -1880,6 +1929,18 @@ class BattlePipeline {
           formula: "", hercules_ref: "",
         }] }),
         dps_valid: false,
+      });
+    }
+
+    if (skillName === "WZ_VERMILION") {
+      const lovResult = this._runVermilionBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
+      let castMs = 0, delayMs = 0;
+      if (skillData) [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
+      const lovPeriod = Math.max(castMs + delayMs, 100);
+      const lovAttacks = [createAttackDefinition(lovResult.avg_damage, 0.0, lovPeriod, 1.0)];
+      return createBattleResult({
+        normal: lovResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
+        dps: calculateDps(lovAttacks), attacks: lovAttacks, period_ms: lovPeriod, dps_valid: true,
       });
     }
 

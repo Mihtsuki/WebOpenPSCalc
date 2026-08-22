@@ -596,7 +596,7 @@
   },
   "4073": {
     "name": "Pirate Skel Card",
-    "description": "Enables Level 5 <font color='#008800'>Discount</font>.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#B40088'> Accessory</font><br/>Weight:<font color='#009900'> 1</font>"
+    "description": "Add a 5% chance of auto<br/>casting <font color='#008800'>Level 1 Mammonite</font><br/>when dealing a physical<br/>attack.<br/>[<font color='#6666CC'>Blacksmith</font>]<br/>If the user has mastered<br/>the skill at level 10, it<br/>casts <font color='#008800'>Level 10 Mammonite</font>.<br/><font color='#6666CC'>Zeny costs apply, as </font><br/><font color='#6666CC'>does Zeny Pincher</font><br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>"
   },
   "4092": {
     "name": "Skel Worker Card",
@@ -633,7 +633,7 @@
     "description": "Agi +2<br/>Add Flee +20 if the garment is upgraded up to +8 or higher.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Garment</font><br/>Weight:<font color='#009900'> 1</font>"
   },
   "4162": {
-    "description": "Add the chance of auto casting <font color='#663399'>Blind</font> on an enemy when the user receives Physical Damage.<br/>If the user is equipped with an item compounded to the <font color='#008800'>Big Foot Card</font>, the blinding chance will be increased.<br/>Hammerfall has 30% chance to blind targets<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Armor</font><br/>Weight:<font color='#009900'> 1</font>"
+    "description": "Add the chance of auto casting <font color='#663399'>Blind</font> on an enemy when the user receives Physical Damage.<br/>If the user is equipped with an item compounded to the <font color='#008800'>Big Foot Card</font>, the blinding chance will be increased.<br/>Hammerfall has 100% chance to blind targets (resistances still apply)<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Armor</font><br/>Weight:<font color='#009900'> 1</font>"
   },
   "4165": {
     "description": "Gain 5 SP each time an Insect monster is killed by Physical Melee Attack.<br/>Drain 5 SP as the weapon is unequipped.<br/>Increases damage dealt to Insect race by 4%<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#FF0000'> Weapon</font><br/>Weight:<font color='#009900'> 1</font>"
@@ -691,7 +691,7 @@
     "description": "MaxHP +300<br/>When base LUK is 77 or higher: Increases natural HP and SP regeneration by 100%.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#6600FF'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>"
   },
   "4248": {
-    "description": "Adds 3% of auto casting <font color='#008800'>Level 5 Signum Crucis</font> on an enemy when attacking.<br/>If the user has mastered the skill at Level 10, it will cast Level 10 Signum Crusis.<br/>[If equipped with an item compounded to the <font color='#008800'>Mummy Card</font>]<br/>Adds/Increases chance of auto-casting Holy Strike by 5% chance when attacking Undead and Shadow Property[Requires the character to hit monster].<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#6666CC'> Shield</font><br/>Weight:<font color='#009900'> 1</font>"
+    "description": "Adds 3% of auto casting <font color='#008800'>Level 3 Signum Crucis</font> on an enemy when attacking.<br/>If the user has mastered the skill at Level 5, it will cast Level 5 Signum Crusis.<br/>[If equipped with an item compounded to the <font color='#008800'>Mummy Card</font>]<br/>If Holy Strike is known, adds a 7% chance for it to activate. Otherwise, set your Holy Strike chance to 7%.<br/>Holy Strike triggers when attacking Undead/Shadow/Ghost element or Undead/Demon race monsters.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#6666CC'> Shield</font><br/>Weight:<font color='#009900'> 1</font>"
   },
   "4259": {
     "description": "Def +1<br/>Increases HP regen by 30%.<br/>Increases the amount of healing received from Heal skills by 10%<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Armor</font><br/>Weight:<font color='#009900'> 1</font>"
@@ -707,7 +707,7 @@
     "description": "Gain 5 SP each time an Undead monster is killed by Physical Melee Attack.<br/>Drain 5 SP as the weapon is unequipped.<br/>Increases damage dealt to Undead race by 4%<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#FF0000'> Weapon</font><br/>Weight:<font color='#009900'> 1</font>"
   },
   "4282": {
-    "description": "Add the chance of gaining a restorative item each time a monster is killed.<br/>Summoned geographers heal amount increased by 25%[Non Stackable].<br/>Geographers no longer attacks.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#B40088'> Accessory</font><br/>Weight:<font color='#009900'> 1</font>"
+    "description": "Add the chance of gaining<br/>a restorative item each<br/>time a monster is killed.<br/>[<font color='#6666CC'>Alchemist</font>]<br/>Geographer <font color='#008800'>Heal</font><br/>increased by 10%<br/>(<font color='#6666CC'>non stackable</font>)<br/>Geographer can<br/>no longer attack<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#B40088'> Accessory</font><br/>Weight:<font color='#009900'> 1</font>"
   },
   "4286": {
     "description": "Add the chance of auto casting 'MailBreaker' effect on an enemy when the user receives Physical Damage.<br/>The chance is increased if the user has 77 or more STR points.<br/>MailBreaker effect: Enemy receives 10% extra damage<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Armor</font><br/>Weight:<font color='#009900'> 1</font>"
@@ -2195,7 +2195,7 @@
   },
   "8219": {
     "_ps_custom": true,
-    "description": "Grants the Blacksmith skill <font color='#6666CC'>Greed</font>.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Accessory</font><br/>Weight:<font color='#009900'> 1</font><br/> <br/><font color='#007c9e'>It's good to be the king.</font>",
+    "description": "Enables the use of Level 1 <font color='#6666CC'>Greed</font>.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Accessory</font><br/>Weight:<font color='#009900'> 1</font><br/> <br/><font color='#007c9e'>It's good to be the king.</font>",
     "name": "King Poring Card",
     "slots": 0
   },
@@ -2237,14 +2237,14 @@
   },
   "8236": {
     "_ps_custom": true,
-    "description": "Increases damage of <font color='#008800'>Raid</font> and <font color='#008800'>Backstab</font> skills by 10%.<br/>Increases HIT by 5.<br/>Reduces Backstab SP cost by 2.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Footgear</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Increases damage of <font color='#008800'>Raid</font> and <font color='#008800'>Backstab</font> skills by 10%.<br/>Increases HIT by 5.<br/>Reduces SP cost of Back Stab and Hiding by 3.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Footgear</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "Yser Card",
     "slots": 0,
     "script": "bonus2 bSkillAtk,RG_BACKSTAP,10; bonus2 bSkillAtk,RG_RAID,10; bonus bHit,5;"
   },
   "8237": {
     "_ps_custom": true,
-    "description": "Has a 20% chance to reduce the zeny cost of <font color='#008800'>Mammonite</font> skill to zero when the skill is used.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Accessory</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Has a 50% chance to make <font color='#008800'></font><br/><font color='#008800'>Mammonite</font> cost no zeny<br/>(<font color='#6666CC'>non stackable</font>).<br/> <br/>[<font color='#6666CC'>Pirate Skeleton +</font><br/><font color='#6666CC'>Flame Beetle Card</font>]<br/>Autocast <font color='#008800'>Mammonite</font> does<br/>not consume zeny and is<br/>unaffected by <font color='#008800'>Zeny Pincher</font><br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Accessory</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "Flame Beetle Card",
     "slots": 0
   },
@@ -2268,7 +2268,7 @@
   },
   "8241": {
     "_ps_custom": true,
-    "description": "Increases damage of <font color='#008800'>Freezing Trap</font> and <font color='#008800'>Claymore Trap</font> by 5%. (Multiple instances of this card will stack.)<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Weapon</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Increases damage of <font color='#008800'>Freezing Trap</font> and <font color='#008800'>Claymore Trap</font> by 5%.<br/>Grants a 10% chance to not consume a Trap when using <font color='#008800'>Freezing Trap</font> and <font color='#008800'>Claymore Trap</font>.<br/>Grants a 10% chance for <font color='#008800'>Freezing Trap</font> and <font color='#008800'>Claymore Trap</font> to become unrecoverable<br/>The effects of this card stack with multiple instances of the same card.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Weapon</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "Dory Card",
     "slots": 0
   },
@@ -2280,13 +2280,13 @@
   },
   "8243": {
     "_ps_custom": true,
-    "description": "Increases damage of <font color='#008800'>Blast Mine</font> and <font color='#008800'>Land Mine</font> by 5%. (Multiple instances of this card will stack.)<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Weapon</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Increases damage of <font color='#008800'>Blast Mine</font> and <font color='#008800'>Land Mine</font> skills by 5%.<br/>Grants a 10% chance to not consume a Trap when using <font color='#008800'>Blast Mine</font> and <font color='#008800'>Land Mine</font><br/>Grants a 10% chance for <font color='#008800'>Blast Mine</font> and <font color='#008800'>Land Mine</font> to become unrecoverable<br/>The effects of this card stack with multiple instances of the same card.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Weapon</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "Wolpertinger Card",
     "slots": 0
   },
   "8244": {
     "_ps_custom": true,
-    "description": "Increases healing power of <font color='#008800'>Sanctuary</font> by 50%. On WoE castle maps, the increased healing is reduced to 20%.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Increases healing of Sanctuary as if it were 2 skill levels higher (this can exceed rank 7). Increases the radius of Sanctuary from 5x5 to 7x7<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#00CC33'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "Moon Rabbit Card",
     "slots": 0
   },
@@ -2909,7 +2909,7 @@
   },
   "8395": {
     "_ps_custom": true,
-    "description": "A small Rekenber dagger that doubles as a tool for placing traps.<br/>Increases All Trap Damage by 20%<br/>Dealing damage with traps increases movement speed for (base INT/10) seconds.<br/>Must be equipped for 5 seconds for this effect to occur<br/>Class:<font color='#6666CC'> Dagger</font><br/>Attack:<font color='#CC0000'> 65</font><br/>Weight:<font color='#009900'> 50</font><br/>Weapon Level:<font color='#009900'> 3</font><br/>Level Requirement:<font color='#009900'> 12</font><br/>Jobs:<font color='#6666CC'> Hunter, Rogue</font>",
+    "description": "A small Rekenber dagger that doubles as a tool for placing traps.<br/>Increases All Trap Damage by 5%<br/>Dealing damage with traps increases movement speed for (base INT/10) seconds.<br/>Must be equipped for 5 seconds for this effect to occur<br/>Class:<font color='#6666CC'> Dagger</font><br/>Attack:<font color='#CC0000'> 65</font><br/>Weight:<font color='#009900'> 50</font><br/>Weapon Level:<font color='#009900'> 3</font><br/>Level Requirement:<font color='#009900'> 12</font><br/>Jobs:<font color='#6666CC'> Hunter, Rogue</font>",
     "name": "Setting Dirk",
     "atk": 65,
     "equip_level": 12,
@@ -4067,7 +4067,7 @@
   },
   "90001": {
     "_ps_custom": true,
-    "description": "Str +1<br/>Gain 3 Spirit spheres each time a monster is killed with <font color='#008800'>Throw Spirit Sphere</font><br/>Reduces 'Throw Spirit Sphere' cast time by 10%.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Str +1<br/><font color='#008800'>Investigate</font> now has a 3 cell pushback added<br/>To its attacks. <font color='#008800'>Finger Offensive</font> now has a<br/>SkillLvl cell pushback added to its attacks.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "SCOUT Card",
     "slots": 0
   },
@@ -4103,7 +4103,7 @@
   },
   "90007": {
     "_ps_custom": true,
-    "description": "Flee +5<br/>Increases damage of <font color='#008800'>Bomb</font> (Demonstration) by 30%.<br/>Increases damage of <font color='#008800'>Acid Terror</font> by 30%.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Footgear</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Increases damage of <font color='#008800'></font><br/><font color='#008800'>Demonstration</font> and<br/><font color='#008800'>Acid Terror</font> by 10%.<br/>Reduces the cooldown of <font color='#008800'></font><br/><font color='#008800'>Demonstration</font> by <br/>2 seconds.<br/>Flee +5<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Footgear</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "FUEL Card",
     "slots": 0
   },
@@ -4145,7 +4145,7 @@
   },
   "90014": {
     "_ps_custom": true,
-    "description": "Increases the damage dealt by Cart Revolution by 8%.<br/>Additionally, Cart Revolution will no longer cause knock back effect<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Shoes</font><br/>Weight:<font color='#009900'> 1</font>",
+    "description": "Increases the damage dealt<br/>by <font color='#008800'>Cart Revolution</font> by 10%.<br/><font color='#008800'>Cart Revolution</font> no longer<br/>causes knockback.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Shoes</font><br/>Weight:<font color='#009900'> 1</font>",
     "name": "Pill Bug Card",
     "slots": 0
   },
@@ -4265,7 +4265,7 @@
   },
   "90071": {
     "_ps_custom": true,
-    "description": "Stone shield taken from a broken desert statue.<br/>Strangely, it gets heavier the more it is polished<br/>Increase damage of Shield Boomerang by 5% per refine<br/>Class:<font color='#6666CC'> Shield</font><br/>Defense:<font color='#0000FF'> 2</font><br/>Weight:<font color='#009900'> 150</font><br/>Jobs:<font color='#6666CC'> Crusader</font>",
+    "description": "Stone shield taken from a broken desert statue.<br/>Strangely, it gets heavier the more it is polished<br/>Increase damage of Shield Boomerang and Shield Charge by 5% per refine<br/>Class:<font color='#6666CC'> Shield</font><br/>Defense:<font color='#0000FF'> 2</font><br/>Weight:<font color='#009900'> 150</font><br/>Jobs:<font color='#6666CC'> Crusader</font>",
     "name": "Stone Discus",
     "def": 2,
     "slots": 1,
@@ -4276,7 +4276,7 @@
     "script": "bonus bDef,1; bonus bVitDef,10; if(readparam(bVit)>77){bonus bVitDef,10;}"
   },
   "4261": {
-    "description": "Def +1.<br/>Increases Magnum Break fire element duration by 2 seconds per Magnum Break skill level.<br/>[Swordsman class] Increases by 11 seconds per skill level instead.<br/>Class: Card<br/>Compound on: Headgear<br/>Weight: 1",
+    "description": "Def +1<br/>Increases <font color='#008800'>Magnum Break</font> duration by<br/>(2 * Skill Level) seconds, and its effect to 30%<br/>[<font color='#6666CC'>Swordman classes</font>]<br/>Increases duration by<br/>(11 * Skill Level) seconds instead.<br/>Unequipping this item removes the <font color='#008800'>Magnum Break</font> effect.<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#6600FF'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>",
     "script": "bonus bDef,1;"
   },
   "90078": {

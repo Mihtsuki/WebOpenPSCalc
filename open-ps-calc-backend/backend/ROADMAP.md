@@ -318,6 +318,44 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Meteor Storm and Lord of Vermilion: the two multi-hit gaps from the 2026-08-22
+  audit, now closed** — plus the 15 stale item tooltips it found.
+  - **Meteor Storm** was pricing Lv10 at **5 hits instead of 35**. `skills.json`
+    `number_of_hits` ([1,1,2,2,3,3,4,4,5,5]) is only the wiki's *Hits/Meteor* column;
+    the **meteor count** scales too (2,3,3,4,4,5,5,6,6,7) and we ignored it. Now a
+    `magic_hit_counts` entry of meteors × hits ([2,3,6,8,12,15,20,24,30,35]). A target
+    takes every meteor: they land on random cells of a 5×5 grid but each carries a 7×7
+    AoE (±3), so even a corner meteor covers the centre — the same all-hits-land
+    assumption already used for Storm Gust.
+  - **Lord of Vermilion** was one lump, so the target's **soft MDEF was subtracted
+    once where the game subtracts it four times**. It lands in 4 waves of
+    `(20 × lv × waveNumber)%` — 200/400/600/800% at Lv10, summing to the wiki table's
+    200×lv total, which is why the total was right and the mitigation wasn't. A target
+    takes one hit per *wave*, not per bolt: the wiki ties both flinch ("1 second per
+    wave that they are hit by") and the Silence roll ("1% × Skill Level per wave") to
+    waves. **The waves escalate, so this could not go through `magic_hit_counts`** —
+    hence `_runVermilionBranch`, which runs the magic branch once per wave and
+    convolves. Four EQUAL waves of 50×lv looked equivalent (soft MDEF is a flat
+    per-hit subtraction and everything after is multiplicative) and I nearly shipped
+    that, but measuring it showed the two diverge once a single wave floors at minimum
+    damage — wave 1 is only 20×lv% MATK, so at **Lv1 the shortcut understated damage
+    by up to 97%** against a high-INT target. Verified against a hand-written exact
+    reference across MATK 60-535 × Lv 1/5/10 × soft MDEF 0/90/150.
+  - Golden movement on the existing LoV scenario is **−47 (−0.55%)**, exactly the 3
+    extra soft-MDEF subtractions. Two scenarios added, including LoV **Lv1 vs a
+    high-INT target** — the case the shortcut got wrong.
+  - **All 15 stale item tooltips synced** to the live item API via a new repeatable
+    `tools/audit/sync_descriptions.py` (descriptions only — scripts are hand-authored
+    and were the correct half in every one of these). Doing it turned up two things a
+    text-only sync would have buried: **Stone Discus** also boosts **Shield Charge**
+    per the API (the Crusader PDF named only Shield Boomerang; the API is the later
+    source and has precedent for carrying terms the PDFs omit), which is a real script
+    gap now fixed; and **Pirate Skel Card's override description was another card's
+    text entirely** ("Enables Level 5 Discount"), hidden until now because its manual
+    description shadowed it. Setting Dirk (trap 5%) and Pill Bug (Cart Revolution 10%)
+    were checked the same way and their scripts were already right — only the text lied.
+    `audit_items.py` now reports **0 drift, 0 unimplemented**.
+
 - **Full skill + item audit against the wiki, the scraped PS DB and the rework PDFs
   (2026-08-22).** Pulled all 399 base/2nd-job wiki pages as raw wikitext through the wiki's
   MediaWiki API (`wiki.payonstories.com/api.php` is open — no HTML scraping, no summarising),

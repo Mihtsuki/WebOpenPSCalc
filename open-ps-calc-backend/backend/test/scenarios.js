@@ -250,6 +250,23 @@ const scenarios = [
     target: 1036,
   },
   {
+    // Meteor Storm — the meteor COUNT scales as well as hits-per-meteor, so Lv10 is
+    // 7 meteors x 5 hits = 35 hits of 100% MATK, not the 5 we used to price.
+    name: "wizard-meteor-storm-lv10",
+    build: { job_id: 9, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 1, vit: 1, int: 99, dex: 80, luk: 1 }, equipped: { right_hand: 1601 } },
+    skill: { name: "WZ_METEOR", level: 10 },
+    target: 1036,
+  },
+  {
+    // Lord of Vermilion at a LOW rank against a high-INT target — the case where
+    // four equal waves diverge from the real escalating ones, because wave 1 is
+    // only 20% MATK and floors against soft MDEF.
+    name: "wizard-lord-of-vermillion-lv1-high-mdef",
+    build: { job_id: 9, base_level: 99, job_level: 50, base_stats: { str: 1, agi: 1, vit: 1, int: 40, dex: 80, luk: 1 }, equipped: { right_hand: 1601 } },
+    skill: { name: "WZ_VERMILION", level: 1 },
+    target: 1036,
+  },
+  {
     name: "sage-soul-strike-vs-undead",
     build: { job_id: 16, base_level: 90, job_level: 50, base_stats: { str: 1, agi: 40, vit: 30, int: 99, dex: 70, luk: 10 }, equipped: { right_hand: 1601 }, mastery_levels: { MG_SOULSTRIKE: 10 } },
     skill: { name: "MG_SOULSTRIKE", level: 10 },

@@ -41,6 +41,29 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Meteor Storm was worth a fraction of its real damage.** The calculator counted how many
+  times each meteor hits but not how many meteors fall — at level 10 that's 7 meteors of 5 hits
+  each, so it was pricing 5 hits where the spell lands 35. Meteors drop on random cells but each
+  one's blast is wider than the area they drop in, so anything standing in the middle catches all
+  of them. Meteor Storm now shows what it actually does, and it is a lot.
+
+- **Lord of Vermilion ignored most of the target's magic defence.** It lands in four waves of
+  rising strength, and defence is subtracted from each wave separately — but the calculator
+  delivered the whole spell as a single hit, so the target's soft MDEF came off once instead of
+  four times. The total damage was right; the mitigation wasn't. The breakdown now shows all four
+  waves. Against a typical target this costs about half a percent, but it matters much more at low
+  skill levels, where the first wave is small enough to be wiped out by defence entirely.
+
+- **Fifteen items showed the wrong text.** Their damage was always correct — the effect scripts are
+  maintained by hand while the descriptions are copied from the server — but the tooltips had
+  fallen behind: FUEL Card still said 30% (it's 10%), Flame Beetle 20% (it's 50%), Tengu 25% (it's
+  10%), Ancient Mummy the wrong Signum Crucis levels, and Pirate Skel Card was showing a completely
+  different card's text. All now match the server.
+
+- **Stone Discus wasn't boosting Shield Charge.** It gives 5% per refine to Shield Boomerang *and*
+  Shield Charge; only the first was implemented.
+
+
 - **Tracking was doing more damage than it should.** The Gunslinger skill was priced at
   100% + 160% per level; Payon Stories' own release notes say a flat 160% per level, so 1600% at
   Lv10 rather than 1700%. The wiki's table backed the old number, but it disagrees with the prose

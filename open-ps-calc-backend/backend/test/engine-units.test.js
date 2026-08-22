@@ -2001,3 +2001,42 @@ test("items audited against the live PS item API", () => {
   assert.ok(/bMdef\s*,\s*4/.test(script(18656)), "MDEF is 4 per the item API, not 10");
   assert.ok(!/bStr|bInt/.test(script(18656)), "STR/INT are not in the PS description");
 });
+
+// ---------------------------------------------------------------------------
+// Multi-hit magic: the hit COUNT is where these two used to go wrong
+// ---------------------------------------------------------------------------
+test("Meteor Storm counts meteors as well as hits per meteor", () => {
+  // skills.json number_of_hits is only the hits-per-meteor column; the meteor
+  // count scales too, and ignoring it priced Lv10 at 5 hits instead of 35.
+  const f = PS.magic_hit_counts.WZ_METEOR;
+  assert.deepEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(f), [2, 3, 6, 8, 12, 15, 20, 24, 30, 35],
+    "meteors x hits/meteor per the wiki table");
+});
+
+test("Lord of Vermilion lands as four escalating waves, each taking MDEF", () => {
+  const cfg = createBattleConfig();
+  const ratio = PS.magic_ratios.WZ_VERMILION;
+  const wave = (lv, w) => ratio(lv, null, { skill_params: { lov_wave: w } });
+  // (20 x lv x waveNumber)% — 200/400/600/800 at Lv10, summing to the wiki total.
+  assert.deepEqual([1, 2, 3, 4].map((w) => wave(10, w)), [200, 400, 600, 800]);
+  assert.equal([1, 2, 3, 4].reduce((a, w) => a + wave(10, w), 0), 2000);
+  // Any path that misses the wave branch must still price the whole spell, not a quarter.
+  assert.equal(ratio(10, null, { skill_params: {} }), 2000, "no-wave fallback is the full total");
+
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 9, base_level: 99, job_level: 50,
+    base_stats: { str: 1, agi: 1, vit: 1, int: 99, dex: 80, luk: 1 },
+    equipped: { right_hand: 1601 },
+  });
+  const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+  const id = loader.getSkillByName("WZ_VERMILION").id;
+  const hit = (softMdefInt) => new BattlePipeline(cfg).calculate(
+    st, w, createSkillInstance({ id, level: 10 }),
+    createTarget({ element: 0, element_level: 1, race: "RC_Formless", size: "Size_Medium",
+                   def_: 0, def2: 0, mdef_: 0, int_: softMdefInt, vit: 0, level: 80, hp: 999999 }),
+    eff, gb).normal.avg_damage;
+
+  // Soft MDEF is a flat per-hit subtraction, so four waves must cost 4x it — this
+  // is the whole point of the change. One lump would only lose 90.
+  assert.equal(hit(0) - hit(90), 4 * 90, "soft MDEF is subtracted once per wave");
+});

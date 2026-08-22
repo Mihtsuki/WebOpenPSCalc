@@ -25,7 +25,7 @@
    "EQP_HEAD_TOP",
    "EQP_HEAD_MID"
   ],
-  "description": "Adds a 5% chance of autocasting level 1 <font color='#008800'>Mammonite</font><br/>when dealing a physical attack. Zeny costs apply, as well as Zeny<br/>Pincher.<br/>[<font color='#6666CC'>Blacksmith</font>]<br/>If the user has mastered the skill at 10, it will cast level 10<br/><font color='#008800'>Mammonite</font>,<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#6600FF'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>",
+  "description": "Add a 5% chance of auto<br/>casting <font color='#008800'>Level 1 Mammonite</font><br/>when dealing a physical<br/>attack.<br/>[<font color='#6666CC'>Blacksmith</font>]<br/>If the user has mastered<br/>the skill at level 10, it<br/>casts <font color='#008800'>Level 10 Mammonite</font>.<br/><font color='#6666CC'>Zeny costs apply, as </font><br/><font color='#6666CC'>does Zeny Pincher</font><br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Headgear</font><br/>Weight:<font color='#009900'> 1</font>",
   "script": "if(Class==10 || Class==4011) { bonus3 bAutoSpell,MC_MAMMONITE,1+9*(getskilllv(MC_MAMMONITE)==10),50; } else { bonus3 bAutoSpell,MC_MAMMONITE,1,50; }"
  },
  "2111": {
@@ -1348,7 +1348,7 @@
   "slots": 0,
   "aegis_name": "PILL_BUG_Card",
   "_note": "PS Merchant rework 2026-08-09: Cart Revolution damage 8% -> 10%, to line up with the other +% skill-damage shoe cards. (The no-knockback rider is not a damage effect.) The scraped description still said 8%, contradicting the script on screen now that equipped cards show their description on hover — refreshed here, verbatim from the live PS item API (checked 2026-08-12), which reads 10%.",
-  "description": "Increases the damage dealt by <font color='#008800'>Cart Revolution</font> by 10%.<br/>Additionally, <font color='#008800'>Cart Revolution</font> will no longer cause knock back effect<br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Shoes</font><br/>Weight:<font color='#009900'> 1</font>",
+  "description": "Increases the damage dealt<br/>by <font color='#008800'>Cart Revolution</font> by 10%.<br/><font color='#008800'>Cart Revolution</font> no longer<br/>causes knockback.<br/> <br/>Class:<font color='#6666CC'> Card</font><br/>Compound on:<font color='#008C99'> Shoes</font><br/>Weight:<font color='#009900'> 1</font>",
   "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,10;"
  },
  "90015": {
@@ -2290,7 +2290,8 @@
    4015
   ],
   "refineable": true,
-  "script": "bonus2 bSkillAtk,\"CR_SHIELDBOOMERANG\",getrefine()*5;"
+  "script": "bonus2 bSkillAtk,\"CR_SHIELDBOOMERANG\",getrefine()*5; bonus2 bSkillAtk,\"CR_SHIELDCHARGE\",getrefine()*5;",
+  "_note": "Live item API: \"Increase damage of Shield Boomerang and Shield Charge by 5% per refine\". The Crusader rework PDF named only Shield Boomerang, but the API is the later source and has precedent for carrying terms the PDFs never mentioned (the Pirate Skel + Flame Beetle combo). Shield Charge added 2026-08-22."
  },
  "91047": {
   "type": "IT_ARMOR",

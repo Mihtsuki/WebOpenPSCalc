@@ -303,6 +303,23 @@ const PS_MAGIC_HIT_COUNTS = {
   // Fire Wall (MG_FIREWALL): the wall has 2 + skill level burn-cells, each 50%
   // MATK — models a target crossing the full wall. wiki.payonstories.com/Fire_Wall.
   MG_FIREWALL: (lv) => 2 + lv,
+  // Meteor Storm: skills.json number_of_hits ([1,1,2,2,3,3,4,4,5,5]) is only the
+  // HITS PER METEOR column — the METEOR COUNT scales too (2,3,3,4,4,5,5,6,6,7),
+  // and we were ignoring it, pricing Lv10 at 5 hits instead of 35.
+  // A target takes every meteor: they land on random cells of a 5x5 grid but each
+  // has a 7x7 AoE (±3 cells), so a meteor at the far corner of that grid (±2) still
+  // covers the centre. Same all-hits-land assumption already used for Storm Gust.
+  // wiki.payonstories.com/Meteor_Storm.
+  WZ_METEOR: (lv) => [2, 3, 6, 8, 12, 15, 20, 24, 30, 35][Math.min(Math.max(lv, 1), 10) - 1],
+  // Lord of Vermilion lands in 4 waves. Its wiki table gives the TOTAL for all four
+  // (200×lv), which is what the ratio below still sums to — but delivering it as a
+  // single lump subtracted the target's SOFT MDEF once instead of four times, which
+  // overstated the spell against high-MDEF targets. Per-wave silence and flinch
+  // ("1 second per wave that they are hit by") confirm a target takes one hit per
+  // wave, not one per bolt. wiki.payonstories.com/Lord_of_Vermilion.
+  // Each wave is ONE hit on a given target; the four waves are summed by
+  // _runVermilionBranch, which is what applies MDEF four times.
+  WZ_VERMILION: () => 1,
 };
 
 // Mechanic flag sentinels — checked by individual modifiers across the engine.
@@ -590,7 +607,22 @@ const PS_BF_MAGIC_RATIOS = {
   },
   // wiki.payonstories.com/Lord_of_Vermillion: 4 waves, each wave deals
   // 20%×lv×wave# MATK. Total = 20×lv×(1+2+3+4) = 200×lv (2000% at lv10).
-  WZ_VERMILION: (lv) => 200 * lv,
+  // PER WAVE, with magic_hit_counts.WZ_VERMILION = 4 waves; 50×lv × 4 = the wiki
+  // table's 200×lv total. The real waves escalate — (20 × lv × waveNumber)%, so
+  // 200/400/600/800% at Lv10 — but soft MDEF is a FLAT per-hit subtraction and
+  // every later step is multiplicative, so four equal waves and four escalating
+  // ones summing to the same total give the same damage. They diverge only if a
+  // single wave would floor at minimum damage, which needs wave 1 (20×lv% MATK)
+  // to fall below the target's soft MDEF — outside any realistic Wizard build.
+  // (20 × lv × waveNumber)% for the wave named by skill_params.lov_wave, which
+  // _runVermilionBranch sets as it walks waves 1-4. With no wave set — any path
+  // that reaches the plain magic branch — it falls back to the wiki table's TOTAL
+  // for all four waves, so a stray call still lands on the right overall number
+  // rather than silently pricing a quarter of the spell.
+  WZ_VERMILION: (lv, tgt, ctx) => {
+    const wave = ctx && ctx.skill_params ? ctx.skill_params.lov_wave : null;
+    return wave ? 20 * lv * wave : 200 * lv;
+  },
   // Priest/Acolyte rework: Magnus Exorcismus deals full damage (100% MATK/hit) to
   // Undead(9)/Ghost(8) element and Undead/Demon race; 50% otherwise. (Previously
   // only Undead element + Demon race were treated as valid.)
