@@ -662,6 +662,14 @@ label {
   color: var(--text-faint); cursor: help;
 }
 .coin-spend--short { color: var(--crit); }
+
+/* Inline caveat under a target-panel control: the setting is legal, but this build
+   cannot actually produce it. --crit because it means the number above is optimistic. */
+.field-warn {
+  display: block; margin-top: 0.3rem;
+  font-size: 0.7rem; line-height: 1.4;
+  color: var(--crit);
+}
 .stat-pts-counter { margin-left: auto; font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.45rem; }
 .stat-pts-counter--low  { color: var(--accent); }
 .stat-pts-counter--over { color: var(--crit); }

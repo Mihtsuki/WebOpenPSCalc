@@ -898,6 +898,19 @@ export default function BuildEditor() {
   }), [sanitizedBuild, skill.id, skill.level, targetMode, data.target_mob_id, customTarget]);
 
   // Signum Crucis only works on Undead and Demon targets.
+  // Rust-Worn Apparatus (81012): "[Base INT >= 70] Freezing Trap applies Slow instead
+  // of Freeze." The engine has no link between a trap and the Frozen target status —
+  // Frozen is a manual toggle — so a Hunter who ticks it INTENDING to freeze with
+  // Freezing Trap would be pricing a state this build cannot produce, and Frozen is
+  // worth a lot (element forced to Water, hard DEF halved, auto-hit). Warn rather
+  // than block: the target can still be frozen by something else entirely, a party
+  // Wizard's Frost Diver among them.
+  const RUST_WORN_APPARATUS = 81012;
+  const freezingTrapCantFreeze = useMemo(() => {
+    const wearing = Object.values(data.equipped || {}).some((v) => Number(v) === RUST_WORN_APPARATUS);
+    return wearing && (Number(data.base_stats?.int) || 0) >= 70;
+  }, [data.equipped, data.base_stats]);
+
   const signumApplicable = useMemo(() => {
     // Signum Crucis affects Undead-ELEMENT (idx 9) or Demon-RACE targets.
     if (targetMode === "custom") {
@@ -3216,6 +3229,12 @@ export default function BuildEditor() {
                 <option value="Frozen">Frozen (→ Water, −50% hard DEF, auto-hit)</option>
                 <option value="Stone">Stone Curse (→ Earth, −50% hard DEF, auto-hit)</option>
               </select>
+              {targetMods.element_status === "Frozen" && freezingTrapCantFreeze && (
+                <span className="field-warn">
+                  Rust-Worn Apparatus at 70+ base INT makes your Freezing Trap apply Slow, not
+                  Freeze — this target won't be frozen by it.
+                </span>
+              )}
             </div>
 
             <div className="field">

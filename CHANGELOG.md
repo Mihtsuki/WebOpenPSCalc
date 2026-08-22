@@ -50,8 +50,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 - **Rust-Worn Apparatus had no description.** Hovering it showed nothing. Its text is now in place,
   from the official item database. Its Perfect Dodge +2 was working the whole time — see above for
-  why you couldn't see it. (Its "Freezing Trap applies Slow instead of Freeze" effect at 70+ base
-  INT is still not modelled; that changes a status, not damage.) Reported by a player.
+  why you couldn't see it. Reported by a player.
+
+- **The calculator now warns when your own gear stops you freezing a target.** Rust-Worn Apparatus
+  at 70+ base INT makes Freezing Trap apply Slow instead of Freeze. Frozen is a big deal in the
+  target panel — it forces the target to Water, halves its hard DEF and makes you always hit — so a
+  Hunter who ticked **Frozen** planning to freeze with their own trap was reading a number their
+  build can't actually produce. Selecting Frozen while wearing that item now says so. It's a note,
+  not a block: something else can still freeze the target, a party Wizard's Frost Diver included.
 
 - **Arrows added damage to skills that don't use arrows.** Holding a bow made your ammo's ATK count
   towards *every* skill, when in game it only counts for skills that actually fire ammo. The clearest
