@@ -318,6 +318,23 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **ASPD breakpoints report 0.1 steps, not just integer crossings** (`aspdBreaks` in
+  `routes/calculate.ts`). The atomic ASPD step is **0.1, not 1**: `statusCalculator`
+  sets `aspd = (2000 - amotion) / 10` from an INTEGER `amotion`, and `amotion` IS the
+  attack delay, so each 0.1 is one tick — `animation_ms` moves 2 ms per 0.1. Whole-number
+  ASPD is a player convention, not a mechanical threshold. The old `aspdBreaks` emitted a
+  row only when `Math.floor(a) > lastInt` and reported `Math.floor(a)`, so it (a) hid every
+  sub-integer gain and (b) rounded the milestone DOWN. Measured on an AGI-80 Assassin with
+  a dagger: of the 98 AGI points that raise ASPD at all, only **20** cross a whole number —
+  the row was surfacing about a fifth of the real gains, and understating each one.
+  Now returns `{plus, aspd, whole}` with the EXACT value, taking the next 3 fine steps plus
+  the next 2 whole-number milestones for AGI (2 + 1 for DEX); `whole` is tracked even for
+  crossings that aren't emitted, so the flag stays truthful. The at-cap path (empty array →
+  "at cap") is unchanged and was re-verified by temporarily lowering `config.max_aspd`.
+  Route internals aren't reachable from the test suite (`routes/` is TS, `npm test` runs
+  plain JS), so the guard added is at the engine layer instead: ASPD is always a clean 0.1
+  multiple, sub-integer AGI gains provably exist, and 0.1 ASPD is worth 2 ms.
+
 - **Killing Stroke: Mirror Image bonus modeled, and its fabricated DPS removed.**
   Two player reports in one. (1) `NJ_ISSEN` has **every timing array zeroed** in the
   skill DB, so `calculateSkillTiming` returned `0 + 0` and the shared

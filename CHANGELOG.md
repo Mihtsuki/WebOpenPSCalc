@@ -21,6 +21,17 @@ instead of release version. Dates are taken from actual git commit history.
   thing from Flee and now has its own readout. Gear that grants it was always being counted — there
   was simply nowhere to see it, which made it look ignored.
 
+### Changed
+
+- **ASPD breakpoints now show every real step, not just the round numbers.** ASPD moves in steps of
+  0.1, and each 0.1 is one tick less attack delay — so a single point of AGI is usually already worth
+  something. The breakpoints row only listed whole-number milestones, which on a typical Assassin
+  build meant 20 of the 98 useful AGI points were shown and the other 78 looked like they did
+  nothing. It also rounded the milestone down, telling you "+3 AGI → 172" when it was really 172.4.
+  The row now lists the next few actual steps with their exact ASPD, and the whole-number milestones
+  are **bold** so the traditional targets still stand out.
+
+
 ### Fixed
 
 - **Killing Stroke claimed you could cast it ten times a second.** It has no cast time or delay

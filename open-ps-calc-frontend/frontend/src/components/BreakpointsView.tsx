@@ -47,20 +47,40 @@ export function BreakpointsView({ payload, targetName, skillLabel, skillLevel }:
   );
 }
 
+// One ASPD breakpoint list. Every entry is a real 0.1-ASPD gain (one tick of attack
+// delay); the whole-number ones are bolded because that's the number players aim at.
+function AspdSteps({ steps, stat }: { steps: { plus: number; aspd: number; whole: boolean }[]; stat: string }) {
+  return (
+    <>
+      {steps.map((b, i) => (
+        <span key={`${stat}-${b.plus}`}>
+          {i > 0 ? " · " : ""}
+          +{b.plus} {stat} → {b.whole ? <b>{b.aspd.toFixed(1)}</b> : b.aspd.toFixed(1)}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function BreakpointsBody({ bp, targetName, skillLabel, skillLevel }: { bp: Breakpoints; targetName?: string | null; skillLabel?: string | null; skillLevel?: number | null }) {
   const { aspd, cast, hit, int } = bp;
   return (
     <div className="bp-body">
       <div className="bp-row">
         <span className="bp-k">ASPD</span>
-        <span className="bp-v">
+        <span
+          className="bp-v"
+          title="ASPD moves in steps of 0.1, and each 0.1 is one tick less attack delay (2 ms), so every step here is a real gain — you don't have to reach a round number to benefit. The bold entries are the whole-number milestones."
+        >
           <b>{aspd.current.toFixed(1)}</b>
           {aspd.agi.length ? (
-            <> — {aspd.agi.map((b) => `+${b.plus} AGI → ${b.aspd}`).join(" · ")}</>
+            <> — <AspdSteps steps={aspd.agi} stat="AGI" /></>
           ) : (
             <span className="bp-sub"> — at cap</span>
           )}
-          {aspd.dex.length ? <span className="bp-sub"> · or {aspd.dex.map((b) => `+${b.plus} DEX → ${b.aspd}`).join(" · ")}</span> : null}
+          {aspd.dex.length ? (
+            <span className="bp-sub"> · or <AspdSteps steps={aspd.dex} stat="DEX" /></span>
+          ) : null}
         </span>
       </div>
 

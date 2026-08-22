@@ -1925,3 +1925,42 @@ test("Killing Stroke takes the Mirror Image bonus and reports no DPS", () => {
                run({ SC_NJ_NEN: 5, SC_NJ_BUNSINJYUTSU: 5 }).normal.avg_damage, "capped at 5 images");
   assert.ok(!plain.normal.steps.some((st) => /Mirror Image/.test(st.name)), "no step when the buff is off");
 });
+
+// ---------------------------------------------------------------------------
+// ASPD granularity — the premise behind the /breakpoints ASPD rows
+// ---------------------------------------------------------------------------
+test("ASPD steps in 0.1, and each step is a real 2 ms of attack delay", () => {
+  const cfg = createBattleConfig();
+  const aspdAt = (agi) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 12, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi, vit: 30, int: 20, dex: 60, luk: 20 },
+      equipped: { right_hand: 1201 },
+    });
+    return Number(resolvePlayerState(b, cfg, PS)[3].aspd);
+  };
+
+  // statusCalculator derives aspd = (2000 - amotion) / 10 from an INTEGER amotion,
+  // so every reachable ASPD is an exact multiple of 0.1 — never 172.35.
+  for (let agi = 1; agi <= 99; agi += 7) {
+    const a = aspdAt(agi);
+    assert.equal(Math.round(a * 10), a * 10, `ASPD ${a} at AGI ${agi} is not a clean 0.1 step`);
+  }
+
+  // The breakpoints route used to report only whole-number crossings, which hid
+  // every sub-integer gain. Prove those gains exist: somewhere in this range one
+  // point of AGI raises ASPD WITHOUT reaching the next integer. If this ever stops
+  // being true, showing decimal steps would be pointless.
+  let subInteger = 0;
+  for (let agi = 1; agi < 99; agi++) {
+    const lo = aspdAt(agi), hi = aspdAt(agi + 1);
+    if (hi > lo && Math.floor(hi) === Math.floor(lo)) subInteger++;
+  }
+  assert.ok(subInteger > 0, "expected AGI steps that gain ASPD without crossing an integer");
+
+  // And those gains are real, not cosmetic: the attack-delay formula in
+  // routes/calculate.ts is 2 * max(100, round(2000 - aspd*10)), so 0.1 ASPD is 2 ms.
+  const delay = (a) => 2 * Math.max(100, Math.round(2000 - a * 10));
+  assert.equal(delay(170.7) - delay(170.8), 2, "0.1 ASPD must be worth 2 ms");
+  assert.equal(delay(170.7) - delay(171.7), 20, "1.0 ASPD must be worth 20 ms");
+});

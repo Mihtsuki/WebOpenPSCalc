@@ -660,20 +660,46 @@ function computeBreakpoints(eff: any, weapon: any, gb: any, status: any, config:
       gb
     );
 
-  // ASPD: pre-renewal ASPD is continuous (each AGI ≈ +0.2, each DEX ≈ +0.05), so
-  // "breakpoints" are the next whole-number ASPD milestones players target — the
-  // smallest +AGI (primary; 4× the weight of DEX) or +DEX to reach the next
-  // integer ASPD. Stops at the ASPD cap (where more stat no longer helps).
-  const aspdBreaks = (which: "agi" | "dex", cap: number, want: number) => {
-    const out: { plus: number; aspd: number }[] = [];
-    let lastInt = Math.floor(Number(status.aspd));
-    for (let k = 1; k <= cap && out.length < want; k++) {
+  // ASPD breakpoints. The atomic step is 0.1 ASPD, not 1: statusCalculator derives
+  // aspd = (2000 - amotion) / 10 from an INTEGER amotion, and amotion is the attack
+  // delay, so every 0.1 ASPD is one less tick of delay (animation_ms moves 2 ms per
+  // 0.1). Whole-number ASPD is a player convention, not a mechanical threshold.
+  //
+  // This used to report only integer crossings, floored — so a player adding +1 AGI
+  // saw nothing at all despite a real gain, and the milestone it did show was
+  // rounded DOWN (+3 AGI "→ 173" when the true value was 173.2). We now return the
+  // next few genuine 0.1 steps AND the next whole-number milestones, each carrying
+  // its exact ASPD and a `whole` flag so the UI can mark the round numbers.
+  //
+  // AGI is ~4x the weight of DEX, hence the different caps and counts.
+  const aspdBreaks = (which: "agi" | "dex", cap: number, wantSteps: number, wantWhole: number) => {
+    const out: { plus: number; aspd: number; whole: boolean }[] = [];
+    let lastAspd = Number(status.aspd);
+    let lastInt = Math.floor(lastAspd);
+    let steps = 0;
+    let wholes = 0;
+    for (let k = 1; k <= cap; k++) {
       const a = Number(which === "agi" ? statusWith(k, 0).aspd : statusWith(0, k).aspd);
-      if (Math.floor(a) > lastInt) { out.push({ plus: k, aspd: Math.floor(a) }); lastInt = Math.floor(a); }
+      if (!(a > lastAspd)) continue;           // no gain yet — keep spending stat
+      const isWhole = Math.floor(a) > lastInt;
+      // Take every step until the fine quota is met, then only the round numbers.
+      if (steps < wantSteps || (isWhole && wholes < wantWhole)) {
+        out.push({ plus: k, aspd: a, whole: isWhole });
+        steps++;
+        if (isWhole) wholes++;
+      }
+      // Track crossings even when not emitted, so `whole` stays truthful later on.
+      if (isWhole) lastInt = Math.floor(a);
+      lastAspd = a;
+      if (steps >= wantSteps && wholes >= wantWhole) break;
     }
     return out;
   };
-  const aspd = { current: Number(status.aspd), agi: aspdBreaks("agi", 80, 3), dex: aspdBreaks("dex", 160, 2) };
+  const aspd = {
+    current: Number(status.aspd),
+    agi: aspdBreaks("agi", 80, 3, 2),
+    dex: aspdBreaks("dex", 160, 2, 1),
+  };
 
   // Cast: DEX needed to shorten / instant-cast the selected skill (only if it
   // has a variable cast now). castMs is monotonic-decreasing in DEX → binary

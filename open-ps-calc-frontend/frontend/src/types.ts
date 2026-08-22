@@ -133,8 +133,10 @@ export interface UrlEditorState {
 export interface Breakpoints {
   aspd: {
     current: number;
-    agi: { plus: number; aspd: number }[];
-    dex: { plus: number; aspd: number }[];
+    // `aspd` is the EXACT value reached (1 decimal — the atomic step is 0.1, which
+    // is one tick of attack delay). `whole` marks the round-number milestones.
+    agi: { plus: number; aspd: number; whole: boolean }[];
+    dex: { plus: number; aspd: number; whole: boolean }[];
   };
   cast: {
     skill: string;
