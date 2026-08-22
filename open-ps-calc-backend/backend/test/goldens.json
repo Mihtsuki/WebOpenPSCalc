@@ -5003,6 +5003,58 @@
    }
   }
  },
+ "bow-rogue-acid-terror-ignores-arrow": {
+  "status": {
+   "str": 7,
+   "agi": 101,
+   "vit": 7,
+   "int_": 30,
+   "dex": 106,
+   "luk": 1,
+   "batk": 207,
+   "max_hp": 5070,
+   "max_sp": 656,
+   "aspd": 168.1,
+   "cri": 13,
+   "hit": 205,
+   "flee": 200,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 46,
+   "matk_max": 66
+  },
+  "result": {
+   "dps": 2841.693,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 638,
+   "normal": {
+    "min": 1813,
+    "max": 1813,
+    "avg": 1813,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Acid Terror Lv5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "incoming-banshee-physical": {
   "status": {
    "str": 67,

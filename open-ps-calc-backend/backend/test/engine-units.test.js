@@ -1691,3 +1691,62 @@ test("Fling's coin debuff cuts the target's DEF by 3% per coin", () => {
   assert.ok(/target\.is_pc/.test(src) && /def_percent/.test(src),
     "defenseFix must still branch on is_pc when applying def_percent");
 });
+
+// ---------------------------------------------------------------------------
+// Arrow ATK follows the SKILL's ammo requirement, not the weapon type
+// ---------------------------------------------------------------------------
+test("ammo ATK counts only for skills that require ammo (and normal attacks)", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+  const pipeline = new BattlePipeline(config);
+  const ORIDECON_ARROW = 1765; // ATK 50
+  const BOW = 1716;
+
+  const dmg = (jobId, skillName, withAmmo, extra = {}) => {
+    const b = buildFromSaveSchema({
+      job_id: jobId, base_level: 99, job_level: 50,
+      base_stats: { str: 1, agi: 94, vit: 1, int: 26, dex: 99, luk: 1 },
+      equipped: { right_hand: BOW, ...(withAmmo ? { ammo: ORIDECON_ARROW } : {}) },
+      ...extra,
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, config, profile);
+    const skill = skillName
+      ? createSkillInstance({ id: loader.getSkillIdByName(skillName), level: 5, name: skillName })
+      : createSkillInstance({ id: 0, level: 1 });
+    return pipeline.calculate(status, weapon, skill, loader.getMonster(1036), eff, gb).normal.avg_damage;
+  };
+  const gains = (jobId, skillName, extra) => dmg(jobId, skillName, true, extra) - dmg(jobId, skillName, false, extra);
+
+  // The report: a bow Rogue's plagiarised Acid Terror. Its requirement is
+  // `Items: { Acid_Bottle: 1 }` with no AmmoTypes, so skill_check_condition_castbegin
+  // sets sd->state.arrow_atk = 0 (skill.c:15810) and the arrow contributes nothing.
+  const rogueExtra = { flags: { plagiarism: { name: "AM_ACIDTERROR", level: 5 } } };
+  assert.equal(gains(17, "AM_ACIDTERROR", rogueExtra), 0, "Acid Terror must not gain arrow ATK");
+
+  // Skills that DO require ammo keep it, and so does a normal attack (where the
+  // weapon type is what sets arrow_atk, battle.c:6852).
+  assert.ok(gains(11, "AC_DOUBLE") > 0, "Double Strafe requires arrows — must still gain");
+  assert.ok(gains(11, "AC_SHOWER") > 0, "Arrow Shower requires arrows — must still gain");
+  assert.ok(gains(11, null) > 0, "a bow normal attack must still gain");
+
+  // The data this now keys off must actually be present, or the gate silently
+  // becomes "never".
+  const needsAmmo = (n) => {
+    const r = loader.getSkillByName(n).requirements || {};
+    return (r.ammo_types || []).length > 0 || (r.ammo_amount || []).some((x) => Number(x) > 0);
+  };
+  for (const n of ["AC_DOUBLE", "AC_SHOWER", "AC_CHARGEARROW", "SN_SHARPSHOOTING",
+                   "BA_MUSICALSTRIKE", "DC_THROWARROW", "CG_ARROWVULCAN"]) {
+    assert.ok(needsAmmo(n), `${n} must declare an ammo requirement`);
+  }
+  for (const n of ["AM_ACIDTERROR", "AM_DEMONSTRATION", "HT_BLITZBEAT"]) {
+    assert.ok(!needsAmmo(n), `${n} must NOT declare an ammo requirement`);
+  }
+
+  // HT_PHANTASMIC is a Bows skill that consumes no ammo, and Hercules force-sets
+  // flag.arrow for it (battle.c:4909). Without that exception the data-driven test
+  // above would wrongly strip its arrow ATK.
+  assert.ok(!needsAmmo("HT_PHANTASMIC"), "still the odd one out in the data");
+  assert.ok(gains(11, "HT_PHANTASMIC") > 0, "Phantasmic Arrow is force-set as an arrow attack");
+});

@@ -624,6 +624,23 @@ const scenarios = [
     target: 1036,
   },
 
+  {
+    // Arrow ATK is gated on the SKILL's ammo requirement, not on holding a bow.
+    // A bow Rogue's plagiarised Acid Terror requires an Acid Bottle and no ammo, so
+    // the equipped Oridecon Arrow (ATK 50) must add nothing — the engine used to add
+    // it, which is what a player reported. Ammo is equipped here deliberately: the
+    // scenario is worthless if it can't catch the bonus coming back.
+    name: "bow-rogue-acid-terror-ignores-arrow",
+    build: {
+      job_id: 17, base_level: 99, job_level: 50,
+      base_stats: { str: 1, agi: 94, vit: 1, int: 26, dex: 99, luk: 1 },
+      equipped: { right_hand: 1716, ammo: 1765 },
+      flags: { plagiarism: { name: "AM_ACIDTERROR", level: 5 } },
+    },
+    skill: { name: "AM_ACIDTERROR", level: 5 },
+    target: 1036,
+  },
+
   // --- incoming (survivability) -----------------------------------------------------------
   {
     name: "incoming-banshee-physical",

@@ -31,14 +31,14 @@ instead of release version. Dates are taken from actual git commit history.
   was checked in the emulator rather than guessed: Provoke is explicitly blocked against bosses and
   Fling has no such block, so the full −15% applies to them.
 
-### Changed
-
-- **The damage breakdown now explains the arrow line.** If you hold a bow, your ammo's ATK is added
-  to *every* weapon skill you use — not just bow skills — so a bow Rogue's borrowed Acid Terror
-  really does hit harder with better arrows. That's how the game works, but the breakdown only said
-  "Ammo ID 1765", which read like a mistake. It now names the arrow and says why it counts.
-
 ### Fixed
+
+- **Arrows added damage to skills that don't use arrows.** Holding a bow made your ammo's ATK count
+  towards *every* skill, when in game it only counts for skills that actually fire ammo. The clearest
+  case was a bow Rogue with a borrowed **Acid Terror**, which throws an acid bottle and uses no
+  arrows at all — an Oridecon Arrow was adding its full 50 ATK to it. Double Strafe, Arrow Shower,
+  Musical Strike, Throw Arrow, the Gunslinger and Ninja skills and ordinary attacks are unaffected,
+  since those really do consume ammo. Reported by a player.
 
 - **Ammo counted even when your weapon couldn't fire it.** Equipping a Gunslinger bullet while
   holding a mace still handed you the bullet's bonuses — a Hollow-Point Bullet's +20% against

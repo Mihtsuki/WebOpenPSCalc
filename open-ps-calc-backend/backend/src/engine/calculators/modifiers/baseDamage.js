@@ -48,9 +48,43 @@ function calculateBaseDamage(status, weapon, build, target, skill, result, opts 
     result.add_step({ name: "bAtk", value: gearBonuses.weapon_atk_flat, note: `Equipment: +${gearBonuses.weapon_atk_flat} weapon ATK`, formula: `atkmax += ${gearBonuses.weapon_atk_flat}`, hercules_ref: "status_calc_pc", info: true });
   }
 
+  // Whether the ammo's ATK counts at all. Hercules decides this with
+  // `sd->state.arrow_atk`, and CRUCIALLY it means two different things:
+  //
+  //   * NORMAL attack — set from the WEAPON: `weapontype == W_BOW || <guns>`
+  //     (battle.c:6852, inside battle_weapon_attack).
+  //   * SKILL cast — OVERWRITTEN from the SKILL's own ammo requirement in
+  //     skill_check_condition_castbegin (skill.c:15810):
+  //         require = skill->get_requirement(sd, skill_id, skill_lv);
+  //         sd->state.arrow_atk = require.ammo ? 1 : 0;
+  //
+  // `flag.arrow` is then set from that (battle.c:4890) and gates the arrow roll
+  // below (`flag&2`, battle.c:661). So holding a bow does NOT feed ammo ATK into
+  // every skill — only into skills that actually require ammo. This engine used to
+  // apply it on weapon type alone, which handed a bow Rogue's plagiarised Acid
+  // Terror the arrow's ATK (+50 from an Oridecon Arrow). Acid Terror's requirement
+  // is `Items: { Acid_Bottle: 1 }` with no AmmoTypes, so in game it gains nothing.
+  // Reported by a player, who was right.
+  //
+  // HT_PHANTASMIC is the one skill Hercules force-sets (battle.c:4909, "Since these
+  // do not consume ammo, they need to be explicitly set as arrow attacks") — it is a
+  // Bows skill with no ammo requirement, so the data-driven test alone would miss it.
+  const FORCED_ARROW_SKILLS = new Set(["HT_PHANTASMIC"]);
+  const skillName = skill && skill.name;
+  const skillData = skillName ? loader.getSkillByName(skillName) : null;
+  const skillNeedsAmmo = (sd) => {
+    if (!sd) return false;
+    const req = sd.requirements || {};
+    return (req.ammo_types || []).length > 0 || (req.ammo_amount || []).some((n) => Number(n) > 0);
+  };
+  // No skill selected = a normal attack, which is the weapon-type case.
+  const usesAmmo = skillName
+    ? (skillNeedsAmmo(skillData) || FORCED_ARROW_SKILLS.has(skillName))
+    : isRanged;
+
   let arrowAtk = 0;
   let ammoId = null;
-  if (isRanged) {
+  if (usesAmmo) {
     ammoId = build.equipped.ammo;
     if (ammoId != null) {
       const ammo = loader.getItem(ammoId);
