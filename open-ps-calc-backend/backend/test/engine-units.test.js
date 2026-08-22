@@ -1750,3 +1750,91 @@ test("ammo ATK counts only for skills that require ammo (and normal attacks)", (
   assert.ok(!needsAmmo("HT_PHANTASMIC"), "still the odd one out in the data");
   assert.ok(gains(11, "HT_PHANTASMIC") > 0, "Phantasmic Arrow is force-set as an arrow attack");
 });
+
+// ---------------------------------------------------------------------------
+// isequipped() — set bonuses, and effects a full set switches OFF
+// ---------------------------------------------------------------------------
+test("isequipped() gates a script, and a bare `!` no longer fails open", () => {
+  const { parseScript, createItemScriptContext } = require("../src/engine/itemScriptParser");
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+
+  // `!` was never tokenized (only `!=` was), so safeEvalInt threw, returned null,
+  // and evalConditionals took the TRUE branch — every `if(!...)` guard in the DB
+  // applied the thing it was meant to suppress.
+  const applied = (cond) =>
+    parseScript(`if(${cond}) bonus bFlee,7;`, createItemScriptContext({})).length > 0;
+  assert.equal(applied("1"), true);
+  assert.equal(applied("0"), false);
+  assert.equal(applied("!0"), true);
+  assert.equal(applied("!1"), false, "a bare ! must not fail open");
+
+  // Wanderer Card (4210): `if(!isequipped(4172,4257,4230,4272)) bonus3 bAutoSpell,
+  // RG_INTIMIDATE,1,20;` — the Intimidate proc is switched OFF by the full thief
+  // card set, while its unconditional Flee stays.
+  const THIEF_SET = [4172, 4257, 4230, 4272];
+  const script = loader.getItem(4210).script;
+  assert.ok(/isequipped/.test(script), "Wanderer Card must still carry the guard");
+
+  const autocastsWith = (equipped) => {
+    const b = buildFromSaveSchema({
+      job_id: 17, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 60, luk: 20 },
+      equipped: { right_hand: 1201, armor: 2302, armor_card1: 4210, ...equipped },
+    });
+    const [gb] = resolvePlayerState(b, config, profile);
+    return (gb.autocast_on_attack || []).map((a) => a.skill_name);
+  };
+  const FULL = {
+    head_top: 2285, head_top_card1: THIEF_SET[0],
+    head_mid: 2295, head_mid_card1: THIEF_SET[1],
+    shoes: 2406, shoes_card1: THIEF_SET[2],
+    garment: 2502, garment_card1: THIEF_SET[3],
+  };
+  const PARTIAL = { ...FULL };
+  delete PARTIAL.garment_card1; // one card short
+
+  assert.ok(autocastsWith({}).includes("RG_INTIMIDATE"), "alone, the proc applies");
+  assert.ok(autocastsWith(PARTIAL).includes("RG_INTIMIDATE"), "one card short — still applies");
+  assert.ok(!autocastsWith(FULL).includes("RG_INTIMIDATE"), "full thief set switches the proc off");
+
+  // isequipped needs EVERY listed id, and resolves to 0 when the caller supplies
+  // no equipped list at all (so a bare parseScript still works).
+  const guard = "if(isequipped(4172,4257)) bonus bFlee,7;";
+  assert.equal(parseScript(guard, createItemScriptContext({ equipped_ids: new Set([4172, 4257]) })).length, 1);
+  assert.equal(parseScript(guard, createItemScriptContext({ equipped_ids: new Set([4172]) })).length, 0);
+  assert.equal(parseScript(guard, createItemScriptContext({})).length, 0, "no list = not equipped");
+});
+
+// ---------------------------------------------------------------------------
+// Rust-Worn Apparatus: both bonuses, and a description to hover
+// ---------------------------------------------------------------------------
+test("Rust-Worn Apparatus grants INT and Perfect Dodge, and has a description", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+  const { StatusCalculator } = require("../src/engine/calculators/statusCalculator");
+
+  const stat = (equipped) => {
+    const b = buildFromSaveSchema({
+      job_id: 11, base_level: 99, job_level: 50,
+      base_stats: { str: 1, agi: 70, vit: 20, int: 70, dex: 80, luk: 20 },
+      equipped: { right_hand: 1707, ...equipped },
+    });
+    const [gb, eff, weapon] = resolvePlayerState(b, config, profile);
+    return new StatusCalculator(config).calculate(eff, weapon, gb);
+  };
+  const bare = stat({});
+  const worn = stat({ accessory_left: 81012 });
+
+  // Both halves of `bonus bInt,1; bonus bFlee2,2;` reach the status. The player who
+  // reported the Perfect Dodge "missing" was seeing a DISPLAY gap: flee2 was absent
+  // from the /status payload, so no panel could show it.
+  assert.equal(worn.int_ - bare.int_, 1, "INT +1");
+  assert.equal(worn.flee2 - bare.flee2, 2, "Perfect Dodge +2");
+
+  const desc = loader.getItemDescription(81012);
+  assert.ok(desc && desc.description, "must have a description to hover");
+  assert.ok(/Perfect Dodge/i.test(desc.description), "and it should mention the bonus");
+});

@@ -413,6 +413,7 @@
   "slots": 0,
   "aegis_name": "Rust-Worn_Apparatus",
   "name": "Rust-Worn Apparatus",
+  "description": "A rusted trap mechanism found embedded in a dead creature.<br/>With proper handling, it can be adapted for practical use.<br/>INT + 1, Perfect Dodge +2<br/>[Base INT &gt;= 70]<br/><font color='#008800'>Freezing Trap</font> applies Slow instead of Freeze.<br/>Class:<font color='#6666CC'> Accessory</font><br/>Defense:<font color='#0000FF'> 0</font><br/>Weight:<font color='#009900'> 40</font><br/>Level Requirement:<font color='#009900'> 52</font><br/>Jobs:<font color='#6666CC'> Hunter, Rogue</font>",
   "job": [
    11,
    4012,
@@ -421,7 +422,8 @@
   ],
   "equip_level": 52,
   "refineable": false,
-  "script": "bonus bInt,1; bonus bFlee2,2;"
+  "script": "bonus bInt,1; bonus bFlee2,2;",
+  "_note": "Description added 2026-08-21 from the live PS item API (tools.payonstories.com/api/pc/item?name=Rust-worn+Apparatus, id 81012) — the item had a manual entry for its script but no description anywhere, so hovering it in the equipment picker showed nothing. Reported by a player, who also thought the Perfect Dodge bonus was missing: it is not, `bonus bFlee2,2` applies and reaches status.flee2 (34 -> 36 on a test Hunter). It simply had nowhere to be SEEN, since the Combat stats panel listed Flee but not Perfect Dodge — now added there. NOT modelled: the [Base INT >= 70] clause making Freezing Trap apply Slow instead of Freeze, which is a status change on the trap, not a damage term."
  },
  "1327": {
   "type": "IT_WEAPON",

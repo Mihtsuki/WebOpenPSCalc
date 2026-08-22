@@ -31,7 +31,27 @@ instead of release version. Dates are taken from actual git commit history.
   was checked in the emulator rather than guessed: Provoke is explicitly blocked against bosses and
   Fling has no such block, so the full −15% applies to them.
 
+### Added
+
+- **Perfect Dodge is now shown in Combat stats.** It sits next to Flee. Perfect Dodge is a flat
+  chance to avoid a hit outright, no matter how much HIT the attacker has, so it's a different
+  thing from Flee and now has its own readout. Gear that grants it was always being counted — there
+  was simply nowhere to see it, which made it look ignored.
+
 ### Fixed
+
+- **Wanderer Card kept proccing with the full thief card set.** Its Intimidate proc is meant to
+  switch off once you wear the whole set, and the card's own text says so — but the calculator
+  ignored the condition entirely and applied the proc regardless. The underlying cause was broader:
+  **any item effect written as "only if you are NOT wearing X" was being applied anyway**, because
+  the script reader didn't understand "not" and fell back to applying the bonus. Wanderer is the
+  only item in the database that uses it, so nothing else was affected. Its Flee +20, which has no
+  condition, is unchanged. Reported by a player.
+
+- **Rust-Worn Apparatus had no description.** Hovering it showed nothing. Its text is now in place,
+  from the official item database. Its Perfect Dodge +2 was working the whole time — see above for
+  why you couldn't see it. (Its "Freezing Trap applies Slow instead of Freeze" effect at 70+ base
+  INT is still not modelled; that changes a status, not damage.) Reported by a player.
 
 - **Arrows added damage to skills that don't use arrows.** Holding a bow made your ammo's ATK count
   towards *every* skill, when in game it only counts for skills that actually fire ammo. The clearest

@@ -1208,6 +1208,22 @@ unmodeled — it needs the target to already carry that status.
   flat DEF-ignoring/accuracy-independent damage add; PF_SPIDERWEB Fire ×2.5 vs webbed target.
 
 ### Confirmed correct (no action — recorded so they aren't re-flagged)
+- **`if(!...)` used to FAIL OPEN — fixed 2026-08-21, worth knowing about.** `safeEvalInt`
+  normalises `&&`/`||` to `and`/`or`, and `evalConditionals` treats a null result as TRUE so an
+  unparseable condition still applies its bonus. But the tokenizer only ever emitted `!=`, never a
+  bare `!` — so every `if(!...)` threw, returned null, and applied the very effect it was written to
+  suppress. `!` is now normalised to the word `not`, which the existing `notExpr` already handled.
+  Found via Wanderer Card (4210), whose
+  `if(!isequipped(4172,4257,4230,4272)) bonus3 bAutoSpell,RG_INTIMIDATE,1,20;` kept proccing with
+  the full thief set on. `isequipped(...)` was also unimplemented — now substituted to 1/0 from
+  `ctx.equipped_ids`, a Set of every worn id (cards included) built once per `compute()` so a set
+  bonus sees the whole outfit. With no list supplied it resolves to 0.
+  Only ONE bundled item uses either construct, so the blast radius was tiny — but both were silent
+  failures that applied bonuses rather than dropping them, which is the dangerous direction.
+  **Debugging note**: the first attempt at the `isequipped` regex silently never matched because a
+  Python heredoc wrote `\b` as a literal backspace byte (0x08) into the JS source. `cat -A` showed
+  it as `^H`. If a regex written through a script inexplicably fails to match, check for control
+  characters before doubting the logic.
 - **Arrow ATK follows the SKILL's ammo requirement, not the weapon type** — FIXED 2026-08-21.
   A player reported "if you add oridecon arrows, it adds damage to acid terror" and was right; an
   earlier pass in this same session recorded the opposite and had to be reversed. Worth reading as

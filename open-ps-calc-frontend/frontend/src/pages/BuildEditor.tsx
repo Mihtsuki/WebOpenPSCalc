@@ -2113,6 +2113,11 @@ export default function BuildEditor() {
                 { label: "ASPD",     value: charStatus?.aspd?.toFixed(1), note: aspdDelayMs != null ? <AttackRateNote periodMs={aspdDelayMs} adelayMs={aspdDelayMs} /> : undefined },
                 { label: "HIT",      value: charStatus?.hit?.toLocaleString() },
                 { label: "Flee",     value: charStatus?.flee?.toLocaleString() },
+                // Perfect Dodge (flee2) is a flat chance to avoid a hit outright,
+                // independent of the attacker's HIT — so it belongs beside Flee
+                // rather than folded into it. It was computed but never surfaced,
+                // which made gear granting it look broken.
+                { label: "Perfect Dodge", value: charStatus ? `${(charStatus.flee2 / 10).toFixed(1)}%` : undefined },
                 { label: "Critical", value: charStatus ? `${(charStatus.cri / 10).toFixed(1)}%` : undefined },
               ] as { label: string; value?: string; note?: ReactNode }[]).map(({ label, value, note }) => {
                 const card = (

@@ -190,6 +190,13 @@ function compute(equipped, refineLevels = null, scriptCtx = null, forceProcs = f
   const cardGb = createGearBonuses();
   let refinedefUnits = 0;
 
+  // Every worn item id, cards included, for isequipped() in item scripts. Built once
+  // and shared by every ctx below — a set bonus has to see the WHOLE outfit, not just
+  // the slot whose script is being parsed.
+  const equippedIds = new Set(
+    Object.values(equipped).filter((v) => v != null).map(Number).filter(Number.isFinite)
+  );
+
   for (const [slot, itemId] of Object.entries(equipped)) {
     if (itemId == null) continue;
     const item = loader.getItem(itemId);
@@ -230,8 +237,8 @@ function compute(equipped, refineLevels = null, scriptCtx = null, forceProcs = f
     }
 
     const ctx = scriptCtx != null
-      ? { ...scriptCtx, refine, weapon_level: weaponLevel }
-      : createItemScriptContext({ refine, weapon_level: weaponLevel });
+      ? { ...scriptCtx, refine, weapon_level: weaponLevel, equipped_ids: equippedIds }
+      : createItemScriptContext({ refine, weapon_level: weaponLevel, equipped_ids: equippedIds });
 
     const effects = parseScript(script, ctx);
 

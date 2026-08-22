@@ -62,7 +62,7 @@ export const api = {
       max_hp: number; max_sp: number; hp_regen: number; sp_regen: number;
       batk: number; weapon_atk: number; matk_min: number; matk_max: number;
       hard_def: number; soft_def: number; hard_mdef: number; soft_mdef: number;
-      aspd: number; cri: number; flee: number;
+      aspd: number; cri: number; flee: number; flee2: number;
     }>,
   calculate: (payload: unknown) =>
     request("/calculate", { method: "POST", body: payload }) as Promise<any>,

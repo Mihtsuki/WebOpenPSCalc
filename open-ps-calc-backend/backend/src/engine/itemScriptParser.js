@@ -28,6 +28,9 @@ function createItemScriptContext(overrides = {}) {
     hp: null, sp: null, max_hp: null, max_sp: null,
     class_: null, base_job: null,
     weapon_level: null,
+    // Item ids currently worn, for isequipped(). null = caller didn't supply them,
+    // in which case isequipped() resolves to 0 (see the substitution in parseScript).
+    equipped_ids: null,
     ...overrides,
   };
 }
@@ -155,7 +158,16 @@ function parseAndEval(tokens, context) {
 }
 
 function safeEvalInt(expr, context) {
-  const normalized = expr.replace(/&&/g, " and ").replace(/\|\|/g, " or ");
+  // `!` is normalised to the word `not` (which notExpr already handles) exactly as
+  // && / || become and / or. The tokenizer only ever emitted `!=`, so a bare `!` was
+  // a tokenize error -> safeEvalInt returns null -> evalConditionals FAILS OPEN and
+  // takes the true branch. That is how Wanderer Card's `if(!isequipped(...))` guard
+  // applied its autospell even with the full thief set on. The negative lookahead
+  // keeps `!=` intact.
+  const normalized = expr
+    .replace(/&&/g, " and ")
+    .replace(/\|\|/g, " or ")
+    .replace(/!(?!=)/g, " not ");
   try {
     const tokens = tokenize(normalized);
     return parseAndEval(tokens, context);
@@ -274,13 +286,30 @@ function preprocessScript(script, ctx = null) {
     script = script.replace(/\bautobonus[23]?\s*"(?:[^"\\]|\\.)*"[^;]*;/g, " ");
   }
 
+  const hasIsequipped = script.includes("isequipped");
   const hasGetrefine = script.includes("getrefine");
   const hasGetskilllv = script.includes("getskilllv");
   const hasReadparam = script.includes("readparam");
   const hasGetweaponlv = script.includes("getequipweaponlv");
   const hasIf = script.includes("if(") || script.includes("if (");
 
-  if (!(hasGetrefine || hasGetskilllv || hasReadparam || hasGetweaponlv || hasIf)) return script;
+  if (!(hasGetrefine || hasGetskilllv || hasReadparam || hasGetweaponlv || hasIf || hasIsequipped)) return script;
+
+  // isequipped(id, id, ...) is TRUE only when EVERY listed item is worn — Hercules
+  // uses it for set bonuses and, as on Wanderer Card, to switch an effect OFF once a
+  // full set is assembled. Substituted to 1/0 before evaluation, like getrefine().
+  // With no equipped list supplied it resolves to 0 (nothing worn), which keeps a
+  // bare parseScript() call working and matches the common case.
+  if (hasIsequipped) {
+    const worn = ctx.equipped_ids;
+    script = script.replace(/\bisequipped\s*\(([^)]*)\)/g, (_m, args) => {
+      const ids = args.split(",").map((a) => Number(a.trim())).filter((n) => Number.isFinite(n));
+      if (!ids.length) return "0";
+      if (!worn) return "0";
+      const has = (id) => (worn instanceof Set ? worn.has(id) : worn.includes(id));
+      return ids.every(has) ? "1" : "0";
+    });
+  }
 
   if (hasGetrefine) {
     script = script.replace(/\bgetrefine\s*\(\s*\)/g, String(ctx.refine));

@@ -603,6 +603,11 @@ router.post("/status", (req: Request, res: Response) => {
       aspd:      status.aspd,
       cri:       status.cri,
       flee:      status.flee,
+      // Perfect Dodge (flee2). Separate from soft FLEE: a flat % chance to avoid a
+      // hit outright, unaffected by the attacker's HIT. It was computed all along but
+      // never returned, so gear granting it (Rust-Worn Apparatus, Whisper Card, the
+      // Smokie/Hunter Fly pets) appeared to do nothing — reported as a missing bonus.
+      flee2:     status.flee2,
       hit:       status.hit,
     });
   } catch (err: any) {
