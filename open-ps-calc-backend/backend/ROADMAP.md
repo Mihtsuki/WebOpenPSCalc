@@ -318,6 +318,24 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Cards are only counted in a slot they can compound into** (`gearBonusAggregator.js`,
+  `SLOT_CARD_LOCS` + `cardFitsSlot`). The aggregator applied every card sitting in a
+  `*_cardN` key regardless of the card's own `loc`, so a garment card in an armour slot
+  paid out in full. The **editor was never the hole** — `SLOT_CARD_LOC` in `BuildEditor.tsx`
+  and the `?loc=` filter on the item route already restrict the picker — but three paths
+  bypass the picker entirely: share URLs (`z3_`), the jaludev importer, and direct API
+  calls. So the guard belongs in the engine, next to the existing `ammoFitsWeapon` check.
+  `left_hand` is resolved by what is HELD (an off-hand weapon takes `EQP_WEAPON`, a shield
+  takes `EQP_SHIELD`); a card with no/empty `loc` fails open, which keeps the synthetic
+  wildcard cards (`47xx`, every loc) usable in every slot as the custom card-mix UI needs.
+  **This exposed three stale test fixtures** — the golden scenarios still slotted Pirate Skel
+  and Wootan Fighter as accessory/armour cards after the earlier data fix moved them to
+  headgear, and the Wanderer `isequipped` test had all four thief-set cards in the wrong
+  slots. Those tests were only passing *because* the engine ignored `loc`. Fixtures corrected
+  (cards hosted on a Hat 2221 / their real slots); the only golden movement is the host
+  headgear's `def_` +2 — every damage number is unchanged, confirming the bonuses still
+  apply from the correct slot.
+
 - **Bonus-routing audit — several damage bonuses were parsed but not applied.**
   Diffed every `bonus`/`bonus2` type used in `item_db` against what
   `bonusDefinitions.js` actually routes, and checked table entries that were

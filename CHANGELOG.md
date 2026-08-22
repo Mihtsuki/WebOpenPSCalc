@@ -5,31 +5,7 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
-## 2026-08-17
-
-### Added
-
-- **Gunslinger coins, and Fling.** Coins were missing entirely and Fling wasn't in the calculator —
-  they turned out to be one feature, since Fling is what spends them. Playing a Gunslinger, the
-  Buffs panel now has a **Coins (0–10)** box for what Coin Flip has given you.
-
-  **Fling** is in twice, because it does two things. Pick it as a skill and it throws up to 5 coins
-  for **(job level + base level) damage each** — a Lv99 / job 50 Gunslinger with 5 coins does 745,
-  and unusually that ignores your ATK, the target's defence, its element, *and* Barrage, so it's the
-  one Gunslinger skill your +30% damage buff doesn't touch. It's also a **target debuff**: under the
-  target's other debuffs there's now **Fling (−3% DEF per coin)**, up to −15% at 5 coins, for when
-  someone else in your party is the Gunslinger.
-
-  The calculator also now tracks what your coins are being **spent** on. Tick Barrage (2 coins) or
-  Run and Gun (1), pick a skill that costs one, and the Coins box tells you **"Spending 3 of 10"** —
-  or turns red with **"Needs 7 — 2 short"** when the build is asking for more coins than it holds.
-  And **Barrage and Run and Gun now turn each other off**, because in game each replaces the other;
-  before this you could tick both and get two buffs no character can have at once.
-
-  One thing worth knowing: no damage-per-second figure is shown for Fling, because coins are a
-  finite pool rather than something you can sustain. **MVPs do not resist Fling's DEF cut** — that
-  was checked in the emulator rather than guessed: Provoke is explicitly blocked against bosses and
-  Fling has no such block, so the full −15% applies to them.
+## 2026-08-22
 
 ### Added
 
@@ -66,6 +42,41 @@ instead of release version. Dates are taken from actual git commit history.
   Musical Strike, Throw Arrow, the Gunslinger and Ninja skills and ordinary attacks are unaffected,
   since those really do consume ammo. Reported by a player.
 
+- **Cards counted from slots they don't fit.** A garment card compounded into an armour slot still
+  gave its bonus. The card picker in the editor never let you do this, but a shared build link, an
+  imported build or a hand-made API call could, so a build could be shared showing damage no real
+  character can reach. Each card now only counts where it actually goes, with the off-hand judged by
+  what you're holding — weapon cards in an off-hand weapon, shield cards in a shield. Reported by a
+  player.
+
+## 2026-08-20
+
+### Added
+
+- **Gunslinger coins, and Fling.** Coins were missing entirely and Fling wasn't in the calculator —
+  they turned out to be one feature, since Fling is what spends them. Playing a Gunslinger, the
+  Buffs panel now has a **Coins (0–10)** box for what Coin Flip has given you.
+
+  **Fling** is in twice, because it does two things. Pick it as a skill and it throws up to 5 coins
+  for **(job level + base level) damage each** — a Lv99 / job 50 Gunslinger with 5 coins does 745,
+  and unusually that ignores your ATK, the target's defence, its element, *and* Barrage, so it's the
+  one Gunslinger skill your +30% damage buff doesn't touch. It's also a **target debuff**: under the
+  target's other debuffs there's now **Fling (−3% DEF per coin)**, up to −15% at 5 coins, for when
+  someone else in your party is the Gunslinger.
+
+  The calculator also now tracks what your coins are being **spent** on. Tick Barrage (2 coins) or
+  Run and Gun (1), pick a skill that costs one, and the Coins box tells you **"Spending 3 of 10"** —
+  or turns red with **"Needs 7 — 2 short"** when the build is asking for more coins than it holds.
+  And **Barrage and Run and Gun now turn each other off**, because in game each replaces the other;
+  before this you could tick both and get two buffs no character can have at once.
+
+  One thing worth knowing: no damage-per-second figure is shown for Fling, because coins are a
+  finite pool rather than something you can sustain. **MVPs do not resist Fling's DEF cut** — that
+  was checked in the emulator rather than guessed: Provoke is explicitly blocked against bosses and
+  Fling has no such block, so the full −15% applies to them.
+
+### Fixed
+
 - **Ammo counted even when your weapon couldn't fire it.** Equipping a Gunslinger bullet while
   holding a mace still handed you the bullet's bonuses — a Hollow-Point Bullet's +20% against
   Demi-Humans applied to an Alchemist's Mammonite, taking it from 1,820 to 2,167. In game you
@@ -82,12 +93,7 @@ instead of release version. Dates are taken from actual git commit history.
   you're above 80% HP on top of the +3 DEF. The calculator prices every build at full HP, so that
   condition is treated as met. Reported by a player.
 
-- **The support form failed silently for some people.** The Ko-fi form is embedded from another
-  site, and privacy extensions, Brave shields, Firefox's strict mode and Safari all block that kind
-  of embed — so instead of a form you got a blank white box with no way forward. It now detects
-  that and offers a direct "Open Ko-fi in a new tab" link, and there's a permanent one at the
-  bottom of the panel regardless. The form also sizes itself to the window now instead of being a
-  fixed 680px, which on a phone meant scrolling a box inside a box.
+## 2026-08-18
 
 ### Added
 
@@ -128,6 +134,36 @@ instead of release version. Dates are taken from actual git commit history.
   Nibelungen only works with a level 4 weapon, Assassin Cross does nothing while you hold a bow
   or gun, and Bragi only moves DPS when you have a skill selected.
 
+### Fixed
+
+- **The support form failed silently for some people.** The Ko-fi form is embedded from another
+  site, and privacy extensions, Brave shields, Firefox's strict mode and Safari all block that kind
+  of embed — so instead of a form you got a blank white box with no way forward. It now detects
+  that and offers a direct "Open Ko-fi in a new tab" link, and there's a permanent one at the
+  bottom of the panel regardless. The form also sizes itself to the window now instead of being a
+  fixed 680px, which on a phone meant scrolling a box inside a box.
+
+- **Your resist gear wasn't reducing the damage you take.** Reported by a player comparing a
+  Survivability reading against the game. Two separate holes:
+  - **Size resistance did nothing at all** — a **Stone Buckler**'s "reduces damage from Large
+    monsters by 5%" was shown in the item text and then thrown away, against every attack,
+    physical and magic alike. Any card or gear with that kind of line was equally inert.
+  - **Incoming magic only counted element resistance.** Size, race, boss and ranged reductions
+    were all skipped, and race resistance was hardcoded to Demi-Human — so a **Penomena Card**
+    (−30% from Formless) did nothing against **Lady Huo**, who is Formless. Physical hits already
+    counted race correctly; only magic was affected.
+
+  Together those two were most of a defensive setup. Against Lady Huo's Adoramus, a build wearing
+  a Stone Buckler and a Penomena Card now reads **9,019 instead of 13,564** — a third less.
+
+- **Maelstrom is no longer listed as damage.** Lady Huo's cast was described as a hit the
+  calculator couldn't put a number on. It deals no damage at all — it turns an area of ground into
+  dead cells — so it now reads as a status effect, like Quagmire or Dispell.
+
+## 2026-08-17
+
+### Added
+
 - **Lady Huo's two big spells now show damage numbers.** Both were listed as "can't be modelled":
   **Adoramus** hits for **1400% MATK** as **Holy** — so Holy resistance is the counter, and against
   a Lv99 Swordsman in a Cotton Shirt it lands around **13,600** — and **Drain Life** for **750%
@@ -153,23 +189,6 @@ instead of release version. Dates are taken from actual git commit history.
   the element of the explosion.
 
 ### Fixed
-
-- **Your resist gear wasn't reducing the damage you take.** Reported by a player comparing a
-  Survivability reading against the game. Two separate holes:
-  - **Size resistance did nothing at all** — a **Stone Buckler**'s "reduces damage from Large
-    monsters by 5%" was shown in the item text and then thrown away, against every attack,
-    physical and magic alike. Any card or gear with that kind of line was equally inert.
-  - **Incoming magic only counted element resistance.** Size, race, boss and ranged reductions
-    were all skipped, and race resistance was hardcoded to Demi-Human — so a **Penomena Card**
-    (−30% from Formless) did nothing against **Lady Huo**, who is Formless. Physical hits already
-    counted race correctly; only magic was affected.
-
-  Together those two were most of a defensive setup. Against Lady Huo's Adoramus, a build wearing
-  a Stone Buckler and a Penomena Card now reads **9,019 instead of 13,564** — a third less.
-
-- **Maelstrom is no longer listed as damage.** Lady Huo's cast was described as a hit the
-  calculator couldn't put a number on. It deals no damage at all — it turns an area of ground into
-  dead cells — so it now reads as a status effect, like Quagmire or Dispell.
 
 - **The falcon's damage was inflated by your cards.** Auto Blitz Beat was taking the attacker's
   race and boss card bonuses, which it should not: Blitz Beat is Misc damage, and those bonuses

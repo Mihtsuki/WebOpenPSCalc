@@ -53,6 +53,49 @@ function ammoFitsWeapon(equipped, ammoItem) {
   return need.has(weapon.weapon_type);
 }
 
+// Which `loc` tokens a card slot accepts. The editor already filters its card picker
+// by slot (SLOT_CARD_LOC in BuildEditor.tsx), so a normal user cannot slot a garment
+// card into armour — but the ENGINE accepted anything it was handed, and plenty of
+// paths bypass the picker: share URLs written before that filter existed, the jaludev
+// importer, and direct API calls. This is the safety net, in the same spirit as
+// ammoFitsWeapon above.
+//
+// EQP_HELM covers all three head slots, and EQP_ARMS covers the weapon/shield pair,
+// so both are accepted wherever they overlap.
+const SLOT_CARD_LOCS = {
+  right_hand:      ["EQP_WEAPON", "EQP_ARMS"],
+  head_top:        ["EQP_HEAD_TOP", "EQP_HELM"],
+  head_mid:        ["EQP_HEAD_MID", "EQP_HELM"],
+  head_low:        ["EQP_HEAD_LOW", "EQP_HELM"],
+  armor:           ["EQP_ARMOR"],
+  garment:         ["EQP_GARMENT"],
+  shoes:           ["EQP_SHOES"],
+  accessory_left:  ["EQP_ACC"],
+  accessory_right: ["EQP_ACC"],
+};
+
+/**
+ * True when this card may be compounded into this slot — or when we cannot tell, in
+ * which case it is allowed. Permissive on unknowns for the same reason as the ammo
+ * gate: silently DROPPING a real bonus is worse than the looseness being closed.
+ *
+ * left_hand is resolved from what is actually held: a shield takes EQP_SHIELD cards,
+ * an off-hand weapon takes weapon cards. The convenience/wildcard entries (ids 4700+
+ * and the negative synthetic ones) carry every loc, so they pass anywhere by design.
+ */
+function cardFitsSlot(equipped, slot, card) {
+  const hostSlot = slot.slice(0, slot.indexOf("_card"));
+  let allowed = SLOT_CARD_LOCS[hostSlot];
+  if (hostSlot === "left_hand") {
+    const off = equipped.left_hand != null ? loader.getItem(equipped.left_hand) : null;
+    allowed = off && off.type === "IT_WEAPON" ? ["EQP_WEAPON", "EQP_ARMS"] : ["EQP_SHIELD", "EQP_ARMS"];
+  }
+  if (!allowed) return true;                       // slot we don't model — allow
+  const loc = card && card.loc;
+  if (!Array.isArray(loc) || !loc.length) return true;  // card with no loc data — allow
+  return loc.some((l) => allowed.includes(l));
+}
+
 function scriptCtxFromBuild(build, status = null) {
   let maxHp = null, maxSp = null, hp = null, sp = null;
   if (status != null) {
@@ -205,6 +248,9 @@ function compute(equipped, refineLevels = null, scriptCtx = null, forceProcs = f
     // Ammo the equipped weapon cannot fire contributes nothing — see ammoFitsWeapon.
     // (The arrow's ATK roll is gated separately, on weapon type, in baseDamage.js.)
     if (slot === "ammo" && !ammoFitsWeapon(equipped, item)) continue;
+
+    // A card in a slot it cannot compound into contributes nothing — see cardFitsSlot.
+    if (slot.includes("_card") && !cardFitsSlot(equipped, slot, item)) continue;
 
     if (item.type === "IT_ARMOR") {
       bonuses.def_ += item.def || 0;

@@ -4011,7 +4011,7 @@
    "cri": 83,
    "hit": 167,
    "flee": 157,
-   "def_": 0,
+   "def_": 2,
    "mdef": 3,
    "matk_min": 3,
    "matk_max": 3
@@ -4221,7 +4221,7 @@
    "cri": 83,
    "hit": 167,
    "flee": 157,
-   "def_": 0,
+   "def_": 2,
    "mdef": 6,
    "matk_min": 3,
    "matk_max": 3
@@ -4672,7 +4672,7 @@
    "cri": 90,
    "hit": 165,
    "flee": 141,
-   "def_": 5,
+   "def_": 7,
    "mdef": 0,
    "matk_min": 24,
    "matk_max": 36

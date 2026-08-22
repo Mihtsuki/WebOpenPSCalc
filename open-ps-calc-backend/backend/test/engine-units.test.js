@@ -917,7 +917,7 @@ test("Magnum Break's lingering fire hits auto-attacks and Magnum Break only, and
     const b = buildFromSaveSchema({
       server: "payon_stories", job_id: 7, base_level: 99, job_level: 50,
       base_stats: { str: 90, agi: 40, vit: 80, int: 20, dex: 60, luk: 20 },
-      equipped: { right_hand: 1101, ...(opts.wootan ? { armor: 2302, armor_card1: 4261 } : {}) },
+      equipped: { right_hand: 1101, ...(opts.wootan ? { armor: 2302, head_top: 2221, head_top_card1: 4261 } : {}) },
       active_buffs: opts.lingering ? { SC_SUB_WEAPONPROPERTY: 1 } : {},
     });
     const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
@@ -957,7 +957,7 @@ test("auto-Mammonite casts Lv10 only for the Blacksmith line", () => {
     const b = buildFromSaveSchema({
       server: "payon_stories", job_id: jobId, base_level: 95, job_level: 50,
       base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
-      equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073 },
+      equipped: { right_hand: 1504, accessory_left: 2615, head_top: 2221, head_top_card1: 4073 },
       mastery_levels: { MC_MAMMONITE: mammoniteLv },
     });
     return resolvePlayerState(b, cfg, PS)[0].autocast_on_attack[0].skill_level;
@@ -1249,7 +1249,7 @@ test("card autocast (Pirate Skel to Mammonite) surfaces as a proc branch on auto
     const b = buildFromSaveSchema({
       server: "payon_stories", job_id: 10, base_level: 95, job_level: 50,
       base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
-      equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073 },
+      equipped: { right_hand: 1504, accessory_left: 2615, head_top: 2221, head_top_card1: 4073 },
       mastery_levels: { MC_MAMMONITE: 10 },
     });
     const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
@@ -1280,7 +1280,7 @@ test("Pirate Skel + Flame Beetle exempts the AUTOCAST Mammonite from Zeny Pinche
       server: "payon_stories", job_id: 10, base_level: 95, job_level: 50,
       base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 },
       equipped: {
-        right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073,
+        right_hand: 1504, accessory_left: 2615, head_top: 2221, head_top_card1: 4073,
         ...(beetle ? { accessory_right: 2615, accessory_right_card1: 8237 } : {}),
       },
       mastery_levels: { MC_MAMMONITE: 10 },
@@ -1781,19 +1781,19 @@ test("isequipped() gates a script, and a bare `!` no longer fails open", () => {
     const b = buildFromSaveSchema({
       job_id: 17, base_level: 99, job_level: 50,
       base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 60, luk: 20 },
-      equipped: { right_hand: 1201, armor: 2302, armor_card1: 4210, ...equipped },
+      equipped: { right_hand: 1201, armor: 2302, garment: 2502, garment_card1: 4210, ...equipped },
     });
     const [gb] = resolvePlayerState(b, config, profile);
     return (gb.autocast_on_attack || []).map((a) => a.skill_name);
   };
   const FULL = {
-    head_top: 2285, head_top_card1: THIEF_SET[0],
-    head_mid: 2295, head_mid_card1: THIEF_SET[1],
-    shoes: 2406, shoes_card1: THIEF_SET[2],
-    garment: 2502, garment_card1: THIEF_SET[3],
+    right_hand_card1: THIEF_SET[0],      // The Paper    - EQP_WEAPON
+    shoes: 2406, shoes_card1: THIEF_SET[1],   // Wild Rose    - EQP_SHOES
+    accessory_left: 2615, accessory_left_card1: THIEF_SET[2],    // Shinobi     - EQP_ACC
+    accessory_right: 2615, accessory_right_card1: THIEF_SET[3],  // Zhu Po Long - EQP_ACC
   };
   const PARTIAL = { ...FULL };
-  delete PARTIAL.garment_card1; // one card short
+  delete PARTIAL.accessory_right_card1; // one card short
 
   assert.ok(autocastsWith({}).includes("RG_INTIMIDATE"), "alone, the proc applies");
   assert.ok(autocastsWith(PARTIAL).includes("RG_INTIMIDATE"), "one card short — still applies");
@@ -1837,4 +1837,48 @@ test("Rust-Worn Apparatus grants INT and Perfect Dodge, and has a description", 
   const desc = loader.getItemDescription(81012);
   assert.ok(desc && desc.description, "must have a description to hover");
   assert.ok(/Perfect Dodge/i.test(desc.description), "and it should mention the bonus");
+});
+
+// ---------------------------------------------------------------------------
+// A card only counts in a slot it can actually compound into
+// ---------------------------------------------------------------------------
+test("cards are ignored in slots they cannot compound into", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+
+  const gb = (equipped) => {
+    const b = buildFromSaveSchema({
+      job_id: 17, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 60, luk: 20 },
+      equipped,
+    });
+    return resolvePlayerState(b, config, profile)[0];
+  };
+  const SHIELD = { right_hand: 1201, armor: 2302, garment: 2502, left_hand: 2101 }; // Guard
+  const DUAL   = { right_hand: 1201, armor: 2302, garment: 2502, left_hand: 1201 }; // off-hand dagger
+
+  // Wanderer (4210) is a GARMENT card. The editor's picker already filters by slot,
+  // but share URLs, the jaludev importer and direct API calls all bypass it.
+  const autocasts = (eq) => (gb(eq).autocast_on_attack || []).map((a) => a.skill_name);
+  assert.ok(autocasts({ ...SHIELD, garment_card1: 4210 }).includes("RG_INTIMIDATE"), "correct slot applies");
+  assert.ok(!autocasts({ ...SHIELD, armor_card1: 4210 }).includes("RG_INTIMIDATE"), "armour slot must ignore it");
+
+  // Hydra (4035) is a WEAPON card; Pupa (4003) is ARMOR.
+  assert.equal(gb({ ...SHIELD, right_hand_card1: 4035 }).add_race.RC_DemiHuman || 0, 20);
+  assert.equal(gb({ ...SHIELD, armor_card1: 4035 }).add_race.RC_DemiHuman || 0, 0, "weapon card in armour");
+  assert.equal(gb({ ...SHIELD, armor_card1: 4003 }).maxhp, 700);
+  assert.equal(gb({ ...SHIELD, garment_card1: 4003 }).maxhp, 0, "armour card in garment");
+
+  // left_hand depends on what is HELD: a shield takes shield cards, an off-hand
+  // weapon takes weapon cards. Thara Frog (4058) is EQP_SHIELD.
+  assert.equal(gb({ ...SHIELD, left_hand_card1: 4058 }).sub_race.RC_DemiHuman || 0, 30, "shield card on a shield");
+  assert.equal(gb({ ...DUAL, left_hand_card1: 4058 }).sub_race.RC_DemiHuman || 0, 0, "shield card on a weapon");
+  assert.equal(gb({ ...DUAL, left_hand_card1: 4035 }).add_race.RC_DemiHuman || 0, 20, "weapon card on the off-hand");
+  assert.equal(gb({ ...SHIELD, left_hand_card1: 4035 }).add_race.RC_DemiHuman || 0, 0, "weapon card on a shield");
+
+  // The synthetic wildcard/convenience cards carry every loc and must stay usable
+  // in any slot — they are how the custom card-mix UI is priced.
+  assert.equal(gb({ ...SHIELD, armor_card1: 4704 }).str_, 5, "wildcard STR+5 still applies");
+  assert.equal(gb({ ...SHIELD, right_hand_card1: 4704 }).str_, 5);
 });

@@ -486,7 +486,7 @@ const scenarios = [
     // Mammonite is mastered — surfaces as a card_autocast_MC_MAMMONITE proc branch
     // and folds into DPS. Accessory card slot on an accessory (2615 Clip).
     name: "blacksmith-pirate-skel-auto-mammonite",
-    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073 }, mastery_levels: { MC_MAMMONITE: 10 } },
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504, accessory_left: 2615, head_top: 2221, head_top_card1: 4073 }, mastery_levels: { MC_MAMMONITE: 10 } },
     target: 1036,
   },
   {
@@ -513,7 +513,7 @@ const scenarios = [
     // A manual Mammonite on the same build is still pinched (see
     // whitesmith-mammonite-zeny-pincher).
     name: "blacksmith-pirate-skel-flame-beetle-zeny-pincher",
-    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504, accessory_left: 2615, accessory_left_card1: 4073, accessory_right: 2615, accessory_right_card1: 8237 }, mastery_levels: { MC_MAMMONITE: 10 } },
+    build: { job_id: 10, base_level: 95, job_level: 50, base_stats: { str: 95, agi: 60, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1504, accessory_left: 2615, head_top: 2221, head_top_card1: 4073, accessory_right: 2615, accessory_right_card1: 8237 }, mastery_levels: { MC_MAMMONITE: 10 } },
     zeny_pincher: true,
     target: 1036,
   },
@@ -570,7 +570,7 @@ const scenarios = [
   {
     // Wootan Fighter Card raises the lingering effect 20% → 30%.
     name: "swordman-magnum-lingering-wootan-fighter",
-    build: { job_id: 7, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 80, int: 20, dex: 60, luk: 20 }, equipped: { right_hand: 1101, left_hand: 2101, armor: 2302, armor_card1: 4261 }, active_buffs: { SC_SUB_WEAPONPROPERTY: 1 } },
+    build: { job_id: 7, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 40, vit: 80, int: 20, dex: 60, luk: 20 }, equipped: { right_hand: 1101, left_hand: 2101, armor: 2302, head_top: 2221, head_top_card1: 4261 }, active_buffs: { SC_SUB_WEAPONPROPERTY: 1 } },
     target: 1036,
   },
   {
