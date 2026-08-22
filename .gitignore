@@ -15,3 +15,7 @@ Thumbs.db
 CLAUDE.md
 context.md
 .claude/
+
+# Audit tooling: derived reports and Python caches (snapshots ARE committed)
+tools/audit/build/
+tools/audit/__pycache__/
