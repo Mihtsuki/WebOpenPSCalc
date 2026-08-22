@@ -227,6 +227,14 @@ const scenarios = [
     skill: { name: "NJ_ISSEN", level: 10 },
     target: 1867,
   },
+  {
+    // Same build with Ninja Aura (+2 STR/lv, and STR is 40x here) and a full five
+    // Mirror Images up (+30%). Both are required to cast it at all in game.
+    name: "ninja-killing-stroke-aura-mirror-image",
+    build: { job_id: 25, base_level: 99, job_level: 50, base_stats: { str: 90, agi: 90, vit: 50, int: 1, dex: 60, luk: 20 }, equipped: { right_hand: 1201 }, active_buffs: { SC_NJ_NEN: 5, SC_NJ_BUNSINJYUTSU: 5 } },
+    skill: { name: "NJ_ISSEN", level: 10 },
+    target: 1867,
+  },
 
   // --- magic branch --------------------------------------------------------------
   {

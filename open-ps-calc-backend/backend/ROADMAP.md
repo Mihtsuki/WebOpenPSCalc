@@ -88,7 +88,7 @@ without re-auditing everything from scratch.
   anywhere in this JS port yet (`SC_CLOAKING_BONUS`,
   `GS_BLOCK_ENDOW`,
   `PR_TURNUNDEAD_PS_BONUS`, `PS_HOLYSTRIKE_PROC`,
-  `SC_GS_ADJUSTMENT_LR_REDUCE`, `NJ_ISSEN_MIRROR_BONUS`) — these need new
+  `SC_GS_ADJUSTMENT_LR_REDUCE`) — these need new
   modifier code, not just data. (The Musical Strike / Throw Arrow "performing"
   +100% bonus is now implemented via `skill_params.PS_PERFORMING_active` and a
   target-panel toggle, so its two upstream flags are dropped from this list.)
@@ -317,6 +317,29 @@ so it doesn't flood the backend (or add a batch endpoint). Natural follow-ons: a
 and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
+
+- **Killing Stroke: Mirror Image bonus modeled, and its fabricated DPS removed.**
+  Two player reports in one. (1) `NJ_ISSEN` has **every timing array zeroed** in the
+  skill DB, so `calculateSkillTiming` returned `0 + 0` and the shared
+  `Math.max(castMs + delayMs, 100)` floor turned that into a 100 ms period — the
+  panel was advertising **ten Killing Strokes a second, 60,890 DPS** for a skill that
+  drops you to 1 HP. It is a one-shot by construction (the cast also cancels the Ninja
+  Aura it *requires*), so the branch now returns `dps: null` / `dps_valid: false` /
+  `period_ms: 0` rather than a floor-derived fiction. (2) Mirror Image
+  (`SC_NJ_BUNSINJYUTSU`) raises this skill's damage by **(5 + 5×ImagesLeft)%**, 10% at
+  one image to 30% at five, on non-PvP/GvG maps — we only price PvM, so it always
+  applies when set. Added as a buff-picker entry whose **level is the number of images
+  LEFT, not the skill level**: the skill grants `ceil(lv/2)` images (Lv1-2 → 1 …
+  Lv9-10 → 5, per `skill_descriptions.json`), and the formula reads how many are still
+  standing at cast time. Applied last as its own breakdown step, clamped to 5.
+  Sources: `wiki.payonstories.com/Killing_Stroke` + `/Mirror_Image` (both fetched
+  live — the formula and the image counts are stated outright on those pages).
+  **Side fix in the frontend:** `dps_valid:false` also zeroed `killDps`, which blanked
+  **hits-to-kill** — but "how many casts to kill" is precisely what you want from a
+  burst nuke. Those branches are a single deterministic hit with no crit or proc mix,
+  so per-hit damage *is* the expected damage per cast; the panel now falls back to it
+  and relabels the tile **"Casts to kill"**, while time-to-kill correctly stays blank
+  (no rate, no honest duration). The DPS "—" now carries a tooltip saying why.
 
 - **Cards are only counted in a slot they can compound into** (`gearBonusAggregator.js`,
   `SLOT_CARD_LOCS` + `cardFitsSlot`). The aggregator applied every card sitting in a
@@ -792,8 +815,9 @@ brackets are the number of PS-custom entries found across those tables.
    Shadow's Within), Raigeki Sai (150+60×lv = 210→450%). **Fixed:** Bakuenryu (300→900% = 150+150×lv;
    was a flat 300% from the DB fallback) and **NJ_ISSEN (Killing Stroke)** — implemented its fixed
    HP-sacrifice formula (STR×40 + HP×8%×lv, Neutral, auto-hit, DEF+cards apply) via a dedicated
-   `_runKillingStrokeBranch`; was computing a flat 100% ATK. (Mirror Image +10–30% bonus not
-   modeled.) Nen/Ki are buffs (out of scope).
+   `_runKillingStrokeBranch`; was computing a flat 100% ATK. **Mirror Image's +10–30% is now
+   modeled too** (see "Done this pass"), which retires the upstream `NJ_ISSEN_MIRROR_BONUS` flag.
+   Ninja Aura (SC_NJ_NEN) was already a buff entry and its +2 STR/lv feeds the ×40 STR term.
 10. **Alchemist / Creator [3]** — ✅ done (PS wiki, with-DEF), **re-audited 2026-08-09 against
     `PayonStories Alchemist Rework 2026-08-09.pdf`**. Acid Demonstration unchanged (200+40×lv =
     240→400%, weapon-ATK-based with size penalty, DEF applies, ignores %-cards but +ATK cards

@@ -383,6 +383,12 @@ const SELF_BUFFS = [
   // Ninja Aura (NJ_NEN) — PS: +2 STR / +2 INT per level, max Lv5 (+10 each).
   // wiki.payonstories.com/Ninja_Aura. (Engine reads passive_overrides.SC_NJ_NEN.)
   { key: "SC_NJ_NEN",          label: "Ninja Aura",            max: 5,  jobs: [25] },
+  // Mirror Image (NJ_BUNSINJYUTSU). The level here is the number of images LEFT,
+  // not the skill level — that is what Killing Stroke's bonus reads, (5+5*left)%,
+  // so 1 image is +10% and 5 is +30% (wiki.payonstories.com/Mirror_Image). The
+  // skill grants ceil(lv/2) images, so five needs Mirror Image Lv9-10. Killing
+  // Stroke consumes them all. Its evasion side isn't modeled; only the bonus is.
+  { key: "SC_NJ_BUNSINJYUTSU", label: "Mirror Image (images left)", max: 5, jobs: [25] },
   // PS wiki calls this "Double Bolt" (constant PF_DOUBLECASTING / status
   // SC_DOUBLECASTING). On Payon Stories it's a SAGE skill (wiki: class = Sage),
   // so both Sage and Professor get it — not just Professor as in vanilla. 100%

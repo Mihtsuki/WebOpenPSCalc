@@ -670,7 +670,16 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
   // per-hit damage for the hit count assumed 100% of that branch — e.g. all crits —
   // so a big-crit / low-crit-rate build showed FEWER hits yet a SLOWER time.) The
   // min/max envelope applies the displayed branch's roll spread around that value.
-  const expPerHit = !isInstaKill && killDps > 0 && periodS > 0 ? killDps * periodS : null;
+  // A branch with no meaningful rate (Killing Stroke, Fling, Reflect Shield) reports
+  // dps_valid:false, which zeroes killDps — but "how many casts to kill" is still a
+  // real question there, and it was coming out blank. Those branches are a single
+  // deterministic hit with no crit or proc mix, so the per-hit damage IS the expected
+  // damage per cast and the reason for the DPS×period basis doesn't apply. Time to
+  // kill stays blank: without a rate there is no honest duration to quote.
+  const noRateHit = !isInstaKill && !displayDpsValid && killAvg != null && killAvg > 0;
+  const expPerHit = !isInstaKill && killDps > 0 && periodS > 0 ? killDps * periodS
+    : noRateHit ? killAvg
+    : null;
   const hiRatio = killAvg != null && killAvg > 0 && killMax != null ? killMax / killAvg : 1;
   const loRatio = killAvg != null && killAvg > 0 && killMin != null ? killMin / killAvg : 1;
   const hitsBest = isInstaKill ? null : hitsToKill(expPerHit != null ? expPerHit * hiRatio : null);   // fewest hits — best-case rolls
@@ -763,7 +772,9 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
             </div>
           </div>
         ) : null}
-        <div className="metric">
+        <div className="metric" title={displayDpsValid
+          ? undefined
+          : "No DPS for this branch: it has no repeat rate to quote. Killing Stroke drops you to 1 HP and cancels the Ninja Aura it needs; Fling spends your coins; Reflect Shield fires on the enemy's attacks, not yours. The per-hit damage is the meaningful number."}>
           <div className="label">DPS (est.)</div>
           <div className="value">{displayDpsValid && effectiveDps != null ? effectiveDps.toFixed(1) : "—"}</div>
         </div>
@@ -774,8 +785,10 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
           </div>
         )}
         {!isInstaKill && hitsAvg != null && (
-          <div className="metric metric-range" title={`Expected hits to kill the ${target_hp!.toLocaleString()}-HP target — using your effective per-hit damage (folding in crit rate, procs and ASPD, same as Time to kill), from best-case to worst-case damage rolls.`}>
-            <div className="label">Hits to kill</div>
+          <div className="metric metric-range" title={noRateHit
+            ? `Expected casts to kill the ${target_hp!.toLocaleString()}-HP target, from best-case to worst-case damage rolls. This skill has no repeat rate to quote, so there is no time to kill — only the number of casts.`
+            : `Expected hits to kill the ${target_hp!.toLocaleString()}-HP target — using your effective per-hit damage (folding in crit rate, procs and ASPD, same as Time to kill), from best-case to worst-case damage rolls.`}>
+            <div className="label">{noRateHit ? "Casts to kill" : "Hits to kill"}</div>
             <div className="value range">
               {hitsBest}<span className="unit">min</span>
               {" – "}

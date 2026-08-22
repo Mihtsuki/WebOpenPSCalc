@@ -1600,7 +1600,16 @@ class BattlePipeline {
    * (wiki.payonstories.com/Killing_Stroke). Always Neutral element; auto-hit
    * (damage_type IgnoreFlee); DEF and cards still apply. HP is the current HP
    * being sacrificed — use current_hp when set, otherwise max HP (full health).
-   * The Mirror Image (+10-30%) damage bonus is not modeled.
+   *
+   * Mirror Image (SC_NJ_BUNSINJYUTSU) raises this skill's damage by
+   * (5 + 5*ImagesLeft)% — 10% at one image up to 30% at five — on non-PvP/GvG
+   * maps, and the images are consumed by the cast. We only ever price PvM, so
+   * the bonus always applies when the buff is set. The buff level here is the
+   * number of images LEFT (1-5), not the Mirror Image skill level: the skill
+   * grants ceil(lv/2) images (Lv1-2 -> 1 ... Lv9-10 -> 5, per skill_descriptions),
+   * and what the formula reads is how many are still standing when you cast.
+   * Ninja Aura's own +STR is already in status.str via statusCalculator, which
+   * matters here because STR is 40x in the base term.
    */
   _runKillingStrokeBranch(status, weapon, skill, target, build, opts = {}) {
     const { gear_bonuses: gearBonuses } = opts;
@@ -1622,9 +1631,23 @@ class BattlePipeline {
     pmf = calculateAttrFix(weapon, target, pmf, result, build, 0 /* always Neutral */);
     pmf = calculateCardFix(build, gearBonuses, 0, target, false, pmf, result);
 
+    // Mirror Image, applied last as its own multiplier so the breakdown shows it.
+    const images = Math.max(0, Math.min(5, Number((build.active_status_levels || {}).SC_NJ_BUNSINJYUTSU) || 0));
+    if (images > 0) {
+      const pct = 5 + 5 * images;
+      pmf = scaleFloor(pmf, 100 + pct, 100);
+      const [, , avMi] = pmfStats(pmf);
+      result.add_step({
+        name: `Mirror Image (+${pct}%)`, value: avMi, min_value: avMi, max_value: avMi,
+        note: `${images} image${images === 1 ? "" : "s"} left — consumed by this cast`,
+        formula: "(5 + 5*ImagesLeft)%",
+        hercules_ref: "wiki.payonstories.com/Killing_Stroke",
+      });
+    }
+
     pmf = floorAt(pmf, 1);
     const [mn, mx, av] = pmfStats(pmf);
-    result.add_step({ name: "Final Damage", value: av, min_value: mn, max_value: mx, note: "Killing Stroke branch (HP sacrifice; Mirror Image bonus not modeled)", formula: "", hercules_ref: "" });
+    result.add_step({ name: "Final Damage", value: av, min_value: mn, max_value: mx, note: "Killing Stroke branch (HP sacrifice)", formula: "", hercules_ref: "" });
 
     result.min_damage = mn;
     result.max_damage = mx;
@@ -1789,11 +1812,17 @@ class BattlePipeline {
       const ksResult = this._runKillingStrokeBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
       let castMs = 0, delayMs = 0;
       if (skillData) [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
-      const ksPeriod = Math.max(castMs + delayMs, 100);
-      const attacks = [createAttackDefinition(ksResult.avg_damage, 0.0, ksPeriod, 1.0)];
+      // No DPS. NJ_ISSEN has every timing array zeroed in the skill DB, so
+      // cast + delay came to 0 and the shared max(...,100) floor turned that into
+      // a 100 ms period — the calculator was advertising ten Killing Strokes a
+      // second. It is a one-shot by construction: the cast drops you to 1 HP (or
+      // 5*ImagesLeft% with Mirror Image up) and cancels Ninja Aura, which this
+      // skill REQUIRES, so the next cast waits on Ninja Aura plus healing back up.
+      // Reporting no rate is the honest answer; the per-hit damage is the point.
+      const attacks = [createAttackDefinition(ksResult.avg_damage, 0.0, 0, 1.0)];
       return createBattleResult({
         normal: ksResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
-        dps: calculateDps(attacks), attacks, period_ms: ksPeriod, dps_valid: true,
+        dps: null, attacks, period_ms: 0, dps_valid: false,
       });
     }
 

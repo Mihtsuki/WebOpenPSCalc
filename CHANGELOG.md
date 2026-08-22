@@ -9,12 +9,26 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Mirror Image now counts towards Killing Stroke.** The Ninja buff raises Killing Stroke's damage
+  by 10% to 30%, depending on how many images you still have up when you cast — and it wasn't in the
+  calculator at all. It's now in the Buffs panel as **Mirror Image (images left)**. Set it to the
+  number of images standing, not the skill level: one image is +10%, five is +30%, and Mirror Image
+  has to be Lv9 or Lv10 to give you five. Killing Stroke consumes them all. Ninja Aura was already
+  there, and it matters more than it looks — its STR is multiplied by 40 in this skill's formula.
+
 - **Perfect Dodge is now shown in Combat stats.** It sits next to Flee. Perfect Dodge is a flat
   chance to avoid a hit outright, no matter how much HIT the attacker has, so it's a different
   thing from Flee and now has its own readout. Gear that grants it was always being counted — there
   was simply nowhere to see it, which made it look ignored.
 
 ### Fixed
+
+- **Killing Stroke claimed you could cast it ten times a second.** It has no cast time or delay
+  recorded anywhere, and the calculator filled that gap with its minimum period — which came out as
+  ten casts per second and a DPS figure near 61,000. Killing Stroke is a one-shot: it leaves you on
+  1 HP and cancels the Ninja Aura it needs to be cast in the first place. There's no repeat rate to
+  quote, so DPS and time to kill now show "—" instead of a made-up number. **Casts to kill** is still
+  there, because that's the question actually worth asking of a skill like this. Reported by a player.
 
 - **Wanderer Card kept proccing with the full thief card set.** Its Intimidate proc is meant to
   switch off once you wear the whole set, and the card's own text says so — but the calculator

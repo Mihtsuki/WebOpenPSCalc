@@ -1882,3 +1882,46 @@ test("cards are ignored in slots they cannot compound into", () => {
   assert.equal(gb({ ...SHIELD, armor_card1: 4704 }).str_, 5, "wildcard STR+5 still applies");
   assert.equal(gb({ ...SHIELD, right_hand_card1: 4704 }).str_, 5);
 });
+
+// ---------------------------------------------------------------------------
+// Killing Stroke: Mirror Image bonus, and no fabricated repeat rate
+// ---------------------------------------------------------------------------
+test("Killing Stroke takes the Mirror Image bonus and reports no DPS", () => {
+  const cfg = createBattleConfig();
+  const ks = loader.getSkillByName("NJ_ISSEN");
+  const target = loader.getMonster(1002);
+  const run = (active_buffs) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 25, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 60, vit: 50, int: 20, dex: 60, luk: 20 },
+      equipped: { right_hand: 1201 }, active_buffs,
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: ks.id, level: 5 }), target, eff, gb);
+  };
+
+  // Every timing array for NJ_ISSEN is zero in the skill DB, so cast+delay came to
+  // 0 and the shared max(...,100) floor advertised ten casts a second. The skill
+  // drops you to 1 HP and cancels the Ninja Aura it requires — there is no rate.
+  const plain = run({});
+  assert.equal(plain.dps_valid, false, "no repeat rate to quote");
+  assert.equal(plain.dps, null);
+  assert.equal(plain.period_ms, 0, "must not fall back to the 100 ms floor");
+
+  // Ninja Aura is +2 STR/level on PS and STR is multiplied by 40 in the base term,
+  // so Lv5 is worth exactly 10 * 40 damage before any multiplier.
+  const aura = run({ SC_NJ_NEN: 5 });
+  assert.equal(aura.normal.avg_damage - plain.normal.avg_damage, 400, "Aura Lv5 = +10 STR = +400");
+
+  // (5 + 5*ImagesLeft)% — 10% at one image, 30% at five. Applied last, floored.
+  const base = aura.normal.avg_damage;
+  for (const [images, pct] of [[1, 10], [3, 20], [5, 30]]) {
+    const r = run({ SC_NJ_NEN: 5, SC_NJ_BUNSINJYUTSU: images });
+    assert.equal(r.normal.avg_damage, Math.floor((base * (100 + pct)) / 100), `${images} image(s) = +${pct}%`);
+    assert.ok(r.normal.steps.some((st) => st.name === `Mirror Image (+${pct}%)`), "the bonus is its own step");
+  }
+  // Clamped at five images: the skill grants at most ceil(10/2) = 5.
+  assert.equal(run({ SC_NJ_NEN: 5, SC_NJ_BUNSINJYUTSU: 9 }).normal.avg_damage,
+               run({ SC_NJ_NEN: 5, SC_NJ_BUNSINJYUTSU: 5 }).normal.avg_damage, "capped at 5 images");
+  assert.ok(!plain.normal.steps.some((st) => /Mirror Image/.test(st.name)), "no step when the buff is off");
+});

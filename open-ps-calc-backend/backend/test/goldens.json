@@ -1977,11 +1977,11 @@
    "matk_max": 6
   },
   "result": {
-   "dps": 60890,
-   "dps_valid": true,
+   "dps": null,
+   "dps_valid": false,
    "hit_chance": 100,
    "crit_chance": 0,
-   "period_ms": 100,
+   "period_ms": 0,
    "normal": {
     "min": 6089,
     "max": 6089,
@@ -1991,6 +1991,47 @@
      "Defense Fix",
      "Attr Fix",
      "Card Fix",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "ninja-killing-stroke-aura-mirror-image": {
+  "status": {
+   "str": 100,
+   "agi": 96,
+   "vit": 50,
+   "int_": 15,
+   "dex": 64,
+   "luk": 22,
+   "batk": 216,
+   "max_hp": 6375,
+   "max_sp": 600,
+   "aspd": 172.4,
+   "cri": 83,
+   "hit": 163,
+   "flee": 195,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 19,
+   "matk_max": 24
+  },
+  "result": {
+   "dps": null,
+   "dps_valid": false,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 0,
+   "normal": {
+    "min": 8279,
+    "max": 8279,
+    "avg": 8279,
+    "steps": [
+     "Killing Stroke Base (Lv 10)",
+     "Defense Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Mirror Image (+30%)",
      "Final Damage"
     ]
    }

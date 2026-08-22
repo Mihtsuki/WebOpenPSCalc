@@ -57,6 +57,7 @@ const BUFF_SKILL = {
   SC_GS_ADJUSTMENT: "GS_ADJUSTMENT",          // Run and Gun (PS rename, in DB)
   SC_GS_GATLINGFEVER: "GS_GATLINGFEVER",      // Gatling Fever
   SC_NJ_NEN: "NJ_NEN",                        // Ninja Aura  <-- the "Ki" regression guard
+  SC_NJ_BUNSINJYUTSU: "NJ_BUNSINJYUTSU",      // Mirror Image (level = images LEFT, 1-5)
   SC_AMPLIFYMAGICPOWER: "HW_MAGICPOWER",      // Amplify Magic Power
   // --- PARTY_BUFFS ---
   SC_IMPOSITIO: "PR_IMPOSITIO",               // Impositio Manus
