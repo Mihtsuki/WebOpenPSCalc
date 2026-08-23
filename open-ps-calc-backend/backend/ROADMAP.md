@@ -1266,6 +1266,43 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **Monk combo delay is missing its floor — we OVERSTATE Chain Combo / Combo Finish DPS.**
+  `skillTiming.js` already applies the right idea to `MONK_COMBO_SKILLS`
+  (`baseDelay -= 4*AGI + 2*DEX`), but the wiki's formula is
+  **`max(800, (1000 - 4*agi - 2*dex + 300) + 25)`** — we are missing the `+300`, the `+25`
+  and, critically, the **800 ms floor**. Measured on a Monk at AGI 97 / DEX 84: we compute
+  **502 ms** where the wiki floors at **800 ms**, so combo DPS reads **~59% too high**.
+  Note also that our DB base for `MO_COMBOFINISH` is **700 ms** while the wiki uses 1000 for
+  both skills. Sources: wiki.payonstories.com/Chain_Combo and /Combo_Finish (both state the
+  formula identically, in the `delay =` infobox field and again in the body).
+  This is the one in the family that reads too STRONG, so it should go first.
+- **Stat-scaled after-cast delay is only wired to Monk — Assassin and Ninja skills miss it.**
+  The same `X - (4*AGI + 2*DEX)` reduction the Monk combo path uses is documented on the wiki
+  for several skills that never get it, so they all read too SLOW. Measured at AGI 96 / DEX 84:
+  | skill | wiki delay | ours | effect |
+  |---|---|---|---|
+  | `AS_SONICBLOW` | `2000 - (4*AGI + 2*DEX)` = 1424 ms | 2000 ms | DPS ~29% low |
+  | `NJ_KUNAI` (Throw Kunai) | `1000 - (4*AGI + 2*DEX)` = 448 ms | 1000 ms | DPS ~55% low |
+  | `NJ_KASUMIKIRI` (Haze Slasher) | `1000 - (4*AGI + 2*DEX)` = 448 ms | 1000 ms | DPS ~55% low |
+  The extension point already exists and is empty: **`profile.ps_skill_delay_fn`** is read by
+  `calculateSkillTiming` before the `MONK_COMBO_SKILLS` branch, so these drop in as per-skill
+  functions without touching the Monk path. Sources: wiki.payonstories.com/Sonic_Blow
+  ("delay = 2000 - (AGI*4 + DEX*2) ms"), /Throw_Kunai ("The delay is reduced based on the
+  formula: 1000 - (4*AGI + 2*DEX) ms"), /Haze_Slasher ("The delay is reduced based on the
+  formula: 4*AGI + 2*DEX").
+  **Blocked on a decision — `NJ_HUUMA` (Throw Huuma Shuriken).** Same mechanic, doubled
+  coefficients: the wiki gives cast `0.5 + 0.5*lv` (3 s at Lv5) and delay
+  `2000 - (8*AGI + 4*DEX)` = 896 ms, but does **not** say whether that cast is DEX-reducible.
+  We currently DEX-reduce the cast (3000 → 1320) and apply the full unreduced 2000 delay, for
+  3320 ms. Cast-reducible reads 2216 ms (we are 1.5x slow); cast-fixed reads 3896 ms (we are
+  15% fast). **Needs an in-game timing before picking a side** — do not guess this one.
+  Related, found in the same investigation but a different kind of gap: **`NJ_SYURIKEN`
+  (Throw Shuriken) is not modelled at all** — typed `Misc` with no ratio, so the BF_MISC guard
+  returns 0 damage. Per the wiki it is a normal-attack-shaped skill (flat **+5xSkillLv ATK**,
+  "inherits both the attack speed and the size penalties of the weapon class", range 9,
+  consumes shuriken ammo, which we already carry as 13250-13254). Its PACING would already be
+  correct once priced, because `skillPeriodMs` floors the period at the ASPD delay; the only
+  blocker is the missing ratio. Throwing Mastery's +3xlv is already implemented and matches.
 - ~~**Gunslinger coins + Fling**~~ — **implemented 2026-08-21**, gated on `GS_FLING_PS_FORMULA`.
   Coins are now a build resource (`gs_coins`, 0–10, serialised under `flags` like `spirit_spheres`,
   Gunslinger-gated in the Buffs panel). Fling is BOTH halves, deliberately split: its **damage** is
