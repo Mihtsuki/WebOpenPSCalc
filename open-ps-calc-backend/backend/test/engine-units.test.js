@@ -2086,3 +2086,39 @@ test("held coins add +3 ATK each, multiplied by the skill's hit count", () => {
   };
   assert.equal(monk(5) - monk(0), 15, "Monk spheres still +3 each");
 });
+
+// ---------------------------------------------------------------------------
+// Gunslinger ammo: element rides the SCRIPT, not the `element` field
+// ---------------------------------------------------------------------------
+test("elemental ammo applies its element, and Destroyer has its 3-slot version", () => {
+  const cfg = createBattleConfig();
+  const ELE_GHOST = 8;
+
+  // Destroyer [3] (13160) is slots=3 on PS but 0 in the vanilla item_db, so the
+  // slotted version was missing from the picker entirely while [1] was present.
+  assert.equal(loader.getItem(13160).slots, 3, "Destroyer [3]");
+  assert.equal(loader.getItem(13161).slots, 1, "Destroyer [1] unchanged");
+
+  // resolveWeapon takes the element from gearBonuses.script_atk_ele_rh, which comes
+  // from the ammo's `bonus bAtkEle` — an `element` field on its own does nothing.
+  // Ghosthunter Grenade carried element:8 with an empty script, so Ghost never landed.
+  const elementWith = (ammo) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 24, base_level: 99, job_level: 50,
+      base_stats: { str: 80, agi: 90, vit: 1, int: 1, dex: 80, luk: 1 },
+      equipped: { right_hand: 13160, ammo },
+    });
+    return resolvePlayerState(b, cfg, PS)[2].element;
+  };
+  assert.equal(elementWith(91125), ELE_GHOST, "Ghosthunter Grenade is Ghost");
+  assert.equal(elementWith(13203), 3, "Flare Sphere still Fire");
+  assert.equal(elementWith(13207), 1, "Freezing Sphere still Water");
+  assert.ok(/bAtkEle/.test(String(loader.getItem(91125).script)), "the element must be scripted");
+
+  // Every ammo whose data claims a non-Neutral element must actually script it —
+  // this is the class of bug, not just the one item.
+  const unscripted = (loader.getItemsByType("IT_AMMO") || []).filter(
+    (it) => it.element != null && it.element !== 0 && !/bAtkEle/.test(String(it.script || "")));
+  assert.deepEqual(unscripted.map((it) => `${it.id} ${it.name}`), [],
+    "ammo with an element field but no bAtkEle would silently hit as Neutral");
+});

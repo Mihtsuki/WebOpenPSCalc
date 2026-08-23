@@ -41,6 +41,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Destroyer [3] wasn't in the item list.** The three-slot version of the grenade launcher
+  was recorded as having no slots, so it never appeared — only Destroyer [1] did. Reported by
+  a player.
+
+- **Ghosthunter Grenade wasn't dealing Ghost damage.** It was marked as Ghost in the data, but
+  the calculator reads an ammo's element from its effect script, and this one had none — so it
+  was hitting as Neutral. The other elemental rounds (Flare, Freezing, Blind, Lightning, Poison
+  Sphere) were all fine, which is why it went unnoticed. Also reported by a player.
+
+
 - **Gunslinger coins weren't adding any damage.** Coins are worth **+3 ATK each**, and that
   applies to every hit a skill lands — so 10 coins is +30 on a normal attack, +90 on Triple
   Action and +180 on a level 10 Desperado. The calculator was only giving that bonus to Monk

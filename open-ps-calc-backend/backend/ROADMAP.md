@@ -318,6 +318,26 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Destroyer [3] was missing, and Ghosthunter Grenade's Ghost element never applied.**
+  Two Gunslinger reports from the same player.
+  - **Destroyer (13160)** is `slots=3` on the live item API but `0` in the vanilla
+    `item_db`, so the 3-slot version simply did not exist in the picker while
+    Destroyer [1] (13161, slots=1 in both) was there. Fixed in `ps_item_manual.json`.
+  - **Ghosthunter Grenade (91125)** carried `element: 8` with an **empty script**. The
+    engine takes a weapon's element from `gearBonuses.script_atk_ele_rh`, populated from
+    the ammo's `bonus bAtkEle` — **the `element` data field alone does nothing**. That is
+    why Flare / Freezing / Blind Sphere (all of which script `bAtkEle`) worked and this
+    one silently hit as Neutral. Live API confirms "Element: Ghost". Now scripted, and
+    a test asserts **no** ammo anywhere has an element field without the matching
+    `bAtkEle`, so the class of bug is closed rather than the one instance.
+  - Audited all 24 Gunslinger ammo entries against the API while in here; Ghosthunter was
+    the only element that failed to apply. **Left alone deliberately:** the API labels
+    the Sphere rounds (13203-13207) "Class: Bullet" where we and the vanilla item_db have
+    them as `A_GRENADE`, and the same for Thud Grenade (91127). Changing a subtype moves
+    which weapons accept which ammo through `ammoFitsWeapon`, the API's `Class:` line
+    looks coarse (it says "Bullet" for most rounds while saying "Grenade" for the 9112x
+    customs), and no player has reported it — so it is recorded here rather than guessed at.
+
 - **Gunslinger coins were worth nothing** (`forgeBonus.js` `calculateSpiritSphereBonus`).
   Held coins grant **+3 ATK each, multiplied by the skill's hit count** — the same flat
   Star-Crumb-position add Monk spirit spheres get — but the bonus was gated behind

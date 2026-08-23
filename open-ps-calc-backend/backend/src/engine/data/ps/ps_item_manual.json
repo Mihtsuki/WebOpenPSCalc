@@ -2476,7 +2476,8 @@
   "aegis_name": "Ghosthunter_Grenade",
   "job": [],
   "refineable": false,
-  "script": ""
+  "script": "bonus bAtkEle,Ele_Ghost;",
+  "_note": "Element comes from the ammo SCRIPT, not the `element` field — resolveWeapon reads gearBonuses.script_atk_ele_rh, which is populated from bAtkEle. This entry carried element:8 with an empty script, so the Ghost property never reached the attack while Flare/Freezing/Blind Sphere (which all have bAtkEle) worked. Live API confirms \"Element: Ghost\". Reported by a player."
  },
  "91126": {
   "type": "IT_AMMO",
@@ -2621,5 +2622,10 @@
   "aegis_name": "Wit_Pumpkin_Hat",
   "script": "bonus bMdef,4; bonus2 bMagicAddRace,RC_Undead,15; bonus2 bMagicAddRace,RC_Demon,15;",
   "_note": "The vanilla item_db script for this id (bMdef,10 + bStr,2 + bInt,2) is for a different item — PS repurposed the id. Live item API: \"Mdef +4. Increase Damage against Undead and Demon monsters by 15%.\" MDEF corrected 10->4 and the unlisted STR/INT dropped. The +15% is kept MAGIC-only (bMagicAddRace, as vanilla had it) because the PS text says \"Damage\" without qualifying it — if a player reports it working on physical hits, switch to bAddRace."
+ },
+ "13160": {
+  "aegis_name": "Destroyer",
+  "slots": 3,
+  "_note": "Live item API (tools.payonstories.com/api/pc/item?id=13160) reports slots=3; the vanilla item_db has 0, so Destroyer [3] was missing from the item picker entirely while the [1] version (13161, slots=1 in both) was present. Reported by a player."
  }
 }
