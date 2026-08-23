@@ -318,6 +318,36 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Pinned the values that must not drift** (`test/protected-values.test.js`, wired into
+  `npm test` so CI gates the deploy on it). Written for a repo that is about to take
+  outside contributions: most of it should stay easy to change, but a few values decide
+  **where money goes, who the site claims to be, and who it credits**, and each can be
+  altered in a one-line diff that looks harmless in review.
+  - **Ko-fi.** The page id (`KOFI_PAGE`) is pinned, both URLs must be built from it on
+    `https://ko-fi.com`, and the whole component may reference no other host — a
+    typosquat like `ko-fi.co` keeps the id and still takes the money. A second sweep
+    asserts no payment host (ko-fi/paypal/patreon/buymeacoffee) appears **anywhere else**
+    under either `src/`, so a rival "Support us" button cannot bypass the first check.
+    That sweep is deliberately blunt and trips on comments too: a false alarm costs a
+    sentence in review, a missed one costs every donation until somebody notices.
+  - **Identity.** `index.html`'s canonical and `og:url`, plus `gen-guides.mjs`'s `SITE`,
+    must all agree on `https://openpscalc.com` — a wrong canonical hands this site's
+    search ranking to whatever it points at, and the generator stamps its own copy into
+    every page it writes.
+  - **Attribution** to `StatGameDev/Open_PS_Calc` in the README. The only item here that
+    is a licence condition rather than a preference.
+  - **Data sources.** The audit tooling may fetch from `payonstories.com` and nowhere
+    else; repointing it would make every number suspect while the app still looked fine.
+  Nothing is frozen — the mechanism is that changing one **also** requires changing this
+  test in the same commit, which turns a silent edit into a visible one. All six attack
+  scenarios were run against it (redirect the id, typosquat the host, repoint the
+  canonical, desync the generator domain, strip attribution, add a second donation link
+  in an unrelated file) and each one fails the suite. A `## Contributing` section in the
+  README explains it, so it reads as a documented rule rather than a mystery failure.
+  **Not done, and worth considering separately:** a `CODEOWNERS` file plus branch
+  protection would add a human review requirement on these paths. That is a GitHub
+  settings change rather than a repo change, so it is left to the maintainer.
+
 - **Swept the LIVE PS item DB for anything we are missing (2026-08-23).** There is no bulk
   endpoint, so `tools/audit/fetch_ps_items.py` harvests it two ways: `?name=` is a substring
   match with a 3-character minimum, so every 3-gram occurring in a known item name is

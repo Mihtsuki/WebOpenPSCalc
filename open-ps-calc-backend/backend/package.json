@@ -7,7 +7,7 @@
   "scripts": {
     "start": "tsx src/server.ts",
     "dev": "tsx watch src/server.ts",
-    "test": "node --test test/calc-goldens.test.js test/engine-units.test.js test/buff-labels.test.js test/mob-skill-ratios.test.js",
+    "test": "node --test test/calc-goldens.test.js test/engine-units.test.js test/buff-labels.test.js test/mob-skill-ratios.test.js test/protected-values.test.js",
     "test:gen-goldens": "node test/gen-goldens.js",
     "kill-port": "node scripts/kill-port.mjs",
     "stats:backfill-regions": "node src/scripts/backfill-regions.js",

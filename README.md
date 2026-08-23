@@ -365,6 +365,29 @@ Linux and Windows). See
 `open-ps-calc-frontend/frontend/README.md` for more detail, and
 `DEPLOYMENT.md` for deploying to EC2.
 
+## Contributing
+
+Run the backend test suite before opening a PR — CI runs it and it gates the
+deploy:
+
+```bash
+cd open-ps-calc-backend/backend && npm test
+```
+
+A handful of values are pinned by `test/protected-values.test.js`: the Ko-fi
+donation page, the site's canonical domain, the upstream attribution to
+StatGameDev/Open_PS_Calc, and the hosts the audit tooling fetches from. They are
+pinned because each one can be changed in a one-line diff that looks harmless in
+review and does real damage if it lands — swap eight characters of the Ko-fi id
+and every donation goes somewhere else, with nothing on screen looking different.
+
+None of them are frozen. If you have reason to change one, change it in that test
+too, in the same commit. That is the entire point: it turns a silent edit into a
+visible one a reviewer is asked to confirm on purpose.
+
+If that suite fails and you did not mean to touch any of it, look closely at the
+diff before pushing.
+
 ## What's accurate vs. what's a placeholder
 
 This is a faithful, hand-checked port of the formula-heavy parts of the
