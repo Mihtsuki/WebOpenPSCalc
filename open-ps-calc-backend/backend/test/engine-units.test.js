@@ -2040,3 +2040,49 @@ test("Lord of Vermilion lands as four escalating waves, each taking MDEF", () =>
   // is the whole point of the change. One lump would only lose 90.
   assert.equal(hit(0) - hit(90), 4 * 90, "soft MDEF is subtracted once per wave");
 });
+
+// ---------------------------------------------------------------------------
+// Gunslinger coins are spirit balls (Hercules shares the counter)
+// ---------------------------------------------------------------------------
+test("held coins add +3 ATK each, multiplied by the skill's hit count", () => {
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1002);
+  const dmg = (coins, skillName, lv) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 24, base_level: 99, job_level: 50,
+      base_stats: { str: 80, agi: 90, vit: 1, int: 1, dex: 80, luk: 1 },
+      equipped: { right_hand: 13100 }, flags: { gs_coins: coins },
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    const sd = skillName ? loader.getSkillByName(skillName) : null;
+    return new BattlePipeline(cfg).calculate(
+      st, w, createSkillInstance({ id: sd ? sd.id : 0, level: lv || 1 }), target, eff, gb).normal;
+  };
+
+  // battle.c: ATK_ADD(wd.div_ * sd->spiritball * 3), and skill.c's GS_GLITTERING
+  // caps addspiritball at 10 — coins are the same counter Monk spheres use, so this
+  // was never Monk-only. A single-hit attack gains exactly 3 per coin.
+  assert.equal(dmg(10, null).avg_damage - dmg(0, null).avg_damage, 30, "10 coins = +30 on one hit");
+  assert.ok(dmg(10, null).steps.some((s) => s.name === "Coin Bonus"), "shown as its own step");
+  assert.ok(!dmg(0, null).steps.some((s) => s.name === "Coin Bonus"), "no step with no coins");
+
+  // ...and it scales with div, so a 3-hit skill gets it three times.
+  const ta3 = dmg(10, "GS_TRIPLEACTION", 1).avg_damage - dmg(0, "GS_TRIPLEACTION", 1).avg_damage;
+  assert.equal(ta3, 90, "Triple Action is 3 hits → +30 x 3");
+
+  // Coins are capped at 10 (skill.c GS_GLITTERING), so 15 is worth no more than 10.
+  assert.equal(dmg(15, null).avg_damage, dmg(10, null).avg_damage, "capped at 10 coins");
+
+  // A Monk's spheres must be unaffected by any of this.
+  const monk = (spheres) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 15, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 60, vit: 40, int: 1, dex: 60, luk: 1 },
+      equipped: { right_hand: 1801 }, flags: { spirit_spheres: spheres },
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(
+      st, w, createSkillInstance({ id: 0, level: 1 }), target, eff, gb).normal.avg_damage;
+  };
+  assert.equal(monk(5) - monk(0), 15, "Monk spheres still +3 each");
+});

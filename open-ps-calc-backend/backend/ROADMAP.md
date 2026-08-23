@@ -318,6 +318,33 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Gunslinger coins were worth nothing** (`forgeBonus.js` `calculateSpiritSphereBonus`).
+  Held coins grant **+3 ATK each, multiplied by the skill's hit count** — the same flat
+  Star-Crumb-position add Monk spirit spheres get — but the bonus was gated behind
+  `MONK_LINE_JOBS`, so a Gunslinger holding a full pool of 10 saw no change at all.
+  Verified against source rather than inferred, after the first pass leaned too hard on
+  one wiki line:
+  - `skill.c` `case GS_GLITTERING:` (Flip the Coin) calls `pc->addspiritball(sd, …, 10)`
+    — **coins ARE `sd->spiritball`**, and that 10 is where the coin cap comes from.
+  - `battle.c` `ATK_ADD(wd.div_ * sd->spiritball * 3)`, inside `#ifndef RENEWAL` (PS is
+    pre-re), sits beside the Star Crumb `ATK_ADD2` and immediately before
+    `battle->calc_cardfix`. That one line establishes all four properties — +3 each,
+    ×hit-count, past DEF, affected by cards — and carries **no job check**.
+  - PS keeps it: the wiki's Gunslinger page says "Each coin adds +3 dmg to your attacks"
+    and the Flip Coin page calls the coins "similar to monk spirits". The Monk side is
+    spelled out separately on Call Spirits ("+3 ATK that ignores enemy defense and flee",
+    "affected by cards but not by elements") — the same behaviour, as expected.
+  Practical effect: 10 coins are +30 on a single-hit attack, **+90 on Triple Action (3
+  hits) and +180 on Desperado Lv10 (6 hits)**. No existing golden moved — no scenario had
+  ever set a coin.
+- **The coin field no longer deducts stance costs.** Barrage (2 coins) and Run and Gun (1)
+  were being charged against the pool, so the panel told Gunslingers they were short of
+  coins they would actually be holding. The cost is paid when the stance goes up and Coin
+  Flip refills in one 3-second cast, so by the time you attack you have both. The field
+  now means "coins in hand as you act", and shows the +ATK they are worth. Barrage's own
+  +30% damage was already modelled correctly (verified: auto 206→267, Desperado
+  3414→4438), and Barrage/Run and Gun mutual exclusion was already wired. Player-reported.
+
 - **Meteor Storm and Lord of Vermilion: the two multi-hit gaps from the 2026-08-22
   audit, now closed** — plus the 15 stale item tooltips it found.
   - **Meteor Storm** was pricing Lv10 at **5 hits instead of 35**. `skills.json`

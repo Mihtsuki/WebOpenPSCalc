@@ -31,10 +31,6 @@ const WILDCARD_BONUS_OPTIONS = [4, 10, 15, 20, 30];
 // 2025-03-01) and wiki.payonstories.com/Fling. Coins are a finite pool from Coin
 // Flip (max 10), so a build can ask for more than it holds — this is what lets the
 // panel say so instead of silently pricing an impossible setup.
-const GS_BUFF_COIN_COST: Record<string, number> = {
-  SC_GS_MADNESSCANCEL: 2, // Barrage
-  SC_GS_ADJUSTMENT: 1,    // Run and Gun
-};
 // Skill ids that cost a coin to cast. Fling is absent because it is variable —
 // it spends up to 5 and is handled separately.
 const GS_SKILL_COIN_COST: Record<number, number> = {
@@ -2657,11 +2653,12 @@ export default function BuildEditor() {
               // debuffs represents someone ELSE's Gunslinger, whose coins aren't yours.
               const coinsHeld = Number(data.flags?.gs_coins) || 0;
               const coinSpend: { label: string; cost: number }[] = [];
-              for (const [sc, cost] of Object.entries(GS_BUFF_COIN_COST)) {
-                if (Number((data.active_buffs || {})[sc]) > 0) {
-                  coinSpend.push({ label: sc === "SC_GS_MADNESSCANCEL" ? "Barrage" : "Run and Gun", cost });
-                }
-              }
+              // Barrage (2) and Run and Gun (1) are NOT counted here, even though they
+              // cost coins. Their cost is paid when the stance goes up, and Coin Flip
+              // refills in one 3-second cast, so by the time you attack you are holding
+              // a full pool AND running the stance. Charging the build for both made
+              // the panel claim a Gunslinger was short of coins they would actually
+              // have. Reported by a player. This field is "coins in hand as you act".
               if (skill.id === GS_FLING_SKILL_ID) {
                 const thrown = Math.min(5, coinsHeld);
                 if (thrown > 0) coinSpend.push({ label: "Fling", cost: thrown });
@@ -2776,7 +2773,7 @@ export default function BuildEditor() {
                         )}
                         {isGunslinger && (
                           <div className="field" key="__gs_coins">
-                            <label title="Coins in hand from Coin Flip. A spendable resource, not a buff: Fling throws up to 5 of them for (job level + base level) damage each and cuts the target's DEF by 3% per coin. Barrage costs 2, and Run and Gun, Soul Bullet, Tranq Shot and Disarm cost 1 each. Max 10.">
+                            <label title="Coins in hand from Coin Flip as you attack, max 10. Each one is worth +3 ATK on every hit (so 10 coins = +30), the same flat bonus a Monk gets per spirit sphere — it ignores the target's DEF and is multiplied by a skill's hit count. Fling additionally throws up to 5 of them for (job level + base level) damage each and cuts the target's DEF by 3% per coin. Soul Bullet, Tranq Shot and Disarm each need 1 to cast. Barrage's 2 and Run and Gun's 1 are NOT deducted here: you pay those when the stance goes up and refill with Coin Flip before attacking.">
                               Coins (0–10)
                             </label>
                             <input
@@ -2791,6 +2788,11 @@ export default function BuildEditor() {
                                 setData((prev) => ({ ...prev, flags: { ...(prev.flags || {}), gs_coins: v || undefined } }));
                               }}
                             />
+                            {coinsHeld > 0 && coinSpend.length === 0 && (
+                              <span className="coin-spend" title="Held coins are worth +3 ATK each on every hit, the same flat bonus a Monk gets per spirit sphere — it ignores the target's DEF and is multiplied by a skill's hit count. Fling is the only skill that also spends them for damage of their own.">
+                                +{coinsHeld * 3} ATK from coins
+                              </span>
+                            )}
                             {coinSpend.length > 0 && (
                               <span
                                 className={`coin-spend${coinsShort ? " coin-spend--short" : ""}`}

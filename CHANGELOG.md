@@ -41,6 +41,19 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Gunslinger coins weren't adding any damage.** Coins are worth **+3 ATK each**, and that
+  applies to every hit a skill lands — so 10 coins is +30 on a normal attack, +90 on Triple
+  Action and +180 on a level 10 Desperado. The calculator was only giving that bonus to Monk
+  spirit spheres, even though coins are the same thing under the hood, so a Gunslinger holding
+  a full pool saw no change at all. Reported by a player.
+
+- **Coins were being docked for your stance.** Turning on Barrage or Run and Gun subtracted
+  their cost from your coins, which made the panel claim you were short. You pay that cost when
+  you put the stance up and Coin Flip refills in one cast, so by the time you attack you have
+  the stance *and* a full pool. The coin box now means what you're holding as you attack, and
+  shows the ATK it's worth. Also reported by a player, who pointed out you just re-summon.
+
+
 - **Meteor Storm was worth a fraction of its real damage.** The calculator counted how many
   times each meteor hits but not how many meteors fall — at level 10 that's 7 meteors of 5 hits
   each, so it was pricing 5 hits where the spell lands 35. Meteors drop on random cells but each
