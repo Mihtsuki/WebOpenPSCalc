@@ -282,9 +282,13 @@ function compute(equipped, refineLevels = null, scriptCtx = null, forceProcs = f
       }
     }
 
+    // The right-hand weapon's type, for isweapontype() — ammo scripts use it
+    // (Armor Piercing Bullet's crit bonus is larger out of a Rifle).
+    const rhItem = equipped.right_hand != null ? loader.getItem(equipped.right_hand) : null;
+    const rhType = rhItem ? rhItem.weapon_type || null : null;
     const ctx = scriptCtx != null
-      ? { ...scriptCtx, refine, weapon_level: weaponLevel, equipped_ids: equippedIds }
-      : createItemScriptContext({ refine, weapon_level: weaponLevel, equipped_ids: equippedIds });
+      ? { ...scriptCtx, refine, weapon_level: weaponLevel, weapon_type: rhType, equipped_ids: equippedIds }
+      : createItemScriptContext({ refine, weapon_level: weaponLevel, weapon_type: rhType, equipped_ids: equippedIds });
 
     const effects = parseScript(script, ctx);
 

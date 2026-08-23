@@ -9,6 +9,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Three missing items added: Brass Wristwatch [1], Luck o' Pint and Leprecoin.** A sweep of
+  Payon Stories' live item database turned up these three as the only equippable things the
+  calculator didn't have. The wristwatch is the one worth caring about — it's a one-slot
+  accessory, so it's a card slot. Everything else the sweep found was a box, a costume, a
+  consumable, or gear for classes this server doesn't have.
+
+
 - **Super Novice can now use Crazy Uproar.** The buff was missing from the Super Novice list, so
   the +STR/+VIT it grants couldn't be switched on. Payon Stories has always given Super Novices
   Crazy Uproar and Cart Revolution — the 18 August client patch only moved them into the Novice
@@ -40,6 +47,10 @@ instead of release version. Dates are taken from actual git commit history.
 
 
 ### Fixed
+
+- **Armor Piercing Bullets weren't giving their full crit out of a Rifle.** They're worth +10
+  crit normally and +30 in a Rifle, but only the +10 was being counted.
+
 
 - **Destroyer [3] wasn't in the item list.** The three-slot version of the grenade launcher
   was recorded as having no slots, so it never appeared — only Destroyer [1] did. Reported by

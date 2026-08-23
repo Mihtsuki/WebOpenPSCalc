@@ -28,6 +28,9 @@ function createItemScriptContext(overrides = {}) {
     hp: null, sp: null, max_hp: null, max_sp: null,
     class_: null, base_job: null,
     weapon_level: null,
+    // Right-hand weapon_type string ("Rifle", "Revolver", "Grenade", …) for
+    // isweapontype(). null = unknown, which makes the predicate false.
+    weapon_type: null,
     // Item ids currently worn, for isequipped(). null = caller didn't supply them,
     // in which case isequipped() resolves to 0 (see the substitution in parseScript).
     equipped_ids: null,
@@ -291,9 +294,10 @@ function preprocessScript(script, ctx = null) {
   const hasGetskilllv = script.includes("getskilllv");
   const hasReadparam = script.includes("readparam");
   const hasGetweaponlv = script.includes("getequipweaponlv");
+  const hasWeaponType = script.includes("isweapontype");
   const hasIf = script.includes("if(") || script.includes("if (");
 
-  if (!(hasGetrefine || hasGetskilllv || hasReadparam || hasGetweaponlv || hasIf || hasIsequipped)) return script;
+  if (!(hasGetrefine || hasGetskilllv || hasReadparam || hasGetweaponlv || hasWeaponType || hasIf || hasIsequipped)) return script;
 
   // isequipped(id, id, ...) is TRUE only when EVERY listed item is worn — Hercules
   // uses it for set bonuses and, as on Wanderer Card, to switch an effect OFF once a
@@ -330,6 +334,17 @@ function preprocessScript(script, ctx = null) {
       const re = new RegExp(`\\breadparam\\s*\\(\\s*(${names})\\s*\\)`, "g");
       script = script.replace(re, (full, p1) => (p1 in statValues ? String(statValues[p1]) : full));
     }
+  }
+
+  // isweapontype("Rifle") — 1 when the RIGHT-HAND weapon is of that type, else 0.
+  // NOT a Hercules function: this is a ps_item_manual-layer extension, in the same
+  // spirit as the PS-custom bonus names (bMagnumLinger, bCritHeal). Hercules spells
+  // the same test as getiteminfo(getequipid(EQI_HAND_R),11)==W_RIFLE, which this
+  // parser has no getiteminfo/getequipid to evaluate. Unknown weapon type ⇒ 0, so a
+  // script that uses it still parses when the caller supplies no weapon.
+  if (hasWeaponType) {
+    script = script.replace(/\bisweapontype\s*\(\s*["']([^"']*)["']\s*\)/g, (_m, want) =>
+      (ctx.weapon_type && String(ctx.weapon_type).toLowerCase() === String(want).toLowerCase()) ? "1" : "0");
   }
 
   if (hasGetweaponlv) {

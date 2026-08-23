@@ -318,6 +318,53 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Swept the LIVE PS item DB for anything we are missing (2026-08-23).** There is no bulk
+  endpoint, so `tools/audit/fetch_ps_items.py` harvests it two ways: `?name=` is a substring
+  match with a 3-character minimum, so every 3-gram occurring in a known item name is
+  queried (that reaches anything sharing a trigram with something we already have), plus a
+  straight id scan of the 90000-92000 custom block, whose names can look like nothing in the
+  vanilla DB. **3,032 ids came back that we lack — and essentially none of them matter.**
+  The breakdown is the useful part: 886 costumes, and the rest boxes/containers, candies and
+  consumables, or **Renewal 3rd-job gear** (Illusion/Beginner Sura, Warlock, Geneticist,
+  Kagerou/Oboro) that pre-renewal PS cannot equip. Of 525 ids in the weapon/armour ranges,
+  every single one with a real weapon `Class:` line turned out to be a **Box** quoting its
+  contents (Rudra Bow Box, Moonlight Sword Box, Wrench Box). So our equipment coverage for
+  damage purposes was already complete — a negative result worth recording so this does not
+  get re-investigated.
+  **Three equippable items were genuinely missing** and are now added: **Brass Wristwatch
+  (81002)** — an Accessory **[1]**, the one that actually matters, because the card slot is
+  the point even though it has no innate stats — plus **Luck o' Pint (80066)** and
+  **Leprecoin (80067)**, stat-less St. Patrick's event pieces added so a build can represent
+  what is worn. Costumes are deliberately NOT imported: they carry no stats and we do not
+  model a costume slot, so 886 of them would only bloat the picker.
+- **Confirmed the bullet/grenade ammo question from the wiki** (raised when the item API
+  disagreed with our subtypes). The Gunslinger page carries two explicit lists:
+  *"Bullets are gunslinger specific ammunition used with Revolvers, Rifles, Shotguns and
+  Gatlings"* — Bullet 13200, Armor Piercing 13233, Hollow-Point 13234, Heavy Tipped 13235,
+  Plated 91126 — and *"Grenades are … used with Grenade Launchers"* — Thud 91127, Heavy
+  Explosive 91121, Flashbang 91122, Stun 91123, Sticky 91124, Ghosthunter 91125.
+  **Thud Grenade is a GRENADE**, so our `A_GRENADE` was right and the API's `Class: Bullet`
+  on it is the unreliable reading — the API's `Class:` line is coarse and says "Bullet" for
+  most rounds. Not changing the subtypes was the correct call. The Sphere rounds
+  (13203-13207) appear in **neither** list, so PS does not document them; left as the
+  vanilla `A_GRENADE`.
+- **Armor Piercing Bullet was missing its Rifle bonus.** The wiki's bullet table says
+  "+10 Crit, **+20 Crit with Rifle**", footnoted "Both bonuses count for Rifle, making it
+  +30 Crit while using Armor Piercing Bullets with Rifles". Only the flat +10 was
+  implemented. Needed a weapon-type test, which the parser had no way to express, so
+  `isweapontype("Rifle")` was added — a **ps_item_manual-layer predicate**, in the same
+  spirit as the PS-custom bonus names, since Hercules spells this as
+  `getiteminfo(getequipid(EQI_HAND_R),11)==W_RIFLE` and this parser has no
+  `getiteminfo`/`getequipid`. `weapon_type` is threaded into the script context alongside
+  the existing `weapon_level`.
+  **Worth knowing how this nearly shipped wrong:** the predicate's regex was written with a
+  literal **backspace byte** (`` through a non-raw Python string — the same trap already
+  recorded in this file), so it never matched, the `if()` condition became unevaluatable, and
+  `evalConditionals` **FAILS OPEN** and took the true branch — quietly granting +20 crit to
+  every weapon including grenade launchers. The fail-open is deliberate and documented, but
+  it means a broken predicate is silent rather than loud. Both the outcome (Revolver must
+  gain only +10) and the predicate itself are now pinned by tests.
+
 - **Destroyer [3] was missing, and Ghosthunter Grenade's Ghost element never applied.**
   Two Gunslinger reports from the same player.
   - **Destroyer (13160)** is `slots=3` on the live item API but `0` in the vanilla

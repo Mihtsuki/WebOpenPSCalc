@@ -2360,18 +2360,9 @@
   "script": ""
  },
  "13233": {
-  "type": "IT_AMMO",
-  "subtype": "A_BULLET",
-  "loc": [
-   "EQP_AMMO"
-  ],
-  "atk": 30,
-  "slots": 0,
   "aegis_name": "Armor_Piercing_Bullet",
-  "job": [],
-  "refineable": false,
-  "script": "bonus bCritical,10;",
-  "_note": "These PS ammo entries carried no `subtype`, so nothing could tell a bullet from an arrow. That let the gear aggregator apply their bonuses with any weapon equipped - a mace user with a Hollow-Point Bullet was collecting its +20% vs Demi-Human. Tagged A_BULLET / A_GRENADE to match the vanilla ammo rows so ammoFitsWeapon() in gearBonusAggregator can gate them."
+  "script": "bonus bCritical,10; if(isweapontype(\"Rifle\")) bonus bCritical,20;",
+  "_note": "PS wiki Gunslinger#Bullets: \"+10 Crit, +20 Crit with Rifle*\", with the table's own footnote \"Both bonuses count for Rifle, making it +30 Crit while using Armor Piercing Bullets with Rifles\". Only the flat +10 was implemented, so a Rifle Gunslinger was missing 20 crit. isweapontype() is a ps_item_manual-layer predicate — see itemScriptParser.js."
  },
  "13234": {
   "type": "IT_AMMO",
@@ -2627,5 +2618,47 @@
   "aegis_name": "Destroyer",
   "slots": 3,
   "_note": "Live item API (tools.payonstories.com/api/pc/item?id=13160) reports slots=3; the vanilla item_db has 0, so Destroyer [3] was missing from the item picker entirely while the [1] version (13161, slots=1 in both) was present. Reported by a player."
+ },
+ "80066": {
+  "type": "IT_ARMOR",
+  "loc": [
+   "EQP_HEAD_TOP"
+  ],
+  "def": 0,
+  "slots": 0,
+  "weight": 10,
+  "aegis_name": "Luck_o_Pint",
+  "name": "Luck o' Pint",
+  "refineable": false,
+  "description": "What's St. Patrick's Day without a cool draft beer! Just make sure you're not drunk enough to put the beer on your head!<br/>Class:<font color='#6666CC'> Headgear</font><br/>Location:<font color='#6666CC'> Upper</font><br/>Weight:<font color='#009900'> 10</font><br/>Jobs:<font color='#6666CC'> All Jobs</font>",
+  "_note": "St. Patrick's event headgear. Live item API lists no DEF and no bonuses — it is equippable but changes no damage. Added so a build can represent what is actually worn. Verified 2026-08-23."
+ },
+ "80067": {
+  "type": "IT_ARMOR",
+  "loc": [
+   "EQP_ACC"
+  ],
+  "def": 0,
+  "slots": 0,
+  "weight": 9,
+  "aegis_name": "Leprecoin",
+  "name": "Leprecoin",
+  "refineable": false,
+  "description": "A shiny gold coin that was once held by O'Riley the Leprechaun! You can feel the coin vibrate when it's being held close to The Luck o' Leprechaun Hat.<br/>Class:<font color='#6666CC'> Accessory</font><br/>Weight:<font color='#009900'> 9</font>",
+  "_note": "St. Patrick's event accessory. The API lists no bonuses of its own; the description hints at a pairing with Luck o' Leprechaun Hat (80071) but states no effect, so no combo is modelled. Verified 2026-08-23."
+ },
+ "81002": {
+  "type": "IT_ARMOR",
+  "loc": [
+   "EQP_ACC"
+  ],
+  "def": 0,
+  "slots": 1,
+  "weight": 40,
+  "aegis_name": "Brass_Wristwatch",
+  "name": "Brass Wristwatch",
+  "refineable": false,
+  "description": "An old brass wristwatch, it's solid and seems to have been well-maintained.<br/>Class:<font color='#6666CC'> Accessory</font><br/>Weight:<font color='#009900'> 40</font><br/>Jobs:<font color='#6666CC'> All Jobs</font>",
+  "_note": "Live item API: Accessory [1], no innate bonuses. Worth having despite the blank stat line because the CARD SLOT is the point — it is a slotted accessory available to all jobs. Verified 2026-08-23."
  }
 }

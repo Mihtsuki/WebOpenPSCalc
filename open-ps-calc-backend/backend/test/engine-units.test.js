@@ -2122,3 +2122,50 @@ test("elemental ammo applies its element, and Destroyer has its 3-slot version",
   assert.deepEqual(unscripted.map((it) => `${it.id} ${it.name}`), [],
     "ammo with an element field but no bAtkEle would silently hit as Neutral");
 });
+
+// ---------------------------------------------------------------------------
+// isweapontype() — a ps_item_manual-layer predicate, and the ammo that needs it
+// ---------------------------------------------------------------------------
+test("Armor Piercing Bullet's crit bonus is bigger out of a Rifle", () => {
+  const cfg = createBattleConfig();
+  const crit = (rh, ammo) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 24, base_level: 99, job_level: 50,
+      base_stats: { str: 80, agi: 90, vit: 1, int: 1, dex: 80, luk: 1 },
+      equipped: ammo ? { right_hand: rh, ammo } : { right_hand: rh },
+    });
+    return resolvePlayerState(b, cfg, PS)[3].cri;
+  };
+  // Wiki Gunslinger#Bullets: "+10 Crit, +20 Crit with Rifle", footnoted as "Both
+  // bonuses count for Rifle, making it +30 Crit". `cri` is per-mille, so x10.
+  assert.equal(crit(13150, 13233) - crit(13150, null), 300, "Rifle gets +30 crit");
+  assert.equal(crit(13100, 13233) - crit(13100, null), 100, "Revolver gets only +10");
+  assert.equal(crit(13160, 13233) - crit(13160, null), 100, "Grenade Launcher likewise");
+});
+
+test("isweapontype() resolves rather than falling open", () => {
+  // The condition handler deliberately fails OPEN on an unevaluatable condition, so
+  // a predicate that fails to substitute silently grants its bonus to everything —
+  // which is exactly what a mangled regex did here before this test existed.
+  const { parseScript, createItemScriptContext } = require("../src/engine/itemScriptParser");
+  const script = 'bonus bCritical,10; if(isweapontype("Rifle")) bonus bCritical,20;';
+  const total = (weapon_type) =>
+    parseScript(script, createItemScriptContext({ weapon_type }))
+      .reduce((n, e) => n + e.params[0], 0);
+  assert.equal(total("Rifle"), 30);
+  assert.equal(total("Revolver"), 10);
+  assert.equal(total(null), 10, "unknown weapon must be false, NOT fail open");
+});
+
+test("PS-custom equipment added from the item API is loadable", () => {
+  // The 2026-08-23 sweep of the live item DB found only three equippable items we
+  // lacked; everything else missing was a box, a costume, a consumable, or Renewal
+  // 3rd-job gear that pre-renewal PS cannot equip.
+  const watch = loader.getItem(81002);
+  assert.equal(watch.slots, 1, "Brass Wristwatch is the one with a card slot");
+  assert.deepEqual(watch.loc, ["EQP_ACC"]);
+  for (const id of [80066, 80067, 81002]) {
+    assert.ok(loader.getItem(id) && loader.getItem(id).name, `item ${id} loads`);
+    assert.ok((loader.getItemDescription(id) || {}).description, `item ${id} has a tooltip`);
+  }
+});
