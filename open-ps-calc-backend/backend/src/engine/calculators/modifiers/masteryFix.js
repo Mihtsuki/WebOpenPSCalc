@@ -142,7 +142,7 @@ function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, o
     const shurikenBouns = 5 * skill.level;
     pmf = addFlat(pmf, shurikenBouns);
     [mn, mx, av] = pmfStats(pmf);
-    result.add_step({ name: "Throw Shuriken", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note: `NJ_SYURIKEN Lv ${skill.level}: +${shurikenBouns}`, formula: `dmg + 5×${skill.level}`, hercules_ref: "battle.c NJ_SYURIKEN" });
+    result.add_step({ name: "Throw Shuriken", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note: `NJ_SYURIKEN Lv ${skill.level}: +${shurikenBouns}`, formula: `dmg + 5×${skill.level}`, hercules_ref: "battle.c:5427" });
   }
 
   if (skill != null && skill.name === "TF_POISON") {
