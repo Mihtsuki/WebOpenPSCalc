@@ -138,6 +138,13 @@ function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, o
     result.add_step({ name: "Kunai Mastery", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note: "NJ_KUNAI: +60 flat", formula: "dmg + 60", hercules_ref: "battle.c:852-855" });
   }
 
+  if (skill != null && skill.name === "NJ_SYURIKEN") {
+    const shurikenBouns = 5 * skill.level;
+    pmf = addFlat(pmf, shurikenBouns);
+    [mn, mx, av] = pmfStats(pmf);
+    result.add_step({ name: "Throw Shuriken", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note: `NJ_SYURIKEN Lv ${skill.level}: +${shurikenBouns}`, formula: `dmg + 5×${skill.level}`, hercules_ref: "battle.c NJ_SYURIKEN" });
+  }
+
   if (skill != null && skill.name === "TF_POISON") {
     const poisonBonus = 15 * skill.level;
     pmf = addFlat(pmf, poisonBonus);
