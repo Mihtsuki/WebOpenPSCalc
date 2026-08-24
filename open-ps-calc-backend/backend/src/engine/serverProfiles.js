@@ -553,6 +553,7 @@ const PS_BF_WEAPON_RATIOS = {
     return Math.trunc(NJ_KASUMIKIRI_RATIOS[lv - 1] * (hiding ? 1.4 : 1.0));
   },
   NJ_HUUMA: (lv) => 200 + 150 * lv,
+  NJ_SYURIKEN: () => 100,
 };
 
 // core/server_profiles.py's _PS_WEAPON_VANILLA_OK — skills confirmed to match
