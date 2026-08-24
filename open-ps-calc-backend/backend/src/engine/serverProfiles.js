@@ -189,6 +189,25 @@ const PS_PASSIVE_OVERRIDES = {
   SC_EXPLOSIONSPIRITS: { cri_base: 175, cri_per_lv: 25 },                                      // PS rework: 20%/22.5%/25%/27.5%/30% (was 10%…20%)
   GS_DUST:           { str_to_atk_at_max_lv: 1, str_atk_weapon: "Shotgun", max_level: 10 },     // wiki.payonstories.com/Dust: +1 ATK per STR at Lv10 with a Shotgun
   GS_SINGLEACTION:   { hit_per_lv: 4 },                                                          // wiki.payonstories.com/Single_Action: +4 HIT/lv (+40 at Lv10; vanilla default was +2/lv)
+  // Throwing Mastery. Its +3 ATK/lv on Throw Shuriken is vanilla (battle.c
+  // `case NJ_SYURIKEN: damage += 3 * skill2_lv`) and is applied in masteryFix, but the
+  // HIT half is a PS ADDITION — Hercules has no NJ_TOBIDOUGU anywhere in status.c, where
+  // a HIT bonus would live. statusCalculator has always read this value and defaulted it
+  // to 0, so the whole block was a silent no-op and the Ninja's only passive did half of
+  // what its own description promises ("Increase Throw Shuriken damage and accuracy").
+  // wiki.payonstories.com/Throwing_Mastery: +2 HIT/lv, +20 at Lv10.
+  //
+  // The HIT is GLOBAL, not scoped to Throw Shuriken, even though the skill's own
+  // one-line description reads "Increase Throw Shuriken damage and accuracy". The
+  // Ninja page settles it three separate ways: "Thanks to the large boost to HIT
+  // provided by Throwing Mastery, these ninja can get away with having lower DEX than
+  // what is normal for physical damage builds"; "Throwing Mastery makes DEX less of a
+  // priority"; and, decisively, in the Shadow Slash build notes — "Though the bonus
+  // damage to Throw Shuriken is irrelevant to these ninja, the bonus to HIT could make
+  // other skills like Haze Slasher more practical to use". So: ATK is Shuriken-only
+  // (masteryFix gates on skill.name), HIT is not. Do not "fix" this to match the
+  // summary table without reading those passages first.
+  NJ_TOBIDOUGU:      { hit_per_lv: 2 },
 };
 
 // PS Demon Bane rework (wiki.payonstories.com/Demon_Bane): "+3 per skill level

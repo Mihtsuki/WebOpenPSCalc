@@ -318,6 +318,30 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Throwing Mastery's HIT half did nothing** (`passive_overrides.NJ_TOBIDOUGU`). Player-reported.
+  `statusCalculator` has always had the code — `status.hit += perLv * njTobiLv` — but it reads
+  `perLv` from `passive_overrides.NJ_TOBIDOUGU.hit_per_lv` **defaulting to 0**, and the PS profile
+  had no entry. So the block was a silent no-op and the Ninja's *only* passive in the picker
+  delivered half of what its own description promises ("Increase Throw Shuriken damage **and
+  accuracy**"). Now `{ hit_per_lv: 2 }` → +20 HIT at Lv10, per
+  wiki.payonstories.com/Throwing_Mastery.
+  **PS-only, verified against source rather than assumed:** `NJ_TOBIDOUGU` appears nowhere in
+  Hercules `status.c`, which is where a HIT bonus would live — only in `battle.c` as
+  `case NJ_SYURIKEN: damage += 3 * skill2_lv`. That is why the hook existed defaulting to 0. The
+  standard profile stays flat and a test asserts it, so the PS bonus cannot leak into vanilla.
+  **The two halves have DIFFERENT scopes, and this is the part worth not getting wrong.** The ATK
+  is Shuriken-only (vanilla gates it, and `masteryFix` matches on `skill.name === "NJ_SYURIKEN"`).
+  The HIT is **global** — despite the skill's own one-line summary reading "…and accuracy" as if
+  scoped, and despite the class-page skill table saying "+HIT to Throw Shuriken". The Ninja page's
+  build prose settles it three ways: "Thanks to the large boost to HIT provided by Throwing
+  Mastery, these ninja can get away with having lower DEX than what is normal for physical damage
+  builds"; "Throwing Mastery makes DEX less of a priority"; and decisively, in the Shadow Slash
+  notes, "Though the bonus damage to Throw Shuriken is irrelevant to these ninja, **the bonus to
+  HIT could make other skills like Haze Slasher more practical to use**". Recorded in the profile
+  comment so nobody narrows it back to match the summary table.
+  No golden moved — no scenario sets `NJ_TOBIDOUGU`. Sabotage-checked three ways: removing the
+  entry, changing the per-level value, and leaking it into the vanilla profile.
+
 - **The `4*AGI + 2*DEX` after-cast reduction now reaches Assassin and Ninja, not just Monk.**
   `skillTiming` has always applied this, but only to `MONK_COMBO_SKILLS`, so three skills the
   wiki documents identically sat at their full DB delay and read far too slow. Added as

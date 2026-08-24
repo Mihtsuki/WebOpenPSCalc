@@ -48,6 +48,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Throwing Mastery wasn't giving its HIT.** The skill raises both Throw Shuriken's damage and
+  your accuracy, but only the damage half was being applied — so a Ninja with it maxed was missing
+  **+20 HIT**. That matters more than it sounds: it's the reason Ninja can run lower DEX than other
+  physical builds, and the accuracy helps every skill, not just Throw Shuriken. Reported by a player.
+
+
 - **Sonic Blow, Throw Kunai and Haze Slasher were all slower than they should be.** Their
   after-cast delay shrinks as you stack AGI and DEX, and the calculator was only applying that to
   the Monk combo skills — everything else sat at its full delay. A 90 AGI / 80 DEX Assassin gets

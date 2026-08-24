@@ -2222,3 +2222,43 @@ test("the 4*AGI+2*DEX after-cast reduction reaches Assassin and Ninja, not just 
   assert.ok(!("NJ_HUUMA" in (PS.ps_skill_delay_fn || {})),
     "NJ_HUUMA needs an in-game timing before it joins this list");
 });
+
+// ---------------------------------------------------------------------------
+// Throwing Mastery: two halves, two different scopes
+// ---------------------------------------------------------------------------
+test("Throwing Mastery grants HIT globally and ATK only to Throw Shuriken", () => {
+  const cfg = createBattleConfig();
+  const hitAt = (lv, profile, server) => {
+    loader.setProfile(profile);
+    const b = buildFromSaveSchema({
+      server, job_id: 25, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 70, luk: 20 },
+      equipped: { right_hand: 1201 }, mastery_levels: { NJ_TOBIDOUGU: lv },
+    });
+    return resolvePlayerState(b, cfg, profile)[3].hit;
+  };
+
+  // PS gives +2 HIT/lv. statusCalculator has always read this through
+  // passive_overrides.NJ_TOBIDOUGU.hit_per_lv, defaulting to 0 — with no PS entry the
+  // whole block was a silent no-op, so the Ninja's ONLY passive did half its job.
+  const STD = getProfile("standard");
+  assert.equal(hitAt(10, PS, "payon_stories") - hitAt(0, PS, "payon_stories"), 20, "+2 HIT/lv on PS");
+  assert.equal(hitAt(5, PS, "payon_stories") - hitAt(0, PS, "payon_stories"), 10);
+
+  // Vanilla has NO such bonus — NJ_TOBIDOUGU appears nowhere in Hercules status.c, only
+  // in battle.c as `case NJ_SYURIKEN: damage += 3 * skill2_lv`. So this is PS-only and
+  // the standard profile must stay flat.
+  assert.equal(hitAt(10, STD, "standard") - hitAt(0, STD, "standard"), 0, "vanilla has no HIT bonus");
+  loader.setProfile(PS);
+
+  // The HIT is global (the Ninja page: the bonus "could make other skills like Haze
+  // Slasher more practical to use"), so it must NOT be gated on the selected skill.
+  // The ATK half is the opposite — vanilla gates it to NJ_SYURIKEN — and Throw Shuriken
+  // is not priced yet, so assert the gate rather than the damage.
+  const fs = require("fs");
+  const path = require("path");
+  const masteryFix = fs.readFileSync(
+    path.join(__dirname, "..", "src", "engine", "calculators", "modifiers", "masteryFix.js"), "utf8");
+  assert.ok(/skill\.name === "NJ_SYURIKEN" && njTobiLv > 0/.test(masteryFix),
+    "the +3 ATK/lv must stay gated to Throw Shuriken");
+});
