@@ -2262,3 +2262,65 @@ test("Throwing Mastery grants HIT globally and ATK only to Throw Shuriken", () =
   assert.ok(/skill\.name === "NJ_SYURIKEN" && njTobiLv > 0/.test(masteryFix),
     "the +3 ATK/lv must stay gated to Throw Shuriken");
 });
+
+// ---------------------------------------------------------------------------
+// Throw Shuriken: motion-paced, and no longer swallowed by the BF_MISC guard
+// ---------------------------------------------------------------------------
+test("Throw Shuriken fires on attack motion — twice the normal-attack rate", () => {
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1002);
+  const run = (skillId, lv, tobi) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 25, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 70, luk: 20 },
+      equipped: { right_hand: 1201, ammo: 13254 }, mastery_levels: { NJ_TOBIDOUGU: tobi },
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    const r = new BattlePipeline(cfg).calculate(
+      st, w, createSkillInstance({ id: skillId, level: lv }), target, eff, gb);
+    return { r, st };
+  };
+  const id = loader.getSkillByName("NJ_SYURIKEN").id;
+
+  // Player-reported: "based on an attack motion, instead of a delay ... tl;dr 2x aspd".
+  // amotion is half of adelay, so the skill's period must be exactly half a normal
+  // attack's. Relying on skillPeriodMs' ASPD floor would have given adelay — half speed.
+  const { r: shuriken, st } = run(id, 10, 10);
+  const { r: normal } = run(0, 1, 10);
+  const amotion = Math.max(100, Math.round(2000 - st.aspd * 10));
+  assert.equal(shuriken.period_ms, amotion, "period is the attack motion");
+  assert.equal(normal.period_ms, 2 * amotion, "a normal attack waits twice that");
+  assert.equal(shuriken.period_ms * 2, normal.period_ms, "2x the auto-attack rate");
+
+  // It used to return a flat 0: typed Misc with no ratio anywhere, so the BF_MISC guard
+  // reported it unmodelled. The 100% entry in weapon_ratios exists to get past that.
+  assert.ok(shuriken.normal.avg_damage > 0, "must deal damage at all");
+
+  // Both flat bonuses are mastery-type and must land AFTER Defense Fix — the Ninja page
+  // says they "act like mastery damage and therefore bypass normal defense".
+  const names = shuriken.normal.steps.map((s) => s.name);
+  const iDef = names.indexOf("Defense Fix");
+  assert.ok(iDef >= 0);
+  for (const step of ["Throw Shuriken ATK", "Throw Mastery"]) {
+    assert.ok(names.indexOf(step) > iDef, `${step} must be applied past DEF`);
+  }
+  // +5/lv from the skill, +3/lv from Throwing Mastery.
+  assert.equal(run(id, 10, 10).r.normal.avg_damage - run(id, 10, 0).r.normal.avg_damage, 30,
+    "Throwing Mastery contributes 3 x lv");
+  assert.equal(run(id, 10, 0).r.normal.avg_damage - run(id, 1, 0).r.normal.avg_damage, 45,
+    "the skill's own ATK is 5 x lv (Lv10 - Lv1 = 45)");
+
+  // Higher-ATK shuriken must raise the damage — it is ammo, and the ammo-fit guard has
+  // to let A_SHURIKEN through for a skill that requires it.
+  const dmgWith = (ammo) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 25, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 70, luk: 20 },
+      equipped: { right_hand: 1201, ammo }, mastery_levels: { NJ_TOBIDOUGU: 10 },
+    });
+    const [gb, eff, w, st2] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(
+      st2, w, createSkillInstance({ id, level: 10 }), target, eff, gb).normal.avg_damage;
+  };
+  assert.ok(dmgWith(13254) > dmgWith(13250), "Thorn Needle (100 ATK) beats Shuriken (10 ATK)");
+});

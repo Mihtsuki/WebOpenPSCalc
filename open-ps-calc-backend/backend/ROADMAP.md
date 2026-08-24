@@ -318,6 +318,33 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Throw Shuriken now works at all, and is paced by attack MOTION rather than delay.**
+  It was returning a flat **0 damage**: the skill is typed `Misc` and had no ratio in either
+  ratio map, so the BF_MISC guard reported it unmodelled. Three parts, all now in:
+  - **Damage.** A 100% entry in `weapon_ratios` purely to get past that guard — the wiki gives
+    no % ratio, only flat ATK. Its own **+5/lv** is applied in `masteryFix` alongside Throwing
+    Mastery's existing +3/lv, both **after Defense Fix**, because the Ninja page says the two
+    "act like mastery damage and therefore bypass normal defense". Shuriken ammo ATK feeds it
+    normally (205 → 242 across the ammo tiers at Lv10).
+  - **Speed — the reported half.** A player: *"Throw Shuriken is based on an attack motion,
+    instead of a delay. Generally ~half of a delay. tl;dr 2x aspd."* `adelay` is exactly
+    `2 x amotion`, so the period is `amotion` and the skill fires at **twice** the auto-attack
+    rate. Wired through **`ps_attack_interval`, the second empty hook** (`(status, amotion)`),
+    which REPLACES the period — so it also bypasses the 200 ms minimum skill delay, matching
+    the wiki's "Throw Shuriken bypasses this at higher attack speeds".
+  - **My earlier note was wrong and is corrected above.** I had written that the pacing would
+    come out right on its own via the ASPD floor. That floor is `adelay` — double the correct
+    value — so acting on it would have shipped the skill at half speed. The player's report is
+    what caught it.
+  Corroboration for the pacing is independent: the wiki's own note ("~9.1 times per second at
+  190 ASPD") is the same claim. It carries a `*Confirmation needed` marker and our model gives
+  10/s at 190 ASPD (`amotion` floors at 100 ms), a ~10% disagreement on an explicitly unconfirmed
+  figure — recorded, not chased.
+  **Left as-is deliberately:** the breakdown classifies it **Short** range for the long/short
+  rate bonuses, because that follows the equipped weapon. The skill has range 9, but no source
+  says whether `bLongAtkRate` gear applies to it, and the wiki's notes list only *size* penalties
+  as weapon-inherited. Needs a source or an in-game check before changing.
+
 - **Throwing Mastery's HIT half did nothing** (`passive_overrides.NJ_TOBIDOUGU`). Player-reported.
   `statusCalculator` has always had the code — `status.hit += perLv * njTobiLv` — but it reads
   `perLv` from `passive_overrides.NJ_TOBIDOUGU.hit_per_lv` **defaulting to 0**, and the PS profile
@@ -1351,6 +1378,9 @@ unmodeled — it needs the target to already carry that status.
   consumes shuriken ammo, which we already carry as 13250-13254). Its PACING would already be
   correct once priced, because `skillPeriodMs` floors the period at the ASPD delay; the only
   blocker is the missing ratio. Throwing Mastery's +3xlv is already implemented and matches.
+  **CORRECTION (2026-08-24): that pacing claim was WRONG, and the skill is now implemented —
+  see "Done this pass".** The ASPD floor gives `adelay`, but Throw Shuriken runs on `amotion`,
+  which is half of it. Trusting the floor would have shipped the skill at HALF speed.
 - ~~**Gunslinger coins + Fling**~~ — **implemented 2026-08-21**, gated on `GS_FLING_PS_FORMULA`.
   Coins are now a build resource (`gs_coins`, 0–10, serialised under `flags` like `spirit_spheres`,
   Gunslinger-gated in the Buffs panel). Fling is BOTH halves, deliberately split: its **damage** is

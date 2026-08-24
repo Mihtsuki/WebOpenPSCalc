@@ -125,6 +125,23 @@ function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, o
     result.add_step({ name: "Adv. Katar Mastery", value: av, min_value: mn, max_value: mx, multiplier: ratio / 100, note: `ASC_KATAR Lv ${ascKatarLv}: ×${(ratio / 100).toFixed(2)}`, formula: `dmg * (110+2×${ascKatarLv}) / 100`, hercules_ref: "battle.c:927-929" });
   }
 
+  // Throw Shuriken's own flat ATK: +5 per skill level, on top of Throwing Mastery's +3.
+  // Applied HERE, at the mastery position, because the Ninja page says the two together
+  // "act like mastery damage and therefore bypass normal defense" — adding it to base ATK
+  // instead would let the target's DEF eat it. wiki.payonstories.com/Throw_Shuriken
+  // ("ATK Increase +5 … +50").
+  if (skill != null && skill.name === "NJ_SYURIKEN" && skill.level > 0) {
+    const flat = 5 * skill.level;
+    pmf = addFlat(pmf, flat);
+    [mn, mx, av] = pmfStats(pmf);
+    result.add_step({
+      name: "Throw Shuriken ATK", value: av, min_value: mn, max_value: mx, multiplier: 1.0,
+      note: `NJ_SYURIKEN Lv ${skill.level}: +${flat} (mastery-type — bypasses DEF)`,
+      formula: `dmg + 5×${skill.level}`,
+      hercules_ref: "wiki.payonstories.com/Throw_Shuriken",
+    });
+  }
+
   const njTobiLv = mastery.NJ_TOBIDOUGU || 0;
   if (skill != null && skill.name === "NJ_SYURIKEN" && njTobiLv > 0) {
     pmf = addFlat(pmf, 3 * njTobiLv);

@@ -307,6 +307,22 @@ const PS_SKILL_DELAY_FN = {
   // the punch-list in ROADMAP.md — it needs an in-game timing, not a guess.
 };
 
+// Skills paced by the attack MOTION rather than the attack DELAY. A normal attack
+// waits `adelay`, which is exactly 2x `amotion` — so a motion-paced skill fires twice
+// as often as auto-attacking at the same ASPD.
+//
+// Reported in-game by a player: "Throw Shuriken is based on an attack motion, instead
+// of a delay. Generally ~half of a delay. tl;dr 2x aspd." That matches the wiki, which
+// says the skill "inherits both the attack speed and the size penalties of the weapon
+// class" and is "entirely dependant on attack speed".
+//
+// This corrects a note that used to sit in the ROADMAP claiming the pacing would come
+// out right on its own because `skillPeriodMs` floors at the ASPD delay. It would not:
+// with the skill's cast and delay both zero the floor gives `adelay`, i.e. HALF speed.
+const PS_ATTACK_INTERVAL = {
+  NJ_SYURIKEN: (_status, amotion) => amotion,
+};
+
 const PS_PROC_RATE_OVERRIDES = {
   TF_DOUBLE: 7.0,
   GS_CHAINACTION: 7.0,
@@ -601,6 +617,12 @@ const PS_BF_WEAPON_RATIOS = {
     const hiding = !!(ctx && ctx.skill_params.NJ_KASUMIKIRI_hiding);
     return Math.trunc(NJ_KASUMIKIRI_RATIOS[lv - 1] * (hiding ? 1.4 : 1.0));
   },
+  // Throw Shuriken is a normal attack wearing a skill's clothes — the wiki calls it
+  // "both a skill and a regular attack" and gives no % ratio at all, only a flat ATK
+  // increase (applied in masteryFix). It needs an entry here purely so the BF_MISC guard
+  // stops swallowing it: the skill is typed Misc, and that guard fires for Misc skills
+  // with no ratio ANYWHERE. Without this the calculator returned a flat 0 damage.
+  NJ_SYURIKEN: () => 100,
   NJ_HUUMA: (lv) => 200 + 150 * lv,
 };
 
@@ -768,6 +790,7 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
   rate_bonuses: PS_RATE_BONUSES,
   mechanic_flags: PS_MECHANIC_FLAGS,
   aspd_buffs: PS_ASPD_BUFFS,
+  ps_attack_interval: PS_ATTACK_INTERVAL,
   ps_skill_delay_fn: PS_SKILL_DELAY_FN,
   proc_rate_overrides: PS_PROC_RATE_OVERRIDES,
   // KN_SPEARMASTERY: [without_peco, with_peco] ATK per level. Vanilla is [4, 5]; PS is [5, 7].

@@ -48,6 +48,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Throw Shuriken did no damage at all, and now throws at the right speed.** The skill was
+  showing a flat zero. It's back, and it fires on your attack *motion* rather than a cast delay —
+  which means **twice** the rate of a normal attack at the same ASPD, and it isn't held back by
+  the usual minimum skill delay. Damage is a normal attack plus a flat bonus from the skill and
+  from Throwing Mastery, both of which ignore the target's defence, and higher-ATK shuriken hit
+  harder. Speed behaviour reported by a player.
+
+
 - **Throwing Mastery wasn't giving its HIT.** The skill raises both Throw Shuriken's damage and
   your accuracy, but only the damage half was being applied — so a Ninja with it maxed was missing
   **+20 HIT**. That matters more than it sounds: it's the reason Ninja can run lower DEX than other

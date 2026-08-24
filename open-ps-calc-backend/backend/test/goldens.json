@@ -417,6 +417,61 @@
    }
   }
  },
+ "ninja-throw-shuriken-lv10": {
+  "status": {
+   "str": 60,
+   "agi": 86,
+   "vit": 30,
+   "int_": 24,
+   "dex": 74,
+   "luk": 22,
+   "batk": 114,
+   "max_hp": 5525,
+   "max_sp": 647,
+   "aspd": 170.9,
+   "cri": 83,
+   "hit": 193,
+   "flee": 185,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 33,
+   "matk_max": 40
+  },
+  "result": {
+   "dps": 831.615,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 291,
+   "normal": {
+    "min": 205,
+    "max": 280,
+    "avg": 242,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Arrow ATK",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Throw Shuriken Lv10)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Throw Shuriken ATK",
+     "Throw Mastery",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
  "ninja-haze-slasher-agi-delay": {
   "status": {
    "str": 70,

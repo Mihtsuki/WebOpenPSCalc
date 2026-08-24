@@ -58,6 +58,15 @@ const scenarios = [
     target: 1002,
   },
   {
+    // Throw Shuriken: was returning a flat 0 (typed Misc with no ratio, so the BF_MISC
+    // guard swallowed it). Paced by attack MOTION, not delay — half a normal attack's
+    // period, i.e. twice the rate. Damage is a normal attack plus two mastery-type flats.
+    name: "ninja-throw-shuriken-lv10",
+    build: { job_id: 25, base_level: 99, job_level: 50, base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 70, luk: 20 }, equipped: { right_hand: 1201, ammo: 13254 }, mastery_levels: { NJ_TOBIDOUGU: 10 } },
+    skill: { name: "NJ_SYURIKEN", level: 10 },
+    target: 1002,
+  },
+  {
     name: "ninja-haze-slasher-agi-delay",
     build: { job_id: 25, base_level: 99, job_level: 50, base_stats: { str: 70, agi: 40, vit: 30, int: 20, dex: 40, luk: 20 }, equipped: { right_hand: 1201 } },
     skill: { name: "NJ_KASUMIKIRI", level: 5 },
