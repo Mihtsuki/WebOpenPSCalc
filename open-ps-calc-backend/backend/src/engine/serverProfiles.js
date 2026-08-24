@@ -814,6 +814,10 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
   },
   // Fraction of Corrupting Drain's damage returned as HP.
   ps_corrupting_drain_heal_pct: 75,
+  ps_attack_interval: {
+    // Uses attack motion value instead of a delay. Results in ~2x atk/s
+    NJ_SYURIKEN: (status, amotion) => amotion,
+  },
 });
 
 const PROFILES = {
