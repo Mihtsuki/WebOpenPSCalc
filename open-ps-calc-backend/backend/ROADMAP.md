@@ -318,6 +318,30 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **The `4*AGI + 2*DEX` after-cast reduction now reaches Assassin and Ninja, not just Monk.**
+  `skillTiming` has always applied this, but only to `MONK_COMBO_SKILLS`, so three skills the
+  wiki documents identically sat at their full DB delay and read far too slow. Added as
+  `PS_SKILL_DELAY_FN` through the **`ps_skill_delay_fn` hook that already existed and was
+  empty** — it REPLACES the DB delay (the Monk branch subtracts from it), and runs before the
+  percentage reductions so Bragi and delayrate gear still stack on top as they should.
+  | skill | formula | period before → after | DPS |
+  |---|---|---|---|
+  | `AS_SONICBLOW` | `2000 - (4*AGI + 2*DEX)` | 2000 → 1424 ms | ×1.40 |
+  | `NJ_KUNAI` | `1000 - (4*AGI + 2*DEX)` | 1000 → 532 ms | ×1.88 |
+  | `NJ_KASUMIKIRI` | `1000 - (4*AGI + 2*DEX)` | 1000 → 532 ms | ×1.88 |
+  (at AGI 90 / DEX 80 base). All three DB bases already matched the wiki (2000/1000/1000), but
+  the base is written out explicitly at each entry so the formula reads next to its source
+  rather than depending on a scraped number staying right.
+  **Note the ASPD floor binds first for the two 1000 ms skills**: the raw formula gives 448 ms
+  where the attack animation is 532 ms, and `skillPeriodMs` takes `max(delay, ASPD delay)` — you
+  cannot cast faster than you can swing. That is why the tests assert `max(formula, aspdFloor)`
+  rather than the formula alone; asserting the formula would have been wrong at high AGI.
+  Only one golden moved (`assassin-sonic-blow-lv10`: period 2000 → 1484, DPS 1272 → 1715);
+  damage is untouched, this is purely rate. Kunai and Haze Slasher had no coverage at all, so
+  both got scenarios. Sabotage-checked three ways: unwiring the hook, dropping the DEX half of
+  the formula, and **adding `NJ_HUUMA` by pattern-matching** — the last of which the test
+  explicitly guards against, because Huuma is still blocked on an in-game timing.
+
 - **Pinned the values that must not drift** (`test/protected-values.test.js`, wired into
   `npm test` so CI gates the deploy on it). Written for a repo that is about to take
   outside contributions: most of it should stay easy to change, but a few values decide
@@ -1276,7 +1300,7 @@ unmodeled — it needs the target to already carry that status.
   both skills. Sources: wiki.payonstories.com/Chain_Combo and /Combo_Finish (both state the
   formula identically, in the `delay =` infobox field and again in the body).
   This is the one in the family that reads too STRONG, so it should go first.
-- **Stat-scaled after-cast delay is only wired to Monk — Assassin and Ninja skills miss it.**
+- ~~**Stat-scaled after-cast delay is only wired to Monk — Assassin and Ninja skills miss it.**~~ — **implemented 2026-08-23** via `ps_skill_delay_fn` (see "Done this pass"). The Huuma and Throw Shuriken notes below remain OPEN.
   The same `X - (4*AGI + 2*DEX)` reduction the Monk combo path uses is documented on the wiki
   for several skills that never get it, so they all read too SLOW. Measured at AGI 96 / DEX 84:
   | skill | wiki delay | ours | effect |

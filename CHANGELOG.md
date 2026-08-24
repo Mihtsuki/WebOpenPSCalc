@@ -48,6 +48,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Sonic Blow, Throw Kunai and Haze Slasher were all slower than they should be.** Their
+  after-cast delay shrinks as you stack AGI and DEX, and the calculator was only applying that to
+  the Monk combo skills — everything else sat at its full delay. A 90 AGI / 80 DEX Assassin gets
+  **40% more Sonic Blow DPS**, and the two Ninja skills nearly double. Damage per hit hasn't
+  changed; they simply come round faster now. Note that at high AGI the two Ninja skills hit your
+  attack animation speed before they hit the formula — you can't throw faster than you can swing.
+
+
 - **Armor Piercing Bullets weren't giving their full crit out of a Rifle.** They're worth +10
   crit normally and +30 in a Rifle, but only the +10 was being counted.
 

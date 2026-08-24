@@ -258,6 +258,36 @@ const PS_ASPD_BUFFS = {
   SC_GS_MADNESSCANCEL: { sc_quicken: { quicken_floor: 20 } },
 };
 
+// After-cast delay that shrinks with AGI and DEX. Payon Stories documents the same
+// `base - (4*AGI + 2*DEX)` ms reduction on several skills across three classes, and
+// skillTiming has always applied it — but only to MONK_COMBO_SKILLS, so every other
+// skill that earns it was left at its full DB delay and read too slow.
+//
+// These go through `ps_skill_delay_fn`, which REPLACES the DB delay rather than
+// subtracting from it (the Monk branch subtracts). Writing the base out here keeps the
+// formula readable next to its source instead of depending on a scraped number being
+// right — though all three bases do match the wiki today (2000/1000/1000).
+//
+// Floored at 0; skillTiming applies its own MIN_SKILL_DELAY_MS afterwards, and the
+// percentage reductions (Bragi, delayrate gear) still run on top, as they should.
+const agiDexDelay = (base) => (status) =>
+  Math.max(0, base - (4 * status.agi + 2 * status.dex));
+
+const PS_SKILL_DELAY_FN = {
+  // wiki.payonstories.com/Sonic_Blow — "delay = 2000 - (AGI*4 + DEX*2) ms"
+  AS_SONICBLOW: agiDexDelay(2000),
+  // wiki.payonstories.com/Throw_Kunai — "The delay is reduced based on the formula:
+  // 1000 - (4*AGI + 2*DEX) ms"
+  NJ_KUNAI: agiDexDelay(1000),
+  // wiki.payonstories.com/Haze_Slasher — "delay = 1s (reduced by DEX & AGI)", body:
+  // "The delay is reduced based on the formula: 4*AGI + 2*DEX"
+  NJ_KASUMIKIRI: agiDexDelay(1000),
+  // NOT here on purpose: NJ_HUUMA. Same mechanic with doubled coefficients
+  // (2000 - (8*AGI + 4*DEX)), but the wiki never says whether its 0.5+0.5*lv cast is
+  // DEX-reducible, and the two readings land 1.7x apart in opposite directions. See
+  // the punch-list in ROADMAP.md — it needs an in-game timing, not a guess.
+};
+
 const PS_PROC_RATE_OVERRIDES = {
   TF_DOUBLE: 7.0,
   GS_CHAINACTION: 7.0,
@@ -719,6 +749,7 @@ const PAYON_STORIES = emptyProfile("payon_stories", {
   rate_bonuses: PS_RATE_BONUSES,
   mechanic_flags: PS_MECHANIC_FLAGS,
   aspd_buffs: PS_ASPD_BUFFS,
+  ps_skill_delay_fn: PS_SKILL_DELAY_FN,
   proc_rate_overrides: PS_PROC_RATE_OVERRIDES,
   // KN_SPEARMASTERY: [without_peco, with_peco] ATK per level. Vanilla is [4, 5]; PS is [5, 7].
   mastery_per_level: { KN_SPEARMASTERY: [5, 7] },

@@ -2169,3 +2169,56 @@ test("PS-custom equipment added from the item API is loadable", () => {
     assert.ok((loader.getItemDescription(id) || {}).description, `item ${id} has a tooltip`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// After-cast delay that shrinks with AGI and DEX
+// ---------------------------------------------------------------------------
+test("the 4*AGI+2*DEX after-cast reduction reaches Assassin and Ninja, not just Monk", () => {
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1002);
+  const period = (skillName, job, weapon, lv, stats) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: job, base_level: 99, job_level: 50,
+      base_stats: stats, equipped: { right_hand: weapon },
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    const sd = loader.getSkillByName(skillName);
+    const r = new BattlePipeline(cfg).calculate(
+      st, w, createSkillInstance({ id: sd.id, level: lv }), target, eff, gb);
+    return { period: r.period_ms, agi: st.agi, dex: st.dex, aspd: st.aspd };
+  };
+  const LOW = { str: 70, agi: 1, vit: 30, int: 20, dex: 1, luk: 20 };
+  const HIGH = { str: 70, agi: 90, vit: 30, int: 20, dex: 80, luk: 20 };
+  const aspdFloor = (aspd) => 2 * Math.max(100, Math.round(2000 - aspd * 10));
+
+  // Sonic Blow's own delay is long enough that the formula always binds.
+  for (const stats of [LOW, HIGH]) {
+    const r = period("AS_SONICBLOW", 12, 1201, 10, stats);
+    assert.equal(r.period, 2000 - (4 * r.agi + 2 * r.dex),
+      "Sonic Blow: 2000 - (4*AGI + 2*DEX)");
+  }
+
+  // Kunai and Haze Slasher share the 1000 base. At high AGI the ASPD floor takes over
+  // before the formula does — you cannot cast faster than the attack animation — so the
+  // period is max(reduced delay, attack delay), not the raw formula.
+  for (const name of ["NJ_KUNAI", "NJ_KASUMIKIRI"]) {
+    for (const stats of [LOW, HIGH]) {
+      const r = period(name, 25, 1201, 5, stats);
+      const wiki = Math.max(0, 1000 - (4 * r.agi + 2 * r.dex));
+      assert.equal(r.period, Math.max(wiki, aspdFloor(r.aspd)),
+        `${name}: max(1000 - (4*AGI + 2*DEX), ASPD delay)`);
+    }
+  }
+
+  // The reduction must actually depend on the stats — a flat DB delay would pass an
+  // equality check written against itself, so assert the two builds differ.
+  assert.ok(period("AS_SONICBLOW", 12, 1201, 10, HIGH).period
+            < period("AS_SONICBLOW", 12, 1201, 10, LOW).period,
+    "more AGI/DEX must mean a shorter delay");
+
+  // Throw Huuma is deliberately NOT in this family yet: the wiki gives its delay formula
+  // but never says whether its cast is DEX-reducible. Guard the omission so nobody adds
+  // it by pattern-matching without resolving that first (see ROADMAP punch-list).
+  assert.ok(!("NJ_HUUMA" in (PS.ps_skill_delay_fn || {})),
+    "NJ_HUUMA needs an in-game timing before it joins this list");
+});

@@ -306,11 +306,11 @@
    "matk_max": 6
   },
   "result": {
-   "dps": 1272.62,
+   "dps": 1715.121,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 22,
-   "period_ms": 2000,
+   "period_ms": 1484,
    "normal": {
     "min": 2190,
     "max": 2707,
@@ -350,6 +350,112 @@
      "Base Damage",
      "Skill Ratio (Sonic Blow Lv10)",
      "Crit ATK Rate",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "ninja-throw-kunai-agi-delay": {
+  "status": {
+   "str": 70,
+   "agi": 96,
+   "vit": 30,
+   "int_": 24,
+   "dex": 84,
+   "luk": 22,
+   "batk": 139,
+   "max_hp": 5525,
+   "max_sp": 647,
+   "aspd": 173.4,
+   "cri": 83,
+   "hit": 183,
+   "flee": 195,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 33,
+   "matk_max": 40
+  },
+  "result": {
+   "dps": 255.639,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 532,
+   "normal": {
+    "min": 128,
+    "max": 144,
+    "avg": 136,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Arrow ATK",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Throw Kunai Lv5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Kunai Mastery",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Short)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "ninja-haze-slasher-agi-delay": {
+  "status": {
+   "str": 70,
+   "agi": 46,
+   "vit": 30,
+   "int_": 24,
+   "dex": 44,
+   "luk": 22,
+   "batk": 131,
+   "max_hp": 5525,
+   "max_sp": 647,
+   "aspd": 161.4,
+   "cri": 83,
+   "hit": 143,
+   "flee": 145,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 33,
+   "matk_max": 40
+  },
+  "result": {
+   "dps": 369.171,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 0,
+   "period_ms": 772,
+   "normal": {
+    "min": 285,
+    "max": 285,
+    "avg": 285,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Haze Slash Lv5)",
      "Defense Fix",
      "Active Status Bonuses",
      "Refine Bonus",

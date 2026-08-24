@@ -48,6 +48,21 @@ const scenarios = [
     skill: { name: "AS_SONICBLOW", level: 10 },
     target: 1036,
   },
+  {
+    // Throw Kunai and Haze Slasher both take the same 1000 - (4*AGI + 2*DEX) after-cast
+    // reduction as Sonic Blow. At this AGI the ASPD floor binds before the formula does,
+    // which is the point of pinning them: the period is max(reduced delay, attack delay).
+    name: "ninja-throw-kunai-agi-delay",
+    build: { job_id: 25, base_level: 99, job_level: 50, base_stats: { str: 70, agi: 90, vit: 30, int: 20, dex: 80, luk: 20 }, equipped: { right_hand: 1201, ammo: 13255 } },
+    skill: { name: "NJ_KUNAI", level: 5 },
+    target: 1002,
+  },
+  {
+    name: "ninja-haze-slasher-agi-delay",
+    build: { job_id: 25, base_level: 99, job_level: 50, base_stats: { str: 70, agi: 40, vit: 30, int: 20, dex: 40, luk: 20 }, equipped: { right_hand: 1201 } },
+    skill: { name: "NJ_KASUMIKIRI", level: 5 },
+    target: 1002,
+  },
 
   // --- ranged / arrows / element ----------------------------------------------
   {
