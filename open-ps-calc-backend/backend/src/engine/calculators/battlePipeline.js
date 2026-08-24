@@ -1908,6 +1908,11 @@ class BattlePipeline {
       });
     }
 
+    // PS Throw Shuriken doesn't ignore flee.
+    if (skillName === "NJ_SYURIKEN" && profile.mechanic_flags.has("NJ_SYURIKEN_IGNORE_FLEE_DISABLED")) {
+      skill.nk_ignore_flee = false;
+    }
+
     // Whether the active profile can actually compute this skill's damage (a ratio is
     // defined for it somewhere). PS damage skills like Venom Splasher (AS_SPLASHER),
     // Brandish Spear and Bomb carry the NoDamage flag in the DB because their real hit

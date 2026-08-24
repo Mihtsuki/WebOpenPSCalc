@@ -425,6 +425,8 @@ const PS_MECHANIC_FLAGS = new Set([
   // stack, for 5 s. Introduced by the Alchemist's Remote Detonator (with a Marine
   // Sphere Bottle) and slated to be a core mechanic for another class.
   "PS_BURNING_STATUS",
+  // The standard implementation ignores Flee. PS Throw Shuriken doesn't.
+  "NJ_SYURIKEN_IGNORE_FLEE_DISABLED",
 ]);
 
 // PS Burning (Burning 2026-08-09 PDF / Alchemist Rework p.4).
