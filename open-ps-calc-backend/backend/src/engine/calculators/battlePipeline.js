@@ -1766,6 +1766,9 @@ class BattlePipeline {
     const damageType = skillData ? skillData.damage_type || [] : [];
     skill.nk_ignore_def = damageType.includes("IgnoreDefense");
     skill.nk_ignore_flee = damageType.includes("IgnoreFlee");
+    if (skillName === "NJ_SYURIKEN" && profile.mechanic_flags.has("NJ_SYURIKEN_FLEE_IGNORE_DISABLED")) {
+      skill.nk_ignore_flee = false;
+    }
     skill.nk_ignore_ele = damageType.includes("IgnoreElement");
     skill.nk_ignore_cards = damageType.includes("IgnoreCards");
     // Asura Strike and Grand Cross both ignore the weapon size penalty. GC:

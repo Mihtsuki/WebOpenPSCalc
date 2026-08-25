@@ -363,6 +363,14 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
   weapon-derived fails 10 tests, and treating a negative range literally (which would break
   Tracking and Bash) fails 3.
 
+- **Throw Shuriken was still ignoring Flee.** `skills.json` marks `NJ_SYURIKEN` `IgnoreFlee`
+  (vanilla), and `battlePipeline.js` read that with no override, so it always hit with a 100% chance.
+  The skill's PS description states: "No longer ignores
+  Flee" (`ps_skill_db.json`).
+  Fixed with a pipeline override behind a new `NJ_SYURIKEN_FLEE_IGNORE_DISABLED` flag - vanilla
+  data and the `standard` profile untouched. Tested against a 296-Flee target: matches
+  `calculateHitChance`'s real answer now instead of always hitting.
+
 - **Throw Shuriken now works at all, and is paced by attack MOTION rather than delay.**
   It was returning a flat **0 damage**: the skill is typed `Misc` and had no ratio in either
   ratio map, so the BF_MISC guard reported it unmodelled. Three parts, all now in:
