@@ -151,10 +151,14 @@ function skillRangeAtLevel(skill) {
   const sd = loader.getSkill(skill.id);
   const r = sd && sd.range;
   if (r == null) return null;
-  if (!Array.isArray(r)) return r;
-  if (!r.length) return null;
-  const lv = Math.max(1, Math.min(Number(skill.level) || 1, r.length));
-  return r[lv - 1];
+  // Must be a NUMBER. ps_skill_db scrapes `range` as prose ("9 Cells + Vulture's Eye"),
+  // and a string here would slip into `range >= 5` and compare false every time — i.e.
+  // silently Short, which is exactly the bug this guard exists to stop. Anything
+  // non-numeric falls back to the weapon, same as a negative range.
+  const pick = Array.isArray(r)
+    ? (r.length ? r[Math.max(1, Math.min(Number(skill.level) || 1, r.length)) - 1] : null)
+    : r;
+  return Number.isFinite(pick) ? pick : null;
 }
 
 function resolveIsRanged(build, weapon, skill) {

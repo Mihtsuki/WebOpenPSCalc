@@ -921,7 +921,21 @@ class DataLoader {
           element: rec.element || ["Ele_Weapon"],
           damage_type: rec.damage_type || [],
           number_of_hits: rec.number_of_hits || [1],
-          range: [1],
+          // -1 means "use the wielder's weapon range", which is how Hercules reads a
+          // NEGATIVE range (skill_get_range2). These records are SYNTHESIZED for PS-custom
+          // skills and carry no real range, so the sentinel is the honest value: it keeps
+          // battlePipeline's long/short classification falling back to the weapon instead
+          // of silently forcing every PS-custom skill to Short. A literal [1] did exactly
+          // that once resolveIsRanged started reading this field, costing bow Rogues their
+          // bLongAtkRate on Trick Arrow and Quick Step.
+          // -1 means "use the wielder's weapon range", which is how Hercules reads a
+          // NEGATIVE range (skill_get_range2). These records are SYNTHESIZED and carry no
+          // numeric range — ps_skill_db's `range` is scraped PROSE ("9 Cells + Vulture's
+          // Eye"), not a number, so it must not be passed through into a numeric field.
+          // The sentinel keeps battlePipeline's long/short classification falling back to
+          // the weapon. A literal [1] forced every PS-custom skill Short once
+          // resolveIsRanged began reading this, costing bow Rogues their bLongAtkRate.
+          range: [-1],
           skill_type: ["Enemy"],
         };
       }

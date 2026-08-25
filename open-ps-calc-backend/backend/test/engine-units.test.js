@@ -2374,3 +2374,36 @@ test("skills are classified long/short by their own range", () => {
   // A negative range still follows the weapon: Tracking is -9, and a rifle is ranged.
   assert.match(rateStep(24, 13150, "GS_TRACKING", 10).label, /\(Long\)/);
 });
+
+test("a skill with no usable range falls back to the weapon, never to Short", () => {
+  const cfg = createBattleConfig();
+  // PS-custom skills are SYNTHESIZED records. They carry no numeric range, and
+  // ps_skill_db scrapes `range` as prose ("9 Cells + Vulture's Eye"). Once
+  // resolveIsRanged started reading this field, a placeholder of [1] forced every one
+  // of them Short — a real damage regression for bow Rogues, who lost bLongAtkRate on
+  // Trick Arrow and Quick Step. A prose string is just as bad: `"9 Cells..." >= 5` is
+  // false, so it fails Short silently rather than loudly.
+  const rate = (weapon, skillName) => {
+    const sd = loader.getSkillByName(skillName);
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 17, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 80, luk: 20 },
+      equipped: { right_hand: weapon, right_hand_card1: 4094, ammo: 1750 },
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    const r = new BattlePipeline(cfg).calculate(
+      st, w, createSkillInstance({ id: sd.id, level: 5 }), loader.getMonster(1002), eff, gb);
+    return (r.normal.steps.find((x) => /Final Rate Bonus \((Short|Long)\)/.test(x.name)) || {}).name;
+  };
+  assert.match(rate(1701, "PS_RG_TRICKARROW"), /\(Long\)/, "a bow is ranged");
+  assert.match(rate(1201, "PS_RG_TRICKARROW"), /\(Short\)/, "a dagger is not");
+
+  // The synthesized range must stay a NUMERIC sentinel, not prose and not a literal 1.
+  for (const name of ["PS_RG_TRICKARROW", "PS_RG_QUICKSTEP"]) {
+    const sd = loader.getSkillByName(name);
+    const r = sd.range;
+    const v = Array.isArray(r) ? r[0] : r;
+    assert.ok(typeof v === "number" && v < 0,
+      `${name}: synthesized range must be a negative number (weapon-derived), got ${JSON.stringify(r)}`);
+  }
+});

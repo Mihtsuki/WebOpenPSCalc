@@ -318,6 +318,22 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Regression fix (same day, self-inflicted): PS-custom skills were forced Short.**
+  Making `skillRangeAtLevel` read `skills.json` `range` turned a field that had never mattered
+  into a load-bearing one — and `dataLoader._psCustomBattleSkills()` SYNTHESIZES its records
+  with a placeholder `range: [1]`. Every PS-custom battle skill therefore classified Short,
+  costing bow Rogues `bLongAtkRate` on Trick Arrow and Quick Step (Long/385 → Short/351 with an
+  Archer Skeleton Card). Not one of the 11 label-only golden flips — a real damage change, and
+  it shipped in `47d794e`.
+  **The first fix was also wrong**, which is the more useful lesson. Falling back to
+  `rec.range` looked right until it turned out `ps_skill_db` scrapes `range` as **prose** —
+  `"9 Cells + Vulture's Eye"` — so the value reaching `range >= 5` was a STRING. That compares
+  false against a number, so it still failed Short, just for a different reason and just as
+  silently. Fixed properly in two places: the synthesized record now uses a numeric **`[-1]`**
+  sentinel (Hercules' "use the weapon's range"), and `skillRangeAtLevel` rejects anything that
+  is not a finite number rather than comparing it. A test pins both the behaviour and the
+  sentinel's type, and fails if the `[1]` placeholder returns.
+
 - **Long/short is now the SKILL's range, not the weapon's** (`resolveIsRanged`). This was a
   documented stub — the function already took a `skill` argument and threw it away under a
   `NOT YET PORTED` comment. Hercules `battle_range_type()`:

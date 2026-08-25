@@ -48,6 +48,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Bow Rogues briefly lost their long-range card bonus on Trick Arrow and Quick Step.** A
+  regression introduced earlier the same day by the ranged/melee change above, now fixed: the
+  server's custom skills carry no range of their own, and they were being read as melee. Caught
+  before anyone reported it.
+
+
 - **Ranged and melee skills were being told apart by your weapon instead of the skill.** That got
   it right for most skills and quietly wrong for the rest: throwing skills used with a dagger were
   treated as melee, while **Desperado was treated as ranged and given a long-range card bonus it
