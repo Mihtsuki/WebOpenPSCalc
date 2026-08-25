@@ -2324,3 +2324,53 @@ test("Throw Shuriken fires on attack motion — twice the normal-attack rate", (
   };
   assert.ok(dmgWith(13254) > dmgWith(13250), "Thorn Needle (100 ATK) beats Shuriken (10 ATK)");
 });
+
+// ---------------------------------------------------------------------------
+// Long/short is the SKILL's range, not the weapon's
+// ---------------------------------------------------------------------------
+test("skills are classified long/short by their own range", () => {
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1002);
+  // Archer Skeleton Card (4094) is bLongAtkRate — the only thing this flag feeds.
+  const rateStep = (job, weapon, skillName, lv, card) => {
+    const equipped = card ? { right_hand: weapon, right_hand_card1: card } : { right_hand: weapon };
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: job, base_level: 99, job_level: 50,
+      base_stats: { str: 80, agi: 80, vit: 30, int: 20, dex: 80, luk: 20 }, equipped,
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    const sd = loader.getSkillByName(skillName);
+    const r = new BattlePipeline(cfg).calculate(
+      st, w, createSkillInstance({ id: sd.id, level: lv }), target, eff, gb);
+    const s = r.normal.steps.find((x) => /Final Rate Bonus \((Short|Long)\)/.test(x.name));
+    return { label: s && s.name, dmg: r.normal.avg_damage };
+  };
+
+  // Hercules battle_range_type(): range < 5 -> BF_SHORT, else BF_LONG, with a NEGATIVE
+  // range meaning "use the weapon's". Three PS wiki statements confirm the cutoff, and
+  // Desperado confirms it in the opposite direction from the rest.
+
+  // Range 9 on a dagger -> LONG despite the melee weapon.
+  assert.match(rateStep(25, 1201, "NJ_SYURIKEN", 10).label, /\(Long\)/);
+  assert.match(rateStep(25, 1201, "NJ_KUNAI", 5).label, /\(Long\)/);
+
+  // Desperado has NO range in the skill DB (0) and PS says so outright: "Desperado is
+  // considered melee, which means cards like Earth and Sky Deleter work with it, but
+  // Archer skeleton does not." A revolver is a ranged WEAPON, so weapon-derived logic
+  // called this Long and wrongly paid out bLongAtkRate.
+  assert.match(rateStep(24, 13100, "GS_DESPERADO", 10).label, /\(Short\)/);
+  assert.equal(rateStep(24, 13100, "GS_DESPERADO", 10, 4094).dmg,
+               rateStep(24, 13100, "GS_DESPERADO", 10).dmg,
+               "Archer Skeleton must NOT boost Desperado");
+  assert.ok(rateStep(25, 1201, "NJ_SYURIKEN", 10, 4094).dmg
+            > rateStep(25, 1201, "NJ_SYURIKEN", 10).dmg,
+    "but it must boost a genuinely long-range skill");
+
+  // Grimtooth splits mid-skill: range 2+lv, so Lv1-2 melee and Lv3+ ranged. The wiki
+  // states exactly that ("blocked by Safety Wall" vs "blocked by Pneuma").
+  assert.match(rateStep(12, 1250, "AS_GRIMTOOTH", 2).label, /\(Short\)/);
+  assert.match(rateStep(12, 1250, "AS_GRIMTOOTH", 3).label, /\(Long\)/);
+
+  // A negative range still follows the weapon: Tracking is -9, and a rifle is ranged.
+  assert.match(rateStep(24, 13150, "GS_TRACKING", 10).label, /\(Long\)/);
+});

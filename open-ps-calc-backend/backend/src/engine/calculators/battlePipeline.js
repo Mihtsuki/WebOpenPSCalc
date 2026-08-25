@@ -123,10 +123,48 @@ function trapFactors(cfg, status, build) {
   return [a, b];
 }
 
+// Long/short classification. For a NORMAL attack this follows the weapon, but for a
+// SKILL Hercules decides from the SKILL's own range — `battle_range_type()`:
+//
+//     if (skill->get_range2(src, skill_id, skill_lv) < 5) return BF_SHORT;
+//     return BF_LONG;
+//
+// and `skill_get_range2()` resolves a NEGATIVE range to the wielder's weapon range.
+// That negative case is the common one (Bash is -1), which is why the old
+// weapon-only behaviour looked right for most skills and quietly wrong for the rest.
+//
+// Confirmed against Payon Stories twice, independently, and both match the <5 cutoff
+// exactly — including that it is decided PER LEVEL:
+//   - Grimtooth (range 2+lv = 3,4,5,6,7): "Level 1 and level 2 are considered melee
+//     (can be blocked by Safety Wall) while level 3 and above are considered ranged
+//     (can be blocked by Pneuma)". The same page adds a second, mechanical tell:
+//     "Arrows only work with long range attacks so the only skill Assassins have that
+//     will benefit from this is Grimtooth (level 3 or above)".
+//   - Throw Kunai (range 9): "This is a RANGED attack even if you are standing 1 cell
+//     from the target."
+// Throw Shuriken is range 9 in the PS wiki, in our skills.json and in Hercules'
+// db/pre-re/skill_db.conf, and a player confirmed it plays as ranged.
+//
+// The only thing this feeds is `long_atk_rate` (bLongAtkRate gear) in cardFix.
+function skillRangeAtLevel(skill) {
+  if (!skill || !skill.id) return null;
+  const sd = loader.getSkill(skill.id);
+  const r = sd && sd.range;
+  if (r == null) return null;
+  if (!Array.isArray(r)) return r;
+  if (!r.length) return null;
+  const lv = Math.max(1, Math.min(Number(skill.level) || 1, r.length));
+  return r[lv - 1];
+}
+
 function resolveIsRanged(build, weapon, skill) {
-  // skill-level long/short overrides (skills.json range sign) are NOT YET PORTED;
-  // this mirrors the weapon-derived default from build_manager.effectiveIsRanged.
-  return effectiveIsRanged(build, weapon);
+  if (build.is_ranged_override !== null && build.is_ranged_override !== undefined) {
+    return build.is_ranged_override;
+  }
+  const range = skillRangeAtLevel(skill);
+  // No skill (a normal attack), or a negative range meaning "use the weapon's".
+  if (range == null || range < 0) return effectiveIsRanged(build, weapon);
+  return range >= 5;
 }
 
 function skillPeriodMs(castMs, delayMs, skillData, skillLv, minPeriodOverride, amotionFloor) {

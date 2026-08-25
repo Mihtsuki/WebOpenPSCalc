@@ -318,6 +318,35 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Long/short is now the SKILL's range, not the weapon's** (`resolveIsRanged`). This was a
+  documented stub — the function already took a `skill` argument and threw it away under a
+  `NOT YET PORTED` comment. Hercules `battle_range_type()`:
+  `if (skill->get_range2(...) < 5) return BF_SHORT; return BF_LONG;`, and `skill_get_range2()`
+  resolves a **NEGATIVE** range to the wielder's weapon range. That negative case is the common
+  one (Bash is `-1`), which is exactly why weapon-only logic looked right for most skills and was
+  quietly wrong for the rest.
+  **Three independent PS wiki statements confirm the `<5` cutoff, and one of them runs the
+  OPPOSITE way**, which is what makes this more than a code reading:
+  - *Grimtooth* (range `2+lv` = 3,4,5,6,7): "Level 1 and level 2 are considered melee (can be
+    blocked by Safety Wall) while level 3 and above are considered ranged (can be blocked by
+    Pneuma)" — the flip lands exactly on the cutoff, and it is **per level**. The same page adds
+    a mechanical tell: "Arrows only work with long range attacks so the only skill Assassins have
+    that will benefit from this is Grimtooth (level 3 or above)".
+  - *Throw Kunai* (range 9): "This is a RANGED attack even if you are standing 1 cell from the
+    target."
+  - *Desperado* — **a gun skill that is MELEE.** It has no `Range:` line in Hercules at all (so 0),
+    and PS says: "Desperado is considered melee, which means cards like Earth and Sky Deleter work
+    with it, but **Archer skeleton does not**." Archer Skeleton Card is `bLongAtkRate`, the single
+    thing this flag feeds — so the wiki is describing our exact code path. We were classifying it
+    Long (revolver = ranged weapon) and **paying out a long-range bonus PS says it does not get**.
+    Verified before/after: Desperado + Archer Skeleton is now 3480 → 3480 (ignored), while Throw
+    Shuriken + the same card goes 225 → 247.
+  **Golden movement is 11 step-name flips and ZERO damage or DPS changes** — no golden build wears
+  `bLongAtkRate` gear, so the label moves and the number does not. The damage only diverges once
+  someone equips one of the nine such items. Sabotage-checked both halves: reverting to
+  weapon-derived fails 10 tests, and treating a negative range literally (which would break
+  Tracking and Bash) fails 3.
+
 - **Throw Shuriken now works at all, and is paced by attack MOTION rather than delay.**
   It was returning a flat **0 damage**: the skill is typed `Misc` and had no ratio in either
   ratio map, so the BF_MISC guard reported it unmodelled. Three parts, all now in:
@@ -340,10 +369,8 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
   190 ASPD") is the same claim. It carries a `*Confirmation needed` marker and our model gives
   10/s at 190 ASPD (`amotion` floors at 100 ms), a ~10% disagreement on an explicitly unconfirmed
   figure — recorded, not chased.
-  **Left as-is deliberately:** the breakdown classifies it **Short** range for the long/short
-  rate bonuses, because that follows the equipped weapon. The skill has range 9, but no source
-  says whether `bLongAtkRate` gear applies to it, and the wiki's notes list only *size* penalties
-  as weapon-inherited. Needs a source or an in-game check before changing.
+  **Range classification: RESOLVED and implemented — see the next entry.** It is range 9 and is
+  long-range; a player confirmed it plays as ranged.
 
 - **Throwing Mastery's HIT half did nothing** (`passive_overrides.NJ_TOBIDOUGU`). Player-reported.
   `statusCalculator` has always had the code — `status.hit += perLv * njTobiLv` — but it reads

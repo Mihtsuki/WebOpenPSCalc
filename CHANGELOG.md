@@ -48,6 +48,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Ranged and melee skills were being told apart by your weapon instead of the skill.** That got
+  it right for most skills and quietly wrong for the rest: throwing skills used with a dagger were
+  treated as melee, while **Desperado was treated as ranged and given a long-range card bonus it
+  doesn't get in game**. Skills are now judged by their own range — which also means Grimtooth
+  correctly switches from melee to ranged at level 3, exactly as its description says. This only
+  changes your damage if you wear long-range gear like Archer Skeleton Card.
+
+
 - **Throw Shuriken did no damage at all, and now throws at the right speed.** The skill was
   showing a flat zero. It's back, and it fires on your attack *motion* rather than a cast delay —
   which means **twice** the rate of a normal attack at the same ASPD, and it isn't held back by
