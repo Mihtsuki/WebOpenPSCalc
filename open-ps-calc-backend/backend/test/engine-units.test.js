@@ -2407,3 +2407,45 @@ test("a skill with no usable range falls back to the weapon, never to Short", ()
       `${name}: synthesized range must be a negative number (weapon-derived), got ${JSON.stringify(r)}`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// Throw Shuriken doesn't ignore Flee on PS - vanilla's IgnoreFlee is overridden
+// ---------------------------------------------------------------------------
+test("Throw Shuriken rolls hit/flee like a normal attack on PS, not vanilla's auto-hit", () => {
+  const cfg = createBattleConfig();
+  const id = loader.getSkillByName("NJ_SYURIKEN").id;
+
+  // A deliberately low-HIT build against a high-Flee monster, so an auto-hit override
+  // would be visibly wrong (100%) versus the real accuracy formula (well under 100%).
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 25, base_level: 60, job_level: 30,
+    base_stats: { str: 20, agi: 20, vit: 20, int: 1, dex: 20, luk: 1 },
+    equipped: {},
+  });
+  const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+  const target = loader.getMonster(1920); // 296 Flee - highest in the loaded DB
+
+  // The real formula's own answer, computed the same way battlePipeline.js does it
+  // internally - this is what the skill SHOULD show once Flee is not ignored.
+  const [expectedHit] = calculateHitChance(st, target, cfg, "NJ_SYURIKEN", 1, { mastery: gb.effective_mastery });
+  assert.ok(expectedHit < 100, "test setup must actually produce a hit chance below 100% to be meaningful");
+
+  const r = new BattlePipeline(cfg).calculate(st, w, createSkillInstance({ id, level: 1 }), target, eff, gb);
+  assert.equal(r.hit_chance, expectedHit, "must use the real accuracy formula, not a guaranteed hit");
+
+  // Regression guard: the override lives in the pipeline, not the DB - vanilla data
+  // must keep saying IgnoreFlee, or the STANDARD-profile assertion below is meaningless.
+  const skillData = loader.getSkillByName("NJ_SYURIKEN");
+  assert.ok((skillData.damage_type || []).includes("IgnoreFlee"),
+    "vanilla data must still say IgnoreFlee - PS's override must be a pipeline-level fix, not a data edit");
+
+  // The override must stay PS-only: STANDARD keeps vanilla's auto-hit behaviour.
+  const stdBuild = buildFromSaveSchema({
+    server: "standard", job_id: 25, base_level: 60, job_level: 30,
+    base_stats: { str: 20, agi: 20, vit: 20, int: 1, dex: 20, luk: 1 },
+    equipped: {},
+  });
+  const [gbStd, effStd, wStd, stStd] = resolvePlayerState(stdBuild, cfg, STANDARD);
+  const rStd = new BattlePipeline(cfg).calculate(stStd, wStd, createSkillInstance({ id, level: 1 }), target, effStd, gbStd);
+  assert.equal(rStd.hit_chance, 100, "STANDARD (vanilla) profile must still auto-hit");
+});

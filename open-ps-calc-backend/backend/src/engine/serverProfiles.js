@@ -398,6 +398,8 @@ const PS_MECHANIC_FLAGS = new Set([
   "GROUND_EFFECT_PS_VALUES",
   "GS_GS_ADJUSTMENT_SKIP_HIT_PENALTY",
   "GS_INCREASING_REMOVED",   // Increasing Accuracy removed on PS (folded into Single Action)
+  // PS Throw Shuriken does not ignore flee
+  "NJ_SYURIKEN_FLEE_IGNORE_DISABLED",
   "PR_MACEMASTERY_EXPANDED_WEAPON_TYPES",
   "MO_EXTREMITYFIST_PS_SP_REWORK",  // PS rework: SP consumed = floor(MaxSP × 0.2 × SkillLv)
   // PS Asura does NOT ignore the target's DEF (unlike vanilla, whose skill DB
