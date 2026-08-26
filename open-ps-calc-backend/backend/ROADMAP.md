@@ -318,6 +318,25 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Forge data outlived the weapon it belonged to, hiding the next weapon's card slots.**
+  Player-reported via a share link. `data.forge` is keyed by SLOT (`forge.right_hand`) but
+  describes a SPECIFIC forged weapon, and neither the item picker nor Unequip cleared it. So
+  swapping weapons carried the old one's crumbs/element across, `isForged` stayed true, and the
+  card-slot pickers — deliberately hidden for forged weapons, whose slots hold the crafter's
+  signature — never rendered for the new weapon.
+  **The failure mode is worse than it first looks.** The forge UI is gated on
+  `FORGEABLE_WEAPON_IDS`, so swapping to a non-forgeable weapon hides the forge controls while
+  the stale flag persists: the slots are gone, nothing on screen explains why, and there is no
+  control left to switch it off. The reporter's build was a forged Damascus (1222, `sc:2`,
+  `ele:3`) → Main Gauche; 1207 [3] is forgeable but 1208 [4] is not, so the dead-end case was
+  one click away. Decoded from their share link rather than guessed at.
+  Both paths now delete `forge[slot.key]` — the picker only when the id actually changes, so
+  re-picking the same weapon keeps its forge setup. Guarded by a source-level test in
+  `protected-values.test.js` (there is no frontend test runner; same precedent as
+  `buff-labels.test.js` parsing `BuildEditor.tsx`), sabotage-checked by removing the cleanup.
+  Not related to the earlier wildcard slot-count fix, which was my first suspicion — that one
+  governs which wildcard BONUSES apply, not whether the slot UI renders.
+
 - **Regression fix (same day, self-inflicted): PS-custom skills were forced Short.**
   Making `skillRangeAtLevel` read `skills.json` `range` turned a field that had never mattered
   into a load-bearing one — and `dataLoader._psCustomBattleSkills()` SYNTHESIZES its records

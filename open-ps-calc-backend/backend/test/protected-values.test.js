@@ -141,3 +141,28 @@ test("Payon Stories sources still point at Payon Stories", () => {
     assert.ok(hosts.includes(host), `${path.basename(file)} must still query ${host}`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// Per-slot state that must not outlive the item it belongs to
+// ---------------------------------------------------------------------------
+test("changing or removing a weapon clears that slot's forge data", () => {
+  // Forge (Star Crumbs / element / ranked) is stored per SLOT but describes a
+  // SPECIFIC weapon. Left behind on a swap it makes the next weapon read as forged,
+  // which hides its card slots entirely — and if that weapon is not forgeable, the
+  // forge controls are hidden too, so there is no way to clear it from the UI.
+  // A player hit exactly this: a shared build with a forged Damascus, switched to a
+  // Main Gauche, and no card slots ever appeared.
+  //
+  // There is no frontend test runner, so this is a source-level guard in the same
+  // spirit as buff-labels.test.js. If the picker/unequip handlers are restructured,
+  // update this to match the new shape rather than deleting it.
+  const src = read(FRONTEND, "src", "pages", "BuildEditor.tsx");
+
+  const onSelect = src.slice(src.indexOf("onSelect={(r) => {"));
+  assert.ok(/delete next\.forge\[slot\.key\]/.test(onSelect.slice(0, 1600)),
+    "the item picker must drop the slot's forge data when the equipped item changes");
+
+  const unequip = src.slice(src.indexOf("next.equipped[slot.key] = null;"));
+  assert.ok(/delete next\.forge\[slot\.key\]/.test(unequip.slice(0, 700)),
+    "Unequip must drop the slot's forge data too, or the next weapon inherits it");
+});

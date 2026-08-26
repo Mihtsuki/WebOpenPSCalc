@@ -48,6 +48,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Switching weapons could leave you with no card slots.** If the weapon you were replacing had
+  been forged, the forge settings stayed behind on the slot and made the *new* weapon count as
+  forged — and forged weapons have no card slots, so the pickers vanished. Worse, if the new
+  weapon couldn't be forged at all, the forge controls were hidden too, so there was nothing to
+  switch off. Forge settings now clear when you change or unequip a weapon. Reported by a player
+  who loaded a shared build and tried to swap to a Main Gauche.
+
+
 - **Bow Rogues briefly lost their long-range card bonus on Trick Arrow and Quick Step.** A
   regression introduced earlier the same day by the ranged/melee change above, now fixed: the
   server's custom skills carry no range of their own, and they were being read as melee. Caught

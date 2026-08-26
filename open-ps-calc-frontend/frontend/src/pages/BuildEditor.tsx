@@ -2208,6 +2208,9 @@ export default function BuildEditor() {
                               const next = structuredClone(prev) as any;
                               next.equipped[slot.key] = null;
                               for (let i = 1; i <= 4; i++) delete next.equipped[`${slot.key}_card${i}`];
+                              // Same reason as the picker above: forge data is per-slot, so
+                              // leaving it behind makes the NEXT weapon read as forged.
+                              if (next.forge) delete next.forge[slot.key];
                               return next;
                             });
                           }}
@@ -2226,7 +2229,21 @@ export default function BuildEditor() {
                         placeholder={`Search ${slot.label.toLowerCase()}…`}
                         search={"dualWield" in slot && slot.dualWield ? leftHandSearch : itemSearch(slot.itemType, "loc" in slot ? slot.loc : undefined)}
                         onSelect={(r) => {
-                          updateField(["equipped", slot.key], r.id);
+                          setData((prev) => {
+                            const next = structuredClone(prev) as any;
+                            const wasEquipped = next.equipped[slot.key];
+                            next.equipped[slot.key] = r.id;
+                            // Forge data belongs to the SPECIFIC weapon that was forged, but
+                            // it is stored per SLOT — so swapping weapons used to carry the
+                            // old weapon's crumbs/element onto the new one. That silently
+                            // hides the new weapon's card slots (a forged weapon has none),
+                            // and if the new weapon is not forgeable the forge controls are
+                            // hidden too, leaving no way to clear it. Reported by a player
+                            // who loaded a shared build with a forged Damascus and switched
+                            // to a Main Gauche: the slots simply never appeared.
+                            if (wasEquipped !== r.id && next.forge) delete next.forge[slot.key];
+                            return next;
+                          });
                           api.getItem(r.id, data.server)
                             .then((full) => setItemCache((prev) => ({ ...prev, [r.id]: full })))
                             .catch(() => setItemCache((prev) => ({ ...prev, [r.id]: { id: r.id, name: r.label } })));
