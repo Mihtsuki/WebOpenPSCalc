@@ -109,3 +109,59 @@ test("the frontend and backend agree on which weapons are forgeable", () => {
   assert.deepEqual(onlyBe, [], "ids the engine forges but the picker will not badge");
   assert.ok(fe.size > 0);
 });
+
+// ---------------------------------------------------------------------------
+// CHANGELOG structure
+// ---------------------------------------------------------------------------
+test("CHANGELOG.md is well formed", () => {
+  // I have broken this file three ways while working on it: filing four days of
+  // entries under one stale date heading, doubling the blank line between every
+  // inserted entry, and leaving an empty orphaned heading behind after repairing the
+  // first two. It is edited by script often enough that "read it and see" is not a
+  // real check, so the shape is asserted here instead.
+  const text = fs.readFileSync(path.join(REPO, "CHANGELOG.md"), "utf8");
+  const lines = text.split("\n");
+
+  const dates = lines.filter((l) => /^## \d{4}-\d{2}-\d{2}$/.test(l)).map((l) => l.slice(3));
+
+  // One heading per date.
+  const dupes = dates.filter((d, i) => dates.indexOf(d) !== i);
+  assert.deepEqual([...new Set(dupes)], [], "a date has more than one heading");
+
+  // Newest first, so the top of the file is the most recent work.
+  assert.deepEqual(dates, [...dates].sort().reverse(), "date headings are out of order");
+
+  // No empty section — a heading immediately followed by another heading is the
+  // orphan left behind by a bad slice.
+  for (let i = 0; i < lines.length - 1; i++) {
+    if (!/^## \d{4}-\d{2}-\d{2}$/.test(lines[i])) continue;
+    const next = lines.slice(i + 1).find((l) => l.trim() !== "");
+    assert.ok(next && !next.startsWith("## "),
+      `${lines[i]} has no content — orphaned heading`);
+  }
+
+  // One Added/Changed/Fixed per date, and nothing else.
+  let current = null;
+  const seen = new Map();
+  for (const l of lines) {
+    const d = l.match(/^## (\d{4}-\d{2}-\d{2})$/);
+    if (d) { current = d[1]; seen.set(current, []); continue; }
+    const h = l.match(/^### (.+)$/);
+    if (h && current) {
+      // The Keep a Changelog set. Added/Changed/Fixed carry almost everything here;
+      // the rest are allowed so a legitimate section is never a test failure.
+      assert.ok(["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"].includes(h[1]),
+        `${current}: unexpected section "${h[1]}"`);
+      assert.ok(!seen.get(current).includes(h[1]),
+        `${current} has a second "### ${h[1]}" — merge them`);
+      seen.get(current).push(h[1]);
+    }
+  }
+
+  // Single blank line between entries.
+  let run = 0;
+  lines.forEach((l, i) => {
+    run = l.trim() === "" ? run + 1 : 0;
+    assert.ok(run < 2, `line ${i + 1}: ${run} consecutive blank lines`);
+  });
+});

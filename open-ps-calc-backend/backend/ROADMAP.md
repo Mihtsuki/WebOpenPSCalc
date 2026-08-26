@@ -318,6 +318,23 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **CHANGELOG.md is now shape-checked by a test**, after I broke it three separate ways in
+  one stretch of work: four days of entries filed under a stale `## 2026-08-22` heading
+  (every insert script hardcoded that date — the same drift I had *already* repaired once in
+  this file), a doubled blank line before every entry I inserted (`FIXED` strings ending in
+  `
+
+`), and then an empty orphaned `## 2026-08-22` heading left behind by an off-by-one
+  in the repair itself (sliced at index 8 where the heading sat at index 7). The user caught
+  all three. The file is edited by script often enough that "read it and see" is not a real
+  check, so `frontend-source.test.js` now asserts: one heading per date, dates newest-first,
+  no heading without content, one `### <type>` per date from the Keep a Changelog set, and no
+  run of two or more blank lines. Each failure mode was sabotage-verified.
+  Normalising the whole file for that test also merged **pre-existing** duplicate sections in
+  the July entries (2026-07-01 / 07-10 / 07-13), which I had spotted during the 2026-08-22
+  audit and consciously left alone at the time. 47 date sections normalised, 442 entries
+  verified present before and after.
+
 - **Forgeable weapons are marked in the item picker**, and the UI regression guards got a
   proper home. Whether a weapon is Blacksmith-forgeable is otherwise invisible until after you
   equip it, so the dropdown now carries a small "Forgeable" pill on both weapon searches (the

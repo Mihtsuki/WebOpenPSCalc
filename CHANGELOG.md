@@ -5,7 +5,6 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
-## 2026-08-22
 ## 2026-08-26
 
 ### Added
@@ -13,7 +12,6 @@ instead of release version. Dates are taken from actual git commit history.
 - **The item list now marks which weapons can be forged.** Forgeable weapons show a small
   "Forgeable" tag in the dropdown, so you can see at a glance which ones accept Star Crumbs, an
   element and a ranked bonus — previously you had to equip a weapon to find out.
-
 
 ### Fixed
 
@@ -484,6 +482,7 @@ instead of release version. Dates are taken from actual git commit history.
   effect is unchanged. Both upstream sources are still stale on this — vanilla `item_db` has
   it as `EQP_ACC` and the live PS item API still says "Compound on: Accessory" — so the slot
   is pinned in `ps_item_manual.json`, the same way the card's reworked script already was.
+
 - **DEF-ignoring monster casts are no longer priced as if your armour stopped them.** The
   incoming pipeline ignored the skill DB's IgnoreDefense flag, so Asura Strike, Earthquake,
   Auto Counter, Critical Slash, Fire Pillar and Clashing Spiral were all reduced by the DEF you
@@ -517,11 +516,13 @@ instead of release version. Dates are taken from actual git commit history.
   card pickers and clears anything already slotted, and a build shared before this is corrected
   when it loads. Cards in your other gear are untouched, and a weapon that isn't blacksmith-
   forgeable keeps its cards as before.
+
 - **The off-hand weapon can be forged too.** Forging was main-hand only, so a dual-wielding
   Assassin's second dagger was always an unforged, Neutral one — its Star Crumbs and elemental
   stone did nothing. Each hand now carries its own forge: a VVS main hand and a VVVS Fire
   off-hand are two separate weapons, and forging one doesn't touch the other's cards. An endow
   now colours both weapons, as it does in game, instead of only the main hand.
+
 - **Forged weapons can carry their element.** The forge control took Star Crumbs and a ranked
   forge, but the weapon was always Neutral — so a **VVS Fire Katana** was priced as a plain one.
   Pick the elemental stone it was forged with (**Flame Heart / Mystic Frozen / Rough Wind / Great
@@ -529,6 +530,7 @@ instead of release version. Dates are taken from actual git commit history.
   Crumbs — a Fire weapon with no crumbs is still a Fire weapon — and an active endow (Fire Weapon,
   Aspersio…) still overrides it, as in game. Against a Ghoul, a VVS Fire Sword goes from 190 to
   280 average.
+
 - **Rogues and Stalkers can plagiarise.** The Passive skills panel now has a **Plagiarism** slot:
   pick the skill you've copied and its rank, from the 55 skills the PS wiki lists as copyable. It's
   saved with the build and travels in the share link, so you can record a copied **Jupitel Thunder
@@ -536,9 +538,11 @@ instead of release version. Dates are taken from actual git commit history.
   **Triple Attack** procs on your auto-attacks, which the calculator previously had no way to model
   (Triple Attack is 5 ranks on PS, and the slot caps you there). To see a copied spell's own damage,
   pick it as the skill at the top as usual. Reported by a player.
+
 - **Triple Attack procs now get their own breakdown card**, showing what one proc hits for and the
   proc chance, for Monks and Champions as well as plagiarising Rogues. It replaces the auto-attack
   rather than adding a hit, so its damage was already inside the DPS — you just couldn't see it.
+
 - **Weapon Perfection is now a buff you can turn on** — as a Blacksmith self-buff *and* as a party
   buff, since on Payon Stories party members receive it too. It nullifies the weapon-vs-size
   penalty completely: every weapon deals 100% to every size, so an Axe against a Medium target
@@ -552,15 +556,19 @@ instead of release version. Dates are taken from actual git commit history.
   open. They're now **Element vs target**, **Cards & gear**, **Target's DEF**, **Weapon mastery**,
   **Size penalty** and so on, with the original name kept in the row's tooltip so anyone
   cross-referencing a formula can still find it. Reported by a player.
+
 - **The skill ratio row names the skill.** It used to read *Skill Ratio (ID 0 Lv 1)*; it now says
   **Skill ratio — Normal attack**, or **Skill ratio — Bash Lv10**.
+
 - **ATK buffs show their arithmetic.** Power-Thrust adds its percentage *into* the skill's ratio
   rather than multiplying the total, and there was no way to see that had happened. The ratio row
   now spells it out: *Cart Revolution Lv5: 250% + Power-Thrust Lv5 +25 = 275%*. Same for Maximum
   Power-Thrust and Sonic Acceleration.
+
 - **Picking a skill now starts it at max rank** instead of Lv1 — that's the rank builds are
   planned around, so it's one less thing to set every time. The rank input beside it still moves,
   and a skill loaded from a shared build keeps whatever rank it was saved with.
+
 - **Hilt Binding is easier to find.** The Blacksmith/Whitesmith passive list was in skill-tree
   order, which buried it in the middle of the six *Smith &lt;weapon&gt;* entries. Those six only
   matter because Veteran Axe reads how many you've mastered — they do nothing on their own — so
@@ -577,6 +585,7 @@ instead of release version. Dates are taken from actual git commit history.
   10 → 5, and **Moonlit Water Mill** gains its 5 ranks. The skill picker and the passive picker
   had also disagreed on some of these — they now share one source. A build shared with a rank
   that no longer exists is computed at the real maximum instead.
+
 - **Power-Thrust was adding +50% instead of +25%, inflating every damage number under it.**
   The buff picker offered 10 ranks; the skill has **5** (+5% ATK each). So a maxed Power-Thrust
   priced an auto-attack at ×1.50 instead of ×1.25, and **Cart Revolution Lv5 at 300% instead of
@@ -584,6 +593,7 @@ instead of release version. Dates are taken from actual git commit history.
   in game. The picker now stops at 5 and the engine clamps the rank as well, so builds shared
   while it read 10 are corrected when they load. One-Hand Quicken had the same overshoot (10
   ranks offered, 1 real), though its level never changed a number.
+
 - **Combos that grant an auto-cast now actually cast it.** A combo's `bonus3 bAutoSpell` was
   being dropped, so **Gust Bow + Arrow of Wind** never auto-cast its Wind Blade Lv5 (10%, and 20%
   once your base INT reaches 40) — the +25% long-range half of that combo worked, which is why it
@@ -592,14 +602,17 @@ instead of release version. Dates are taken from actual git commit history.
   Flame Lord + Ring of Resonance** (Asura Strike / Sonic Blow / Investigate / Meteor Assault).
   Reported by a player. Note the bonus is *long-range physical* and the proc rides *physical*
   attacks — neither touches a magic spell, so a plagiarised Jupitel Thunder sees nothing from it.
+
 - **Gear that auto-casts off one of your skills now casts it.** `bAutoSpellOnSkill` had no
   consumer at all, so **Elemental Sword**'s Cold Bolt → Fire Bolt → Lightning Bolt → Earth Spike
   chain did nothing — it's a 100% proc, worth roughly +45% DPS on a bolt Wizard. Also covers
   **Dagger of Hunter** (Bash), **Nepenthes Bow**, **Croce Staff**, **Horn of Hillslion** and
   **Holy Marcher Hat**. Each shows as its own proc card with the skill that triggers it.
+
 - **A combo's `autobonus` is no longer dropped**, so the "Cards always proc" toggle now covers
   combo procs too — **Hahoe Mask + Witch's Pumpkin Hat** (+50 ATK), **Twilight Desert +
   Sandstorm** (+100% ASPD) and five others.
+
 - **Corruptor Card is fully modelled.** Its Corrupting Drain is a PS-custom skill the engine
   couldn't even resolve, so the whole bonus was thrown away. It now procs at its real rate —
   **4% on melee attacks, 2% on ranged**, read per weapon (any card with separate melee/ranged
@@ -607,12 +620,14 @@ instead of release version. Dates are taken from actual git commit history.
   `100 + STR + STR²/40 + DEX + DEX²/40 + INT + INT²/40 + LUK + LUK²/40`, off your total stats,
   unaffected by element, size or race. The breakdown shows one step per stat, the **75% lifesteal**
   is reported beside it as healing (never as damage), and the proc now counts toward your DPS.
+
 - **Holy Cross's accuracy bonus now scales with its rank.** The calculator gave every rank of
   Holy Cross the full +20% accuracy, when the bonus is **+2% per rank** (+2% at Lv1 → +20% at
   Lv10). Low-rank Holy Cross was showing a hit chance it doesn't have; Lv10 is unchanged. As a
   worked example, a base-level-99 Crusader hitting **Abysmal Knights** needs **52 DEX** to never
   miss with Holy Cross Lv10 (147 HIT), **67 DEX** at Lv1, and 68 DEX on a plain auto-attack —
   the Hit breakpoints panel gives the exact number for your build. Reported by a player.
+
 - **Every other accuracy bonus is now applied too.** Accuracy — a percentage *of your hit chance*,
   not a flat +HIT — was only wired up for Holy Cross and Shield Chain. Now also modeled:
   **Bash** (+5% per level, so Lv10 turns a 67% hit chance into 100%), **Magnum Break** (+10% per
@@ -629,22 +644,38 @@ instead of release version. Dates are taken from actual git commit history.
   ASPD number actually buys you. Hover it for the attacks per second, the time between attacks
   in milliseconds, the formula, and the caveat that these are attack *cycles*: a katar's second
   hit, dual-wield's third hit and multi-hit skills all land inside one cycle.
+
 - **Skills show their cast rate too, next to your animation delay** — a skill fires on
   whichever is slower, its after-cast delay or your animation, so the two timings sit side by
   side for you to compare: Bash at 1.77 casts/s against a 0.57 s animation, Sonic Blow at
   0.50 casts/s (2.00 s) against the same animation.
+
 - Timings are given both ways players quote them — `1.77 atk/s` and `0.57 s (566 ms)` between
   attacks — so a skill's after-cast delay can be lined up against your animation delay directly.
+
 - The **ASPD card in Combat stats** carries the same panel, so you can read your attack rate
   while tuning AGI without running a calculation first.
+
 - **Pirate Skel Card + Flame Beetle Card is now a real combo.** The pair makes your autocast
   Mammonite cost no zeny *and* ignore Zeny Pincher — and since Zeny Pincher trades damage for
   the zeny discount, that means the proc hits for the full **600% at Lv10 instead of 350%**
   while Zeny Pincher is on. A Mammonite you cast yourself is still pinched.
+
 - **Giant Pestle is now a real item.** It had a placeholder id while it was unobtainable; the
   PS item database published it as **8430**, so it's keyed properly and searchable by name.
   (If you saved a build with it before today, re-pick the weapon.) Its stats — Mace, ATK 100,
   weapon level 3, level 58, Alchemist, +3/+12 ATK per Pharmacy level — all confirmed unchanged.
+
+### Changed
+
+- **The damage breakdown now labels its two columns** — the left badge is what that
+  step *changed*, the right number is the *running total* after it. Every step follows
+  that convention now; the Overrefine row used to show the size of its own roll (e.g.
+  "1–5") instead of the total, which is what made the columns look inconsistent.
+
+- **Grand Cross' magic half is marked as a fresh sub-track.** Its Base MATK row opens a
+  separate calculation that is later summed with the physical half, so it no longer
+  displays a (meaningless) change against the physical running total.
 
 ### Fixed
 
@@ -654,41 +685,37 @@ instead of release version. Dates are taken from actual git commit history.
   overstated ~7×), **Charge Attack** 3 s (~5×), **Throw Arrow** and **Musical Strike** 0.3 s
   (−19% and −5%). Acid Terror's 0.22 s is shorter than its own cast, so nothing changes there.
   A cooldown is fixed — Bragi and delay-reduction gear shorten the after-cast delay, never this.
+
 - **FUEL Card's −2 s Demonstration cooldown now counts**, which it couldn't before: it takes the
   cooldown from 5 s to 3 s, worth about +77% Demonstration DPS.
+
 - The cast rate panel lists **cast time, after-cast delay, cooldown and animation delay
   separately** — a cooldown is not an after-cast delay, and only one of the two can be reduced.
   Where the animation delay isn't part of the rate yet — magic, traps and a few skills with
   their own timing — the panel says so.
+
 - **Maximum Over Thrust is a self buff, and it now actually does something.** It sat under
   Party buffs, which was wrong twice over: the skill is Whitesmith-only and self-cast
   ("cannot be activated to anyone beside the caster"), and the party checkbox had no effect
   at all, because the damage ratio only ever reads self-cast buffs. It's now in Self buffs
   for Whitesmiths, where its +20% ATK per level lands — a Lv5 Mammonite goes from 1,559 to
   1,819 on the same build. Over Thrust, which *is* castable on the party, stays where it was.
+
 - **The damage breakdown no longer shows phantom negative steps on unrefined weapons.**
   The Refine Bonus and Overrefine Bonus rows reported "0" instead of the running damage
   total when there was nothing to add, so the breakdown read them as huge losses
   (e.g. "−351 Refine Bonus"). Rows that change nothing now carry the running total, and
   the breakdown simply hides them. Final damage was always correct — only the step
   display was wrong.
+
 - **The step where your status ATK is added is now its own row** ("Status BATK Added").
   It used to be silently folded into whichever row came next, which is what made the
   Overrefine row look like it added a few hundred damage out of nowhere.
+
 - Weapon-ATK inputs (Impositio Manus, Battle Theme, Nibelungen, Volcano, equipment
   +ATK) and Turn Undead's instant-kill chance are shown as input chips rather than
   pipeline steps — they aren't stages of the running total, and rendering them as such
   produced meaningless +/− badges.
-
-### Changed
-
-- **The damage breakdown now labels its two columns** — the left badge is what that
-  step *changed*, the right number is the *running total* after it. Every step follows
-  that convention now; the Overrefine row used to show the size of its own roll (e.g.
-  "1–5") instead of the total, which is what made the columns look inconsistent.
-- **Grand Cross' magic half is marked as a fresh sub-track.** Its Base MATK row opens a
-  separate calculation that is later summed with the physical half, so it no longer
-  displays a (meaningless) change against the physical running total.
 
 ## 2026-08-09
 
@@ -719,14 +746,17 @@ instead of release version. Dates are taken from actual git commit history.
     Smith Sword. Their levels are now in the passive picker because the new Veteran Axe
     scales off how many you have mastered.
   - **Chemical Protections** cap at rank 3, **Pushcart** at rank 5.
+
 - **Burning** — the new stacking Fire debuff — is a target toggle. Each of the up-to-5
   stacks cuts the target's **hard MDEF by 2**, so your magic damage rises accordingly. The
   debuff's own 60 Fire magic damage per second per stack is shown alongside, labelled as a
   pre-mitigation figure since it is Burning's damage, not your hit's.
+
 - **Cards that autocast a skill on a physical attack now show their damage.** The reworked
   **Pirate Skel Card** (5% auto-Mammonite, cast at Lv10 once you have mastered Mammonite)
   and the **Rekenber Mercenary Card** (auto-Bash) each get their own breakdown panel with
   the per-proc damage and the DPS they add. Shown on auto-attacks, where these cards are used.
+
 - **New weapons from the rework notes**, with full stats and bonuses: **Veteran Axe [2]**
   (retuned to ATK 155 / level 60; scales ATK, Perfect Dodge and ASPD with your mastered
   Smith Weapon skills, doubling at base DEX and LUK 80+), **Whirling Hammer [1]** (two-handed
@@ -744,6 +774,7 @@ instead of release version. Dates are taken from actual git commit history.
   matching the 9 August change. **Wootan Fighter Card** raises it to 30%. This was previously
   missing from the calculator entirely, so Swordman-line auto-attack DPS was understated
   whenever the buff was up — expect a visible jump against Fire-weak targets.
+
 - **Crescent Scythe now shows the HP it heals you.** Both the plain and the slotted version
   heal **0.1% of the damage dealt per refine** on a critical hit — so a +10 one returns 1% of
   the crit, ten times what a flat 0.1% would give. The crit breakdown shows the HP restored,
@@ -755,9 +786,11 @@ instead of release version. Dates are taken from actual git commit history.
   `SkillLevel × (SoftDEF/2 + ⌊VIT/10⌋²) × (100 + 2×DEF) / 1000`. **VIT now counts
   quadratically**, so it's far and away the most valuable stat for it — doubling VIT more
   than doubles the reflected damage — and hard DEF from armour scales it as well.
+
 - **FUEL Card** now adds **+10%** to Acid Terror and Demonstration (was +30%), and **Pill
   Bug Card** adds **+10%** to Cart Revolution (was +8%), matching the rework notes. Acid
   Terror's higher base damage more than covers the FUEL nerf.
+
 - **Pirate Skel Card's auto-Mammonite casts at level 10 only for Blacksmiths and
   Whitesmiths.** A Merchant or Alchemist who has mastered Mammonite still procs level 1,
   per the `[Blacksmith]` tag on the card.
@@ -771,12 +804,27 @@ instead of release version. Dates are taken from actual git commit history.
   Passive levels are now checked against the selected job's own skill tree, which also
   repairs builds already saved or shared with the stale data — just reload the link. Skills
   **granted by gear** are unaffected: a card really can give you a skill outside your tree.
+
 - **Item scripts that multiply by a condition now compute the right number.** An expression
   like `1 + 9 × (skill level == 10)` was collapsing to 1, which capped every such bonus at
   its minimum value. This is what makes the auto-Mammonite / auto-Bash cards cast at level
   10 for a character who has mastered the skill.
 
 ## 2026-08-08
+
+### Changed
+
+- **Unverified monster cast-skill numbers are now labelled "for testing".** Cast skills
+  priced from a baseline ratio Payon Stories may have tuned (monster-native `NPC_` skills
+  and a few unaudited vanilla skills) are marked **for testing** in the Survivability panel
+  — a clearer prompt to confirm the figure in-game — replacing the quieter "≈ est." tag.
+
+- **Skills that can't be modeled are now shown explicitly.** Monster damage skills with no
+  reliable Payon Stories formula (Dark Breath, Spiral Pierce, monster-only 3rd-job skills)
+  are now flagged **not modeled yet** in the Survivability panel instead of quietly showing
+  element and type only, so it's clear the missing number is a known gap rather than an
+  oversight. The `NPC_` "for testing" ratios were also re-audited against pre-renewal
+  Hercules and confirmed correct as pre-re baselines.
 
 ### Fixed
 
@@ -787,19 +835,6 @@ instead of release version. Dates are taken from actual git commit history.
   so **Provoke's DEF reduction meaningfully scales GC damage** (often the difference between a
   clean one-shot and not). Against low-DEF targets the numbers barely move. Weapon masteries
   and Demon Bane still apply as before.
-
-### Changed
-
-- **Unverified monster cast-skill numbers are now labelled "for testing".** Cast skills
-  priced from a baseline ratio Payon Stories may have tuned (monster-native `NPC_` skills
-  and a few unaudited vanilla skills) are marked **for testing** in the Survivability panel
-  — a clearer prompt to confirm the figure in-game — replacing the quieter "≈ est." tag.
-- **Skills that can't be modeled are now shown explicitly.** Monster damage skills with no
-  reliable Payon Stories formula (Dark Breath, Spiral Pierce, monster-only 3rd-job skills)
-  are now flagged **not modeled yet** in the Survivability panel instead of quietly showing
-  element and type only, so it's clear the missing number is a known gap rather than an
-  oversight. The `NPC_` "for testing" ratios were also re-audited against pre-renewal
-  Hercules and confirmed correct as pre-re baselines.
 
 ## 2026-08-07
 
@@ -1016,12 +1051,21 @@ instead of release version. Dates are taken from actual git commit history.
   hits); per hit = (LUK + INT/2 + 6×Steel Crow + 20) × 2 — neutral element, bypasses DEF, and
   unaffected by ATK cards (wiki.payonstories.com/Blitz_Beat). Without a Falcon it shows "requires a
   Falcon" rather than a number.
+
 - **Double Bolt for Sages.** The Double Bolt buff (100% instant re-cast of Fire/Cold/Lightning
   Bolt, Earth Spike or Soul Strike) is now available to Sages, not just Professors — on Payon
   Stories it's a Sage skill.
+
 - **Shadow Slash "from Hiding" toggle.** Casting Shadow Slash or Haze Slash from Hiding / Cloaking
   now has a toggle in the Skill panel; the engine already applied the higher from-Hiding ratio, but
   there was no way to switch it on.
+
+### Changed
+
+- **Self-buffs renamed to their Payon Stories names** so you can find them by the in-game name:
+  Attention Concentrate → **Improve Concentration**, Fury → **Critical Explosion**, Two-Hand Quicken
+  → **Sword Quickening**, Mystical Amplification → **Amplify Magic Power**. (Double Bolt kept — that's
+  the PS wiki's name for it.)
 
 ### Fixed
 
@@ -1048,13 +1092,6 @@ instead of release version. Dates are taken from actual git commit history.
 - **Amplify Magic Power** buff level cap: Lv10 → **Lv5** (its actual max on Payon Stories; Lv6–10
   did nothing).
 
-### Changed
-
-- **Self-buffs renamed to their Payon Stories names** so you can find them by the in-game name:
-  Attention Concentrate → **Improve Concentration**, Fury → **Critical Explosion**, Two-Hand Quicken
-  → **Sword Quickening**, Mystical Amplification → **Amplify Magic Power**. (Double Bolt kept — that's
-  the PS wiki's name for it.)
-
 ## 2026-07-26
 
 ### Added
@@ -1079,9 +1116,12 @@ instead of release version. Dates are taken from actual git commit history.
 - **Hunter Trapper support.** All four Hunter damage traps — Land Mine (Earth), Blast Mine (Wind),
   Freezing Trap (Water), Claymore Trap (Fire) — are now selectable in the skill picker (only
   Freezing Trap used to show), and there's a new **Hunter — Trapper** starter build.
+
 - **Reflect Shield** is now selectable in the skill picker; its per-hit reflected damage was
   already computed but had no way to be picked.
+
 - **Rust-Worn Apparatus** accessory added (Hunter / Rogue line): INT +1, Perfect Dodge +2.
+
 - **Sage — Hindsight** starter build, and every starter build re-aligned to the Payon Stories
   wiki's recommended stat spreads.
 
@@ -1090,6 +1130,7 @@ instead of release version. Dates are taken from actual git commit history.
 - **Starter build stats.** Corrected templates whose stats didn't match the wiki or broke the
   level-99 stat-point budget — e.g. the Wizard PvE build is now a feasible 99 INT / 99 DEX, and
   Grand Cross / Asura / Desperado / Throwing use the right primary stats.
+
 - **Improve Concentration stat display.** The stat cards no longer over-count AGI/DEX when
   Improve Concentration is combined with Blessing / Increase AGI. The display now matches the
   engine (which was already correct), so e.g. Blessing reads +10 DEX, not +11.
@@ -1105,6 +1146,7 @@ instead of release version. Dates are taken from actual git commit history.
   30% chance on every physical attack. The results now show an **Auto Spell (Hindsight)** breakdown
   with the per-proc magic damage (bolt ranks roll a random Lv2–4 cast, shown as a range), and the
   proc's expected value is folded into the DPS estimate. Assumes the underlying spell is learned.
+
 - **Cast breakpoints show the next DEX jumps.** The Breakpoints panel's cast row now lists the next
   few DEX thresholds (smallest +DEX to reach each successive cast-time step), ending at the
   instant-cast point — matching the ASPD row — instead of only the instant-cast DEX.
@@ -1169,6 +1211,28 @@ instead of release version. Dates are taken from actual git commit history.
   PS-wiki stat guidance (linked from a hint), and a signature skill (e.g. Wizard loads Storm Gust, so
   its cast breakpoints show right away). Gear is left for you to pick — a starting point to tweak.
 
+### Changed
+
+- **The ASPD / cast / hit Breakpoints panel is now a highlighted accent card.** It was previously a
+  muted list that was easy to miss; it now sits in a gold-tinted card with a left accent stripe and a
+  ⚡ heading so the attack-speed and cast-speed breakpoints stand out at a glance.
+
+- **The Breakpoints Cast row now names the skill and level.** It shows which skill (and its level) the
+  cast time is for — e.g. "6.00s Storm Gust Lv 10 — instant cast at +40 DEX" — so it's clear what's
+  being cast at that speed.
+
+- **The Breakpoints Hit row now names the target.** The hit-chance breakpoint is computed against the
+  selected monster, so it now says which one — e.g. "92% vs Ferus [Fire]" (or "vs custom target") —
+  instead of leaving you to guess what the percentage is measured against.
+
+- **The reworks banner is now a Features list.** The banner that listed every per-class rework is now
+  a concise list of what the calculator can do — Payon Stories custom equipment and skills, all PS
+  class reworks (collapsed to one line that expands to the full per-class detail), the step-by-step
+  damage breakdown, the ASPD / cast / hit breakpoint calculator, disambiguated damage/hit/dodge per
+  monster, the survivability panel, Grand Cross recoil, build-vs-build comparison, the starter build
+  templates, importing builds from the jaludev calculator, and light/dark mode. Expanded by default so
+  the tools are easy to find.
+
 ### Fixed
 
 - **Spirit sphere ATK is now modeled as a Star Crumb-style flat bonus, not base ATK.** Each active
@@ -1199,28 +1263,6 @@ instead of release version. Dates are taken from actual git commit history.
   Stories (max Lv5 → +20), but the calc applied none of it and didn't offer the passive. It now
   appears in the Sage's Passive skills panel (capped at Lv5) and adds its FLEE to the stat/breakpoint/
   survivability readouts.
-
-### Changed
-
-- **The ASPD / cast / hit Breakpoints panel is now a highlighted accent card.** It was previously a
-  muted list that was easy to miss; it now sits in a gold-tinted card with a left accent stripe and a
-  ⚡ heading so the attack-speed and cast-speed breakpoints stand out at a glance.
-
-- **The Breakpoints Cast row now names the skill and level.** It shows which skill (and its level) the
-  cast time is for — e.g. "6.00s Storm Gust Lv 10 — instant cast at +40 DEX" — so it's clear what's
-  being cast at that speed.
-
-- **The Breakpoints Hit row now names the target.** The hit-chance breakpoint is computed against the
-  selected monster, so it now says which one — e.g. "92% vs Ferus [Fire]" (or "vs custom target") —
-  instead of leaving you to guess what the percentage is measured against.
-
-- **The reworks banner is now a Features list.** The banner that listed every per-class rework is now
-  a concise list of what the calculator can do — Payon Stories custom equipment and skills, all PS
-  class reworks (collapsed to one line that expands to the full per-class detail), the step-by-step
-  damage breakdown, the ASPD / cast / hit breakpoint calculator, disambiguated damage/hit/dodge per
-  monster, the survivability panel, Grand Cross recoil, build-vs-build comparison, the starter build
-  templates, importing builds from the jaludev calculator, and light/dark mode. Expanded by default so
-  the tools are easy to find.
 
 ## 2026-07-16
 
@@ -1271,12 +1313,14 @@ instead of release version. Dates are taken from actual git commit history.
   and, with it, the elemental damage modifier. The arrow is now imported into the Ammo slot (matched by
   name; arrows this server doesn't have are listed as unmapped). Arrows not on this server (Hunting,
   Elven) are reported instead of silently dropped.
+
 - **jaludev import: imported builds no longer force Neutral weapon element.** The import always wrote a
   weapon-element override of 0 (Neutral) even when jaludev's element dropdown was untouched. That
   override outranks the equipped arrow's element and the weapon's own innate element, so after an
   import, elemental arrows did nothing — Musical Strike (and every other weapon attack) was stuck
   Neutral even if you equipped a Fire Arrow by hand afterward. The override is now only carried when a
   non-Neutral element was actually selected on the jaludev side.
+
 - **Performing bonus now visible in the damage breakdown.** The +100 ratio-point Performing bonus for
   Musical Strike / Throw Arrow was folded silently into the Skill Ratio multiplier (the damage was
   right, but nothing showed the bonus was applied). The breakdown now shows the base skill ratio and a
@@ -1300,16 +1344,19 @@ instead of release version. Dates are taken from actual git commit history.
   Lv1, +3% AGI/DEX) was correctly applied to damage and to HIT/FLEE/ASPD, but the AGI/DEX totals in the
   Character panel were computed without it, so toggling the box looked like it did nothing. The stat
   readout now reflects it.
+
 - **Equipment/monster search now ranks by relevance.** Search results were a plain substring match in
   id order, so an item like **Legacy of Dragon** fell past the result limit for a broad query ("le")
   and only appeared once you'd typed enough ("leg") for it to be the sole match (which then auto-selected
   it). Results are now ranked — name starts with your text, then a word starts with it, then a plain
   substring — so the item you want surfaces at the top right away.
+
 - **Asura Strike: flat 1000 at all ranks, and it no longer ignores DEF.** The skill's fixed bonus is a
   constant **+1000** at every level (it was scaling `250 + 150×level`, i.e. 400→1000), and on Payon
   Stories Asura Strike now takes the target's **normal DEF** instead of ignoring it — a Knight of Abyss
   or other high-DEF target now reduces Asura damage as it should. Verified against the PSRO Monk Rework
   2026 document and the PS wiki.
+
 - **Spirit spheres now add damage for Monks/Champions.** A new **Spirit spheres** input (in the Buffs
   panel, for Monk/Champion) adds **+3 ATK per active sphere** to all their attacks — auto-attacks,
   combos, and Asura Strike, where it's amplified by the `×(8 + SP/10)` multiplier. Capped at 5 (Monk) /
@@ -1322,8 +1369,6 @@ instead of release version. Dates are taken from actual git commit history.
 - **Box consumables in the Consumables panel.** Three new toggles: **Box of Gloom** (casts Improve
   Concentration Lv1 — +3% AGI/DEX from base stats), **Box of Resentment** (+20 ATK), and **Box of
   Drowsiness** (+20 MATK). The ATK/MATK boxes stack on top of the flat ATK/MATK item fields.
-
-### Added
 
 - **Monster picker distinguishes same-name monsters and hides duplicates.** Monsters that share a name
   now show a tag so you can tell them apart — **Ferus [Fire]** vs **Ferus [Earth]**, **Deleter [Fire]
@@ -1340,6 +1385,7 @@ instead of release version. Dates are taken from actual git commit history.
   flagged NoDamage because the real hit is a delayed explosion. The guard now exempts skills the profile
   can actually compute (those with a damage ratio), so Venom Splasher (and Brandish Spear, Bomb)
   calculate real damage instead of showing zero.
+
 - **Armor / accessory / headgear bonus audit.** Audited all 1,431 non-weapon equipment pieces against
   the Payon Stories item database and corrected ~44 whose scripts didn't match their stated effects.
   Several headgear applied a bonus **backwards** — **Classic Hat**, **Gigantic Majestic Goat**
@@ -1350,6 +1396,7 @@ instead of release version. Dates are taken from actual git commit history.
   Hat / Red Wing Hat** refine ATK/MATK tiers, **3D Glasses**, **Baby Dragon Hat**, **Neo Valkyrie
   Shield**, **Devilring Hat**, **Fur Seal Hat**, and more). Resistance values corrected (**Angelic /
   Satanic Helm**, **Reginrev's Wings**, **Novice Shield**, **Pinwheel Hat** MaxHP/SP).
+
 - **Weapon bonus audit — magic weapons now apply their MATK bonus, and several other weapon bonuses
   corrected.** A sweep of all 708 weapons against the PS item database found weapons whose stated
   bonuses were missing from the script the calculator reads. Now fixed: **Book, Bible, Tablet, Girl's
@@ -1362,12 +1409,14 @@ instead of release version. Dates are taken from actual git commit history.
   version) MaxHP +400 → +200; **Nemesis**'s "Shadow elemental" bonus was applied to the Undead *race*
   instead of the Shadow *element*; and the rental **Refined Bloody Axe** (MATK +20% / −5% delay) and
   **Refined Hardcover Book** (flat MATK +100) had unrelated vanilla scripts.
+
 - **Dragon-slaying weapons now apply their refine bonuses.** Dragon Killer, Dragon Slayer, Gae Bolg,
   and Dragon Wing grant refine-conditional bonuses against Dragon monsters (+HIT, +% damage, crit, and
   Dragon resistance at +6 refine, doubled at +7) that the calculator wasn't applying — the reworked PS
   effects weren't present in the item script the engine reads. Now applied. Also corrected two base
   bonuses surfaced along the way: **Dragon Slayer**'s Dragon damage bonus (was 15%, PS is 20%) and
   **Gae Bolg**'s missing 20% Dragon damage bonus.
+
 - **Venom Splasher reappears in the skill picker.** Venom Splasher — along with Brandish Spear and
   Bomb (Acid Demonstration) — is flagged "no damage" in the item database because its real hit is a
   delayed explosion, so a filter meant to hide pure support skills was hiding it too. These skills are
@@ -1384,8 +1433,10 @@ instead of release version. Dates are taken from actual git commit history.
   the recoil. **Part 2** is the fixed casting cost of 20% of your current HP, which ignores all
   reductions. The readout shows the total HP lost per cast and whether you survive. Holy-element
   (Angeling) armour negates Part 1 entirely; the 20% HP cost always applies.
+
 - **Faith (Crusader) is now selectable** under Passive skills. Its Holy resistance (up to −50% at
   Lv 10) and +MaxHP now factor into the Grand Cross recoil.
+
 - **Survivability panel.** Calculate against a monster and a new readout shows how hard it hits *you*:
   the damage its basic attack (and any elemental attack skills) deals through your DEF/MDEF and
   reduction gear, hits to down you, effective HP, damage mitigated, and your dodge chance plus the FLEE
@@ -1410,29 +1461,36 @@ instead of release version. Dates are taken from actual git commit history.
   skill with a built-in +20 crit rate, but an internal skill-id mismatch meant that bonus was never
   being added — Sharp Shooting was computing an ordinary critical rate. It now correctly includes the
   +20.
+
 - **Shield Chain now applies its 20% accuracy bonus.** Like Holy Cross, Shield Chain lands with a
   built-in +20% hit rate; the calculator was showing normal accuracy for it. Fixed.
+
 - **Pierce now hits by target size.** Pierce strikes once against Small targets, twice against Medium,
   and three times against Large — the calculator was always applying three hits, overstating its
   damage against Small and Medium enemies by up to 3×.
+
 - **Holy Cross now applies its 20% accuracy bonus.** Holy Cross has a built-in 20% accuracy bonus,
   but the calculator was showing the same hit chance as a normal attack. The bonus is now applied to
   the hit rate (×1.2 before the 5–100% clamp), so Holy Cross lands more reliably against high-FLEE
   targets than a plain melee hit — matching in-game behaviour.
+
 - **Demi-Human resistance now applies defensively.** Cards such as **Thara Frog**
   (`bSubRace,RC_DemiPlayer`) were stored under a race key nothing checked, so their 30% reduction
   wasn't being applied to incoming Demi-Human damage — or the Grand Cross recoil. Composite race
   resistances now fan out to their constituent races, so the reduction lands correctly.
+
 - **Grand Cross now ignores the target's DEF, MDEF and size.** The PS wiki formula is simply
   `(ATK + MATK) × (100% + 40×lvl%)` with no defense term, and in-game Grand Cross ignores the target's
   defense (confirmed against RateMyServer and live damage on Knight of Abyss). The calculator was
   subtracting the target's hard DEF (physical half) and hard MDEF (magic half) and applying the weapon
   size penalty — undershooting by 2–3× against defended targets. Grand Cross now ignores those; only
   the small VIT/INT-based soft DEF/MDEF still applies.
+
 - **Monster basic attacks are treated as Neutral.** A monster's normal melee is Neutral element, not
   its (defensive) property — which is why Raydric and Ghostring tank most monsters, including
   non-Neutral ones. Incoming basic-attack damage now uses Neutral, so Neutral-resist gear correctly
   reduces it; elemental *skills* still carry their own element.
+
 - **Monster skill data is now Payon Stories-accurate.** The list of which skills each monster casts
   (and their elements) now comes from Payon Stories' own data instead of a vanilla baseline — so, e.g.,
   Baphomet shows its real kit and Knight of Abyss its Shadow-element attack.
@@ -1446,6 +1504,7 @@ instead of release version. Dates are taken from actual git commit history.
   the equipment matched by name to this server's item database. Anything the jaludev calculator names
   differently or doesn't have is listed so you can set it manually. Note that the jaludev calculator
   is no longer kept up to date, so your damage here may differ from what it showed.
+
 - **Build-vs-build comparison.** The results panel has a new **Compare builds** section: click
   **Pin** to save the current build as a column, then tweak your gear, cards, stats or skill and pin
   again. Each pinned build is compared side by side with your current one across **DPS, damage per
@@ -1453,6 +1512,7 @@ instead of release version. Dates are taken from actual git commit history.
   the top-DPS build is flagged, and pinned columns show a ▲/▼ delta versus the current build.
   **Load** restores a pinned build into the editor (and recomputes it) and **Clear all** resets the
   comparison.
+
 - **Talisman of Holy Protection** added to the item database — the accessory (All Stats +1, Holy
   Damage −7%) was missing, so it can now be equipped in a build.
 
@@ -1462,9 +1522,11 @@ instead of release version. Dates are taken from actual git commit history.
   Bard/Dancer, Alchemist, Merchant and Ninja reworks (and Grand Cross under Crusader, plus the Monk
   additions) that had shipped but weren't listed, and corrects the Frost Nova wording to
   `175+15×lv` (i.e. 190% at Lv 1), max Lv 5.
+
 - **Grand Cross breakdown labelled as "waves".** The damage panel now shows **Per-Wave Damage**
   and **Grand Cross Total (3 waves)** instead of "hits", matching how the skill's three cross
   ticks are described. Wording only — the damage is unchanged.
+
 - **Clearer damage breakdown.** Steps that don't change anything (e.g. a bypassed "Card Fix" on
   Grand Cross, which ignores cards) are hidden, and every ×-multiplier now names the step it feeds
   into (e.g. "× 3 → Grand Cross Total (3 waves)"). This removes the confusion where the 3-wave ×3
@@ -1480,20 +1542,6 @@ instead of release version. Dates are taken from actual git commit history.
   for Knight/Lord Knight/Crusader/Paladin. While mounted, ASPD takes the riding penalty (reduced one
   rank per Cavalier Mastery level, gone at Lv5) and Spear Mastery uses its higher mounted ATK value.
 
-### Fixed
-
-- **Proc cards (e.g. Bonechewer) no longer double-count.** An `autobonus` script is a *proc* — its
-  bonus should only apply when it triggers (or via the "Cards always proc" toggle). The parser was
-  also reading the `bonus` lines *inside* the autobonus block as always-on gear bonuses, so
-  Bonechewer's `+5 Crit / +50% Crit damage` applied once just from equipping it, and again when
-  "always proc" was enabled. The inner effects are now excluded from the base parse and only apply
-  through the proc path.
-- **Triple Attack (Monk) — level cap and crit.** It was selectable up to level 10 even though the PS
-  rework caps it at **5** (140/180/220/260/300%); the picker and passive list now cap it at 5. It
-  also couldn't crit when selected as an active skill — the "can crit while Critical Explosion / Fury
-  is active" rule was only wired into the auto-attack proc path, not the active-skill path. Selecting
-  Triple Attack with Fury up now crits correctly (and still can't crit without Fury).
-
 ### Changed
 
 - **Skill picker now shows only real Payon Stories skills.** The damage-skill search was listing
@@ -1505,6 +1553,19 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Proc cards (e.g. Bonechewer) no longer double-count.** An `autobonus` script is a *proc* — its
+  bonus should only apply when it triggers (or via the "Cards always proc" toggle). The parser was
+  also reading the `bonus` lines *inside* the autobonus block as always-on gear bonuses, so
+  Bonechewer's `+5 Crit / +50% Crit damage` applied once just from equipping it, and again when
+  "always proc" was enabled. The inner effects are now excluded from the base parse and only apply
+  through the proc path.
+
+- **Triple Attack (Monk) — level cap and crit.** It was selectable up to level 10 even though the PS
+  rework caps it at **5** (140/180/220/260/300%); the picker and passive list now cap it at 5. It
+  also couldn't crit when selected as an active skill — the "can crit while Critical Explosion / Fury
+  is active" rule was only wired into the auto-attack proc path, not the active-skill path. Selecting
+  Triple Attack with Fury up now crits correctly (and still can't crit without Fury).
+
 - **Two magic-skill ratio corrections.** A sweep of exposed skills not covered by the earlier
   per-class audit turned up two Wizard/Ninja magic-ratio bugs:
   - **Jupitel Thunder** dealt roughly **11× too much** — the per-hit ratio was `100 + 100×lv` *and*
@@ -1515,10 +1576,12 @@ instead of release version. Dates are taken from actual git commit history.
   - **Storm Gust** used the renewal-style `100×(lv+2)` as a single lumped hit (1200% @Lv10). It's now
     modeled the way it actually works — **`100 + 40×lv`% MATK per hit** (140%→500%) across its **10
     hits** vs a target that stays in the field, so Lv10 totals 5000% instead of 1200%.
+
 - **Some Misc-type skills briefly returned 0 damage.** A dispatch guard added earlier the same day
   was too broad and routed BF_MISC skills that PS treats as normal ATK-ratio hits (Acid Terror,
   Demonstration, Venom Splasher, Ground Drift, Counter Attack, Bull's Eye, Magical Bullet) to
   "not implemented." The guard is now ratio-aware and only catches truly unported skills.
+
 - **Refine ATK was suppressed on the wrong skills.** Hercules excludes the post-DEF refine bonus
   (`atk2`) for **Occult Impaction** (Investigate) and **Asura Strike** only, but the suppression list
   used stale skill ids that actually pointed at **Triple Attack** and **Body Relocation**. As a result
@@ -1531,21 +1594,17 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-07-09
 
-### Changed
-
-- **Shorter share URLs** — build links now rename their state keys to short append-only codes
-  before compressing (the `z3_` format), cutting a typical `?b=` param roughly in half. Existing
-  links (`z2_`/`z1_`/older uncompressed) still open exactly as before.
-
 ### Added
 
 - **"Performing" toggle for Bard/Dancer** — a new target-panel checkbox. While a song or dance is
   active, Payon Stories grants Musical Strike and Throw Arrow a flat **+100 ratio points** (Lv1
   300%, Lv5 400%). Ticking it adds that bonus to those two skills only; other skills are unaffected.
+
 - **Holy Light LUK proc** — Payon Stories gives Holy Light a **LUK% chance to deal +60% damage**
   (×1.6). This is now modeled as a probability mixture, so the average damage folds in the proc
   (base × (1 + 0.6 × LUK%)) and the damage range spans a non-proc roll up to a boosted roll. LUK ≥ 100
   makes the bonus guaranteed.
+
 - **Offensive Heal ("heal bomb")** — selecting **Heal** (`AL_HEAL`) now computes its damage against
   Undead-property targets instead of treating it as a generic 100% MATK spell. Damage = **50% of the
   heal value** (`floor((BaseLv + INT) / 8) × (4 + 8 × SkillLv)`) as Holy, modified by the target's
@@ -1554,15 +1613,23 @@ instead of release version. Dates are taken from actual git commit history.
   `bSkillHeal` (e.g. Sacred Saints Robe, Gyokuto, heal robes), which were previously parsed and
   dropped. The new **Purifying Ring** accessory, combined with a **Rosary**, raises the bomb to
   **100%**. Non-Undead targets take no damage (Heal restores their HP).
+
 - **Elemental Change (Sage) in the target panel** — a new dropdown that overrides the target's
   defensive element to Water, Earth, Fire, or Wind at level 1 (the Sage `SA_ELEMENT*` skills — e.g.
   Water 1). It has no effect on MVP/boss monsters, matching the game. Useful for seeing how much more
   (or less) your element deals after changing a monster's property.
+
 - **Turn Undead now shows its instant-kill success chance** and folds it into the kill metrics.
   The chance uses the Payon Stories rework formula `[20×SkillLv + 3×LUK + INT + BaseLv +
   (1−HP/MaxHP)×200] ÷ 10 %` (halved if base INT < 40). "Casts to kill" and "Time to kill" now
   reflect the instant-kill probability (with the fail-damage chip as a fallback), instead of only
   counting the failure damage.
+
+### Changed
+
+- **Shorter share URLs** — build links now rename their state keys to short append-only codes
+  before compressing (the `z3_` format), cutting a typical `?b=` param roughly in half. Existing
+  links (`z2_`/`z1_`/older uncompressed) still open exactly as before.
 
 ### Fixed
 
@@ -1574,23 +1641,49 @@ instead of release version. Dates are taken from actual git commit history.
   physical DEF instead of MDEF, and (c) applied the ratio *before* DEF, leaving masteries/refine
   un-amplified. That last point matters most against Undead/Demon targets, where Demon Bane's flat
   bonus is now correctly multiplied by the ratio.
+
 - **Grand Cross now deals its full 3-hit damage** — the skill places a 0.9s cross that ticks every
   0.3s, so a single target takes **3 hits** (a fixed count, not stay-time-dependent), but the calc
   was only computing one tick. The breakdown now shows the per-hit value and the **×3 total**, folded
   into DPS. (The per-cell reduction when multiple monsters stack on one cell isn't modeled — this is
   the single-target case.)
+
 - **Improve Concentration no longer boosts card-combo stats** — Attention Concentrate's AGI/DEX %
   correctly excludes direct card bonuses (and buffs), but *card combos* (e.g. the Munak/Bongun/Yao
   Jun +1-all-stats set, or the Thief +4 AGI card set) were leaking their AGI/DEX into the multiplied
   base. Card-combo stats are now excluded like any other card bonus; equipment-set combos (e.g.
   Dragon Vest + Manteau) stay factored in, matching the wiki (base stats, job bonus, Owl's Eye, and
   armor are included; cards and buffs are not).
+
 - **Arrow Vulcan now scales with level** — the Clown/Gypsy skill had no damage ratio defined, so it
   fell back to a flat **100% at every level**. It now deals the correct **300%/400%/…/1200% ATK**
   for Lv1–10 (`200 + 100×SkillLevel`), matching the in-game skill description. Musical Strike was
   already correct (200%→300% for Lv1–5, the Payon Stories values).
 
 ## 2026-07-08
+
+### Added
+
+- **Trick Arrow and Quick Step are now selectable** — these Rogue PS-custom skills had damage ratios
+  defined but couldn't be picked or calculated, because the skill lookup only read the vanilla skill
+  database. The calculator now resolves PS-custom active skills, so both appear in the damage-skill
+  picker and compute correctly: **Trick Arrow** (200% ATK over 2 hits, at bow range) and **Quick
+  Step** (10% ATK). This groundwork will let other PS-custom skills be surfaced the same way.
+
+- **Breaking Cloak (opener) toggle** — the Assassin's Cloak initiative bonus: breaking Cloak (Lv3+)
+  with an **auto-attack** makes that opening hit deal **×2 damage**, or with **Sonic Blow** deals
+  **+10%**. Enable it in the target-modifiers panel. Because it's a one-time opener, it scales the
+  shown per-hit damage but not sustained DPS; skills other than auto-attack and Sonic Blow are
+  unaffected.
+
+- **Venom Dust target toggle** — the Assassin's Venom Dust applies a "Mailbreaker" debuff that makes
+  a target standing on it take **+10% physical and magical damage** for 5 seconds. Enable it in the
+  target-modifiers panel to add the bonus to all damage branches. Unlike Provoke and Quagmire, it
+  works on **MVP/boss** monsters, and it stacks multiplicatively with Lex Aeterna.
+
+- **Ring of Peace** (Payon Stories custom accessory) — MaxHP +100, MaxSP +10, HP & SP recovery
+  rates +5%. Level 40, all jobs. A survivability accessory; no effect on outgoing damage. From
+  [the wiki](https://wiki.payonstories.com/Ring_of_Peace).
 
 ### Fixed
 
@@ -1599,17 +1692,21 @@ instead of release version. Dates are taken from actual git commit history.
   caster's HP for a fixed hit of `STR×40 + HP×(8%×SkillLevel)` (Neutral, always hits, DEF and cards
   still apply). It now computes that, using current HP when set (otherwise full HP). The Mirror
   Image damage bonus isn't modeled.
+
 - **Bakuenryu (Exploding Dragon) now scales with level** — the Ninja spell had no damage ratio
   defined, so it fell back to a flat 100%×3 hits (300% at every level). It now deals the correct
   **300%/450%/600%/750%/900% MATK** for Lv1–5.
+
 - **Refine-scaling item bonuses now apply the full amount** — item scripts that compute a bonus as
   an expression (e.g. `getrefine()*5` for "+5% per refine") were being silently capped at **+1**,
   because the parser only understood plain integers and fell back to a boolean evaluator for
   anything with arithmetic. Such bonuses now evaluate correctly, so every "+N% per refine"-style
   item (and any bonus using arithmetic) applies its real value.
+
 - **Stone Discus corrected to the Crusader rework** — it was granting +3% per refine to **both**
   Shield Boomerang and Shield Charge; the rework makes it **+5% per refine to Shield Boomerang
   only**. (Combined with the fix above, it now actually scales with refine.)
+
 - **Knight fixes (Blade Mastery, Counter Attack, Bowling Bash)** — three bugs found while auditing
   the Knight patch:
   - **Blade Mastery on one-handed swords** — the rework merges Sword Mastery into Blade Mastery,
@@ -1621,22 +1718,27 @@ instead of release version. Dates are taken from actual git commit history.
     Endure). It now correctly treats Counter Attack as a guaranteed critical.
   - **Bowling Bash damage scales with level** — it was hard-coded to a flat 400% (correct only at
     level 10); it now scales **100 + 30×level** (130% at Lv1 → 400% at Lv10), matching the wiki.
+
 - **Holy Strike fixed to a Priest skill and made selectable** — this Battle Priest skill (a Holy-
   property melee proc dealing `[100 + STR + (1 + BaseLevel)]% ATK`) was tagged with the wrong job
   (Knight/Lord Knight) and couldn't be computed. Corrected its class to Priest/High Priest and
   surfaced it in the damage-skill picker so its per-hit damage can be checked.
+
 - **Magnus Exorcismus hits more targets for full damage** — per the Acolyte/Priest rework, it now
   deals 100% MATK per hit to **Ghost-element and Undead-race** monsters as well as Undead-element
   and Demon-race (previously only Undead element + Demon race got full damage; others got 50%).
+
 - **Bard/Clown ASPD collapsed when a Musical Instrument was equipped** — the job ASPD table was
   missing the `MusicalInstrument` weapon type for Bard and Clown, so equipping an instrument fell
   through to the very-slow default and dragged ASPD down to ~130. Added the instrument base (575,
   mirroring the Dancer/Gypsy Whip). Also backfilled the Unarmed/Knife/Bow bases for Dancer and
   Gypsy, which had the same gap for non-Whip weapons.
+
 - **Rolling Stone (Payon Stories custom shotgun) had a broken duplicate definition** — a stray
   second entry with a bad weapon type (`W_SHOTGUN`) and no equip slot was shadowing the correct
   one, so a Gunslinger equipping it lost all ASPD. Removed the duplicate; the shotgun now equips
   and attacks at normal speed.
+
 - **Enchant Poison capped at level 5 (Payon Stories)** — the Assassin rework reduces Enchant Poison
   to max level 5, but the calculator allowed level 10, letting its passive damage bonus vs
   Poison-element monsters reach +20% instead of the intended **+10%**. The skill now caps at 5 (and
@@ -1645,56 +1747,42 @@ instead of release version. Dates are taken from actual git commit history.
   Envenom's weapon element, and the new Sonic Blow / Grimtooth critical-hit rules (double crit
   chance via Katar, bypass DEF, excluded from Katar Mastery's +50% crit damage) were all verified
   correct against the Assassin Rework document.
+
 - **Fire Pillar now ignores 50% of MDEF instead of all of it** — Fire Pillar was piercing 100% of
   the target's Magic Defense (vanilla behavior), because its "ignore defense" flag caused the whole
   MDEF step to be skipped. Payon Stories lowered it to **50%**, so it now applies a 50% ignore like
   its rework specifies. Its level cap (5) and hit count (2 + 2×level) were already correct.
   Relatedly, the 50% MDEF ignore on Fire Pillar, Napalm Vulcan and Soul Strike (Lv10) now reduces
   **both hard and soft MDEF** (it was only reducing hard MDEF before), matching the rework docs.
+
 - **Soul Strike's MDEF ignore now requires level 10, and Volcano grants its ATK bonus** — per the
   Sage Rework, Soul Strike's 50% MDEF ignore only applies once level 10 is learned, so the
   calculator now grants it only when Soul Strike is set to level 10 (lower levels no longer get it).
   Separately, the Volcano land-spell buff was applying its +MATK% and Fire-damage% but not its flat
   **+10/20/30 ATK** (Lv1/2/3) — that now feeds physical damage for anyone standing in Volcano.
+
 - **Holy Light damage corrected to the current Payon Stories value** — the calculator used an older
   base-level-scaling formula (~200% MATK at base 99); PS now deals a flat **250% MATK**. Also fixed
   the **Cookie card**, which boosts Holy Light by **20%** on PS (the calculator had the vanilla
   10%). Vanilla server profile is unchanged (125% MATK, +10% Cookie).
+
 - **Turn Undead now uses its real damage formula** — it was being treated as a generic 100%-MATK
   magic skill. Turn Undead's damage doesn't scale with MATK at all; on a failed instant-kill it
   deals a fixed Holy hit of `(BaseLevel + INT + SkillLevel×10) × 3 × (1 + LUK×3/200)`, ignoring
   DEF and cards, with the Holy element multiplier vs the target still applied. (The instant-kill
   roll itself isn't modeled — the calculator shows the guaranteed damage floor.)
+
 - **Wizard/Mage multi-hit magic damage corrected** — three skills were over-scaling because the
   engine applied a `+k×level` bonus to each hit where Payon Stories deals a flat 100% MATK per hit:
   Napalm Vulcan (was up to 2× too high), Soul Strike (Undead bonus was baked into the base and hit
   every target), and Meteor Storm (was several times too high). Each now matches the wiki
   (100% MATK per hit; Soul Strike keeps its +5%×level vs-Undead bonus on top). Also fixed a crash
   where **Soul Strike against Undead monsters** threw an error instead of calculating.
+
 - **Skill picker respects the Payon Stories level cap** — skills that PS caps below vanilla (Frost
   Nova, Fire Pillar, Sightrasher, Amplify Magic Power, Spear Stab — all max 5 on PS) were still
   selectable up to their vanilla max (10) in the level selector, even though the engine clamped the
   effective level during the calc. The picker now shows the PS-capped max level.
-
-### Added
-
-- **Trick Arrow and Quick Step are now selectable** — these Rogue PS-custom skills had damage ratios
-  defined but couldn't be picked or calculated, because the skill lookup only read the vanilla skill
-  database. The calculator now resolves PS-custom active skills, so both appear in the damage-skill
-  picker and compute correctly: **Trick Arrow** (200% ATK over 2 hits, at bow range) and **Quick
-  Step** (10% ATK). This groundwork will let other PS-custom skills be surfaced the same way.
-- **Breaking Cloak (opener) toggle** — the Assassin's Cloak initiative bonus: breaking Cloak (Lv3+)
-  with an **auto-attack** makes that opening hit deal **×2 damage**, or with **Sonic Blow** deals
-  **+10%**. Enable it in the target-modifiers panel. Because it's a one-time opener, it scales the
-  shown per-hit damage but not sustained DPS; skills other than auto-attack and Sonic Blow are
-  unaffected.
-- **Venom Dust target toggle** — the Assassin's Venom Dust applies a "Mailbreaker" debuff that makes
-  a target standing on it take **+10% physical and magical damage** for 5 seconds. Enable it in the
-  target-modifiers panel to add the bonus to all damage branches. Unlike Provoke and Quagmire, it
-  works on **MVP/boss** monsters, and it stacks multiplicatively with Lex Aeterna.
-- **Ring of Peace** (Payon Stories custom accessory) — MaxHP +100, MaxSP +10, HP & SP recovery
-  rates +5%. Level 40, all jobs. A survivability accessory; no effect on outgoing damage. From
-  [the wiki](https://wiki.payonstories.com/Ring_of_Peace).
 
 ## 2026-07-07
 
@@ -1703,16 +1791,19 @@ instead of release version. Dates are taken from actual git commit history.
 - **The share URL only updates on Save or Copy-link** — the address bar no longer rewrites itself on
   every edit; it's updated only when you save a build or copy the share link, so the URL stays stable
   while you tweak.
+
 - **Edits survive refresh (auto-draft) + an unsaved-changes dot** — your in-progress build is now
   autosaved to the browser tab so a refresh keeps unsaved edits, even though the URL doesn't change.
   A freshly-opened shared link still shows that build (not your old draft). An **unsaved-changes dot**
   appears on the Save / Load button (and the mobile menu) until you save the build or copy the share
   link. "Start over" clears the draft. The draft is per-tab and cleared when the tab closes; use Save
   to keep a build permanently.
+
 - **"Unofficial fan tool" disclaimer** — the title now marks the app as an unofficial, fan-made tool,
   with a fuller disclaimer in the title's info tooltip and the footer (not affiliated with or
   maintained by the Payon Stories staff; numbers may be inaccurate — verify in-game). Link-embed
   titles/descriptions say the same.
+
 - **Shorter share links** — build-share URLs are now ~40% shorter. Before compressing, the shared
   state drops every value that equals its default and fields that are re-derived on load (job name,
   skill max-level, an unused custom target in monster mode, the default server, …), under a new
@@ -1725,30 +1816,37 @@ instead of release version. Dates are taken from actual git commit history.
   weapon and then switched back to picking real cards, reloading the build wrongly reselected the
   Wildcard tab (leftover wildcard data was mistaken for wildcard mode). A slot with real cards now
   loads in card mode, and switching back to "Cards" clears the stale wildcard data.
+
 - **Quagmire's effect is now visible** — Quagmire only lowers the target's flee (→ your hit chance),
   never damage, so it looked like it "did nothing" when your hit was already at the 100% cap. The
   Target panel now shows the monster's own **Flee** and how Quagmire reduces it (e.g. `116 → 91`),
   and a note appears under the Quagmire selector when your hit is already 100% (so it has no further
   effect). The mechanic itself was already correct.
+
 - **Desperado damage shown as a range** — Desperado's `100+20×lv` is *per hit* and it sprays a
   variable number of shots (in-game 0–10, ~6 average); the calc treated it as a single hit. It now
   shows the damage as a **1–10-hit range** (the damage summary's min = a single shot, max = all 10),
   reflecting the real spread instead of a single average. Per
   [the wiki](https://wiki.payonstories.com/Desperado).
+
 - **Tranq Shot damage gated to Demi-Human/Brute** — Tranq Shot (formerly Bull's Eye) deals 100%
   damage only to Demi-Human and Brute monsters on PS (and "a little bit" — approximated as 10% —
   to others); the calc was doing 100% to every race. Its main purpose is the Sleep chance. Per
   [the wiki](https://wiki.payonstories.com/Tranq_Shot).
+
 - **Increasing Accuracy removed on PS** — the skill was folded into Single Action on Payon Stories,
   so its buff toggle is now hidden on PS and has no effect there. Still available on vanilla.
+
 - **Soul Bullet hits 3×** — Magical Bullet / Soul Bullet was calculated as a single hit, but on
   Payon Stories it fires **3 times** (like Triple Action), so its damage was undercounted by ~3×.
   It now applies 3 hits. Per [the wiki](https://wiki.payonstories.com/Soul_Bullet).
+
 - **Gunslinger Single Action HIT corrected** — Single Action was giving +2 HIT per level, but on
   Payon Stories it grants **+4 HIT per level** (+40 at Lv10) per
   [the wiki](https://wiki.payonstories.com/Single_Action). Fixed, so accuracy — and therefore hit
   chance and effective DPS — is no longer undercounted for gun builds. Its ASPD bonus (+1% per two
   levels) was already correct. Vanilla is unchanged (+2/lv).
+
 - **Combat stats now show flat gear ATK, plus a HIT stat** — flat weapon ATK from gear (`bAtk`, e.g.
   PS Bradium Ring's +10) was used in the damage pipeline but left out of the Character panel's ATK
   readout. It's now shown as part of the equipment-ATK bonus, the `+X` in the in-game-style
@@ -1756,32 +1854,40 @@ instead of release version. Dates are taken from actual git commit history.
   are summed into that `+`). Added a **HIT** stat to the combat readout too — it was missing
   entirely, so gear HIT bonuses (e.g. Bradium Ring's +5) weren't visible anywhere. (MATK already
   reflects gear MATK after the `bMatk` fix.)
+
 - **Gunslinger shotgun masteries now work** — the shotgun skills (Dust, Full Buster, Spread Attack)
   weren't shown in the passive-skill panel, so their Lv10 mastery bonuses could never be enabled.
   They're now selectable, and **Dust's +1 ATK per STR** (with a Shotgun equipped) is applied to ATK,
   as is the 7% Neutral resistance (Shotgun / Grenade Launcher). Per
   [wiki.payonstories.com/Dust](https://wiki.payonstories.com/Dust). Verified: a STR-99 Gunslinger
   with a Shotgun gains +STR ATK at Dust 10, and nothing with a Revolver.
+
 - **Crit-vs-race cards now work** — `bCriticalAddRace` (+CRIT rate against a specific race, e.g.
   crit-vs-Demi-Human gear) was defined with no effect. It now raises crit rate against matching
   targets (verified: 10% → 30% vs Demi-Human with a +20 card, unchanged vs other races).
+
 - **Monster-specific damage cards now work** — `bAddDamageClass` (+% physical damage vs one specific
   monster, e.g. cards that boost damage against a particular MVP) had a duplicate, effect-less
   definition overriding it, so it did nothing. Now applied when the target is that monster.
+
 - **Gear MATK (`bMatk`) now applies** — flat MATK from gear (MATK staves, magic-boosting cards —
   ~150 items) was silently dropped: `bMatk` was defined with no engine field and never folded into
   the MATK total, so magic damage from MATK gear was undercounted. It now adds to MATK.
+
 - **Race "ignore DEF" cards now work** — `bIgnoreDefRace` (physical damage ignores a whole race's
   DEF — 40+ Plant/Dragon/Demi-Human/non-boss "killer" cards) was in the bonus table but wired to
   nothing, so those cards did nothing. It now ignores 100% of the matching race's hard DEF.
+
 - **High Wizard Card now works (magic MDEF ignore)** — `bIgnoreMdefRace` (High Wizard Card: magic
   ignores 100% of non-boss MDEF) was parsed but never routed, so the card did nothing. It's now
   wired into the magic defense step. Verified: against a MDEF-40 non-boss target, magic damage goes
   from ×60% to ×100%.
+
 - **Drake Card now works** — `bNoSizeFix` (Drake Card's "damage ignores size") was parsed but never
   routed into the damage engine, so equipping it did nothing. It now correctly removes the weapon's
   size penalty. Verified: a dagger vs a Large monster goes from a 50% size fix to 100%. (Same class
   of bug as the monster-family "Bane" cards — a real bonus that was silently dropped.)
+
 - **Gunslinger can use Berserk Potion** — the ASPD-potion picker capped Gunslinger at Awakening
   Potion, but Gunslinger is on Berserk Potion's usable-class list even in vanilla (per
   `item_db_usable`). Gunslinger now offers the full Concentration / Awakening / Berserk range. (Ninja
@@ -1796,20 +1902,24 @@ instead of release version. Dates are taken from actual git commit history.
   the in-game status window. It now displays the same two-part value as in-game (e.g. `420+35`, where
   `+35` is a +7 level-3 weapon's refine ATK). Damage was already correct — this was a display-only
   gap in the stat panel.
+
 - **Skill damage bonuses (`bSkillAtk`) no longer double-counted** — cards/items that boost a specific
   skill's damage (e.g. an Acid Terror +30% card, or Yser Card's Backstab/Raid +10%) were applied
   **twice** in the weapon-skill pipeline — once inside the skill-ratio step and again right after —
   inflating those skills. They're now applied once. Example: a bow Rogue's Acid Terror dropped from
   an inflated 3049 to the correct 2333. Skills without a `bSkillAtk` bonus are unaffected.
+
 - **Acid Terror ignores cards** — `AM_ACIDTERROR` (and other `IgnoreCards` skills) now correctly
   bypass the Card Fix stage, so card damage modifiers (bAddRace/bAddEle/bAddSize/atk-element and the
   target's card-based resists) don't apply. Flat-ATK cards (Andre, etc.) still count, as in-game.
+
 - **Venom Splasher (and other offensive skills) now selectable** — the skill picker's
   "damage-dealing only" filter keyed off the skill's attack type, but the skill DB labels everything
   that isn't a plain weapon/magic hit as "Misc" — so genuinely offensive skills like Venom Splasher
   and Acid Terror were hidden alongside the buffs and masteries. The picker now also keeps any skill
   the active server profile has a real damage formula for, so on Payon Stories these appear and
   calculate correctly (Venom Splasher = `500 + 50×lv + 30×Poison-React-lv`%). Vanilla is unchanged.
+
 - **Monster-family "Bane" cards now apply** — Orc Lady, Goblin Leader, Kobold Leader, Lava Golem
   (and other `bAddRace2` cards) were doing nothing, because the calculator had no monster-family
   data and silently dropped the bonus. The engine now knows each mob's racial group (RC2) and
@@ -1827,9 +1937,11 @@ instead of release version. Dates are taken from actual git commit history.
   **average time to kill** (HP ÷ estimated DPS, so it folds in ASPD, crit mix and procs — cast +
   after-cast delay for skills). Monster mode only (needs the mob's HP); uses the combined total for
   dual-wield.
+
 - **"Flee 95%" in the monster stats** — the monster stat grid now includes the FLEE needed to dodge
   the selected mob 95% of the time (`mob level + DEX + 75`, since incoming hit% floors at 5%).
   Soft-flee only — Perfect Dodge and the multi-mob FLEE penalty are noted in the tooltip.
+
 - **Wildcard "Type" cards** — the weapon wildcard mix gains a fourth category, **Type**, for
   monster-family "Bane" cards (Orc / Goblin / Kobold / Golem-Bane, etc. — +30% physical damage to
   that family via `bAddRace2`). It applies as its own card-fix multiplier alongside Race / Size /
@@ -1842,10 +1954,12 @@ instead of release version. Dates are taken from actual git commit history.
   desktop-sized padding on phones, leaving a cramped, off-center column with wasted margins. On small
   screens the panels now use tighter padding and full width, the monster-stat grid drops to two
   columns, and a stray-overflow guard keeps the page from shifting sideways.
+
 - **Modals scroll on iPhone** — the Changelog / Saved builds / Results modals could clip their
   content on small screens and refuse to scroll (a flexbox `min-height` trap, plus `vh` counting
   iOS Safari's address bar). The modal body now scrolls properly and the height tracks the visible
   viewport (`dvh`).
+
 - **Investigate / def-ratio damage now keeps its range** — `MO_INVESTIGATE` and def-ratio
   (`bDefRatioAtk`) cards scale damage by the target's *soft DEF*, which is random over a range on
   high-VIT targets. The Defense Fix step was folding that into a single average factor, collapsing
@@ -1853,6 +1967,7 @@ instead of release version. Dates are taken from actual git commit history.
   min–max (e.g. Investigate vs a VIT 100 target now reads 5805–6870 instead of a flat ~6337).
   Targets with no soft-DEF variance (low VIT) still resolve to a single value, so normal attacks
   are unchanged.
+
 - **Demon Bane matches Payon Stories** — Demon Bane's ATK bonus now uses the PS-reworked values
   ([wiki.payonstories.com/Demon_Bane](https://wiki.payonstories.com/Demon_Bane)): `+5/lv` plus the
   `(1+BaseLv)/20` per-level base term → **+100 ATK at Lv10 / base 99** vs Undead-element or
@@ -1875,25 +1990,32 @@ instead of release version. Dates are taken from actual git commit history.
 - **Link preview / embed tags** — the page now has a descriptive title and Open Graph / Twitter
   card meta tags, so sharing the URL (Discord, Twitter/X, etc.) shows a real title and description
   instead of a bare link.
+
 - **Favicons & app icons** — added a proper favicon (SVG + 16/32 PNG + .ico fallback), an
   iOS/Android home-screen icon and web manifest, and a logo image on the link embed. The
   top-left brand mark now shows the app logo instead of a placeholder glyph.
+
 - **Manual stat bonuses** — a new section in the Base stats panel with STR/AGI/VIT/INT/DEX/LUK
   inputs for flat additions on top of allocated stats (for any source the calculator doesn't
   otherwise model). They fold into each stat's bold total (shown as a dim `+N` chip) and into the
   damage calculation; negative values are allowed. Backed by the build's existing `bonus_stats`
   field, which was already applied server-side but had no UI.
+
 - **Monster stats in the target panel** — selecting a monster now shows a compact stat grid
   (HP, Race, Element + level, Size, DEF, MDEF, ATK range, and STR/AGI/VIT/INT/DEX/LUK) beneath the
   name, plus a "· Boss" tag for boss-protocol monsters. Data comes from the existing mob endpoint.
+
 - **Max all / Reset passives** — the Passive skills panel gets "Max all" and "Reset" buttons that
   set every listed passive to its max level (or 0) in one click.
+
 - **Two more Bard songs** — "A Whistle" (+Flee / Perfect Dodge) and "The Apple of Idun" (+Max HP)
   added to the Bard / Dancer songs list. Both are already modeled in the status calculator, so they
   show up in the combat-stat readout (they're defensive/utility — they don't change outgoing damage).
+
 - **Auto Berserk (self buff)** — Swordman-line jobs (Swordman / Knight / Crusader / Lord Knight /
   Paladin) get an "Auto Berserk" toggle under Buffs → Self buffs. It models the self-cast Provoke
   Lv10 the skill grants while HP < 25%: +32% base ATK (2 + 3×lv) and −55% self-DEF (5 + 5×lv).
+
 - **Provoke (target debuff)** — a selectable Lv 1–10 Provoke in the target debuff panel, reducing
   the target's DEF by `5 + 5×lv`% (−55% at Lv 10; scales both hard and soft DEF). No effect on Boss
   monsters. Kept on a separate status key/object from the player's Auto Berserk, so the two never
@@ -1930,17 +2052,21 @@ instead of release version. Dates are taken from actual git commit history.
 ### Added
 
 - **Payon Stories links** — Discord and PS Website links in the footer.
+
 - **Ko-fi support button** — donation link in the topbar, below the damage results, and in the footer; proceeds go toward hosting costs.
+
 - **Wildcard card mix** — weapon slots with card sockets now have a "Cards / Wildcard mix" toggle.
   In wildcard mode the card pickers are replaced by per-slot rows where each card position is set
   to a generic bonus type (Race / Size / Element) and a bonus %. Size is hardcoded to 15% + 5 ATK;
   Race and Element default to 20% with 4 / 10 / 15 / 20 options for PS custom cards. Bonuses
   always apply to all races/sizes/elements (RC_All, Size_All, Ele_All) and are merged into the
   engine's gear-bonus dictionaries alongside real cards.
+
 - **Equipment slot browse list** — clicking an empty equipment slot input now shows up to 100
   items equippable by the current job (filtered server-side via `?job=` parameter), ensuring
   PS-exclusive high-ID items such as Setting Dirk appear in the initial dropdown. Typed searches
   still show all matching items (equippable first, non-equippable dimmed) with a limit of 20.
+
 - **Visual pipeline damage breakdown** — the damage step list is redesigned as a proper pipeline:
   - Informational sub-components (Status BATK, Weapon ATK, Branch label) are shown as compact
     chips above the pipeline rather than inline rows.
@@ -1957,36 +2083,48 @@ instead of release version. Dates are taken from actual git commit history.
 ### Changed
 
 - **Responsive topbar** — three-tier layout covers all common device sizes: phones (≤600 px) show only brand mark, theme toggle, hamburger, and Calculate, with server select and all actions in the dropdown; tablets and small desktops (601–1279 px) keep the server select inline and put secondary actions in a side panel dropdown; wide desktop (≥1280 px) shows everything inline. Brand title and info tooltip hidden on phones to prevent overflow.
+
 - **Stats chart hover tooltip** — hovering a day column shows a styled tooltip with the date, exact views count, and exact calcs count. Bar series are visually more distinct (wider bars, larger gap, column highlight on hover).
+
 - **Skill search only shows damage skills** — the skill picker in Panel 07 now filters to skills with `attack_type` of `Weapon` or `Magic`, hiding passives (Sword Mastery, Endure, etc.) and non-damaging utility skills.
 
 ### Fixed
 
 - **Permanent page view history** — a `consolidate.js` script reads all nginx access logs (including rotated `.gz` files) and writes page view events into `stats.ndjson`, so history is preserved beyond log rotation. Runs automatically on every deploy for fast incremental updates; a daily 2 AM cron keeps it current between deploys. The stats route now reads archived views from NDJSON and live views from nginx, splitting at the consolidation cursor to avoid double-counting.
+
 - **Calculate events not being saved** — `data-store/` directory might not exist on first deploy, causing `fs.appendFile` to fail silently with ENOENT so every calculate event was dropped. `statsLogger` now creates the directory at module load time.
+
 - **nginx routing** — replaced the broad `/stats/` prefix location block with exact-match blocks for `/stats/ping` and `/stats/data` so the SPA page at `/stats` is no longer intercepted and proxied to the backend.
+
 - **Deploy cron setup** — `grep -v` in the crontab update pipeline exits 1 when no non-matching lines exist (crontab only contains the one entry), causing the deploy script to abort under `set -euo pipefail`. Added `|| true` to suppress the false failure.
+
 - **Dual-wield damage pipeline uses new style** — the RH and LH step lists in the PS Assassin
   dual-wield breakdown now render with `PipelineView` (chip inputs + connector arrows) instead of
   the old flat step-list rows.
+
 - **Wildcard bonuses no longer applied to empty slots** — stale `wildcard_slots` data in the URL
   could activate wildcard mode for a slot with no item equipped (e.g. `left_hand: null`), causing
   phantom race/size/element bonuses to be added to the calculation. Auto-activation and
   `onCalculate` now both guard against empty slots.
+
 - **Pipeline Final Damage value alignment** — the Final Damage row had no dot-leader spacer, so
   its value hugged the label rather than aligning to the right edge. Added
   `justify-content: space-between` to `.pipeline-row--final`.
+
 - **Pipeline left border rail removed** — `.pipeline-track` had a decorative `border-left` that
   made the layout feel cramped. Removed together with the compensating `margin-left`.
+
 - **Quagmire auto-hit** — enabling Quagmire set the target's `flee` to 0, but `hitChance.js`
   uses `target.flee > 0 ? target.flee : target.level + target.agi` as a fallback, so auto-hit was
   never granted. Fixed by adding `SC_QUAGMIRE` to the auto-hit condition block alongside
   `SC_STONE / SC_FREEZE / SC_STUN / SC_SLEEP`.
+
 - **Signum Crucis race restriction** — the Signum Crucis checkbox was previously not restricted to
   applicable targets. It is now disabled (opacity 0.4, not-allowed cursor) and auto-cleared in the
   frontend whenever the selected target is not Undead or Demon; the backend also race-guards the
   DEF reduction (`target.race === "Undead" || "Demon"`), so sending `signum_crucis: true` for an
   inapplicable race has no effect.
+
 - **Body background-image gradient tiling at page bottom** — `html, body, #root` had
   `height: 100%` (exactly viewport height), causing the decorative radial-gradient
   `background-image` on `body` to tile into the overflow area when page content exceeded the
@@ -2056,15 +2194,6 @@ instead of release version. Dates are taken from actual git commit history.
     Already stored and capped at level 3; confirmed correct.
 
 ## 2026-07-01
-
-### Fixed
-
-- **Dancer/Gypsy can now equip Whip weapons** — all Whip-type items in the item
-  database were incorrectly restricted to job `[19, 4020]` (Bard/Clown). The
-  source data relies on a `SEX_MALE` gender field to lock Musical Instruments to
-  Bard/Clown, but Whips carry no gender restriction and therefore must use job
-  `[20, 4021]` (Dancer/Gypsy). Fixed via a normalisation pass in `dataLoader.js`
-  that remaps the job array for any item whose `weapon_type` is `"Whip"`.
 
 ### Added
 
@@ -2211,6 +2340,13 @@ instead of release version. Dates are taken from actual git commit history.
   equipped.
 
 ### Fixed
+
+- **Dancer/Gypsy can now equip Whip weapons** — all Whip-type items in the item
+  database were incorrectly restricted to job `[19, 4020]` (Bard/Clown). The
+  source data relies on a `SEX_MALE` gender field to lock Musical Instruments to
+  Bard/Clown, but Whips carry no gender restriction and therefore must use job
+  `[20, 4021]` (Dancer/Gypsy). Fixed via a normalisation pass in `dataLoader.js`
+  that remaps the job array for any item whose `weapon_type` is `"Whip"`.
 
 - **Venom Splasher (`AS_SPLASHER`) element modifier bug** — `IgnoreElement` was
   listed in the skill's `damage_type` but `nk_ignore_ele` was never set, so
@@ -2584,6 +2720,7 @@ instead of release version. Dates are taken from actual git commit history.
 
 - **"Avg damage" metric card** from the damage breakdown headline — redundant
   given the damage range (min–max) card directly below it.
+
 - **"View results" button** from the top bar — the results modal opens
   automatically on calculate; the button to re-open it added clutter without
   enough benefit.
@@ -2869,6 +3006,7 @@ instead of release version. Dates are taken from actual git commit history.
   +5% vs full per-level scaling — battle.c's actual distinction, not an
   approximation), and that Volcano/weapon endow both move the calculation
   correctly.
+
 - In-app changelog viewer (this document, rendered from a modal in the
   header).
 
@@ -2884,10 +3022,12 @@ instead of release version. Dates are taken from actual git commit history.
   previously-selected job was still silently sent to the backend and
   applied to the calculation. Switching jobs now strips anything that no
   longer applies.
+
 - Added two missing Gunslinger self-buffs: "Barrage" and "Run and Gun"
   (PS's display names for the vanilla `SC_GS_MADNESSCANCEL` /
   `SC_GS_ADJUSTMENT` statuses, which the engine already read but had no
   UI for, like every other buff in this panel).
+
 - **Refine input no longer hidden for refineable headgears (and other
   slots).** The equipment panel decided whether to show a refine-level
   input per equipment *slot* (e.g. "headgear can never be refined"), but
@@ -2905,31 +3045,41 @@ instead of release version. Dates are taken from actual git commit history.
   fields (`proc_chance`, `double_hit`) that were never actually computed.
   Implemented per battle.c:4926 — dagger-only, normal attacks only,
   mutually exclusive with crit, proc rate from the PS/vanilla profile.
+
 - **Buffs panel** — quickens (Two/One-Hand, Spear), Adrenaline Rush,
   Maximize Power, Fury, Overthrust/Overthrust Max, Impositio Manus, and
   Bard/Dancer songs (Battle Theme, Ring of Nibelungen, Assassin Cross of
   Sunset, Humming, Fortune's Kiss) — all fields the engine already read
   but had no UI for.
+
 - Consumables panel (ASPD potions, ATK/MATK items), passive skill panel
   (filtered to masteries that actually affect damage), and card slot UI
   (up to 4 per item) — same pattern: engine support existed, UI didn't.
+
 - Grand Cross (`CR_GRANDCROSS`) damage formula, including a Payon Stories
   deviation (weapon masteries apply there, unlike vanilla) confirmed
   against wiki.payonstories.com/Grand_Cross.
+
 - Magic skill (BF_MAGIC) damage pipeline.
+
 - Incoming (mob → player) damage pipeline, physical and magic, including
   the Lex Aeterna double-damage status — `POST /api/calculate/incoming`.
+
 - Filled out `PAYON_STORIES`'s weapon/magic skill-ratio override tables
   and several `mechanic_flags`, pulled directly from the upstream Python
   source.
+
 - Collapsible UI sections; the damage breakdown panel is pinned and
   visually emphasized as the actual result of the form.
+
 - Info tooltip in the header describing the calculator, linking to the
   original repo and this one.
+
 - CI/CD pipeline (GitHub Actions) deploying to EC2 via pm2 + nginx, with
   an `X-API-Key` gate (not real auth — a deterrent against casual direct
   API hits, documented as such) and free HTTPS via Let's Encrypt +
   sslip.io (no domain required).
+
 - TypeScript migration (frontend + backend entry points/routes); removed
   account/login system in favor of stateless URL-encoded build sharing.
 
@@ -2939,26 +3089,32 @@ instead of release version. Dates are taken from actual git commit history.
   miscategorized as a `devDependency` despite being required at runtime
   (this project runs TypeScript directly via `tsx`, no compile step).
   Moved to `dependencies`.
+
 - CI: rsync failed with "No such file or directory" deploying the
   frontend build if `EC2_DEPLOY_PATH`'s parent directories didn't already
   exist on the box. The pipeline now creates them itself before syncing.
+
 - CI: a fresh TypeScript install in CI hard-errored on the deprecated
   `moduleResolution: "node"` setting instead of just warning (newer
   TypeScript than what's pinned locally). Silenced via
   `ignoreDeprecations` rather than switching resolution strategy.
+
 - nginx returned 500/Permission denied serving the frontend even though
   every directory's own permissions looked correct — Ubuntu's default
   home directory permissions (`750`) block `www-data` from traversing
   into it at all. Fixed in `setup-ec2.sh` going forward.
+
 - Equipment search returned every item of a given type regardless of
   slot (e.g. shoes appearing in the headgear search); `left_hand`
   excluded shields entirely. Search is now filtered by the item's actual
   `loc` field per slot, and `left_hand` searches both shields and
   off-hand weapons.
+
 - `buildManager.js`'s `playerBuildToTarget` set the player's own race to
   `"DemiHuman"` while every race lookup table elsewhere in the engine
   uses the hyphenated `"Demi-Human"` — found while wiring up the incoming
   damage pipeline, which is the first consumer of that function.
+
 - Skill search/dropdown showed the internal engine constant (e.g.
   `MG_FIREBALL`) instead of a human-readable name. Backend now resolves
   a `display_name` (PS-aware) for every skill.
