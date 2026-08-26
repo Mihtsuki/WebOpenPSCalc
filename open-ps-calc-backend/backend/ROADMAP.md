@@ -1392,6 +1392,22 @@ what the calc showed, while Lv1–2 were over-reported. The ×2 Break-Neck ailme
 unmodeled — it needs the target to already carry that status.
 
 ### Open gaps (verified, prioritised) — punch-list
+- **A test assertion that cannot fail: the PS-only guard on Throw Shuriken's Flee override.**
+  From reviewing PR #2 (Mihtsuki), which is correct and worth merging — this is a follow-up on
+  its test, not a reason to hold it. The test ends with:
+  `assert.equal(rStd.hit_chance, 100, "STANDARD (vanilla) profile must still auto-hit")`,
+  intended to prove `NJ_SYURIKEN_FLEE_IGNORE_DISABLED` stays scoped to Payon Stories.
+  **It passes whether or not the override is gated.** On the `standard` profile there is no
+  ratio for `NJ_SYURIKEN`, so the BF_MISC guard short-circuits to a canned "Not yet implemented"
+  result — `hit_chance: 100`, `avg_damage: 0`, `dps_valid: false` — and that 100 is hardcoded,
+  never consulting `nk_ignore_flee`. Demonstrated by sabotage: deleting the flag from the profile
+  correctly fails the test, but making the override **unconditional** (dropping the
+  `mechanic_flags.has(...)` check entirely, so it leaks into vanilla) leaves all 209 tests green.
+  So the leak it is meant to catch is exactly the leak it misses.
+  **Fix:** assert on `skill.nk_ignore_flee` directly after `calculate()`, or exercise a profile
+  that actually models the skill. Same trap applies to any future "stays PS-only" assertion
+  routed through `hit_chance` on a skill vanilla does not price — worth checking whether other
+  tests lean on the same canned result.
 - **Monk combo delay is missing its floor — we OVERSTATE Chain Combo / Combo Finish DPS.**
   `skillTiming.js` already applies the right idea to `MONK_COMBO_SKILLS`
   (`baseDelay -= 4*AGI + 2*DEX`), but the wiki's formula is
