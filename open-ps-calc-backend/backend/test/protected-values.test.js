@@ -166,3 +166,20 @@ test("changing or removing a weapon clears that slot's forge data", () => {
   assert.ok(/delete next\.forge\[slot\.key\]/.test(unequip.slice(0, 700)),
     "Unequip must drop the slot's forge data too, or the next weapon inherits it");
 });
+
+test("a saved build keeps its own name, on save and on load", () => {
+  // The editor's `currentState` is snapshotted BEFORE `onSave` pushes the new name
+  // into `data`, so saving it verbatim stored the previous name inside the state while
+  // the list entry got the typed one. A build saved once from a fresh editor then
+  // loaded back as "New Build"; re-saving hid it, so only save-once builds broke.
+  // No frontend test runner, so this is a source-level guard (see the note above).
+  const src = read(FRONTEND, "src", "components", "SavedBuildsModal.tsx");
+
+  assert.ok(/saveBuild\(\s*name\s*,\s*\{[^)]*build:\s*\{[^)]*name\s*\}/s.test(src),
+    "saveBuild must persist the state with the typed name baked into build.name");
+
+  // Loading must trust the entry's name, which also repairs builds saved before the
+  // fix — otherwise those stay wrong forever in the user's browser.
+  assert.ok(/onLoad\(\s*\{[^)]*b\.state[^)]*name:\s*b\.name/s.test(src),
+    "Load must override build.name with the saved entry's name");
+});

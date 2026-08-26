@@ -318,6 +318,21 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **A saved build's name was stored on the entry but not in the state.** Player-reported.
+  `SavedBuildsModal.handleSave()` called `saveBuild(name, currentState)`, but `currentState` is
+  snapshotted from the editor BEFORE `onSave(name)` pushes the new name into `data` — so the
+  persisted `state.build.name` was the PREVIOUS name while `entry.name` (what the list renders)
+  was correct. `onLoadSavedState` does `setData(state.build)`, so loading restored the stale
+  name: a build saved once from a fresh editor came back as **"New Build"**.
+  **That ordering explains the reporter's "only 1 build" symptom** — re-saving snapshots a
+  `data` that now holds the right name, so every build saved twice silently repaired itself.
+  Only save-once builds stayed broken, which is exactly the pattern they described.
+  Fixed at both ends: `handleSave` now bakes the typed name into the state it persists, and
+  **Load overrides `build.name` with the entry's own name** — the second half matters because a
+  code fix alone would leave already-broken saves wrong forever in the user's browser.
+  Guarded in `protected-values.test.js` alongside the forge fix (no frontend test runner) and
+  sabotage-checked by reverting the save to the raw snapshot.
+
 - **Forge data outlived the weapon it belonged to, hiding the next weapon's card slots.**
   Player-reported via a share link. `data.forge` is keyed by SLOT (`forge.right_hand`) but
   describes a SPECIFIC forged weapon, and neither the item picker nor Unequip cleared it. So

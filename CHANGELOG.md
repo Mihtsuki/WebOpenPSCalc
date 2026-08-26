@@ -48,6 +48,13 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **A saved build could load back as "New Build".** The name you typed was stored on the list
+  entry but not inside the build itself, so loading restored whatever the name had been before
+  you saved. It only affected builds saved exactly once — saving again quietly corrected them,
+  which is why most builds were fine and one wasn't. New saves are correct, and builds already
+  saved with the wrong name now load under the name shown in the list. Reported by a player.
+
+
 - **Switching weapons could leave you with no card slots.** If the weapon you were replacing had
   been forged, the forge settings stayed behind on the slot and made the *new* weapon count as
   forged — and forged weapons have no card slots, so the pickers vanished. Worse, if the new

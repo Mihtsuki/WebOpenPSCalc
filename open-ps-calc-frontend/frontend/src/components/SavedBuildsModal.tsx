@@ -35,7 +35,13 @@ export default function SavedBuildsModal({ open, onClose, currentName, currentSt
   function handleSave() {
     const name = nameInput.trim();
     if (!name) { setError("Name the build before saving."); return; }
-    const result = saveBuild(name, currentState);
+    // Bake the typed name INTO the saved state. `currentState` was snapshotted from
+    // the editor before `onSave` pushes the new name into `data`, so persisting it
+    // as-is stored the OLD name inside the state while the list entry got the new
+    // one. Loading then restored that stale name — a build saved once from a fresh
+    // editor came back as "New Build". Re-saving masked it, which is why only the
+    // builds saved exactly once were affected. Reported by a player.
+    const result = saveBuild(name, { ...currentState, build: { ...currentState.build, name } });
     if (!result.ok) {
       setError(`You already have ${MAX_SAVED_BUILDS} saved builds — delete one first.`);
       return;
@@ -80,7 +86,18 @@ export default function SavedBuildsModal({ open, onClose, currentName, currentSt
                     <span className="saved-builds-item-date">{new Date(b.savedAt).toLocaleString()}</span>
                   </div>
                   <div className="saved-builds-item-actions">
-                    <button onClick={() => { onLoad(b.state); onClose(); }}>Load</button>
+                    <button
+                      onClick={() => {
+                        // The entry's own name is authoritative — it is what this row
+                        // displays and what the user picked. Builds saved before the fix
+                        // above still carry a stale name inside their state, so override
+                        // it here rather than leaving those saves permanently wrong.
+                        onLoad({ ...b.state, build: { ...b.state.build, name: b.name } });
+                        onClose();
+                      }}
+                    >
+                      Load
+                    </button>
                     <button className="danger ghost" onClick={() => handleDelete(b.id)}>Delete</button>
                   </div>
                 </li>
