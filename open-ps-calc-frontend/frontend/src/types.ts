@@ -95,6 +95,11 @@ export interface SearchResult {
   sublabel: string;
   disabled?: boolean;
   max_level?: number;
+  /** Optional short marker shown as a pill in the picker row (e.g. "Forgeable").
+   *  Kept generic so SearchPicker stays unaware of what it is labelling. */
+  badge?: string;
+  /** Tooltip for `badge` — the pill is small, so the meaning lives here. */
+  badgeTitle?: string;
 }
 
 export type TargetMode = "monster" | "custom";

@@ -318,6 +318,26 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Forgeable weapons are marked in the item picker**, and the UI regression guards got a
+  proper home. Whether a weapon is Blacksmith-forgeable is otherwise invisible until after you
+  equip it, so the dropdown now carries a small "Forgeable" pill on both weapon searches (the
+  main slot and the off-hand one, which mixes shields and weapons — shields are never forgeable
+  and stay unmarked).
+  Deliberately generic: `SearchResult` gained optional `badge`/`badgeTitle`, `SearchPicker`
+  renders whatever it is handed and **knows nothing about forging**, so the same mechanism can
+  mark anything later. Styled after `.beta-badge` (outlined, muted, uppercase mono) rather than
+  the unused gold `.badge` — this is metadata in a long list and must not compete with the accent
+  the damage numbers use; it lifts to accent only on the highlighted row, where the muted grey
+  would otherwise lose contrast against `--accent-soft`.
+  **New `test/frontend-source.test.js`.** There is no frontend test runner, so UI fixes had been
+  landing as source-level guards inside `protected-values.test.js` — which is about the handful of
+  values deciding where money goes and who the site credits, and only stays readable if it is not
+  also a dumping ground. The forge-clearing and saved-build-name guards moved out into the new
+  file, joined by the badge guard and a **cross-stack check that the frontend's copy of
+  `FORGEABLE_WEAPON_IDS` still matches the engine's** — `BuildEditor.tsx` duplicates the list so
+  the picker can badge without a round-trip, and its own comment asks for them to be kept in sync,
+  which nothing enforced until now. Desyncing one id fails 5 tests.
+
 - **A saved build's name was stored on the entry but not in the state.** Player-reported.
   `SavedBuildsModal.handleSave()` called `saveBuild(name, currentState)`, but `currentState` is
   snapshotted from the editor BEFORE `onSave(name)` pushes the new name into `data` — so the

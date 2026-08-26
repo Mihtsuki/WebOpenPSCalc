@@ -1646,6 +1646,12 @@ export default function BuildEditor() {
       return api.searchItems(params)
         .then((r) => sortResults(r.items.map((it: any) => ({
           id: it.id, label: itemLabel(it), sublabel: `#${it.id}`, disabled: !canEquip(it),
+          // Forging is only offered for weapons on the blacksmith list, and that is
+          // invisible until after you equip one. Surfacing it here saves picking a
+          // weapon just to find out. Same marker on the off-hand search below.
+          ...(FORGEABLE_WEAPON_IDS.has(it.id)
+            ? { badge: "Forgeable", badgeTitle: "Can be Blacksmith-forged: Star Crumbs, an element, and a ranked bonus." }
+            : {}),
         }))));
     },
     [data.server, data.job_id, canEquip],
@@ -1660,7 +1666,12 @@ export default function BuildEditor() {
         api.searchItems({ type: "IT_WEAPON", q: query, limit: browse ? 100 : 50, server: data.server, ...jobParam }),
       ]).then(([shields, weapons]) => sortResults([
         ...shields.items.map((it: any) => ({ id: it.id, label: itemLabel(it), sublabel: `Shield #${it.id}`, disabled: !canEquip(it) })),
-        ...weapons.items.map((it: any) => ({ id: it.id, label: itemLabel(it), sublabel: `Weapon #${it.id}`, disabled: !canEquip(it) })),
+        ...weapons.items.map((it: any) => ({
+          id: it.id, label: itemLabel(it), sublabel: `Weapon #${it.id}`, disabled: !canEquip(it),
+          ...(FORGEABLE_WEAPON_IDS.has(it.id)
+            ? { badge: "Forgeable", badgeTitle: "Can be Blacksmith-forged: Star Crumbs, an element, and a ranked bonus." }
+            : {}),
+        })),
       ]));
     },
     [data.server, data.job_id, canEquip],

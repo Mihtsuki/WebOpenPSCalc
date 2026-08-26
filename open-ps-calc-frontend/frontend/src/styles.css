@@ -817,6 +817,27 @@ label {
 .search-result-item.disabled { opacity: 0.4; cursor: default; }
 .search-result-item.disabled:hover, .search-result-item.disabled.active { background: transparent; }
 .search-result-item .id { color: var(--text-faint); font-family: var(--mono); font-size: 0.75rem; }
+/* Optional marker pill in a picker row. Follows .beta-badge's register — outlined,
+   muted, uppercase mono — deliberately NOT the gold .badge: this is metadata sitting
+   in a long list, and it must not compete with the accent the damage numbers use. */
+.search-result-label { display: inline-flex; align-items: center; gap: 0.4rem; min-width: 0; }
+.search-result-badge {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* On the highlighted row the muted grey loses contrast against --accent-soft, so
+   lift it to the accent there — same treatment the row's own text gets. */
+.search-result-item:hover .search-result-badge,
+.search-result-item.active .search-result-badge { color: var(--accent); border-color: var(--accent-dim); }
 
 .search-tooltip {
   position: fixed;

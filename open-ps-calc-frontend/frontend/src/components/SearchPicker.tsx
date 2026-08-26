@@ -158,7 +158,12 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
               onMouseEnter={(e) => handleMouseEnter(e, r.id)}
               onMouseLeave={handleMouseLeave}
             >
-              <span>{r.label}</span>
+              <span className="search-result-label">
+                {r.label}
+                {r.badge && (
+                  <span className="search-result-badge" title={r.badgeTitle}>{r.badge}</span>
+                )}
+              </span>
               <span className="id">{r.sublabel}</span>
             </div>
           ))}

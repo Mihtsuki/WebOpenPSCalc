@@ -6,6 +6,70 @@ deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-22
+## 2026-08-26
+
+### Added
+
+- **The item list now marks which weapons can be forged.** Forgeable weapons show a small
+  "Forgeable" tag in the dropdown, so you can see at a glance which ones accept Star Crumbs, an
+  element and a ranked bonus — previously you had to equip a weapon to find out.
+
+
+### Fixed
+
+- **A saved build could load back as "New Build".** The name you typed was stored on the list
+  entry but not inside the build itself, so loading restored whatever the name had been before
+  you saved. It only affected builds saved exactly once — saving again quietly corrected them,
+  which is why most builds were fine and one wasn't. New saves are correct, and builds already
+  saved with the wrong name now load under the name shown in the list. Reported by a player.
+
+- **Switching weapons could leave you with no card slots.** If the weapon you were replacing had
+  been forged, the forge settings stayed behind on the slot and made the *new* weapon count as
+  forged — and forged weapons have no card slots, so the pickers vanished. Worse, if the new
+  weapon couldn't be forged at all, the forge controls were hidden too, so there was nothing to
+  switch off. Forge settings now clear when you change or unequip a weapon. Reported by a player
+  who loaded a shared build and tried to swap to a Main Gauche.
+
+## 2026-08-25
+
+### Fixed
+
+- **Bow Rogues briefly lost their long-range card bonus on Trick Arrow and Quick Step.** A
+  regression introduced earlier the same day by the ranged/melee change above, now fixed: the
+  server's custom skills carry no range of their own, and they were being read as melee. Caught
+  before anyone reported it.
+
+- **Ranged and melee skills were being told apart by your weapon instead of the skill.** That got
+  it right for most skills and quietly wrong for the rest: throwing skills used with a dagger were
+  treated as melee, while **Desperado was treated as ranged and given a long-range card bonus it
+  doesn't get in game**. Skills are now judged by their own range — which also means Grimtooth
+  correctly switches from melee to ranged at level 3, exactly as its description says. This only
+  changes your damage if you wear long-range gear like Archer Skeleton Card.
+
+## 2026-08-24
+
+### Fixed
+
+- **Throw Shuriken did no damage at all, and now throws at the right speed.** The skill was
+  showing a flat zero. It's back, and it fires on your attack *motion* rather than a cast delay —
+  which means **twice** the rate of a normal attack at the same ASPD, and it isn't held back by
+  the usual minimum skill delay. Damage is a normal attack plus a flat bonus from the skill and
+  from Throwing Mastery, both of which ignore the target's defence, and higher-ATK shuriken hit
+  harder. Speed behaviour reported by a player.
+
+- **Throwing Mastery wasn't giving its HIT.** The skill raises both Throw Shuriken's damage and
+  your accuracy, but only the damage half was being applied — so a Ninja with it maxed was missing
+  **+20 HIT**. That matters more than it sounds: it's the reason Ninja can run lower DEX than other
+  physical builds, and the accuracy helps every skill, not just Throw Shuriken. Reported by a player.
+
+- **Sonic Blow, Throw Kunai and Haze Slasher were all slower than they should be.** Their
+  after-cast delay shrinks as you stack AGI and DEX, and the calculator was only applying that to
+  the Monk combo skills — everything else sat at its full delay. A 90 AGI / 80 DEX Assassin gets
+  **40% more Sonic Blow DPS**, and the two Ninja skills nearly double. Damage per hit hasn't
+  changed; they simply come round faster now. Note that at high AGI the two Ninja skills hit your
+  attack animation speed before they hit the formula — you can't throw faster than you can swing.
+
+## 2026-08-23
 
 ### Added
 
@@ -15,13 +79,29 @@ instead of release version. Dates are taken from actual git commit history.
   accessory, so it's a card slot. Everything else the sweep found was a box, a costume, a
   consumable, or gear for classes this server doesn't have.
 
+### Fixed
+
+- **Armor Piercing Bullets weren't giving their full crit out of a Rifle.** They're worth +10
+  crit normally and +30 in a Rifle, but only the +10 was being counted.
+
+- **Destroyer [3] wasn't in the item list.** The three-slot version of the grenade launcher
+  was recorded as having no slots, so it never appeared — only Destroyer [1] did. Reported by
+  a player.
+
+- **Ghosthunter Grenade wasn't dealing Ghost damage.** It was marked as Ghost in the data, but
+  the calculator reads an ammo's element from its effect script, and this one had none — so it
+  was hitting as Neutral. The other elemental rounds (Flare, Freezing, Blind, Lightning, Poison
+  Sphere) were all fine, which is why it went unnoticed. Also reported by a player.
+
+## 2026-08-22
+
+### Added
 
 - **Super Novice can now use Crazy Uproar.** The buff was missing from the Super Novice list, so
   the +STR/+VIT it grants couldn't be switched on. Payon Stories has always given Super Novices
   Crazy Uproar and Cart Revolution — the 18 August client patch only moved them into the Novice
   tab — so this was a long-standing gap on our side, not a new skill. Cart Revolution already
   worked.
-
 
 - **Mirror Image now counts towards Killing Stroke.** The Ninja buff raises Killing Stroke's damage
   by 10% to 30%, depending on how many images you still have up when you cast — and it wasn't in the
@@ -45,73 +125,7 @@ instead of release version. Dates are taken from actual git commit history.
   The row now lists the next few actual steps with their exact ASPD, and the whole-number milestones
   are **bold** so the traditional targets still stand out.
 
-
 ### Fixed
-
-- **A saved build could load back as "New Build".** The name you typed was stored on the list
-  entry but not inside the build itself, so loading restored whatever the name had been before
-  you saved. It only affected builds saved exactly once — saving again quietly corrected them,
-  which is why most builds were fine and one wasn't. New saves are correct, and builds already
-  saved with the wrong name now load under the name shown in the list. Reported by a player.
-
-
-- **Switching weapons could leave you with no card slots.** If the weapon you were replacing had
-  been forged, the forge settings stayed behind on the slot and made the *new* weapon count as
-  forged — and forged weapons have no card slots, so the pickers vanished. Worse, if the new
-  weapon couldn't be forged at all, the forge controls were hidden too, so there was nothing to
-  switch off. Forge settings now clear when you change or unequip a weapon. Reported by a player
-  who loaded a shared build and tried to swap to a Main Gauche.
-
-
-- **Bow Rogues briefly lost their long-range card bonus on Trick Arrow and Quick Step.** A
-  regression introduced earlier the same day by the ranged/melee change above, now fixed: the
-  server's custom skills carry no range of their own, and they were being read as melee. Caught
-  before anyone reported it.
-
-
-- **Ranged and melee skills were being told apart by your weapon instead of the skill.** That got
-  it right for most skills and quietly wrong for the rest: throwing skills used with a dagger were
-  treated as melee, while **Desperado was treated as ranged and given a long-range card bonus it
-  doesn't get in game**. Skills are now judged by their own range — which also means Grimtooth
-  correctly switches from melee to ranged at level 3, exactly as its description says. This only
-  changes your damage if you wear long-range gear like Archer Skeleton Card.
-
-
-- **Throw Shuriken did no damage at all, and now throws at the right speed.** The skill was
-  showing a flat zero. It's back, and it fires on your attack *motion* rather than a cast delay —
-  which means **twice** the rate of a normal attack at the same ASPD, and it isn't held back by
-  the usual minimum skill delay. Damage is a normal attack plus a flat bonus from the skill and
-  from Throwing Mastery, both of which ignore the target's defence, and higher-ATK shuriken hit
-  harder. Speed behaviour reported by a player.
-
-
-- **Throwing Mastery wasn't giving its HIT.** The skill raises both Throw Shuriken's damage and
-  your accuracy, but only the damage half was being applied — so a Ninja with it maxed was missing
-  **+20 HIT**. That matters more than it sounds: it's the reason Ninja can run lower DEX than other
-  physical builds, and the accuracy helps every skill, not just Throw Shuriken. Reported by a player.
-
-
-- **Sonic Blow, Throw Kunai and Haze Slasher were all slower than they should be.** Their
-  after-cast delay shrinks as you stack AGI and DEX, and the calculator was only applying that to
-  the Monk combo skills — everything else sat at its full delay. A 90 AGI / 80 DEX Assassin gets
-  **40% more Sonic Blow DPS**, and the two Ninja skills nearly double. Damage per hit hasn't
-  changed; they simply come round faster now. Note that at high AGI the two Ninja skills hit your
-  attack animation speed before they hit the formula — you can't throw faster than you can swing.
-
-
-- **Armor Piercing Bullets weren't giving their full crit out of a Rifle.** They're worth +10
-  crit normally and +30 in a Rifle, but only the +10 was being counted.
-
-
-- **Destroyer [3] wasn't in the item list.** The three-slot version of the grenade launcher
-  was recorded as having no slots, so it never appeared — only Destroyer [1] did. Reported by
-  a player.
-
-- **Ghosthunter Grenade wasn't dealing Ghost damage.** It was marked as Ghost in the data, but
-  the calculator reads an ammo's element from its effect script, and this one had none — so it
-  was hitting as Neutral. The other elemental rounds (Flare, Freezing, Blind, Lightning, Poison
-  Sphere) were all fine, which is why it went unnoticed. Also reported by a player.
-
 
 - **Gunslinger coins weren't adding any damage.** Coins are worth **+3 ATK each**, and that
   applies to every hit a skill lands — so 10 coins is +30 on a normal attack, +90 on Triple
@@ -124,7 +138,6 @@ instead of release version. Dates are taken from actual git commit history.
   you put the stance up and Coin Flip refills in one cast, so by the time you attack you have
   the stance *and* a full pool. The coin box now means what you're holding as you attack, and
   shows the ATK it's worth. Also reported by a player, who pointed out you just re-summon.
-
 
 - **Meteor Storm was worth a fraction of its real damage.** The calculator counted how many
   times each meteor hits but not how many meteors fall — at level 10 that's 7 meteors of 5 hits
@@ -148,7 +161,6 @@ instead of release version. Dates are taken from actual git commit history.
 - **Stone Discus wasn't boosting Shield Charge.** It gives 5% per refine to Shield Boomerang *and*
   Shield Charge; only the first was implemented.
 
-
 - **Tracking was doing more damage than it should.** The Gunslinger skill was priced at
   100% + 160% per level; Payon Stories' own release notes say a flat 160% per level, so 1600% at
   Lv10 rather than 1700%. The wiki's table backed the old number, but it disagrees with the prose
@@ -165,7 +177,6 @@ instead of release version. Dates are taken from actual git commit history.
 - **Witch's Pumpkin Hat had the wrong item's stats.** It was carrying MDEF +10 plus STR and INT
   bonuses from an unrelated item that shares its id. It's MDEF +4 on Payon Stories, with the +15%
   against Undead and Demon unchanged.
-
 
 - **Killing Stroke claimed you could cast it ten times a second.** It has no cast time or delay
   recorded anywhere, and the calculator filled that gap with its minimum period — which came out as
