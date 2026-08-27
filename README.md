@@ -171,7 +171,8 @@ motivated several changes beyond a straight 1:1 port:
   belong to Dancer/Gypsy `[20, 4021]`. Fixed via a normalisation pass in
   `dataLoader.js`.
 - **PS Rogue rework** — changes from `Rogue_Patchnotes_PayonStories.pdf` are
-  modelled: Backstab formula `200+30×lv`% with a user-toggleable +40%
+  modelled: Backstab formula `200+40×lv`% (240% @Lv1 → 600% @Lv10, per the
+  wiki's per-level table) with a user-toggleable +40%
   opportunity bonus (monster not targeting Rogue); Trick Arrow corrected to
   200% (2×100% hits); Vulture's Eye enables bow Double Attack with proc rate
   `doubleRate × min(TF_DOUBLE_lv, AC_VULTURE_lv)` behind the

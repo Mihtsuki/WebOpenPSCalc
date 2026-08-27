@@ -5,6 +5,31 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-27
+
+### Fixed
+
+- **Backstab was under-calculated at every level.** The skill was modelled at
+  500% ATK at Lv10 when the live server deals 600% (240% at Lv1, +40% per level).
+  Every Backstab number the calculator produced was about a sixth too small,
+  including with the Opportunity bonus, which is applied to the ratio and so
+  inherited the error. Reported in-game by a player.
+
+  The cause was a source conflict decided the wrong way rather than an oversight.
+  The Rogue rework PDF says the damage was "reduced ... to 200%+30%*Skill_Level"
+  and the wiki's Rogue class page repeats that as "500% damage", but the dedicated
+  Back Stab page publishes a full per-level table ending at 600%, and the scraped
+  skill DB and the in-game tooltip both agree with the table. A rework PDF states
+  what was planned; it is not evidence of what shipped.
+
+- **The skill-audit tool could not complete a run, and reported agreement it had
+  not checked.** Two crashes ended a full run early, its wikitable parser could not
+  read several common table layouts, and — worst — a table that parsed to nonsense
+  produced an empty comparison that was printed as `MATCH`. Back Stab's own table
+  was unreadable and Acid Terror's scored a false `MATCH`. The tool now completes,
+  reads those tables, and ends with an explicit count of skills it did **not**
+  actually verify instead of implying a clean bill of health.
+
 ## 2026-08-26
 
 ### Added

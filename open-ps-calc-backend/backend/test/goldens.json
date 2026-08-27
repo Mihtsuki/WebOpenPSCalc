@@ -2702,15 +2702,15 @@
    "matk_max": 6
   },
   "result": {
-   "dps": 2038.194,
+   "dps": 2456.597,
    "dps_valid": true,
    "hit_chance": 100,
    "crit_chance": 0,
    "period_ms": 576,
    "normal": {
-    "min": 1174,
-    "max": 1174,
-    "avg": 1174,
+    "min": 1415,
+    "max": 1415,
+    "avg": 1415,
     "steps": [
      "Status BATK",
      "Weapon ATK",

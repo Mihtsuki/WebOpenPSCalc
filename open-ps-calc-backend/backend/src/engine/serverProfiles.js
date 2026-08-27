@@ -547,7 +547,15 @@ const PS_BF_WEAPON_RATIOS = {
   // formula became (100 + 100×SkillLv)% ATK — 200% @Lv1 → 600% @Lv5 (its PS max rank),
   // up from the old 100+80×lv (180%→500%). Buffed to compensate the FUEL Card nerf.
   AM_ACIDTERROR: (lv) => 100 + 100 * lv,
-  RG_BACKSTAP: (lv) => 200 + 30 * lv, // 200 + 30×lv — PDF-verified prior audit (Rogue Patchnotes)
+  // 200 + 40×lv — 240% @Lv1 → 600% @Lv10, per the wiki's per-level table on
+  // "Back Stab", which the live server and the in-game tooltip both agree with.
+  //
+  // NOT 200 + 30×lv. The Rogue rework PDF says the damage was "reduced from
+  // 300% + 40%*Skill_Level to 200%+30%*Skill_Level", and the Rogue class page
+  // repeats that as "500% damage" — but neither matches what shipped. The PDF
+  // states an intent that the live server did not implement as written, so for
+  // this skill the per-level table outranks it. Reported in-game at 600%.
+  RG_BACKSTAP: (lv) => 200 + 40 * lv,
   AS_SPLASHER: (lv, tgt, ctx) => {
     const poisonLv = ctx ? (ctx.skill_params.AS_SPLASHER_poison_react_lv ?? 0) : 0;
     return 500 + 50 * lv + 30 * poisonLv;

@@ -982,8 +982,11 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
   Spear Stab capped at level 5 via `skill_level_cap_overrides`. Blade Mastery
   covers 1H Sword: `mastery_prefer_fallback { SM_SWORD: "KN_TWOHANDMASTERY" }`
   routes 1H Sword mastery to Blade Mastery when the Knight has levels in it.
-- **PS Rogue rework** (`Rogue_Patchnotes_PayonStories.pdf`) — Backstab ratio
-  corrected to `200+30×lv`% (was `200+40×lv` in PS override). Backstab
+- **PS Rogue rework** (`Rogue_Patchnotes_PayonStories.pdf`) — Backstab ratio is
+  `200+40×lv`% (240% @Lv1 → 600% @Lv10). The 2026-08-22 audit briefly changed this
+  to `200+30×lv` on the PDF's wording ("reduced ... to 200%+30%*Skill_Level") and
+  shipped 500% @Lv10 to players; the wiki's per-level table, `ps_skill_db` and the
+  in-game tooltip all say 600%. Reverted 2026-08-27. Backstab
   Opportunity (+40% multiplicative) gated on `RG_BACKSTAP_OPPORTUNITY` mechanic
   flag and `support_buffs.backstab_opportunity`; UI checkbox in Skill panel
   (skill ID 212, PS server). Trick Arrow ratio corrected to 200% (2×100% hits).
@@ -1170,6 +1173,52 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
   damage-dealing cast skills (element/type only — PS-tuned skill power isn't
   shown). A monster's basic melee is priced as Neutral.
 
+## Ratios pinned on PDF authority alone (2026-08-27)
+
+Back Stab shipped at 500% @Lv10 for five days because the 2026-08-22 audit applied
+one rule — "a rework PDF beats the wiki and beats ps_skill_db" — to a case where it
+gave the wrong answer, and then pinned the result with a passing test whose own
+message read "(wiki says 600)". The conflict was recorded and mis-resolved, not
+missed. A rework PDF states INTENT; it is not evidence of what shipped.
+
+**Corrected rule.** Where a rework PDF disagrees with a full per-level wiki table
+AND the scraped `ps_skill_db` agrees with that table, the table wins. Two sources
+describing the live server outrank one describing a plan.
+
+**Still decided the old way — confirm in-game before trusting.** Each was pinned on
+the PDF against a disagreeing wiki, i.e. the exact pattern that produced the Back
+Stab bug. None has been checked against the live server.
+
+| Skill | Ours (PDF) | Wiki | ps_skill_db | Risk |
+|---|---|---|---|---|
+| `AM_ACIDTERROR` | 600% @Lv5 | 500% | **500%** | **Highest** — wiki and the scraped DB agree with each other and against us, exactly as they did for Back Stab |
+| `KN_SPEARSTAB` | 300% @Lv5 | 100+20×lv | — | Wiki may simply be pre-rework |
+| `KN_BOWLINGBASH` | 400% @Lv10 | 100+30×lv | 100+40×lv | Three-way disagreement; ours matches neither |
+
+`MO_COMBOFINISH` also disagrees with the wiki at Lv1–2 only (ours 345/435, wiki
+340/425; `ps_skill_db` agrees with us) — likely a stale wiki row, low impact.
+
+**Audit tooling gaps found while investigating** (`tools/audit/audit_skills.py`,
+all fixed 2026-08-27 except the last):
+
+- A full run crashed twice: `KeyError` on an ALIAS naming a page absent from the
+  snapshot, and `UnicodeEncodeError` whenever stdout was redirected on Windows.
+  Nobody could complete a full audit; only per-skill runs worked.
+- The wikitable parser could not read newline-style cells (`!Level` on its own
+  line), damage headers carrying a qualifier (`base ATK (%)`), or values whose
+  `%` lives in the header. Back Stab's table hit all three and scored `n/a`.
+- **Empty overlap rendered as `MATCH`.** Acid Terror parsed to junk level keys
+  (`{1180: 3.0, 2260: 6.0, …}`); the intersection with our levels was empty, the
+  diff list came back empty, and the report printed a confident `MATCH` having
+  compared nothing. Now `NO-OVERLAP`.
+- Unreadable tables printed `n/a`, indistinguishable from "page has no table".
+  Now `UNPARSED`, and the run ends with an explicit count of skills that were
+  **not actually checked**.
+- **Open:** 20 skills still report `UNPARSED` — GS_*, NJ_*, KN_AUTOCOUNTER,
+  MG_SOULSTRIKE, PR_MAGNUS, WZ_FIREPILLAR and others. Their wiki tables use
+  layouts the parser still cannot read, so those ratios remain unverified against
+  the wiki. Run `python tools/audit/audit_skills.py` for the current list.
+
 ## Payon Stories per-class skill audit (against the PS wiki)
 
 The Gunslinger audit (2026-07-07, see the CHANGELOG) cross-checked every PS-reworked
@@ -1220,7 +1269,7 @@ brackets are the number of PS-custom entries found across those tables.
    Mailbreaker debuff (+10% phys & magic damage taken, works on MVP/boss) and the Cloak initiative
    opener (breaking Cloak Lv3+ → auto-attack ×2 / Sonic Blow +10%, per-hit only). Fully modeled.
 4. **Rogue / Stalker [7]** — ✅ audited (Rogue Patchnotes PDF, with-DEF). Confirmed correct:
-   RG_BACKSTAP (200+30×lv; +40% Opportunity via the `backstab_opportunity` toggle; DEF applies;
+   RG_BACKSTAP (200+40×lv — 600% @Lv10; +40% Opportunity via the `backstab_opportunity` toggle; DEF applies;
    auto-hit / IgnoreFlee), RG_RAID (600% @lv5; DEF applies), Yser Card (+10% Raid & Backstab, +5
    HIT), Vulture's Eye enabling bow Double Attack (proc = min(TF_DOUBLE, AC_VULTURE)). **Blocked:**
    Trick Arrow (PS_RG_TRICKARROW, 200% / 2 hits) and Quick Step (PS_RG_QUICKSTEP, 10%) are now

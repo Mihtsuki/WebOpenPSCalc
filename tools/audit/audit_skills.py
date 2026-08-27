@@ -16,6 +16,13 @@ import os
 from common import (load, save, snapshot, build, node_eval, norm_name,
                     loose_pattern, PS_DATA, BACKEND)
 
+# This report is full of em-dashes and the wiki's own punctuation, and Windows
+# defaults stdout to cp1252 when it is redirected to a file — which raised
+# UnicodeEncodeError and killed the run mid-table. Force UTF-8 so a redirected
+# run produces the same output as an interactive one.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 # Wiki page titles that differ from the skill DB's display name.
 ALIAS = {
     "Killing Strike": "Killing Stroke",
@@ -51,9 +58,25 @@ def tables(wt):
     for m in re.finditer(r"\{\|(.*?)\n\|\}", wt, re.S):
         rows = []
         for r in re.split(r"\n\s*\|-", m.group(1)):
-            line = " ".join(r.split("\n"))
             cells = []
-            for c in re.split(r"\|\||!!", line):
+            # MediaWiki allows one cell per line ("|1" / "!Level") as well as
+            # several on one line ("|1 || 240"). Joining the lines first, as this
+            # used to, silently welded newline-style cells onto their neighbour:
+            # Back Stab's header came out as ONE cell reading
+            # "base ATK (%) !inattentive ATK (%)", which matched no damage-column
+            # pattern, so the whole table scored n/a and its 600% was never checked
+            # against a rework PDF that said 500%.
+            raw_cells = []
+            for ln in r.splitlines():
+                ln = ln.strip()
+                if not ln:
+                    continue
+                if ln[0] in "|!":
+                    ln = ln[1:]
+                elif not raw_cells:
+                    continue          # "{| class=..." attributes / caption, not a cell
+                raw_cells.extend(re.split("[|][|]|!!", ln))
+            for c in raw_cells:
                 c = re.sub(r"align\s*=\s*\"?[a-z]+\"?", "", c)
                 c = re.sub(r"style\s*=\s*\"[^\"]*\"", "", c)
                 c = re.sub(r"\[\[([^\]|]*\|)?([^\]]*)\]\]", r"\2", c)
@@ -67,8 +90,18 @@ def tables(wt):
     return out
 
 
-PCT = re.compile(r"^\+?(\d+(?:\.\d+)?)\s*%$")
-DMGCOL = re.compile(r"^\+?(atk|matk|damage|weapon atk|dmg)\s*%?$", re.I)
+# The percent sign often lives in the column header ("base ATK (%)") rather than
+# on every cell, so a bare number is accepted. This is only ever applied to a cell
+# in a column whose header already matched DMGCOL, so it cannot swallow SP costs
+# or cast times from some unrelated column.
+PCT = re.compile(r"^[+]?([0-9]+([.][0-9]+)?)[ ]*%?$")
+# "base ATK (%)" and "Damage %" are as common on this wiki as a bare "ATK". The
+# qualifier is optional but MUST stay anchored: a greedy match would also accept
+# Back Stab's "inattentive ATK (%)" column, which is the x1.4 total
+# rather than the base ratio we model, and we would then be diffing our ratio
+# against the wrong column entirely.
+DMGCOL = re.compile(
+    r"^[+]?(base|min|max|weapon|skill)?[ ]*(atk|matk|damage|dmg)[ ]*([(][ ]*%[ ]*[)]|%)?$", re.I)
 
 
 def _pct(v):
@@ -163,6 +196,25 @@ def pdf_hits(display, pdfs):
     return out
 
 
+def status(other, diffs, ours, page):
+    """Render one source's verdict.
+
+    MATCH used to mean "the diff list is empty", which is also true when the two
+    level sets never overlapped - a parser that produced junk keys (Acid Terror
+    came out as {1180: 3.0, 2260: 6.0, ...}) therefore reported a confident MATCH
+    while comparing nothing at all. NO-OVERLAP now names that case, and UNPARSED
+    names a page that visibly has a damage table we failed to read, so neither can
+    masquerade as agreement again.
+    """
+    if other is None:
+        if page and "wikitable" in page and re.search("[0-9]{2,}", page):
+            return "UNPARSED"
+        return "n/a"
+    if not set(ours) & set(other):
+        return "NO-OVERLAP"
+    return "MATCH" if not diffs else "DIFF(%d)" % len(diffs)
+
+
 def report(only=None):
     wiki = load(snapshot("wiki_raw.json"))
     pdfs = load(snapshot("pdfs.json"))
@@ -172,12 +224,18 @@ def report(only=None):
     ours = our_ratios()
 
     by_norm = {norm_name(t): t for t in wiki}
-    rows, flagged = [], []
+    rows, flagged, unchecked, missing_pages = [], [], [], set()
     for k, v in sorted(ours.items()):
         if only and k not in only:
             continue
         disp = v.get("display") or ""
         title = ALIAS.get(disp) or by_norm.get(norm_name(disp))
+        # An ALIAS can name a page the snapshot does not hold (renamed upstream, or
+        # never fetched). That used to raise KeyError and kill the whole run partway
+        # through, so every skill after it went unaudited with no indication why.
+        if title and title not in wiki:
+            missing_pages.add((disp, title))
+            title = None
         wl = wiki_levels(wiki[title]) if title else None
         dl = psdb_levels(disp, psdb)
         ol = {int(a): b for a, b in v["per_level"].items() if b is not None}
@@ -192,16 +250,30 @@ def report(only=None):
         rows.append((k, disp, title, ol, wl, dl, dw, dd, pdf_hits(disp, pdfs) if (dw or dd) else []))
         if dw or dd:
             flagged.append(k)
+        elif (wl is None and title and "wikitable" in (wiki.get(title) or "")) or (
+                wl is not None and not set(ol) & set(wl)):
+            # Not a disagreement, but not a check either: the page has a table we
+            # could not read, or we read one sharing no level with ours. Both used
+            # to render as a clean bill of health.
+            unchecked.append(k)
 
     print("%-24s %-10s %-12s %s" % ("SKILL", "wiki", "ps_skill_db", "pdf"))
     print("-" * 74)
     for k, disp, title, ol, wl, dl, dw, dd, hits in rows:
-        sw = "n/a" if wl is None else ("MATCH" if not dw else "DIFF(%d)" % len(dw))
-        sd = "n/a" if dl is None else ("MATCH" if not dd else "DIFF(%d)" % len(dd))
+        sw = status(wl, dw, ol, wiki.get(title))
+        sd = status(dl, dd, ol, None)
         sp = ",".join(sorted({b.split()[0] for b, _ in hits})) or "-"
         print("%-24s %-10s %-12s %s" % (k, sw, sd, sp))
 
-    print("\n%d skill(s) disagree with at least one source\n" % len(flagged))
+    print("")
+    print("%d skill(s) disagree with at least one source" % len(flagged))
+    if unchecked:
+        print("%d skill(s) were NOT actually checked against the wiki "
+              "(UNPARSED / NO-OVERLAP): %s" % (len(unchecked), ", ".join(sorted(unchecked))))
+    if missing_pages:
+        print("%d alias(es) name a page absent from the snapshot: %s"
+              % (len(missing_pages), ", ".join("%s -> %s" % x for x in sorted(missing_pages))))
+    print("")
     for k, disp, title, ol, wl, dl, dw, dd, hits in rows:
         if not (dw or dd):
             continue

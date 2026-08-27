@@ -1976,11 +1976,29 @@ test("audited skill ratios follow the rework PDFs, not the stale wiki", () => {
   assert.equal(r.GS_TRACKING(1), 160);
   assert.equal(r.GS_TRACKING(10), 1600, "PDF states 1600% at Lv10, not 1700%");
 
-  // These four are ones where the WIKI is stale and we are right — pinned so a future
-  // wiki-driven pass doesn't "correct" them back. Each cites a rework PDF in PS_SOURCES.md.
+  // The rest of this test applies one rule: "a rework PDF beats the wiki". That rule
+  // produced a WRONG answer for Back Stab and shipped it to players.
+  //
+  // The 2026-08-22 audit saw the conflict — the note here used to read "(wiki says
+  // 600)" — and pinned 500 anyway on the strength of the PDF. But the PDF states an
+  // INTENT ("the damage is reduced ... to 200%+30%*Skill_Level"); the wiki's per-level
+  // table and the scraped skill DB describe what actually SHIPPED, and both said 600.
+  // Players reported 600 in-game. Writing the conflict down is not the same as
+  // resolving it, and a test can pin a wrong number just as firmly as a right one.
+  //
+  // Corrected rule: where a rework PDF disagrees with a full per-level wiki table AND
+  // the scraped live skill DB agrees with that table, the table wins — it is evidence
+  // of what shipped, not of what was planned.
+  assert.equal(r.RG_BACKSTAP(10), 600, "wiki table + live skill DB + in-game all say 600%");
+
+  // UNVERIFIED — these three were decided by the same rule that failed above, and for
+  // AM_ACIDTERROR the evidence now points the other way: the wiki table AND ps_skill_db
+  // both say 500 at Lv5, exactly the pattern that turned out to be right for Back Stab.
+  // They are left as-is deliberately: changing a ratio on inference is what caused this
+  // bug, and none of the three has been confirmed against the live server yet. Confirm
+  // in-game before touching them — see ROADMAP "Ratios pinned on PDF authority alone".
   assert.equal(r.KN_SPEARSTAB(5), 300, "Knight PDF: 100+40*SkillLevel (wiki still says 100+20)");
-  assert.equal(r.AM_ACIDTERROR(5), 600, "Alchemist PDF: NEW FORMULA (100+100*SkillLv)% (wiki says 500)");
-  assert.equal(r.RG_BACKSTAP(10), 500, "Rogue PDF: reduced to 200%+30%*Skill_Level (wiki says 600)");
+  assert.equal(r.AM_ACIDTERROR(5), 600, "Alchemist PDF: (100+100*SkillLv)% — wiki AND ps_skill_db say 500; UNCONFIRMED");
   assert.equal(r.KN_BOWLINGBASH(10), 400, "wiki table 100+30*lv; ps_skill_db is stale at 100+40*lv");
 });
 
@@ -2490,4 +2508,45 @@ test("Ardent Helm turns Magnum Break Holy", () => {
       loader.getMonster(1036), eff, gb).normal.steps.find((s) => /Attr Fix/.test(s.name)) || {}).note;
   };
   assert.equal(bashAttr(true), bashAttr(false), "Bash's element must be untouched");
+});
+
+// ---------------------------------------------------------------------------
+// Back Stab: the per-level table, pinned to the wiki's own published numbers
+// ---------------------------------------------------------------------------
+test("Back Stab matches the wiki's published per-level table", () => {
+  // Reported in-game as 600% at Lv10 while the calculator showed 500%.
+  //
+  // The cause was a source conflict resolved the wrong way. The Rogue rework PDF
+  // says the damage was "reduced from 300% + 40%*Skill_Level to 200%+30%*Skill_Level"
+  // and the Rogue class page echoes "500% damage", but the dedicated "Back Stab"
+  // page carries a full per-level table that says otherwise — and the live server,
+  // the scraped skill DB and the in-game tooltip all agree with the table. The PDF
+  // describes an intent that did not ship as written.
+  //
+  // These are the wiki's numbers verbatim, so a future edit has to disagree with a
+  // published table on purpose rather than by picking the wrong source again.
+  const ps = getProfile("payon_stories");
+  const f = ps.weapon_ratios.RG_BACKSTAP;
+  assert.ok(f, "PS weapon ratio table missing Back Stab");
+
+  const BASE = [240, 280, 320, 360, 400, 440, 480, 520, 560, 600];
+  assert.deepEqual(BASE.map((_, i) => f(i + 1)), BASE,
+    "Back Stab base ATK% no longer matches the wiki table (200 + 40 x level)");
+
+  // The wiki publishes the "inattentive" column as exactly base x 1.4, which is the
+  // Opportunity bonus the pipeline applies as its own step. Checking it here keeps
+  // the two halves of the skill tied to the same table.
+  const INATTENTIVE = [336, 392, 448, 504, 560, 616, 672, 728, 784, 840];
+  assert.deepEqual(BASE.map((b) => Math.round(b * 1.4)), INATTENTIVE,
+    "the Opportunity multiplier no longer reproduces the wiki's inattentive column");
+
+  // And the multiplier must stay ON THE RATIO — applied before DEF is subtracted,
+  // not to the final number. Players reported it as "multiplicative on ratio".
+  const src = require("fs").readFileSync(
+    require("path").join(__dirname, "..", "src", "engine", "calculators", "battlePipeline.js"), "utf8");
+  const opp = src.indexOf("RG_BACKSTAP_OPPORTUNITY");
+  assert.ok(opp > 0, "Backstab Opportunity step vanished from the pipeline");
+  const after = src.slice(opp);
+  assert.ok(after.indexOf("calculateDefenseFix") > after.indexOf("scaleFloor(pmf, 140, 100)"),
+    "the x1.4 must be applied before calculateDefenseFix, i.e. on the ratio");
 });
