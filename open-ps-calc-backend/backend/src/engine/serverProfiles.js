@@ -646,6 +646,12 @@ const PS_BF_WEAPON_RATIOS = {
   // stops swallowing it: the skill is typed Misc, and that guard fires for Misc skills
   // with no ratio ANYWHERE. Without this the calculator returned a flat 0 damage.
   NJ_SYURIKEN: () => 100,
+  // 100%/hit (300% total across the 3 hits) - matches vanilla (skillRatio.js's untouched
+  // NJ_KUNAI: () => 100), RMS ("hit three times for a total of 300% attack"), and the PS
+  // wiki's own "Damage: 300%" + "changes from vanilla" list (only the aftercast delay and
+  // card behavior are named as PS-reworked, not the ratio). Entry exists purely so the
+  // BF_MISC guard doesn't swallow it, same reason as NJ_SYURIKEN above.
+  NJ_KUNAI: () => 100,
   NJ_HUUMA: (lv) => 200 + 150 * lv,
 };
 

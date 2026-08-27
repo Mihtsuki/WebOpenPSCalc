@@ -318,6 +318,32 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Throw Kunai works in the calculator.**
+  The ratio is vanilla 100% per hit (300% total because 3 hits). Confirmed by in-game tests, and RMS's vanilla description spells out that it's a total ("hit three times for a total of 300% attack").
+  Added a `NJ_KUNAI: () => 100` entry to `PS_BF_WEAPON_RATIOS` purely to clear the BF_MISC guard
+  (same reason as `NJ_SYURIKEN`'s entry above it) - the value itself is vanilla.
+  The flat `+60` "Kunai Mastery" bonus in `masteryFix.js` applies regardless of whether a weapon
+  is equipped. `battle.c:862-865`'s `if (weapon)` looked like an equipped-weapon check and briefly
+  got gated on `weapon.weapon_type !== "Unarmed"` here, but that `weapon` bool is `flag.weapon`,
+  which `battle_calc_weapon_attack` sets to 1 unconditionally and only clears for four shield
+  skills (`battle.c:4846`/`4918`) - never for NJ_KUNAI.
+
+- **An ammo's element was leaking into attacks that don't use that ammo, in both directions.**
+  Two bugs:
+  `resolveWeapon()`'s Unarmed branch returned `createWeapon()` before ever checking
+  `script_atk_ele_rh` (the ammo's `bAtkEle` script), so a naked character's ammo-driven element
+  was silently dropped - Throw Kunai when used without a weapon showed Neutral instead of the equipped Kunai's real element.
+  Fixed: the early-return branch now resolves `elementOverride`/`script_atk_ele_rh` before
+  falling back to Neutral.
+  Fixing that exposed the opposite bug: the ammo element then applied unconditionally to EVERY
+  attack, not just ones that use the ammo - a bare-handed punch with a Kunai equipped borrowed
+  its Wind element. Fixed by extracting `skillUsesAmmo()` in `baseDamage.js` (the same
+  AmmoTypes-requirement check already used for ammo ATK, from the earlier Acid Terror fix) and
+  gating the element on it too, in `battlePipeline.js`'s element resolution.
+  Regression-tested against the OTHER direction too: an Unarmed character with an elemental
+  arrow equipped still gets nothing - arrows need a compatible weapon (`ammoFitsWeapon`), unlike
+  kunai/shuriken, which are thrown by hand and were already exempt from that gate.
+
 - **Swept the whole wiki (974 pages) for items the item API cannot describe, and added the
   one that mattered.** Of 140 item ids published in wiki tables the API knows 127; 8 of the
   rest were my own false positives (the regex caught an `atk` column sitting beside the Item

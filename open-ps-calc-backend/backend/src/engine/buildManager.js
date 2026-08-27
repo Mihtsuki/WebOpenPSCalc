@@ -276,7 +276,13 @@ function resolveWeapon(loader, itemId, refine = 0, elementOverride = null, opts 
   const { is_forged = false, forge_sc_count = 0, forge_ranked = false, forge_element = 0, script_atk_ele_rh = null } = opts;
   const { createWeapon } = require("./models");
 
-  if (itemId == null) return createWeapon();
+  // Unarmed still needs the element resolved: an ammo-only bAtkEle script (e.g. an
+  // elemental Kunai with no weapon equipped) must not be silently dropped just because
+  // there's no weapon item to read a base element off of.
+  if (itemId == null) {
+    const element = elementOverride != null ? elementOverride : (script_atk_ele_rh != null ? script_atk_ele_rh : 0);
+    return createWeapon({ element });
+  }
 
   const item = loader.getItem(itemId);
   if (item == null) return createWeapon();

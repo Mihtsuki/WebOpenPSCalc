@@ -149,10 +149,16 @@ function calculateMasteryFix(weapon, build, target, pmf, result, skill = null, o
     result.add_step({ name: "Throw Mastery", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note: `NJ_TOBIDOUGU Lv ${njTobiLv}: +${3 * njTobiLv}`, formula: `dmg + 3×${njTobiLv}`, hercules_ref: "battle.c:843-850" });
   }
 
+  // battle.c:862-865 (battle_calc_masteryfix, #ifndef RENEWAL): `if (weapon) damage += 60;`.
+  // That `weapon` bool is `flag.weapon`, set to 1 unconditionally at the top of
+  // battle_calc_weapon_attack (battle.c:4846) and only ever cleared for four shield skills
+  // (PA_SHIELDCHAIN/CR_SHIELDBOOMERANG/LG_SHIELDPRESS/LG_EARTHDRIVE, battle.c:4918) — not
+  // "a weapon is equipped". For NJ_KUNAI it's always true, so this applies Unarmed or not,
+  // same as NJ_SYURIKEN's Throwing Mastery bonus above.
   if (skill != null && skill.name === "NJ_KUNAI") {
     pmf = addFlat(pmf, 60);
     [mn, mx, av] = pmfStats(pmf);
-    result.add_step({ name: "Kunai Mastery", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note: "NJ_KUNAI: +60 flat", formula: "dmg + 60", hercules_ref: "battle.c:852-855" });
+    result.add_step({ name: "Kunai Mastery", value: av, min_value: mn, max_value: mx, multiplier: 1.0, note: "NJ_KUNAI: +60 flat", formula: "dmg + 60", hercules_ref: "battle.c:862-865" });
   }
 
   if (skill != null && skill.name === "TF_POISON") {

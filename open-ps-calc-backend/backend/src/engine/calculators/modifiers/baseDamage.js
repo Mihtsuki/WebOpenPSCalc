@@ -8,6 +8,43 @@ const { uniformPmf, scaleFloor, addFlat, convolve, pmfStats } = require("../../p
 
 const ARROW_BOW_GUN_TYPES = new Set(["Bow", "Revolver", "Rifle", "Gatling", "Shotgun", "Grenade"]);
 
+// HT_PHANTASMIC is the one skill Hercules force-sets as an arrow attack even though it
+// has no AmmoTypes requirement (battle.c:4909, "Since these do not consume ammo, they
+// need to be explicitly set as arrow attacks").
+const FORCED_ARROW_SKILLS = new Set(["HT_PHANTASMIC"]);
+
+// Whether THIS specific attack actually consumes the equipped ammo. Hercules decides
+// this with `sd->state.arrow_atk`, set two DIFFERENT ways depending on context — the
+// two branches below mirror them exactly:
+//
+//   * NORMAL attack (no skill selected) — from the WEAPON: `weapontype == W_BOW ||
+//     <guns>` (battle.c:6852, inside battle_weapon_attack). The `isRanged` fallback
+//     below.
+//   * SKILL cast — OVERWRITTEN from the SKILL's own AmmoTypes requirement
+//     (skill_check_condition_castbegin, skill.c:15810):
+//         require = skill->get_requirement(sd, skill_id, skill_lv);
+//         sd->state.arrow_atk = require.ammo ? 1 : 0;
+//     The ammo_types/ammo_amount lookup below.
+//
+// `flag.arrow` is then set from `arrow_atk` (battle.c:4890) and gates the arrow ATK
+// roll (`flag&2`, battle.c:661) — so holding a bow does NOT feed ammo ATK (or, by the
+// same logic, ammo element) into every skill, only into skills that actually require
+// ammo. This engine used to apply it on weapon type alone, which handed a bow Rogue's
+// plagiarised Acid Terror the arrow's ATK (+50 from an Oridecon Arrow) despite Acid
+// Terror's requirement being `Items: { Acid_Bottle: 1 }` with no AmmoTypes — reported
+// by a player, who was right. Shared by the ammo ATK contribution below and by
+// battlePipeline's element resolution: an ammo-driven bAtkEle element (e.g. an
+// elemental Kunai) must not leak into an attack that doesn't use that ammo either —
+// a bare-handed punch with a Kunai in the ammo slot must not borrow its element.
+function skillUsesAmmo(skill, isRanged) {
+  const skillName = skill && skill.name;
+  if (!skillName) return isRanged; // no skill selected = a normal attack, the weapon-type case
+  const skillData = loader.getSkillByName(skillName);
+  const req = (skillData && skillData.requirements) || {};
+  const needsAmmo = (req.ammo_types || []).length > 0 || (req.ammo_amount || []).some((n) => Number(n) > 0);
+  return needsAmmo || FORCED_ARROW_SKILLS.has(skillName);
+}
+
 function calculateBaseDamage(status, weapon, build, target, skill, result, opts = {}) {
   const { gear_bonuses: gearBonuses, is_crit: isCrit = false, is_ranged: isRanged = false } = opts;
 
@@ -48,39 +85,9 @@ function calculateBaseDamage(status, weapon, build, target, skill, result, opts 
     result.add_step({ name: "bAtk", value: gearBonuses.weapon_atk_flat, note: `Equipment: +${gearBonuses.weapon_atk_flat} weapon ATK`, formula: `atkmax += ${gearBonuses.weapon_atk_flat}`, hercules_ref: "status_calc_pc", info: true });
   }
 
-  // Whether the ammo's ATK counts at all. Hercules decides this with
-  // `sd->state.arrow_atk`, and CRUCIALLY it means two different things:
-  //
-  //   * NORMAL attack — set from the WEAPON: `weapontype == W_BOW || <guns>`
-  //     (battle.c:6852, inside battle_weapon_attack).
-  //   * SKILL cast — OVERWRITTEN from the SKILL's own ammo requirement in
-  //     skill_check_condition_castbegin (skill.c:15810):
-  //         require = skill->get_requirement(sd, skill_id, skill_lv);
-  //         sd->state.arrow_atk = require.ammo ? 1 : 0;
-  //
-  // `flag.arrow` is then set from that (battle.c:4890) and gates the arrow roll
-  // below (`flag&2`, battle.c:661). So holding a bow does NOT feed ammo ATK into
-  // every skill — only into skills that actually require ammo. This engine used to
-  // apply it on weapon type alone, which handed a bow Rogue's plagiarised Acid
-  // Terror the arrow's ATK (+50 from an Oridecon Arrow). Acid Terror's requirement
-  // is `Items: { Acid_Bottle: 1 }` with no AmmoTypes, so in game it gains nothing.
-  // Reported by a player, who was right.
-  //
-  // HT_PHANTASMIC is the one skill Hercules force-sets (battle.c:4909, "Since these
-  // do not consume ammo, they need to be explicitly set as arrow attacks") — it is a
-  // Bows skill with no ammo requirement, so the data-driven test alone would miss it.
-  const FORCED_ARROW_SKILLS = new Set(["HT_PHANTASMIC"]);
-  const skillName = skill && skill.name;
-  const skillData = skillName ? loader.getSkillByName(skillName) : null;
-  const skillNeedsAmmo = (sd) => {
-    if (!sd) return false;
-    const req = sd.requirements || {};
-    return (req.ammo_types || []).length > 0 || (req.ammo_amount || []).some((n) => Number(n) > 0);
-  };
-  // No skill selected = a normal attack, which is the weapon-type case.
-  const usesAmmo = skillName
-    ? (skillNeedsAmmo(skillData) || FORCED_ARROW_SKILLS.has(skillName))
-    : isRanged;
+  // Whether the ammo's ATK counts at all — see skillUsesAmmo() above (battle.c's
+  // sd->state.arrow_atk mechanism, and the Acid Terror report that established it).
+  const usesAmmo = skillUsesAmmo(skill, isRanged);
 
   let arrowAtk = 0;
   let ammoId = null;
@@ -206,4 +213,4 @@ function calculateBaseDamage(status, weapon, build, target, skill, result, opts 
   return pmf;
 }
 
-module.exports = { calculateBaseDamage, ARROW_BOW_GUN_TYPES };
+module.exports = { calculateBaseDamage, ARROW_BOW_GUN_TYPES, skillUsesAmmo };

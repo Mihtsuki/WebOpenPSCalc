@@ -2639,3 +2639,77 @@ test("Shadow's Within gates Shadow Slash's crit and grants the crit rate, not da
   assert.ok(require("../src/engine/calculators/modifiers/critChance")
     .isCritEligible(530, "NJ_KIRIKAGE", "standard"), "vanilla Shadow Slash still crits");
 });
+
+// ---------------------------------------------------------------------------
+// An ammo-driven element only applies to attacks that actually use that ammo
+// ---------------------------------------------------------------------------
+test("elemental Kunai element applies to Throw Kunai but not to a bare-handed punch", () => {
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1170); // Sohee — Water, Lv1
+  const buildWith = (extra) => buildFromSaveSchema({
+    server: "payon_stories", job_id: 25, base_level: 44, job_level: 27,
+    base_stats: { str: 69, agi: 1, vit: 1, int: 1, dex: 8, luk: 1 },
+    equipped: { ammo: 13257 }, // High Wind Kunai — Wind element
+    ...extra,
+  });
+
+  // Unarmed punch with the Kunai equipped: must stay Neutral, not borrow Wind — a
+  // punch never throws the Kunai. Confirmed in-game: punching Sohee reads 74 flat
+  // whether or not the Kunai is equipped.
+  const b1 = buildWith({});
+  const [gb1, eff1, w1, st1] = resolvePlayerState(b1, cfg, PS);
+  const punch = new BattlePipeline(cfg).calculate(st1, w1, createSkillInstance({ id: 0, level: 1 }), target, eff1, gb1);
+  assert.equal(punch.normal.steps.find((s) => s.name === "Attr Fix").note, "Neutral vs Water Lv1 (100%)",
+    "a punch must not inherit the equipped ammo's element");
+  assert.equal(punch.normal.avg_damage, 74, "matches the in-game reading exactly");
+
+  // Throw Kunai — declares an AmmoTypes requirement — must still get the Kunai's
+  // own element.
+  const kunaiId = loader.getSkillIdByName("NJ_KUNAI");
+  const b2 = buildWith({ mastery_levels: { NJ_TOBIDOUGU: 1 } });
+  const [gb2, eff2, w2, st2] = resolvePlayerState(b2, cfg, PS);
+  const kunai = new BattlePipeline(cfg).calculate(st2, w2, createSkillInstance({ id: kunaiId, level: 5 }), target, eff2, gb2);
+  assert.equal(kunai.normal.steps.find((s) => s.name === "Attr Fix").note, "Wind vs Water Lv1 (175%)",
+    "Throw Kunai must still borrow the ammo's element");
+
+  // Regression guard for the OTHER half of this mechanism (ammoFitsWeapon, not
+  // touched by this fix): an Unarmed character with an elemental ARROW equipped
+  // gets nothing at all — arrows need a compatible weapon (Bow/Instrument/Whip) to
+  // fire, unlike Kunai/Shuriken which are thrown by hand.
+  const b3 = buildFromSaveSchema({
+    server: "payon_stories", job_id: 11, base_level: 60, job_level: 30,
+    base_stats: { str: 30, agi: 30, vit: 30, int: 1, dex: 30, luk: 1 },
+    equipped: { ammo: 1759 }, // Frozen Arrow — Water element
+  });
+  const [gb3, eff3, w3, st3] = resolvePlayerState(b3, cfg, PS);
+  const arrowPunch = new BattlePipeline(cfg).calculate(st3, w3, createSkillInstance({ id: 0, level: 1 }), target, eff3, gb3);
+  assert.equal(arrowPunch.normal.steps.find((s) => s.name === "Attr Fix").note, "Neutral vs Water Lv1 (100%)",
+    "an Unarmed character gets nothing from an equipped arrow — it needs a bow");
+});
+
+// ---------------------------------------------------------------------------
+// Throw Kunai's flat +60 mastery bonus is not gated on an equipped weapon
+// ---------------------------------------------------------------------------
+test("Throw Kunai's flat +60 mastery bonus applies whether or not a weapon is equipped", () => {
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1170); // Sohee
+  const id = loader.getSkillIdByName("NJ_KUNAI");
+  const run = (rightHand) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 25, base_level: 44, job_level: 27,
+      base_stats: { str: 69, agi: 1, vit: 1, int: 1, dex: 8, luk: 1 },
+      equipped: { ammo: 13257, ...(rightHand ? { right_hand: rightHand } : {}) },
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(st, w, createSkillInstance({ id, level: 5 }), target, eff, gb);
+  };
+
+  for (const [label, rightHand] of [["Unarmed", null], ["Cutter[3] equipped", 1204]]) {
+    const steps = run(rightHand).normal.steps;
+    const before = steps.find((s) => s.name === "Mastery Fix");
+    const after = steps.find((s) => s.name === "Kunai Mastery");
+    assert.ok(before && after, `${label}: Kunai Mastery step must be present`);
+    assert.equal(after.min_value - before.min_value, 60, `${label}: +60 flat (min)`);
+    assert.equal(after.max_value - before.max_value, 60, `${label}: +60 flat (max)`);
+  }
+});

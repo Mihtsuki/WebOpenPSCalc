@@ -30,7 +30,7 @@ const { createCalcContext, createDamageResult, createBattleResult, createAttackD
 const { getProfile, STANDARD } = require("../serverProfiles");
 const { uniformPmf, scaleFloor, floorAt, pmfStats, convolve, addFlat } = require("../pmf");
 
-const { calculateBaseDamage } = require("./modifiers/baseDamage");
+const { calculateBaseDamage, skillUsesAmmo } = require("./modifiers/baseDamage");
 const { calculateRefineFix } = require("./modifiers/refineFix");
 const { calculateAttrFix } = require("./modifiers/attrFix");
 const { calculateForgeBonus, calculateSpiritSphereBonus } = require("./modifiers/forgeBonus");
@@ -1575,7 +1575,23 @@ class BattlePipeline {
     pmf = calculateMasteryFix(weapon, build, target, pmf, result, skill, { profile, ctx });
 
     const skillData = loader.getSkill(skill.id);
-    let effAtkEle = weapon.element;
+
+    // weapon.element may be overridden by an ammo bAtkEle script (an elemental Kunai,
+    // Shuriken, or arrow), baked in unconditionally by resolveWeapon. That's only
+    // correct for attacks that actually consume that ammo — battle.c sets
+    // sd->state.arrow_atk from the CAST SKILL's own AmmoTypes requirement, not from
+    // what's sitting in the ammo slot (skill_check_condition_castbegin, skill.c:15810).
+    // A bare-handed punch with a Kunai equipped must not borrow its element — confirmed
+    // in-game: punching Sohee reads identical whether or not a High Wind Kunai is
+    // equipped. Falls back to the right-hand item's own element (Neutral if Unarmed).
+    let baseWeaponEle = weapon.element;
+    if (gearBonuses && gearBonuses.script_atk_ele_rh != null && !skillUsesAmmo(skill, isRanged)) {
+      const rhId = build.equipped.right_hand;
+      const rhItem = rhId != null ? loader.getItem(rhId) : null;
+      baseWeaponEle = rhItem ? (rhItem.element ?? 0) : 0;
+    }
+
+    let effAtkEle = baseWeaponEle;
     if (skill.id !== 0 && skillData) {
       const eleList = skillData.element || [];
       if (eleList.length) {
@@ -1587,7 +1603,7 @@ class BattlePipeline {
     if (skill.name in (profile.skill_elements || {})) effAtkEle = profile.skill_elements[skill.name];
 
     // PS rework: Envenom uses weapon element instead of forced Poison.
-    if (profile.mechanic_flags.has("TF_POISON_USES_WEAPON_ELEMENT") && skill.name === "TF_POISON") effAtkEle = weapon.element;
+    if (profile.mechanic_flags.has("TF_POISON_USES_WEAPON_ELEMENT") && skill.name === "TF_POISON") effAtkEle = baseWeaponEle;
 
     // Ardent Helm turns Magnum Break Holy. Applied to the SKILL's hit only — the
     // lingering fire enchant it leaves behind is a separate term below, and no source
