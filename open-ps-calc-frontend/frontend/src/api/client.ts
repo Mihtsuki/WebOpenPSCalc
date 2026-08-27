@@ -10,7 +10,10 @@ async function statsRequest(path: string, password: string, params?: Record<stri
   if (text) { try { data = JSON.parse(text); } catch { data = text; } }
   if (!res.ok) {
     const message = (data && typeof data === "object" && (data as any).error) || `Request failed (${res.status})`;
-    throw new Error(message);
+    // Carry the status: callers need to tell "wrong password" (401) apart from any
+    // other failure, and the message alone cannot say — it is the server's `error`
+    // string, which never mentions the code.
+    throw Object.assign(new Error(message), { status: res.status });
   }
   return data as any;
 }

@@ -141,3 +141,67 @@ test("Payon Stories sources still point at Payon Stories", () => {
     assert.ok(hosts.includes(host), `${path.basename(file)} must still query ${host}`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// Access control. Same category as the above — a one-line diff, invisible in
+// review, that quietly publishes something private.
+// ---------------------------------------------------------------------------
+test("the stats endpoint fails closed when no password is configured", () => {
+  // This guard read `if (!STATS_PASSWORD) return true` for most of its life, so a
+  // server whose env var went missing served the entire traffic log to anyone who
+  // asked — no error, no log line, nothing on screen to say the lock was off. The
+  // deploy rewrites STATS_PASSWORD into the server .env on every run, which makes
+  // that one failed injection away rather than hypothetical.
+  //
+  // Unset must now mean DENY. Restoring the old line is a two-word edit that looks
+  // like a simplification, which is exactly why it is pinned here.
+  const src = read(BACKEND, "src", "routes", "stats.ts");
+
+  const fn = src.slice(src.indexOf("function checkPassword"));
+  const body = fn.slice(0, fn.indexOf("\n}") + 2);
+  assert.ok(body.includes("STATS_PASSWORD"), "checkPassword must still gate on STATS_PASSWORD");
+
+  assert.ok(!/if\s*\(\s*!\s*STATS_PASSWORD\s*\)\s*return\s+true/.test(body),
+    "checkPassword falls open with no password set — an unconfigured server would "
+    + "publish the stats data. The unset branch must deny.");
+
+  // The unset branch has to actually refuse, not fall through to the compare below
+  // (an undefined password would otherwise match a missing header).
+  const unset = body.slice(body.indexOf("if (!STATS_PASSWORD)"));
+  assert.ok(/return false/.test(unset.slice(0, 500)),
+    "the no-password branch must return false so the request is refused");
+
+  // The local-dev escape hatch is an exact opt-in. A truthy test would turn
+  // STATS_OPEN=0 or STATS_OPEN=false into "open", which is the trap this replaced.
+  const m = src.match(/const\s+STATS_OPEN\s*=\s*([^;]+);/);
+  assert.ok(m, "STATS_OPEN must stay a single named constant");
+  assert.equal(m[1].trim(), 'process.env.STATS_OPEN === "1"',
+    "STATS_OPEN must match exactly \"1\" — any truthy check makes STATS_OPEN=false mean open");
+});
+
+test("every stats data route goes through the password check", () => {
+  // The router is mounted twice (/stats and the blocker-resistant /api/e alias), so
+  // the guard lives on the routes rather than the mount. A new route reading the
+  // ndjson without calling checkPassword would be public on both paths at once.
+  const src = read(BACKEND, "src", "routes", "stats.ts");
+
+  const handlers = [...src.matchAll(/router\.(get|post)\(\s*"([^"]+)"/g)];
+  assert.ok(handlers.length > 0, "expected some routes in stats.ts");
+
+  for (const h of handlers) {
+    const body = src.slice(h.index, src.indexOf("\n});", h.index));
+    // Reading the stats store or the share store means serving private data.
+    if (!/STATS_FILE|SHARES_FILE|readNginxPageViews/.test(body)) continue;
+    assert.ok(/checkPassword\(req, res\)/.test(body),
+      `router.${h[1]}("${h[2]}") reads private data without calling checkPassword`);
+  }
+
+  // Both mounts must share one router, so the guard cannot be bypassed by a mount
+  // that reaches a different, unguarded instance.
+  const server = read(BACKEND, "src", "server.ts");
+  const mounts = [...server.matchAll(/app\.use\("([^"]+)",\s*(\w+)\)/g)]
+    .filter((x) => /stats/i.test(x[2]));
+  assert.equal(mounts.length, 2, "expected the stats router to be mounted twice");
+  assert.equal(new Set(mounts.map((x) => x[2])).size, 1,
+    "both stats mounts must use the same router instance");
+});

@@ -243,7 +243,11 @@ export default function StatsPage() {
       const result = await statsApi.getData(pw, params);
       setData(result);
     } catch (e: any) {
-      if (e.message?.includes("401")) {
+      // 401 is specifically a bad password, so drop back to the login form. Anything
+      // else (503 when the server has no password configured, network, 500) is shown
+      // as-is — bouncing those to "Wrong password." would send you round in circles
+      // retyping a password that was never the problem.
+      if (e.status === 401) {
         setAuthed(false);
         sessionStorage.removeItem(SESSION_KEY);
         setAuthErr("Wrong password.");

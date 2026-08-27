@@ -9,6 +9,22 @@ const STATS_FILE   = path.join(__dirname, "../../../data-store/stats.ndjson");
 const CURSOR_FILE  = path.join(__dirname, "../../../data-store/consolidation-cursor.json");
 const SHARES_FILE  = path.join(__dirname, "../../../data-store/shares.json");
 const STATS_PASSWORD = process.env.STATS_PASSWORD;
+// Explicit opt-out for local development. Without a password AND without this, the
+// stats endpoint denies everything — see checkPassword.
+const STATS_OPEN = process.env.STATS_OPEN === "1";
+
+// Announce the state once at import, so a deploy that fails to inject the password is
+// visible in the server log instead of being discovered later. The old behaviour was
+// to fall open silently, which meant a missing env var published the traffic data with
+// nothing anywhere to say so.
+if (STATS_PASSWORD) {
+  console.log("[stats] password set — /stats/data requires X-Stats-Password.");
+} else if (STATS_OPEN) {
+  console.warn("[stats] STATS_OPEN=1 and no STATS_PASSWORD: the stats endpoint is PUBLIC. Never set this in production.");
+} else {
+  console.error("[stats] No STATS_PASSWORD set — the stats endpoint is DENYING ALL requests. "
+    + "Set STATS_PASSWORD to enable it, or STATS_OPEN=1 to run it unprotected locally.");
+}
 
 // Total number of copied/shared builds persisted in the share store (a single
 // id→entry JSON map; deduped by content, so this is the count of distinct builds).
@@ -28,8 +44,23 @@ function readCursor(): number {
   } catch { return 0; }
 }
 
+// FAILS CLOSED. This used to be `if (!STATS_PASSWORD) return true`, so a server whose
+// env var went missing served the whole traffic log to anyone who asked, with no error
+// and no log line. The deploy rewrites STATS_PASSWORD in the server .env on every run,
+// so a failed injection was one bad deploy away from publishing it.
+//
+// Unset now means DENY. Local development opts out explicitly with STATS_OPEN=1, which
+// is loud at boot and can never be reached by accident on the server.
 function checkPassword(req: Request, res: Response): boolean {
-  if (!STATS_PASSWORD) return true;
+  if (!STATS_PASSWORD) {
+    if (STATS_OPEN) return true;
+    res.status(503).json({
+      error: "Stats disabled",
+      detail: "No STATS_PASSWORD is configured. Set it to enable the stats endpoint, "
+        + "or set STATS_OPEN=1 to run it unprotected for local development.",
+    });
+    return false;
+  }
   const pw = (req.headers["x-stats-password"] as string) || (req.query.password as string);
   if (pw === STATS_PASSWORD) return true;
   res.status(401).json({ error: "Unauthorized" });
