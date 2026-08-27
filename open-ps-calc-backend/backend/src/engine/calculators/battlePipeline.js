@@ -1589,6 +1589,13 @@ class BattlePipeline {
     // PS rework: Envenom uses weapon element instead of forced Poison.
     if (profile.mechanic_flags.has("TF_POISON_USES_WEAPON_ELEMENT") && skill.name === "TF_POISON") effAtkEle = weapon.element;
 
+    // Ardent Helm turns Magnum Break Holy. Applied to the SKILL's hit only — the
+    // lingering fire enchant it leaves behind is a separate term below, and no source
+    // says whether that changes too, so it is deliberately left as Fire.
+    if (skill.name === "SM_MAGNUM" && gearBonuses && gearBonuses.magnum_element != null) {
+      effAtkEle = gearBonuses.magnum_element;
+    }
+
     if (!skill.nk_ignore_ele) {
       pmf = calculateAttrFix(weapon, target, pmf, result, build, effAtkEle);
     } else {

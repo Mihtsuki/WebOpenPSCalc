@@ -2449,3 +2449,45 @@ test("Throw Shuriken rolls hit/flee like a normal attack on PS, not vanilla's au
   const rStd = new BattlePipeline(cfg).calculate(stStd, wStd, createSkillInstance({ id, level: 1 }), target, effStd, gbStd);
   assert.equal(rStd.hit_chance, 100, "STANDARD (vanilla) profile must still auto-hit");
 });
+
+// ---------------------------------------------------------------------------
+// Ardent Helm — the one custom item the item API cannot describe
+// ---------------------------------------------------------------------------
+test("Ardent Helm turns Magnum Break Holy", () => {
+  const cfg = createBattleConfig();
+  const id = loader.getSkillByName("SM_MAGNUM").id;
+  const dmg = (helm, mob) => {
+    const equipped = helm ? { right_hand: 1101, head_top: 8417 } : { right_hand: 1101 };
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 14, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 40, vit: 50, int: 20, dex: 60, luk: 20 }, equipped,
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    const r = new BattlePipeline(cfg).calculate(
+      st, w, createSkillInstance({ id, level: 10 }), loader.getMonster(mob), eff, gb);
+    return { dmg: r.normal.avg_damage, attr: (r.normal.steps.find((s) => /Attr Fix/.test(s.name)) || {}).note };
+  };
+
+  // wiki.payonstories.com/Magnum_Break: "The element of Magnum Break can be changed
+  // from Fire to Holy with the Ardent Helmet headgear." Against an Undead target that
+  // is 150% -> 175%, so the swap is visible in the damage as well as the step note.
+  const off = dmg(false, 1036);
+  const on = dmg(true, 1036);
+  assert.match(off.attr, /Fire/, "without the helm Magnum Break is Fire");
+  assert.match(on.attr, /Holy/, "with it, Holy");
+  assert.ok(on.dmg > off.dmg, "Holy beats Fire into Undead");
+
+  // The helm must not leak into other skills — the bonus is Magnum-Break-specific.
+  const bashId = loader.getSkillByName("SM_BASH").id;
+  const bashAttr = (helm) => {
+    const equipped = helm ? { right_hand: 1101, head_top: 8417 } : { right_hand: 1101 };
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 14, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 40, vit: 50, int: 20, dex: 60, luk: 20 }, equipped,
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    return (new BattlePipeline(cfg).calculate(st, w, createSkillInstance({ id: bashId, level: 10 }),
+      loader.getMonster(1036), eff, gb).normal.steps.find((s) => /Attr Fix/.test(s.name)) || {}).note;
+  };
+  assert.equal(bashAttr(true), bashAttr(false), "Bash's element must be untouched");
+});

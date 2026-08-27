@@ -9,6 +9,11 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Ardent Helm is now in the calculator, and turns Magnum Break Holy.** The Crusader
+  quest headgear was missing entirely. Its one known effect — changing Magnum Break's element
+  from Fire to Holy — is modelled, which is a real swing against Undead and Demon targets. Its
+  DEF and refine bonuses aren't published anywhere, so they're left out rather than guessed at.
+
 - **The item list now marks which weapons can be forged.** Forgeable weapons show a small
   "Forgeable" tag in the dropdown, so you can see at a glance which ones accept Star Crumbs, an
   element and a ranked bonus — previously you had to equip a weapon to find out.

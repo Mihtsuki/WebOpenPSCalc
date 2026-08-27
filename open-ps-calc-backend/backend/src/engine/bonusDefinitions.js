@@ -138,6 +138,12 @@ const BONUS1 = {
   // from its base 20% to this value. "assign" (not additive) so two copies of the card
   // still cap at the stated figure rather than stacking to 40%.
   bMagnumLinger: def((v) => `Magnum Break's lingering fire effect becomes ${v}% (base 20%).`, "magnum_linger_pct", "assign"),
+  // PS-specific, and narrow on purpose. The wiki's Magnum Break page: "The element of
+  // Magnum Break can be changed from Fire to Holy with the Ardent Helmet headgear."
+  // Exactly one item does exactly this to exactly one skill, so it follows bMagnumLinger
+  // (also Magnum-Break-specific) rather than inventing a general per-skill element
+  // framework off a single data point. Generalise if a second such item ever appears.
+  bMagnumEle: def((v) => `Magnum Break's element becomes ${ELEMENT_NAMES[String(v)] ?? String(v)}.`, "magnum_element", "assign", { transform: (x) => ELE_STR_TO_INT[x] }),
   // PS-specific: the Pirate Skel + Flame Beetle card combo makes the AUTOCAST
   // Mammonite cost no zeny and be "unaffected by Zeny Pincher" — and Zeny Pincher
   // is a damage term here (it halves Mammonite's per-level ratio term), so the

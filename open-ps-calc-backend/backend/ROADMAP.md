@@ -318,6 +318,35 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Swept the whole wiki (974 pages) for items the item API cannot describe, and added the
+  one that mattered.** Of 140 item ids published in wiki tables the API knows 127; 8 of the
+  rest were my own false positives (the regex caught an `atk` column sitting beside the Item
+  ID column in a Gunslinger table) and one is a Halloween 2023 seasonal. Four were real, and
+  the sweep turned up the wiki's **`List of Custom Items`** — 72 PS-custom items with ids,
+  which is the canonical register for exactly the gear the API is weakest on. We had 69 of 72.
+  - **ADDED: Ardent Helm (8417)** — a Crusader hidden-quest headgear the API has no data for
+    under either its id or its name, so the wiki is the ONLY source. Its single documented
+    mechanical effect is not on the item list at all but on the **Magnum Break** page: "The
+    element of Magnum Break can be changed from Fire to Holy with the Ardent Helmet headgear."
+    Modelled via a new PS-custom `bMagnumEle` bonus, following `bMagnumLinger` (also
+    Magnum-Break-specific) rather than inventing a general per-skill element framework off a
+    single data point. Measured: Fire→Undead 150% becomes Holy→Undead 175%, 897 → 1046 damage.
+    **Deliberately omitted because nothing documents them:** DEF, refine bonuses, level
+    requirement, and whether the lingering fire enchant also turns Holy — the enchant is a
+    separate term and no source covers it, so it stays Fire. The item's `<ref>` to
+    `Patch Note - 22 Jun 2026` is **broken** — that page never mentions it.
+  - **NOT added: Blessing of the Ancients (8325)** — a consumable that casts Blessing 10 and
+    Angelus 10, and only inside Payon Undertombs. Both buffs are already tickable in the buff
+    panel, so the item itself carries no damage term the calculator does not already offer.
+  - **NOT a gap: Frozen Pick.** The wiki lists it as **8293**, but the API resolves Frozen Pick
+    to **8393** and says 8293 is Costume Onigiri Hat. We hold 8393 correctly — this is a wiki
+    id error worth reporting to PS, not something to fix here. It matters because Frozen Pick
+    is the item the Killing Stroke notes reference.
+  `PS_SOURCES.md` now records the custom-items list as the fallback when the API says "No
+  data", with both cautions attached (its ids can be wrong, its refs can be broken, and an
+  item's real effect often lives on the SKILL's page). That text went into `gen_sources.py`,
+  not the generated file — hand-editing PS_SOURCES.md would be wiped on the next regeneration.
+
 - **Hand-authored items could ship with a working script and a blank tooltip.** Player-reported
   on **Giant Pestle (8430)**: every effect applied, but hovering showed nothing. `ps_item_manual`
   entries are written by hand, and it is easy to add a `script` — which changes damage, so tests

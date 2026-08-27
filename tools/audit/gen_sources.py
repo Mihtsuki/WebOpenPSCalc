@@ -82,6 +82,18 @@ calculator is an unofficial fan tool.
   the PDFs never mentioned. Re-check it a day or two after a patch.
 - Dates marked *(downloaded)* are when the file was obtained, not when Payon Stories
   published it. Treat them as an upper bound on the real publish date.
+- **When the item API returns "No data", try the wiki's `List of Custom Items`.** That page
+  is the canonical register of PS-custom gear - name, item id, equipment type and source -
+  and it covers items `tools.payonstories.com` does not carry at all. A 2026-08-26 sweep of
+  every item id published on the wiki found 4 real cases the API cannot describe, three of
+  which are on that page (Ring of Peace 8269, Talisman of Holy Protection 8324, Ardent Helm
+  8417). It is the ONLY source for Ardent Helm.
+  Two cautions from that sweep. Its ids are not always right - it lists **Frozen Pick as
+  8293**, but the API resolves Frozen Pick to **8393** and says 8293 is Costume Onigiri Hat,
+  so cross-check an id before trusting it. And its `<ref>` citations can be broken - Ardent
+  Helm cites `Patch Note - 22 Jun 2026`, which never mentions the item.
+  An item's *mechanical* effect often lives on the SKILL's page rather than the item list:
+  Ardent Helm's only documented effect is a line on `Magnum Break`.
 """
 
 PATCHES = """---
