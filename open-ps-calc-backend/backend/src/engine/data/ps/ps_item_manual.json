@@ -390,7 +390,9 @@
   "job": [],
   "equip_level": 20,
   "refineable": false,
-  "script": "bonus2 bCastrate,\"PR_MAGNUS\",-5;"
+  "script": "bonus2 bCastrate,\"PR_MAGNUS\",-5;",
+  "description": "A ring blessed with holy water, channeling divine power into the wearer's prayers.<br/>Reduces cast time of <font color='#008800'>Magnus Exorcismus</font> by 5%.<br/><font color='#FFFFFF'>_</font><br/>[<font color='#6666CC'>Combo with Rosary [0] or Rosary [1]</font>]<br/><font color='#008800'>Heal</font> inflicts full damage on targets it damages.<br/><font color='#FFFFFF'>_</font><br/>Class:<font color='#6666CC'> Accessory</font><br/>Defense:<font color='#0000FF'> 0</font><br/>Weight:<font color='#009900'> 10</font><br/>Level Requirement:<font color='#009900'> 20</font><br/>Jobs:<font color='#6666CC'> All Jobs</font>",
+  "_note": "Description added 2026-08-26 from the live item API verbatim — the entry had a `name` but no `description`, so the tooltip rendered blank while the script worked. Same class as Giant Pestle (8430) and Rust-Worn Apparatus (81012), both player-reported."
  },
  "8324": {
   "type": "IT_ARMOR",
@@ -403,7 +405,8 @@
   "job": [],
   "equip_level": 60,
   "refineable": false,
-  "script": "bonus bAllStats,1; bonus2 bSubEle,Ele_Holy,7;"
+  "script": "bonus bAllStats,1; bonus2 bSubEle,Ele_Holy,7;",
+  "_note": "No description on purpose: the live item API returns \"No data\" for this id AND for the name, so there is no source to copy. The script is the only record of what it does. Writing tooltip text from the script would be inventing player-facing copy, so it stays blank until PS publishes the item — re-check the API, which has caught up on other items a day or two after a patch. Allowlisted in frontend-source.test.js's description guard."
  },
  "81012": {
   "type": "IT_ARMOR",
@@ -2579,8 +2582,9 @@
   "weapon_level": 4,
   "equip_level": 60,
   "refineable": true,
-  "_note": "PS Blacksmith rework 2026-08-09. Id, level requirement and job list taken from the in-game client tooltip (2026-08-09 screenshot: 'Whirling_Hammer' / 'Whirling Hammer [1]' (8429), Level Requirement 60, Jobs: Blacksmith), which OVERRIDES the rework PDF on two points — the PDF said level 70 and did not restrict the job. tools.payonstories.com/api/pc/item still returns 'No data' for it, so the client is the authoritative source here. 'Gain 1 SP each time a monster is killed by a physical melee attack' is not a damage term and is not modeled.",
-  "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,getrefine();"
+  "_note": "PS Blacksmith rework 2026-08-09. Id, level requirement and job list taken from the in-game client tooltip (2026-08-09 screenshot: 'Whirling_Hammer' / 'Whirling Hammer [1]' (8429), Level Requirement 60, Jobs: Blacksmith), which OVERRIDES the rework PDF on two points — the PDF said level 70 and did not restrict the job. tools.payonstories.com/api/pc/item still returns 'No data' for it, so the client is the authoritative source here. 'Gain 1 SP each time a monster is killed by a physical melee attack' is not a damage term and is not modeled. Description added 2026-08-26 from the live item API verbatim — the entry had a `name` but no `description`, so the tooltip rendered blank while the script worked. Same class as Giant Pestle (8430) and Rust-Worn Apparatus (81012), both player-reported.",
+  "script": "bonus2 bSkillAtk,MC_CARTREVOLUTION,getrefine();",
+  "description": "A heavy hammer made for reckless swings, with no regard of who it connects with.<br/>Gain 1 SP each time a monster is killed by Physical Melee Attack.<br/>Increases <font color='#0000FF'>Cart Revolution</font> damage by 1% per refine.<br/>Class:<font color='#6666CC'> Two-Handed Mace</font><br/>Attack:<font color='#CC0000'> 190</font><br/>Weight:<font color='#009900'> 350</font><br/>Weapon Level:<font color='#009900'> 4</font><br/>Level Requirement:<font color='#009900'> 60</font><br/>Jobs:<font color='#6666CC'> Blacksmith</font>"
  },
  "_comment_95xxx": "The reserved 95xxx block is currently EMPTY. It exists for items announced in a rework PDF that are not obtainable yet and that tools.payonstories.com/api/pc/item returns 'No data' for, so there is no real id to key them by; re-key them to the published id once they land (a share link that equips one will need the item re-picked). Both 2026-08-09 weapons have now made that move: Whirling Hammer to 8429 (in-game client tooltip) and Giant Pestle to 8430 (item API, 2026-08-10).",
  "8430": {
@@ -2601,8 +2605,9 @@
   "weapon_level": 3,
   "equip_level": 58,
   "refineable": true,
-  "_note": "PS Alchemist rework 2026-08-09. Base LUK and base DEX 60-79 give +3 ATK per Pharmacy level; 80+ raises that to +12 per level (the PDF states the 80+ figure is the TOTAL bonus, not an addition). The Potion Pitcher extra-target chance (5% / 20%) is a support effect with no damage term. Re-keyed 2026-08-10 from the provisional 95002 to its real id 8430, published by tools.payonstories.com/api/pc/item; every stat here (Mace, ATK 100, weight 130, weapon level 3, level req 58, 1 slot, Alchemist) matches that entry.",
-  "script": "if(readparam(bLuk)>=80 && readparam(bDex)>=80) { bonus bBaseAtk,12*getskilllv(AM_PHARMACY); } else { if(readparam(bLuk)>=60 && readparam(bDex)>=60) { bonus bBaseAtk,3*getskilllv(AM_PHARMACY); } }"
+  "_note": "PS Alchemist rework 2026-08-09. Base LUK and base DEX 60-79 give +3 ATK per Pharmacy level; 80+ raises that to +12 per level (the PDF states the 80+ figure is the TOTAL bonus, not an addition). The Potion Pitcher extra-target chance (5% / 20%) is a support effect with no damage term. Re-keyed 2026-08-10 from the provisional 95002 to its real id 8430, published by tools.payonstories.com/api/pc/item; every stat here (Mace, ATK 100, weight 130, weapon level 3, level req 58, 1 slot, Alchemist) matches that entry. Description added 2026-08-26 from the live item API verbatim — the entry had a `name` but no `description`, so the tooltip rendered blank while the script (and therefore all the damage) worked fine. Player-reported. NB the API text also promises a Potion Pitcher extra-target chance (+5% / +20%); that is a healing effect with no damage term, so it is described but deliberately not scripted.",
+  "script": "if(readparam(bLuk)>=80 && readparam(bDex)>=80) { bonus bBaseAtk,12*getskilllv(AM_PHARMACY); } else { if(readparam(bLuk)>=60 && readparam(bDex)>=60) { bonus bBaseAtk,3*getskilllv(AM_PHARMACY); } }",
+  "description": "An oversized pestle built<br/>to prepare remedies in<br/>quantities few can handle<br/>[<font color='#008800'>Base LUK and DEX >= 60</font>]<br/>+3 ATK per <font color='#008800'>Pharmacy</font> level<br/>+5% chance for<br/><font color='#008800'>Potion Pitcher</font> to affect<br/>an additional target<br/>[<font color='#008800'>Base LUK and DEX >= 80</font>]<br/>+12 ATK per <font color='#008800'>Pharmacy</font> level<br/>+20% chance for<br/><font color='#008800'>Potion Pitcher</font> to affect<br/>an additional target<br/>Class:<font color='#6666CC'> Mace</font><br/>Attack:<font color='#CC0000'> 100</font><br/>Weight:<font color='#009900'> 130</font><br/>Weapon Level:<font color='#009900'> 3</font><br/>Level Requirement:<font color='#009900'> 58</font><br/>Jobs:<font color='#6666CC'> Alchemist</font>"
  },
  "5816": {
   "aegis_name": "Purple_Cowboy_Hat",

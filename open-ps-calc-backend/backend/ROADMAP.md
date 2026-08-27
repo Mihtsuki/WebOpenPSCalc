@@ -318,6 +318,23 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Hand-authored items could ship with a working script and a blank tooltip.** Player-reported
+  on **Giant Pestle (8430)**: every effect applied, but hovering showed nothing. `ps_item_manual`
+  entries are written by hand, and it is easy to add a `script` — which changes damage, so tests
+  and goldens notice — while forgetting `description`, which only appears on hover, so nothing
+  does. This is the **second** report of exactly this (Rust-Worn Apparatus 81012 was the first),
+  so it was fixed as a class rather than an instance: a sweep found **Whirling Hammer (8429)** and
+  **Purifying Ring (81011)** with the same hole, both now filled verbatim from the item API.
+  **Deliberately left blank: Talisman of Holy Protection (8324)** — the API returns "No data" for
+  both its id and its name, so there is no source to copy. Its script is the only record of what
+  it does, and generating tooltip copy from a script means inventing player-facing text, which is
+  worse than a blank. `_note` records why and says to re-check the API, which has caught up on
+  other items a day or two after a patch. It is the sole allowlist entry in the new guard.
+  New test asserts every hand-authored item resolves a non-empty description, and names the API
+  URL to copy from in its failure message. Sabotage-checked by blanking Giant Pestle again.
+  (The CHANGELOG shape guard added minutes earlier then caught my own entry for THIS fix doubling
+  a blank line — which is the first time that test has paid for itself.)
+
 - **CHANGELOG.md is now shape-checked by a test**, after I broke it three separate ways in
   one stretch of work: four days of entries filed under a stale `## 2026-08-22` heading
   (every insert script hardcoded that date — the same drift I had *already* repaired once in

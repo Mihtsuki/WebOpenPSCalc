@@ -15,6 +15,10 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Giant Pestle, Whirling Hammer and Purifying Ring had no tooltip text.** Their effects all
+  worked — only the description was blank when you hovered them. Reported by a player for Giant
+  Pestle; the other two had the same gap and are fixed alongside it.
+
 - **A saved build could load back as "New Build".** The name you typed was stored on the list
   entry but not inside the build itself, so loading restored whatever the name had been before
   you saved. It only affected builds saved exactly once — saving again quietly corrected them,

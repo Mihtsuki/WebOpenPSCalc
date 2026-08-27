@@ -165,3 +165,37 @@ test("CHANGELOG.md is well formed", () => {
     assert.ok(run < 2, `line ${i + 1}: ${run} consecutive blank lines`);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Hand-authored items must carry the text that explains them
+// ---------------------------------------------------------------------------
+test("every hand-authored item has a description", () => {
+  // ps_item_manual entries are written by hand, and it is easy to add a `script`
+  // (which changes damage, so it gets tested) while forgetting `description` (which
+  // only shows on hover, so nothing notices). The result is an item whose effects all
+  // work and whose tooltip is blank — reported twice by players, on Rust-Worn
+  // Apparatus and then Giant Pestle, before this guard existed.
+  const { loader } = require("../src/engine/dataLoader");
+  const { getProfile } = require("../src/engine/serverProfiles");
+  loader.setProfile(getProfile("payon_stories"));
+
+  // Items PS has not published: the item API returns "No data" for both id and name,
+  // so there is no source to copy and inventing tooltip copy would be worse than a
+  // blank. Re-check the API — it has caught up on other items a day or two post-patch.
+  const NO_SOURCE = new Set(["8324"]);
+
+  const man = JSON.parse(fs.readFileSync(
+    path.join(REPO, "open-ps-calc-backend", "backend", "src", "engine", "data", "ps",
+              "ps_item_manual.json"), "utf8"));
+
+  const missing = Object.keys(man)
+    .filter((id) => /^\d+$/.test(id) && !NO_SOURCE.has(id))
+    .filter((id) => {
+      const d = loader.getItemDescription(Number(id));
+      return !(d && d.description && String(d.description).trim());
+    })
+    .map((id) => `${id} ${(man[id] || {}).name || "?"}`);
+
+  assert.deepEqual(missing, [],
+    "hand-authored items with no tooltip text — copy it from tools.payonstories.com/api/pc/item?id=<id>");
+});
