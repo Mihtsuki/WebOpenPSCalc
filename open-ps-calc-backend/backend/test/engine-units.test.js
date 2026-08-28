@@ -2713,3 +2713,24 @@ test("Throw Kunai's flat +60 mastery bonus applies whether or not a weapon is eq
     assert.equal(after.max_value - before.max_value, 60, `${label}: +60 flat (max)`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// A dual-wielder's off-hand must not borrow the main hand's script-driven element
+// ---------------------------------------------------------------------------
+test("dual-wield off-hand element doesn't borrow the main hand's ammo/script element", () => {
+  const cfg = createBattleConfig();
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 12, base_level: 99, job_level: 50,
+    base_stats: { str: 90, agi: 90, vit: 40, int: 1, dex: 60, luk: 40 },
+    // Bazerald (Fire, via bAtkEle script) right hand, a plain Neutral Knife left.
+    equipped: { right_hand: 1231, left_hand: 1201 },
+    mastery_levels: { AS_RIGHT: 5, AS_LEFT: 5 },
+  });
+  const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, PS);
+  const r = new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: 0, level: 1 }),
+    loader.getMonster(1002), eff, gb);
+  const rhNote = r.normal.steps.find((s) => s.name === "Attr Fix").note;
+  const lhNote = r.dw_lh_normal.steps.find((s) => s.name === "Attr Fix").note;
+  assert.ok(rhNote.startsWith("Fire vs"), `right hand (Bazerald) must stay Fire, got: ${rhNote}`);
+  assert.ok(lhNote.startsWith("Neutral vs"), `left hand (plain Knife) must not borrow Bazerald's Fire, got: ${lhNote}`);
+});

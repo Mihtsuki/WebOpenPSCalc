@@ -5,6 +5,27 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-08-28
+
+### Fixed
+
+- **Throw Kunai wasn't even selectable.** Like Throw Shuriken before it, the skill had no damage
+  formula wired up, so the calculator couldn't offer it at all. It's back: a normal attack's
+  damage, three times per throw, plus a flat mastery bonus that applies whether or not you're
+  holding a weapon.
+
+- **An elemental Kunai (or arrow) could leak its element onto attacks that don't use it, or fail
+  to apply at all.** Two related bugs: fighting bare-handed with an elemental Kunai loaded dropped
+  its element entirely on the skill that's supposed to use it, and once that was fixed, the same
+  element started bleeding into ordinary punches too, which don't actually throw anything. Both
+  are corrected — an equipped Kunai's element only affects the throw itself. The same fix also
+  covers dual-wielding: an off-hand weapon no longer inherits the main hand's element either.
+
+- **Throw Shuriken did falsely ignore flee.** The skill's own
+  description says it "no longer ignores Flee" on this server, but the calculator was still
+  treating it as an automatic hit regardless of the target's evasion. It now rolls hit chance the
+  normal way, like any other attack.
+
 ## 2026-08-27
 
 ### Added
@@ -48,22 +69,6 @@ instead of release version. Dates are taken from actual git commit history.
   was unreadable and Acid Terror's scored a false `MATCH`. The tool now completes,
   reads those tables, and ends with an explicit count of skills it did **not**
   actually verify instead of implying a clean bill of health.
-
-- **Throw Kunai wasn't even selectable.** Like Throw Shuriken before it, the skill had no damage
-  formula wired up, so the calculator couldn't offer it at all. It's back: a normal attack's
-  damage, three times per throw, plus a flat mastery bonus that applies whether or not you're
-  holding a weapon.
-
-- **An elemental Kunai (or arrow) could leak its element onto attacks that don't use it, or fail
-  to apply at all.** Two related bugs: fighting bare-handed with an elemental Kunai loaded dropped
-  its element entirely on the skill that's supposed to use it, and once that was fixed, the same
-  element started bleeding into ordinary punches too, which don't actually throw anything. Both
-  are corrected — an equipped Kunai's element only affects the throw itself.
-
-- **Throw Shuriken did falsely ignore flee.** The skill's own
-  description says it "no longer ignores Flee" on this server, but the calculator was still
-  treating it as an automatic hit regardless of the target's evasion. It now rolls hit chance the
-  normal way, like any other attack.
 
 ## 2026-08-26
 

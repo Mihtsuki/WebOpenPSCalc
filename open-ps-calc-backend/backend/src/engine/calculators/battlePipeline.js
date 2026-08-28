@@ -1511,7 +1511,7 @@ class BattlePipeline {
   }
 
   _runBranch(status, weapon, skill, target, build, isCrit, opts = {}) {
-    const { profile = STANDARD, gear_bonuses: gearBonuses } = opts;
+    const { profile = STANDARD, gear_bonuses: gearBonuses, is_offhand: isOffhand = false } = opts;
     const result = createDamageResult();
     const isRanged = resolveIsRanged(build, weapon, skill);
 
@@ -1583,12 +1583,22 @@ class BattlePipeline {
     // what's sitting in the ammo slot (skill_check_condition_castbegin, skill.c:15810).
     // A bare-handed punch with a Kunai equipped must not borrow its element — confirmed
     // in-game: punching Sohee reads identical whether or not a High Wind Kunai is
-    // equipped. Falls back to the right-hand item's own element (Neutral if Unarmed).
+    // equipped. Falls back to the RESOLVED HAND's own item element (Neutral if empty) —
+    // `isOffhand` picks left vs right, since a dual-wielder's two hands are two
+    // independent weapons/attacks (e.g. a Fire Bazerald right + a Neutral dagger left:
+    // the left-hand hit must stay Neutral, not borrow the right hand's element).
     let baseWeaponEle = weapon.element;
-    if (gearBonuses && gearBonuses.script_atk_ele_rh != null && !skillUsesAmmo(skill, isRanged)) {
-      const rhId = build.equipped.right_hand;
-      const rhItem = rhId != null ? loader.getItem(rhId) : null;
-      baseWeaponEle = rhItem ? (rhItem.element ?? 0) : 0;
+    const scriptEle = gearBonuses ? (isOffhand ? gearBonuses.script_atk_ele_lh : gearBonuses.script_atk_ele_rh) : null;
+    if (scriptEle != null && !skillUsesAmmo(skill, isRanged)) {
+      const equipped = build.equipped || {};
+      const handId = isOffhand ? equipped.left_hand : equipped.right_hand;
+      const handItem = handId != null ? loader.getItem(handId) : null;
+      // Assumes the item's own `.element` field agrees with the bAtkEle script that
+      // put us in this branch — true for all 148 items currently carrying bAtkEle,
+      // but unenforced, and this codebase has shipped that exact mismatch before
+      // (Ghosthunter Grenade: element:8 with an empty script, so its Ghost property
+      // never reached the attack). Might need a future rework, for now just flagging this.
+      baseWeaponEle = handItem ? (handItem.element ?? 0) : 0;
     }
 
     let effAtkEle = baseWeaponEle;
@@ -2327,8 +2337,8 @@ class BattlePipeline {
             ? (lhLv > 0 ? (lhSpec.lh_factors[lhLv - 1] ?? 0.30) : 0.30)
             : (lhLv > 0 ? (0.30 + 0.10 * lhLv) : 0.30);
 
-          const lhNormal = this._runBranch(status, lhWeapon, skill, target, build, false, { profile, gear_bonuses: gearBonuses });
-          const lhCrit   = isEligible ? this._runBranch(status, lhWeapon, skill, target, build, true,  { profile, gear_bonuses: gearBonuses }) : null;
+          const lhNormal = this._runBranch(status, lhWeapon, skill, target, build, false, { profile, gear_bonuses: gearBonuses, is_offhand: true });
+          const lhCrit   = isEligible ? this._runBranch(status, lhWeapon, skill, target, build, true,  { profile, gear_bonuses: gearBonuses, is_offhand: true }) : null;
           const lhCritAvg = lhCrit ? lhCrit.avg_damage : lhNormal.avg_damage;
 
           const dwBonusPct = profile.mechanic_flags.has("DUAL_WIELD_PS_DAMAGE_BONUS") ? 10 : 0;
