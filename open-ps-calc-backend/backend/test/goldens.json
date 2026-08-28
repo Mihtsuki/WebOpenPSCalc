@@ -3811,10 +3811,62 @@
    "matk_max": 104
   },
   "result": {
-   "dps": 2432.979,
+   "dps": 2283.262,
    "dps_valid": true,
    "hit_chance": 100,
-   "crit_chance": 30.6,
+   "crit_chance": 0,
+   "period_ms": 932,
+   "normal": {
+    "min": 1679,
+    "max": 2575,
+    "avg": 2128,
+    "steps": [
+     "Status BATK",
+     "Weapon ATK",
+     "Weapon ATK Range",
+     "Size Fix",
+     "Status BATK Added",
+     "Overrefine Bonus",
+     "Base Damage",
+     "Skill Ratio (Shadow Slash Lv5)",
+     "Defense Fix",
+     "Active Status Bonuses",
+     "Refine Bonus",
+     "Mastery Fix",
+     "Attr Fix",
+     "Card Fix",
+     "Final Rate Bonus (Long)",
+     "Final Rate Bonus (Weapon)",
+     "Final Damage"
+    ]
+   }
+  }
+ },
+ "ninja-shadow-slash-shadows-within": {
+  "status": {
+   "str": 96,
+   "agi": 14,
+   "vit": 7,
+   "int_": 40,
+   "dex": 12,
+   "luk": 89,
+   "batk": 196,
+   "max_hp": 4547,
+   "max_sp": 730,
+   "aspd": 153.4,
+   "cri": 306,
+   "hit": 111,
+   "flee": 113,
+   "def_": 0,
+   "mdef": 0,
+   "matk_min": 65,
+   "matk_max": 104
+  },
+  "result": {
+   "dps": 2677.614,
+   "dps_valid": true,
+   "hit_chance": 100,
+   "crit_chance": 80.6,
    "period_ms": 932,
    "normal": {
     "min": 1679,

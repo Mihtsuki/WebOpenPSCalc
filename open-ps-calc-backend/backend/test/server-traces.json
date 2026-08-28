@@ -1,0 +1,91 @@
+{
+  "_readme": [
+    "Observed Payon Stories SERVER debug traces, and how our pipeline compares stage by stage.",
+    "",
+    "This is the only fixture in the repo that records what the SERVER does. goldens.json",
+    "records what WE did last time, which proves we have not changed but never that we are",
+    "right. A final-number golden also cannot see two large errors that cancel - which is",
+    "exactly what the first trace below caught.",
+    "",
+    "To add a trace: paste the server's debug lines verbatim into raw_log, reconstruct the",
+    "build as a scenarios.js-shaped object, then map each logged stage onto the name of our",
+    "pipeline step that should correspond. Set expect to 'match' when it should agree and",
+    "'diverges' when it is a known, explained gap - never delete a stage to make it pass."
+  ],
+  "version": 1,
+  "traces": [
+    {
+      "id": "soul-bullet-shade-of-payon",
+      "source": "Alardun, PS Discord, 2026-08-27 - server-side damage debug output",
+      "reported_by": "Laila Braveheart (build from her shared ?b=z3_ link)",
+      "observed": "in-game damage caps around 11k; the calculator showed 16650",
+      "raw_log": [
+        "(pre ratio)   <TRUNCATED in the screenshot - still needed>",
+        "(post ratio)  1441",
+        "(pre defense) 3202   <- Alardun: 'Should read post defense'",
+        "(post madness) 3202",
+        "(post elefix) 4162",
+        "(post elefix) 7327   <- one of these two labels is misread; which stage is 7327?",
+        "(pre cardfix) 10346",
+        "<everything after pre cardfix is still needed: post cardfix, final>"
+      ],
+      "caveats": [
+        "The server logs PER HIT at the post-ratio stage (1441 x 2.77 implies a base of ~520);",
+        "stage values below are given as 3-hit totals so they are comparable with ours.",
+        "The build is reconstructed from her share link. Her exact buff state at the moment",
+        "of the log is NOT confirmed, so the divergences below bound the error rather than",
+        "pinpoint it. Confirm before treating any single stage as settled."
+      ],
+      "scenario": {
+        "name": "trace-soul-bullet-shade-of-payon",
+        "build": {
+          "job_id": 24, "base_level": 96, "job_level": 70,
+          "base_stats": { "str": 50, "agi": 42, "vit": 10, "int": 53, "dex": 99, "luk": 3 },
+          "equipped": {
+            "armor": 8298, "garment": 2502, "shoes": 2404, "accessory_left": 2789,
+            "accessory_right": 2624, "ammo": 13235, "right_hand": 13155, "head_top": 2285,
+            "right_hand_card1": 4007, "right_hand_card2": 4007, "armor_card1": 4337,
+            "garment_card1": 4375, "shoes_card1": 4100, "accessory_right_card1": 4064
+          },
+          "refine": { "armor": 4, "garment": 8, "shoes": 4, "right_hand": 5, "head_top": 4 },
+          "consumable_buffs": { "aspd_potion": 3 },
+          "active_buffs": { "SC_GS_MADNESSCANCEL": 1 },
+          "clan": "arch_wand_clan",
+          "mastery_levels": { "GS_SINGLEACTION": 6, "GS_SNAKEEYE": 10, "GS_DUST": 10, "GS_FULLBUSTER": 10, "GS_SPREADATTACK": 10 },
+          "selected_pet": "orc_warrior",
+          "support_buffs": { "SC_BLESSING": 10, "SC_INC_AGI": 10 },
+          "flags": { "gs_coins": 10 }
+        },
+        "skill": { "name": "GS_MAGICALBULLET", "level": 1 },
+        "target": 2524
+      },
+      "stages": [
+        {
+          "label": "post ratio (3-hit total)", "server": 4323, "ours_step": "Skill Ratio (Soul Bullet Lv1)",
+          "ours_now": 6315, "expect": "diverges",
+          "reason": "Our base damage entering the ratio is 760; the server's is ~520 (1441 / 2.77). The ratio itself is right - 277% = 50 + DEX(131) + BaseLvl(96) - so the gap is upstream, in what we add to base ATK. With weapon+ammo alone our base is 525, so the excess comes from gear/buff ATK."
+        },
+        {
+          "label": "post defense", "server": 3202, "ours_step": "Defense Fix",
+          "ours_now": 4694, "expect": "diverges",
+          "reason": "Inherits the base-damage gap. The DEF maths itself agrees: the server applies DEF per hit then sums (1441 x 0.75 - 14) x 3 = 3202, and our single subtraction lands within 2 damage of doing it per-hit, so the ordering is cosmetic here."
+        },
+        {
+          "label": "post madness (+30%)", "server": 4162, "ours_step": "Active Status Bonuses",
+          "ours_now": 6102, "expect": "diverges",
+          "reason": "Inherits the gap. The multiplier agrees exactly: 3202 -> 4162 is x1.300, and we also apply Madness Cancel as +30% at this point."
+        },
+        {
+          "label": "post element fix", "server": 7327, "ours_step": "Attr Fix",
+          "ours_now": 10722, "expect": "diverges",
+          "reason": "Inherits the gap. Element handling agrees: Ghost vs Ghost Lv3 = 175% on both sides (Soul Bullet is Ghost, Shade of Payon is Ghost Lv3)."
+        },
+        {
+          "label": "pre cardfix", "server": 10346, "ours_step": "Coin Bonus",
+          "ours_now": 10812, "expect": "diverges",
+          "reason": "THE IMPORTANT ONE. Only 4.5% apart, but by coincidence: the server multiplies by ~1.412 between element fix and cardfix (7327 -> 10346) and we do not model that step at all - we add +90 flat for 10 coins (+0.8%). Our inflated base and that missing multiplier very nearly cancel. If the x1.412 is the coin bonus, coins are a ~40% multiplier rather than +3 ATK each, which would also explain the earlier 'coins do not add damage' report. Needs the 0-coin trace to confirm."
+        }
+      ]
+    }
+  ]
+}

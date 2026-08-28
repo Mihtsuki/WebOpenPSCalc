@@ -3121,6 +3121,23 @@ export default function BuildEditor() {
                 </label>
               </div>
             )}
+            {skill.id === 530 && data.server === "payon_stories" && (
+              <div className="field field-checkbox" style={{ marginTop: "0.5rem" }}>
+                <label title="PS Ninja platinum skill. Shadow Slash cannot land criticals at all without it; toggled on it grants +30/35/40/45/50 crit rate by skill level (wiki.payonstories.com/Shadow's_Within).">
+                  <input
+                    type="checkbox"
+                    checked={!!(data.support_buffs as Record<string, unknown>)?.shadows_within}
+                    onChange={(e) => setData((prev) => {
+                      const next: Record<string, unknown> = { ...(prev.support_buffs || {}) };
+                      if (e.target.checked) next.shadows_within = true;
+                      else delete next.shadows_within;
+                      return { ...prev, support_buffs: next };
+                    })}
+                  />
+                  <span>Shadow's Within (enables crit)</span>
+                </label>
+              </div>
+            )}
           </Panel>
 
           <Panel eyebrow="08" title="Target">

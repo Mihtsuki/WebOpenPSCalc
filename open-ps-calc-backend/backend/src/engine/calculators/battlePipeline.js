@@ -2115,7 +2115,10 @@ class BattlePipeline {
     const taFury = skillName === "MO_TRIPLEATTACK"
       && profile.mechanic_flags.has("MO_TRIPLEATTACK_PS_BONUS")
       && "SC_EXPLOSIONSPIRITS" in (build.active_status_levels || {});
-    const [isEligible, critChance] = calculateCritChance(status, weapon, skill, target, this.config, build.server, gearBonuses, taFury);
+    // PS Ninja: Shadow's Within is what lets Shadow Slash crit at all, and it
+    // carries the +30..50 crit rate with it. Both live in critChance.js.
+    const shadowsWithin = !!(build.skill_params && build.skill_params.PS_NJ_SHADOWSWITHIN_active);
+    const [isEligible, critChance] = calculateCritChance(status, weapon, skill, target, this.config, build.server, gearBonuses, taFury, shadowsWithin);
     let [hitChance, perfectDodge] = calculateHitChance(status, target, this.config, skillName, skill.level, {
       mastery: gearBonuses ? gearBonuses.effective_mastery : build.mastery_levels,
       skill_params: build.skill_params,

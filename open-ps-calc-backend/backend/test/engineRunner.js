@@ -99,7 +99,7 @@ function normalizeBattleResult(res) {
  *               against target mob id instead of the outgoing one
  * }
  */
-function runScenario(sc) {
+function runScenario(sc, opts = {}) {
   const buildData = { server: "payon_stories", ...sc.build };
   const build = buildFromSaveSchema(buildData);
   const profile = getProfile(build.server);
@@ -131,6 +131,9 @@ function runScenario(sc) {
     if (sc.ninja_hiding) {
       effBuild.skill_params = { ...(effBuild.skill_params || {}), NJ_KIRIKAGE_hiding: true, NJ_KASUMIKIRI_hiding: true };
     }
+    if (sc.shadows_within) {
+      effBuild.skill_params = { ...(effBuild.skill_params || {}), PS_NJ_SHADOWSWITHIN_active: true };
+    }
     if (sc.zeny_pincher) {
       effBuild.skill_params = { ...(effBuild.skill_params || {}), PS_BS_ZENYPINCHER_active: true };
     }
@@ -149,10 +152,27 @@ function runScenario(sc) {
 
     const pipeline = new BattlePipeline(config);
     const battleResult = pipeline.calculate(status, weapon, skill, target, effBuild, gearBonuses);
+    if (opts.raw) {
+      out.raw = battleResult;
+      out.rawStatus = status;
+    }
     out.result = normalizeBattleResult(battleResult);
   }
 
   return out;
 }
 
-module.exports = { runScenario, skillIdByName };
+/**
+ * The same run, keeping the UNNORMALIZED battle result.
+ *
+ * runScenario() reduces each branch to step NAMES and a damage triple, which is
+ * the right shape for the golden suite but throws away the per-step VALUES. The
+ * server-trace suite needs those values: it compares our pipeline stage by stage
+ * against a real server's debug output, and a final-number check cannot see two
+ * large errors that cancel (see server-traces.test.js).
+ */
+function runScenarioRaw(sc) {
+  return runScenario(sc, { raw: true });
+}
+
+module.exports = { runScenario, runScenarioRaw, skillIdByName };

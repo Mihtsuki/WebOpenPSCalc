@@ -2550,3 +2550,92 @@ test("Back Stab matches the wiki's published per-level table", () => {
   assert.ok(after.indexOf("calculateDefenseFix") > after.indexOf("scaleFloor(pmf, 140, 100)"),
     "the x1.4 must be applied before calculateDefenseFix, i.e. on the ratio");
 });
+
+// ---------------------------------------------------------------------------
+// Multi-hit skills must SAY they are multi-hit
+// ---------------------------------------------------------------------------
+test("a multi-hit skill's ratio step states the hit count", () => {
+  // The hit count was computed correctly but only ever written into the step's
+  // `formula` string, and DamageSummary.tsx renders name/value/note — never
+  // formula. So Soul Bullet displayed "277%" with nothing on screen saying it
+  // lands three times, and a player reasonably read that as the whole story.
+  // The note is the field the UI actually shows, so the count goes there.
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(2524); // Shade of Payon
+  const ratioStep = (id, level, extra) => {
+    const b = buildFromSaveSchema(Object.assign({
+      server: "payon_stories", job_id: 24, base_level: 96, job_level: 70,
+      base_stats: { str: 50, agi: 42, vit: 10, int: 53, dex: 99, luk: 3 },
+      equipped: { right_hand: 13155, ammo: 13235 },
+    }, extra || {}));
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(st, w, createSkillInstance({ id, level }), target, eff, gb)
+      .normal.steps.find((s) => /Skill Ratio/.test(s.name));
+  };
+
+  // Soul Bullet fires 3 times (wiki.payonstories.com/Soul_Bullet, "3 times like
+  // Triple Action"), and its ratio is stated PER HIT.
+  const soul = ratioStep(507, 1);
+  assert.match(soul.note, /Hits 3 times/, "Soul Bullet's note must state the 3 hits");
+  assert.match(soul.note, /per hit/, "and must say the ratio is per hit, not the total");
+
+  // Desperado sprays a variable number of shots — the range has to survive too.
+  const desp = ratioStep(loader.getSkillIdByName("GS_DESPERADO"), 10);
+  assert.match(desp.note, /Hits 1.10 times/, "Desperado's note must carry its hit range");
+
+  // A single-hit attack must NOT gain a spurious hit-count sentence.
+  assert.ok(!/Hits \d/.test(ratioStep(0, 1).note || ""),
+    "a normal attack is one hit and should say nothing about hit counts");
+});
+
+// ---------------------------------------------------------------------------
+// Shadow's Within: the toggle that lets Shadow Slash crit at all on PS
+// ---------------------------------------------------------------------------
+test("Shadow's Within gates Shadow Slash's crit and grants the crit rate, not damage", () => {
+  // A player built a crit Shadow Slash and found the calculator could not represent
+  // it. Two reasons: the toggle had NO producer anywhere (no UI control, no route
+  // bridge), so the engine flag was unreachable; and the bonus behind it had been
+  // written into the DAMAGE ratio in serverProfiles.js.
+  //
+  // `25 + 5*lv` is 30/35/40/45/50 — the wiki table's "+Crit (%)" column, not a
+  // damage column. All three sources call it crit rate: the table, the Shadow's
+  // Within page ("critically hit at a rate of +50%") and the skill DB ("the chance
+  // of delivering a critical strike increases by 50%").
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1269); // Clock
+  const run = (shadowsWithin, level) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 25, base_level: 99, job_level: 70,
+      base_stats: { str: 90, agi: 60, vit: 40, int: 1, dex: 70, luk: 90 },
+      equipped: { right_hand: 1232 }, support_buffs: { ninja_hiding: true },
+    });
+    b.skill_params = Object.assign({ NJ_KIRIKAGE_hiding: true }, b.skill_params,
+      shadowsWithin ? { PS_NJ_SHADOWSWITHIN_active: true } : {});
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    return new BattlePipeline(cfg).calculate(st, w, createSkillInstance({ id: 530, level }), target, eff, gb);
+  };
+
+  // PS inverts the vanilla skill: "Shadow Slash no longer possesses the capability
+  // to land critical strikes" unless Shadow's Within is on. No toggle, no crit.
+  assert.equal(run(false, 5).crit_chance, 0, "Shadow Slash must not crit on PS without Shadow's Within");
+  assert.equal(run(false, 5).crit, null, "and must produce no crit branch at all");
+
+  // Toggled on, the bonus is +30 at Lv1 rising to +50 at Lv5, on top of the
+  // character's own crit. The deltas are what matter — the base moves with gear.
+  const base = run(false, 5).crit_chance_uncapped ?? null;
+  const lv1 = run(true, 1).crit_chance, lv5 = run(true, 5).crit_chance;
+  assert.ok(lv1 > 0 && lv5 > 0, "with the toggle on there must be a crit chance");
+  assert.equal(Math.round((lv5 - lv1) * 10) / 10, 20,
+    "Lv1 -> Lv5 must add 20 points of crit (30 -> 50)");
+
+  // And it must NOT touch damage: the ratio is the wiki's per-level table alone.
+  const ratioOf = (r) => (r.normal.steps.find((s) => /Skill Ratio/.test(s.name)) || {}).formula;
+  assert.equal(ratioOf(run(true, 5)), ratioOf(run(false, 5)),
+    "Shadow's Within is crit rate — it must not change the damage ratio");
+  assert.equal(run(true, 5).normal.avg_damage, run(false, 5).normal.avg_damage,
+    "non-crit damage must be identical with and without the toggle");
+
+  // Vanilla is untouched: there, Shadow Slash crits on its own.
+  assert.ok(require("../src/engine/calculators/modifiers/critChance")
+    .isCritEligible(530, "NJ_KIRIKAGE", "standard"), "vanilla Shadow Slash still crits");
+});

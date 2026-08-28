@@ -614,14 +614,27 @@ const PS_BF_WEAPON_RATIOS = {
   // wiki.payonstories.com/Tranq_Shot. (Its real point is the 140% Sleep chance.)
   GS_BULLSEYE: (lv, tgt) => (tgt && ["Brute", "Demi-Human"].includes(tgt.race)) ? 100 : 10,
   GS_MAGICALBULLET: (lv, tgt, ctx) => 50 + (ctx ? ctx.dex : 0) + (ctx ? ctx.base_level : 0),
+  // Shadow Slash. The ratio is the wiki's per-level table and nothing else.
+  //
+  // This used to add `25 + 5*lv` here when Shadow's Within was active. That
+  // expression is 30/35/40/45/50 by level, which is precisely the wiki table's
+  // "+Crit (%) (With Shadow's Within toggled on)" column - a CRIT RATE, not damage.
+  // All three sources agree it is crit: the table, the Shadow's Within page
+  // ("allows Shadow Slash to critically hit at a rate of +50%") and the skill DB
+  // ("the chance of delivering a critical strike increases by 50%"). It now lives
+  // in critChance.js, where it belongs. Reported by a player whose crit Shadow
+  // Slash build the calculator could not represent at all.
+  //
+  // Source conflict, recorded rather than silently resolved: the per-level table
+  // scales 30 -> 50, while both prose sources state a flat +50%. They agree at
+  // Lv5, where most builds sit. The table is followed here for being specific.
   NJ_KIRIKAGE: (lv, tgt, ctx) => {
     const hiding = !!(ctx && ctx.skill_params.NJ_KIRIKAGE_hiding);
     const rangePp = ctx ? (ctx.skill_params.NJ_KIRIKAGE_range_pp ?? 0) : 0;
     const base = hiding
       ? NJ_KIRIKAGE_HIDE_ON[lv - 1]
       : Math.max(0, NJ_KIRIKAGE_HIDE_OFF[lv - 1] - 10 * rangePp);
-    const shadowsWithin = !!(ctx && ctx.skill_params.PS_NJ_SHADOWSWITHIN_active);
-    return base + (shadowsWithin ? 25 + 5 * lv : 0);
+    return base;
   },
   NJ_KASUMIKIRI: (lv, tgt, ctx) => {
     const hiding = !!(ctx && ctx.skill_params.NJ_KASUMIKIRI_hiding);

@@ -424,6 +424,13 @@ router.post("/", (req: Request, res: Response) => {
     if (effBuild.support_buffs?.ninja_hiding) {
       effBuild.skill_params = { ...(effBuild.skill_params || {}), NJ_KIRIKAGE_hiding: true, NJ_KASUMIKIRI_hiding: true };
     }
+    // Shadow's Within (platinum, toggleable): the only thing that lets Shadow Slash
+    // land criticals on PS, and the source of its +30..50 crit rate. Without this
+    // bridge the engine's flag had no producer at all, so the whole skill was
+    // unreachable from the UI.
+    if (effBuild.support_buffs?.shadows_within) {
+      effBuild.skill_params = { ...(effBuild.skill_params || {}), PS_NJ_SHADOWSWITHIN_active: true };
+    }
 
     const pipeline = new BattlePipeline(config);
     const battleResult = pipeline.calculate(status, weapon, skill, target, effBuild, gearBonuses);

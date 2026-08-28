@@ -7,6 +7,19 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-08-27
 
+### Added
+
+- **Shadow's Within is now a toggle, and Shadow Slash crits only with it.** The platinum
+  skill that lets Shadow Slash land criticals had no control anywhere in the calculator, so
+  a crit Shadow Slash build simply could not be represented — reported by a player who
+  couldn't make the numbers match. Ticking it grants +30% crit rate at Shadow Slash Lv1
+  rising to +50% at Lv5; leaving it off now correctly means no critical hits at all, which
+  is how the skill works on Payon Stories.
+
+  It turns out the bonus was already in the code — added to Shadow Slash's *damage* instead
+  of its crit rate, behind a flag nothing in the app could ever set. Shadow Slash's damage
+  is unchanged by this; only its criticals are.
+
 ### Fixed
 
 - **Backstab was under-calculated at every level.** The skill was modelled at
@@ -21,6 +34,12 @@ instead of release version. Dates are taken from actual git commit history.
   Back Stab page publishes a full per-level table ending at 600%, and the scraped
   skill DB and the in-game tooltip both agree with the table. A rework PDF states
   what was planned; it is not evidence of what shipped.
+
+- **Multi-hit skills now say how many times they hit.** Soul Bullet showed its ratio as
+  "277%" with nothing on screen mentioning that it fires three times, so the number looked
+  far too small for the damage it does. The hit count was being calculated correctly all
+  along — it just never made it to the screen. Every multi-hit skill now spells it out, and
+  says whether the percentage shown is per hit or the combined total. Reported by a player.
 
 - **The skill-audit tool could not complete a run, and reported agreement it had
   not checked.** Two crashes ended a full run early, its wikitable parser could not

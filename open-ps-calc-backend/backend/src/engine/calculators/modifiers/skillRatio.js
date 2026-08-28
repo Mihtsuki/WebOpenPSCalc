@@ -191,12 +191,19 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
   // 1–10 shots) — that spans the damage across the hit spread instead of
   // collapsing to a single average.
   let hitLabel;
+  // The same thing in players' terms. hitLabel only ever reached the step's
+  // `formula` string, which the UI does not render (DamageSummary shows name,
+  // value and note) - so a 3-hit skill displayed its PER-HIT ratio with nothing
+  // on screen saying it lands three times. Reported by a player reading Soul
+  // Bullet as 277% when it is 277% × 3.
+  let hitsNote = null;
   let hitCount; // representative hit count returned to the caller (forge-bonus divisor)
   if (hitCountRaw && typeof hitCountRaw === "object") {
     const lo = Math.max(0, hitCountRaw.min | 0);
     const hi = Math.max(lo, hitCountRaw.max | 0);
     pmf = scaleFloorNumRange(pmf, lo, hi, 1, 1);
     hitLabel = `${lo}–${hi} hits`;
+    hitsNote = `Hits ${lo}–${hi} times; the ratio above is per hit.`;
     hitCount = Math.max(1, Math.round((lo + hi) / 2));
   } else {
     const cosmetic = hitCountRaw < 0;
@@ -210,6 +217,11 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
     // (e.g. Triple Attack = 3, Chain Combo = 4).
     hitCount = trueHits;
     hitLabel = cosmetic ? `${trueHits} cosmetic hits` : `${pmfMult} hits`;
+    // A cosmetic skill folds every hit into ONE combined ratio, so calling that
+    // ratio 'per hit' would be exactly backwards - say which it is.
+    hitsNote = cosmetic
+      ? `Shown as ${trueHits} hits; the ratio above is the combined total, not per hit.`
+      : (pmfMult > 1 ? `Hits ${pmfMult} times; the ratio above is per hit.` : null);
   }
 
   if (gearBonuses) {
@@ -243,7 +255,7 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
       name: `Skill Ratio (${skillLabel})`,
       value: Math.round(av * back), min_value: Math.round(mn * back), max_value: Math.round(mx * back),
       multiplier: perfBaseRatio / 100,
-      note: skillData ? skillData.description || "" : "",
+      note: [skillData ? skillData.description || "" : "", hitsNote].filter(Boolean).join(" " + '—' + " "),
       formula: `dmg × ${perfBaseRatio}% × ${hitLabel} (${ratioSrc})`,
       hercules_ref: "battle.c battle_calc_skillratio",
     });
@@ -257,7 +269,7 @@ function calculateSkillRatio(skill, pmf, build, result, opts = {}) {
   } else {
     result.add_step({
       name: `Skill Ratio (${skillLabel})`, value: av, min_value: mn, max_value: mx, multiplier: ratio / 100,
-      note: ratioNote,
+      note: [ratioNote, hitsNote].filter(Boolean).join(" " + '—' + " "),
       formula: `dmg × ${ratio}% × ${hitLabel} (${ratioSrc})`,
       hercules_ref: "battle.c battle_calc_skillratio",
     });

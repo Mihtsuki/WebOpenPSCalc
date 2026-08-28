@@ -1173,6 +1173,36 @@ and a stat optimiser (given N free points, maximise DPS/TTK).
   damage-dealing cast skills (element/type only — PS-tuned skill power isn't
   shown). A monster's basic melee is priced as Neutral.
 
+## Server-trace testing (2026-08-27)
+
+`goldens.json` records what this engine produced last time. It proves we have not changed;
+it cannot prove we are right, because it is generated from the code it checks — every wrong
+number this project has shipped was a green golden at the time. It also only pins the FINAL
+number.
+
+`test/server-traces.json` + `server-traces.test.js` compare our pipeline **stage by stage**
+against debug output from the live server. The first fixture is why it exists: on Laila
+Braveheart's Soul Bullet build our total is 4.5% from the server's, while every intermediate
+stage is ~46% out — an inflated base damage cancelling a multiplier we do not model. A
+final-number check sails straight through that, and did, until a player noticed.
+
+    post ratio (3-hit total)   server    4323   ours    6315   +46.1%
+    post defense               server    3202   ours    4694   +46.6%
+    post madness (+30%)        server    4162   ours    6102   +46.6%
+    post element fix           server    7327   ours   10722   +46.3%
+    pre cardfix                server   10346   ours   10812    +4.5%
+
+Every stage is pinned to its current value, divergent or not, so drift always fails; a stage
+marked `diverges` that starts matching also fails, telling you to promote it. Divergences must
+carry a reason. Do not delete a stage to get green.
+
+**Open, pending data from Alardun** (the trace's `raw_log` lists exactly what is missing):
+the `(pre ratio)` line was truncated, everything after `(pre cardfix)` is unrecorded, and one
+label is misread (two lines both read "post elefix"). The decisive one is **a second trace at
+0 coins**: the server multiplies by ~1.412 between element fix and cardfix, we model coins as
+`+3 ATK × div` (+0.8%), and if that step is the coin bonus then coins are a ~40% multiplier —
+which would also explain the earlier "coins don't add damage" report.
+
 ## Ratios pinned on PDF authority alone (2026-08-27)
 
 Back Stab shipped at 500% @Lv10 for five days because the 2026-08-22 audit applied
@@ -1794,10 +1824,20 @@ unmodeled — it needs the target to already carry that status.
   `defenseFix` pass to the branch. The heal is reported as its own figure, never as damage.
   **General lesson: the in-game tooltip carries terms the item API's description drops** — the
   same trap as the pre/post-patch API lag noted in `context.md`.
-- **NJ_KIRIKAGE (Shadow Slash) crit** [med] — dead id (543 vs real 530) AND on PS should only crit
-  while **Shadow's Within** is active with a PS-tuned value. Needs `skill_params` threaded into
-  `critChance.js` + a source for the crit magnitude. Left disabled (documented in `critChance.js`)
-  rather than restored ungated.
+- ~~**NJ_KIRIKAGE (Shadow Slash) crit**~~ — resolved 2026-08-27, after a player reported a crit
+  Shadow Slash build the calculator could not represent. Shadow's Within is now a toggle
+  (`support_buffs.shadows_within`, bridged in `calculate.ts` beside `ninja_hiding`, checkbox in the
+  Skill panel). On PS it is the whole gate: `isCritEligible` returns false for NJ_KIRIKAGE without
+  it, matching "Shadow Slash no longer possesses the capability to land critical strikes… when
+  paired with Shadow's Within, critical hits become a possibility". The bonus it carries is
+  **+30/35/40/45/50 crit rate** by skill level, in `critChance.js`.
+  **The bug worth remembering:** that bonus was already implemented — as `25 + 5*lv` added to the
+  DAMAGE ratio in `serverProfiles.js`. `25 + 5*lv` is 30/35/40/45/50, i.e. the wiki table's
+  "+Crit (%)" column filed as damage. It was also unreachable: `PS_NJ_SHADOWSWITHIN_active` had no
+  producer anywhere, so the code had never once run. Source conflict recorded, not resolved: the
+  per-level table scales 30→50 while the Shadow's Within page and skill DB both say a flat +50%;
+  they agree at Lv5. Paired goldens (`ninja-shadow-slash-hiding` / `-shadows-within`) pin both
+  states and assert non-crit damage is identical across them.
 - ~~**AS_SONICACCEL**~~ — resolved 2026-08-11. wiki.payonstories.com/Sonic_Acceleration settles the
   conflict explicitly ("Sonic Acceleration does **not** give a flat +50 Hit … SA gives +50% 'Hit',
   the Hit actually being Accuracy rate", with a 30% → 45% worked example), i.e. battle.c's +50

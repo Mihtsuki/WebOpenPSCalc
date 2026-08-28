@@ -489,6 +489,19 @@ const scenarios = [
     ninja_hiding: true,
     target: 1002,
   },
+  {
+    // The same build with Shadow's Within toggled on. On PS this is the ONLY thing
+    // that lets Shadow Slash crit, so the pair pins both halves of the gate: the
+    // scenario above must have no crit branch at all, and this one must have one.
+    // The two must agree exactly on non-crit damage - Shadow's Within is crit rate,
+    // not damage, and it was modelled as a damage bonus until 2026-08-27.
+    name: "ninja-shadow-slash-shadows-within",
+    build: { job_id: 25, base_level: 99, job_level: 70, base_stats: { str: 90, agi: 1, vit: 1, int: 30, dex: 1, luk: 80 }, equipped: { right_hand: 13020 } },
+    skill: { name: "NJ_KIRIKAGE", level: 5 },
+    ninja_hiding: true,
+    shadows_within: true,
+    target: 1002,
+  },
 
   // --- PS Merchant / Blacksmith / Alchemist rework (2026-08-09 PDFs) ----------------------
   {
