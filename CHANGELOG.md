@@ -5,6 +5,18 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-09-08
+
+### Fixed
+
+- **Throw Huuma Shuriken favored the weapon's own element over an active endow.**
+  Wind endow plus a Blaze Huuma Shuriken (a Fire-scripted weapon) showed Fire in the
+  calculator, but Wind in-game. The fallback added for the Kunai ammo-element fix (below)
+  was too broad — it discarded the endow-resolved element for *any* weapon carrying its own
+  `bAtkEle` script, not just ammo. It now only falls back when the script isn't the wielded
+  weapon's own, so an endow still wins over the weapon, and unrelated ammo (an Earth Kunai
+  sitting in the ammo slot during a Huuma Shuriken throw, say) still can't leak in either.
+
 ## 2026-09-07
 
 ### Added

@@ -1694,12 +1694,29 @@ class BattlePipeline {
       const equipped = build.equipped || {};
       const handId = isOffhand ? equipped.left_hand : equipped.right_hand;
       const handItem = handId != null ? loader.getItem(handId) : null;
-      // Assumes the item's own `.element` field agrees with the bAtkEle script that
-      // put us in this branch — true for all 148 items currently carrying bAtkEle,
-      // but unenforced, and this codebase has shipped that exact mismatch before
-      // (Ghosthunter Grenade: element:8 with an empty script, so its Ghost property
-      // never reached the attack). Might need a future rework, for now just flagging this.
-      baseWeaponEle = handItem ? (handItem.element ?? 0) : 0;
+      // If the wielded weapon grants this element ITSELF (Bazerald, Huuma Blaze
+      // Shuriken, ...), weapon.element is already correct as resolveWeapon computed
+      // it — endow > weapon's own script > forge > item field — endow included. Only
+      // re-derive from the raw item field when the script is NOT the weapon's own
+      // (ammo, or something else in another slot): that's the actual "must not leak"
+      // case this block exists for. Missing this let a Huuma Blaze Shuriken's Fire
+      // script win over an active Wind endow, when the endow should win.
+      // Read from all_effects' source_slot (set by the aggregator from the actual
+      // parsed script, per slot) rather than re-testing handItem.script by regex —
+      // that would also catch a bAtkEle sitting inside a conditional block that
+      // isn't currently active.
+      const handSlot = isOffhand ? "left_hand" : "right_hand";
+      const weaponHasOwnScript = gearBonuses && (gearBonuses.all_effects || []).some(
+        (eff) => eff.bonus_type === "bAtkEle" && eff.source_slot === handSlot
+      );
+      if (!weaponHasOwnScript) {
+        // Assumes the item's own `.element` field agrees with the bAtkEle script that
+        // put us in this branch — true for all 148 items currently carrying bAtkEle,
+        // but unenforced, and this codebase has shipped that exact mismatch before
+        // (Ghosthunter Grenade: element:8 with an empty script, so its Ghost property
+        // never reached the attack). Might need a future rework, for now just flagging this.
+        baseWeaponEle = handItem ? (handItem.element ?? 0) : 0;
+      }
     }
 
     let effAtkEle = baseWeaponEle;

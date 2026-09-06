@@ -392,7 +392,9 @@ trade-window test.
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
 - **Throw Kunai works in the calculator.**
-  The ratio is vanilla 100% per hit (300% total because 3 hits). Confirmed by in-game tests, and RMS's vanilla description spells out that it's a total ("hit three times for a total of 300% attack").
+  The ratio is vanilla 100% per hit (300% total because 3 hits). Confirmed by in-game tests,
+  and RMS's vanilla description spells out that it's a total
+  ("hit three times for a total of 300% attack").
   Added a `NJ_KUNAI: () => 100` entry to `PS_BF_WEAPON_RATIOS` purely to clear the BF_MISC guard
   (same reason as `NJ_SYURIKEN`'s entry above it) - the value itself is vanilla.
   The flat `+60` "Kunai Mastery" bonus in `masteryFix.js` applies regardless of whether a weapon
@@ -400,6 +402,15 @@ trade-window test.
   got gated on `weapon.weapon_type !== "Unarmed"` here, but that `weapon` bool is `flag.weapon`,
   which `battle_calc_weapon_attack` sets to 1 unconditionally and only clears for four shield
   skills (`battle.c:4846`/`4918`) - never for NJ_KUNAI.
+
+- **Throw Huuma Shuriken favored the weapon's own script element over an active endow.**
+  Wind endow + Blaze Huuma Shuriken (Fire script) showed Fire, not Wind. The
+  ammo-element-leak fallback below was too broad — it also fired for a weapon carrying its
+  own `bAtkEle` script, discarding the endow-resolved `weapon.element` (which already has
+  the right precedence: endow > weapon's own script > forge > item field) in favor of the
+  raw item field. Fixed by only taking that fallback when the script isn't the wielded
+  weapon's own (`handItem.script` has no `bAtkEle`) — so an endow still beats the weapon,
+  and unrelated ammo still can't leak into a skill that doesn't use it.
 
 - **An ammo's element was leaking into attacks that don't use that ammo, in both directions.**
   Two bugs:
