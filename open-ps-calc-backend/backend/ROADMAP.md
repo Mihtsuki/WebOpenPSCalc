@@ -316,6 +316,27 @@ single-edits, call the existing `/calculate` endpoint for each, diff the DPS, so
 so it doesn't flood the backend (or add a batch endpoint). Natural follow-ons: a card recommender
 and a stat optimiser (given N free points, maximise DPS/TTK).
 
+### 3. Shield wildcard mix (defensive card slots)  (open — maintainer request, 2026-09-06)
+
+The existing "Wildcard mix" is weapon-slots-only (`BuildEditor.tsx` gates the toggle on
+`isWeaponSlot`: `right_hand`, or `left_hand` holding a weapon) and its categories —
+race / size / element / family +damage% — are all offensive. A shield never offers the
+toggle, yet shield cards are where the biggest DEFENSIVE card decisions live (Thara Frog's
+-30% demihuman, the race resist line, Horn/element resists), and the calc already models
+the incoming-damage direction those feed (`bSubRace`/`bSubEle` → `sub_race`/`sub_ele`,
+exercised by the incoming pipeline).
+
+Design sketch: offer the toggle on `left_hand` when the held item is a shield with slots
+(`item.type !== "IT_WEAPON"`, `slots > 0` — in practice 1 slot, so one row). Categories are
+resist-typed rather than damage-typed: **Race resist** (default 30 — Thara-class),
+**Element resist** (default 20 — e.g. Horn's neutral 35 as an option), applied
+unconditionally like the weapon wildcard's `_All` bonuses but into the incoming dict keys.
+Plumbing: a `wildcard_bonuses` key routed in `playerStateBuilder.js` into
+`gear_bonuses.sub_race`/`sub_ele` for the incoming direction — the aggregation and the
+incoming math already exist, so this is mostly UI plus one routing branch. Armor/garment
+slots could follow with the same shape (Marc, Raydric) if asked; start with the shield,
+which is what was asked.
+
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
 - **Throw Kunai works in the calculator.**
