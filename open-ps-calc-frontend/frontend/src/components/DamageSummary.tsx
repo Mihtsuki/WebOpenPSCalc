@@ -462,7 +462,7 @@ function DoubleAttackView({ branch, chance, label, taChance }: {
               what the popups show), so min and max divide exactly and the "2 × N" claim
               always holds — as one per-hit value or a per-hit range. */}
           {Math.round(branch.min_damage) === Math.round(branch.max_damage) ? (
-            <span className="dw-per-hit"> ({(Math.round(branch.min_damage) / 2).toLocaleString()} + {(Math.round(branch.min_damage) / 2).toLocaleString()})</span>
+            <span className="dw-per-hit"> (2 × {(Math.round(branch.min_damage) / 2).toLocaleString()})</span>
           ) : (
             <span className="dw-per-hit"> (2 × {Math.floor(branch.min_damage / 2).toLocaleString()}–{Math.floor(branch.max_damage / 2).toLocaleString()})</span>
           )}
