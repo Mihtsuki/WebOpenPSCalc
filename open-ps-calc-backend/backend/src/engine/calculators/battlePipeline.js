@@ -2350,8 +2350,10 @@ class BattlePipeline {
     }
 
     // TF_DOUBLE (Double Attack) — battle.c:4926. Dagger-only, normal attacks
-    // only (skill.id === 0); crit and the proc are mutually exclusive (a
-    // critical swing never also double-attacks). The second hit reruns the
+    // only (skill.id === 0); crit and the proc are mutually exclusive, and the
+    // proc wins: DA is rolled first and a doubled swing never crits (wiki
+    // Double_Attack "Has higher priority over Critical attacks"; battle.c:5152
+    // crit check requires wd.type != BDT_MULTIHIT). The second hit reruns the
     // exact same non-crit pipeline as `normal` — since DPS here only needs
     // the expected value, not a true independent second roll, reusing
     // normal.avg_damage is mathematically equivalent (E[X+Y] = E[X]+E[Y]
@@ -2528,14 +2530,26 @@ class BattlePipeline {
       }
     }
 
-    // Build attacks array. Triple Attack takes priority over Double Attack: it
-    // REPLACES the swing, so a swing that became a TA cannot also double. Double
-    // Attack still applies to the swings TA did not take, which is (1 - tpf) of them.
+    // Build attacks array. Proc priority chain on a normal swing:
+    // Triple Attack beats Double Attack beats Critical.
+    //   - TA REPLACES the swing (it is a skill, not a regular attack), so a TA
+    //     swing can neither double nor crit — except that PS lets TA crit while
+    //     Critical Explosion / Fury is up. Wiki (Triple_Attack): "This includes
+    //     Critical Hit (unless Critical Explosion is active) and Double Attack
+    //     rolls, effectively lowering the chance of either triggering."
+    //   - DA "has higher priority over Critical attacks" (wiki Double_Attack;
+    //     Alardun confirmed 2026-09-06). Hercules agrees: DA is rolled first
+    //     (battle.c:5091) and the crit check skips multi-hit swings
+    //     (battle.c:5152, `wd.type != BDT_MULTIHIT`). Crit therefore only rolls
+    //     on swings that neither TA'd nor doubled — raising CRIT never costs
+    //     doubles. (Modeled crit-first until 2026-09-06; with SN Fury's +50
+    //     CRIT that wrongly cut doubles from 70% to ~31%, turning Fury into a
+    //     DPS loss. Reported by a player.)
     //
-    // This used to assume the two could never coexist ("Monks don't use Knives"), and
-    // that stopped being true once a Double-Attack card was allowed to work on the
-    // weapon it is compounded in: a Monk with Triple Attack and a Sidewinder was shown
-    // a 14% Double Attack proc that contributed exactly nothing to the DPS.
+    // This used to assume TA and DA could never coexist ("Monks don't use Knives"),
+    // and that stopped being true once a Double-Attack card was allowed to work on
+    // the weapon it is compounded in: a Monk with Triple Attack and a Sidewinder was
+    // shown a 14% Double Attack proc that contributed exactly nothing to the DPS.
     let attacks;
     if (dualWield) {
       // Dual-wield: crits auto-hit; hit/miss applies to non-crit swings only.
@@ -2546,33 +2560,33 @@ class BattlePipeline {
       ];
     } else if (tpf > 0 && taProc) {
       if (taCritProc) {
-        // Fury active: TA proc can crit (independent of normal crit roll)
+        // Fury active: the TA share itself splits crit/non-crit (PS exception)
         attacks = [
-          createAttackDefinition(taCritAvg,  0.0, period, effCrit * tpf),
-          createAttackDefinition(critAvg,     0.0, period, effCrit * (1.0 - tpf)),
-          createAttackDefinition(taAvg,       0.0, period, (1.0 - effCrit) * tpf * h),
-          createAttackDefinition(0.0,         0.0, period, (1.0 - effCrit) * tpf * (1.0 - h)),
-          createAttackDefinition(normalAvg,     0.0, period, (1.0 - effCrit) * (1.0 - tpf) * (1.0 - procFrac) * h),
-          createAttackDefinition(doubleSwingAvg, 0.0, period, (1.0 - effCrit) * (1.0 - tpf) * procFrac * hDA),
-          createAttackDefinition(0.0,           0.0, period, (1.0 - effCrit) * (1.0 - tpf) * ((1.0 - procFrac) * (1.0 - h) + procFrac * (1.0 - hDA))),
+          createAttackDefinition(taCritAvg,      0.0, period, tpf * effCrit),
+          createAttackDefinition(taAvg,          0.0, period, tpf * (1.0 - effCrit) * h),
+          createAttackDefinition(0.0,            0.0, period, tpf * (1.0 - effCrit) * (1.0 - h)),
+          createAttackDefinition(doubleSwingAvg, 0.0, period, (1.0 - tpf) * procFrac * hDA),
+          createAttackDefinition(critAvg,        0.0, period, (1.0 - tpf) * (1.0 - procFrac) * effCrit),
+          createAttackDefinition(normalAvg,      0.0, period, (1.0 - tpf) * (1.0 - procFrac) * (1.0 - effCrit) * h),
+          createAttackDefinition(0.0,            0.0, period, (1.0 - tpf) * (procFrac * (1.0 - hDA) + (1.0 - procFrac) * (1.0 - effCrit) * (1.0 - h))),
         ];
       } else {
-        // No Fury: TA can't crit; crits happen only on non-proc swings
+        // No Fury: the whole TA share can't crit
         attacks = [
-          createAttackDefinition(critAvg,     0.0, period, effCrit),
-          createAttackDefinition(taAvg,       0.0, period, (1.0 - effCrit) * tpf * h),
-          createAttackDefinition(0.0,         0.0, period, (1.0 - effCrit) * tpf * (1.0 - h)),
-          createAttackDefinition(normalAvg,     0.0, period, (1.0 - effCrit) * (1.0 - tpf) * (1.0 - procFrac) * h),
-          createAttackDefinition(doubleSwingAvg, 0.0, period, (1.0 - effCrit) * (1.0 - tpf) * procFrac * hDA),
-          createAttackDefinition(0.0,           0.0, period, (1.0 - effCrit) * (1.0 - tpf) * ((1.0 - procFrac) * (1.0 - h) + procFrac * (1.0 - hDA))),
+          createAttackDefinition(taAvg,          0.0, period, tpf * h),
+          createAttackDefinition(0.0,            0.0, period, tpf * (1.0 - h)),
+          createAttackDefinition(doubleSwingAvg, 0.0, period, (1.0 - tpf) * procFrac * hDA),
+          createAttackDefinition(critAvg,        0.0, period, (1.0 - tpf) * (1.0 - procFrac) * effCrit),
+          createAttackDefinition(normalAvg,      0.0, period, (1.0 - tpf) * (1.0 - procFrac) * (1.0 - effCrit) * h),
+          createAttackDefinition(0.0,            0.0, period, (1.0 - tpf) * (procFrac * (1.0 - hDA) + (1.0 - procFrac) * (1.0 - effCrit) * (1.0 - h))),
         ];
       }
     } else if (procFrac > 0) {
       attacks = [
-        createAttackDefinition(normalAvg, 0.0, period, (1.0 - effCrit) * (1.0 - procFrac) * h),
-        createAttackDefinition(doubleSwingAvg, 0.0, period, (1.0 - effCrit) * procFrac * hDA),
-        createAttackDefinition(0.0, 0.0, period, (1.0 - effCrit) * ((1.0 - procFrac) * (1.0 - h) + procFrac * (1.0 - hDA))),
-        createAttackDefinition(critAvg, 0.0, period, effCrit),
+        createAttackDefinition(doubleSwingAvg, 0.0, period, procFrac * hDA),
+        createAttackDefinition(critAvg,        0.0, period, (1.0 - procFrac) * effCrit),
+        createAttackDefinition(normalAvg,      0.0, period, (1.0 - procFrac) * (1.0 - effCrit) * h),
+        createAttackDefinition(0.0,            0.0, period, procFrac * (1.0 - hDA) + (1.0 - procFrac) * (1.0 - effCrit) * (1.0 - h)),
       ];
     } else {
       attacks = [

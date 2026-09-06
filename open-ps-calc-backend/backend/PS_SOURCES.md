@@ -6177,6 +6177,28 @@ Sidewinder 1/5, Snake Head Hat 5/25. The ratio is exact in all four, which only 
 as **one** effect written twice: the skill for daggers, the flat bonus for every other weapon.
 They are alternatives, not cumulative. Adding them made a Sidewinder dagger read 19%.
 
+## 2026-09-06 - Proc priority: Triple Attack > Double Attack > Critical
+
+A player reported Fury Chant (+50 CRIT) LOWERING their SN dagger build's DPS and asked
+whether the proc order was crit-first. Three sources agree it is not:
+
+- **wiki Double_Attack**, in the skill description itself: *"Has higher priority over
+  Critical attacks."*
+- **wiki Triple_Attack**, notes: *"This includes Critical Hit (unless Critical Explosion
+  is active) and Double Attack rolls, effectively lowering the chance of either
+  triggering."* TA is a skill, replaces the swing, and takes its share off the top of
+  both rolls; the Critical Explosion clause is the one PS exception (a TA can crit
+  while Fury is up).
+- **Hercules battle.c**: the DA roll happens first (:5091) and the crit check requires
+  `wd.type != BDT_MULTIHIT` (:5152), so a doubled (or tripled) swing never crits.
+- **Alardun (Discord, 2026-09-06)**: "DA has priority on crit."
+
+So on a normal swing: TA at its proc rate; DA at its proc rate on the remainder; crit
+only on what is left. Raising CRIT never costs procs. The engine modeled it crit-first
+until this date - correct exclusivity, inverted priority; invisible at low CRIT and
+badly wrong once SN Fury added +50. Composition lives in the attacks-array block of
+battlePipeline.js (grep "priority chain"); pinned by two engine-units tests.
+
 ## 2026-09-05 - RULING: a multi-hit swing deals what its popups show
 
 Maintainer ruling, closing the 396-vs-397 question: **the swing total is floored to a

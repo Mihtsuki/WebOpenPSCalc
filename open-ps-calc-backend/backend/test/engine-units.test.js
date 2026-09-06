@@ -712,10 +712,12 @@ test("Double Attack's +HIT applies only to the swing that procs", () => {
   const doubled = r.attacks.find((a) => r.double_hit && Math.abs(a.avg_damage - r.double_hit.avg_damage) < 1e-6);
   assert.ok(single && doubled, "could not find the single and doubled branches");
 
-  // Single swings roll at the base hit chance...
-  assert.ok(Math.abs(single.chance - (1 - c) * (1 - pf) * h) < 1e-6, "single swing should use the base hit chance");
-  // ...and the proc swing rolls at base + the skill's level, in percentage points.
-  const expected = (1 - c) * pf * (h + 10 / 100);
+  // Single swings roll at the base hit chance, on the share that neither
+  // doubled nor crit (DA is rolled first, crit only on the rest)...
+  assert.ok(Math.abs(single.chance - (1 - pf) * (1 - c) * h) < 1e-6, "single swing should use the base hit chance");
+  // ...and the proc swing — rolled before crit, so at its full rate — rolls
+  // at base + the skill's level, in percentage points.
+  const expected = pf * (h + 10 / 100);
   assert.ok(
     Math.abs(doubled.chance - expected) < 1e-3,
     `proc swing should roll at +10 HIT (expected ${expected.toFixed(5)}, got ${doubled.chance.toFixed(5)})`,
@@ -824,6 +826,79 @@ test("Double Attack still applies on the swings Triple Attack did not take", () 
     dpsOf(KNUCKLE_SW, TA) > dpsOf(KNUCKLE, TA),
     "Double Attack contributes nothing once Triple Attack is active",
   );
+});
+
+// Double Attack has priority over Critical (wiki Double_Attack: "Has higher priority
+// over Critical attacks"; a CC confirmed it 2026-09-06; Hercules gates the crit check
+// on wd.type != BDT_MULTIHIT at battle.c:5152, and DA already claimed the swing at
+// :5091). Crit therefore only rolls on the swings that did not double, and raising
+// CRIT never costs doubles. It was modeled the other way around — crit first — so SN
+// Fury's +50 CRIT cut doubles from 70% to ~31%: a player caught Fury Chant LOWERING
+// their calculated DPS by ~700 on a maxed-DA dagger build.
+test("Double Attack beats Critical: +50 CRIT costs no doubles and raises DPS", () => {
+  const cfg = createBattleConfig();
+  const run = (flags) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 23, base_level: 99, job_level: 99,
+      base_stats: { str: 90, agi: 90, vit: 1, int: 1, dex: 60, luk: 30 },
+      equipped: { right_hand: 1201 }, mastery_levels: { TF_DOUBLE: 10 }, flags,
+    });
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, getProfile("payon_stories"));
+    return new BattlePipeline(cfg).calculate(
+      status, weapon, createSkillInstance({ id: 0, level: 1 }), loader.getMonster(1002), eff, gb,
+    );
+  };
+  const base = run({});
+  const fury = run({ sn_fury: true });
+  assert.ok(fury.crit_chance - base.crit_chance > 49, "Fury should add +50 CRIT");
+
+  const doubleShare = (r) => r.attacks
+    .filter((a) => Math.abs(a.avg_damage - r.double_hit.avg_damage) < 1e-6)
+    .reduce((n, a) => n + a.chance, 0);
+  // The doubled swing keeps its full share when CRIT jumps by 50 points.
+  assert.ok(doubleShare(base) > 0.5, `this build should double most swings, got ${doubleShare(base)}`);
+  assert.ok(Math.abs(doubleShare(base) - doubleShare(fury)) < 1e-9,
+    `doubles must not shrink under Fury: ${doubleShare(base).toFixed(4)} -> ${doubleShare(fury).toFixed(4)}`);
+
+  // Crit rolls only on the non-proc share: exactly (1 - pf) x crit of the mass.
+  const pf = fury.proc_chance / 100, c = fury.crit_chance / 100;
+  const critMass = fury.attacks
+    .filter((a) => Math.abs(a.avg_damage - fury.crit.avg_damage) < 1e-6)
+    .reduce((n, a) => n + a.chance, 0);
+  assert.ok(Math.abs(critMass - (1 - pf) * c) < 1e-6,
+    `crit share should be (1-pf)*crit = ${((1 - pf) * c).toFixed(4)}, got ${critMass.toFixed(4)}`);
+
+  // And so the chant is a DPS gain — crits displace plain hits, never doubles.
+  assert.ok(fury.dps > base.dps,
+    `Fury Chant must not read as a DPS loss (${base.dps} -> ${fury.dps})`);
+});
+
+// Same rule one rung up: Triple Attack REPLACES the swing before either roll (wiki
+// Triple_Attack: "This includes Critical Hit (unless Critical Explosion is active)
+// and Double Attack rolls, effectively lowering the chance of either triggering").
+// Crit-first modeling instead let a lucky Monk's CRIT eat into the TA share.
+test("Triple Attack's share is not reduced by CRIT", () => {
+  const cfg = createBattleConfig();
+  const b = buildFromSaveSchema({
+    server: "payon_stories", job_id: 15, base_level: 99, job_level: 50,
+    base_stats: { str: 90, agi: 90, vit: 1, int: 1, dex: 60, luk: 97 },
+    equipped: { right_hand: 1801 }, mastery_levels: { MO_TRIPLEATTACK: 5 },
+  });
+  const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, getProfile("payon_stories"));
+  const r = new BattlePipeline(cfg).calculate(
+    status, weapon, createSkillInstance({ id: 0, level: 1 }), loader.getMonster(1002), eff, gb,
+  );
+  assert.ok(r.crit_chance > 20, `test needs real crit to bite, got ${r.crit_chance}%`);
+
+  const tpf = r.ta_proc_chance / 100, h = r.hit_chance / 100;
+  const taMass = r.attacks
+    .filter((a) => Math.abs(a.avg_damage - r.ta_proc.avg_damage) < 1e-6)
+    .reduce((n, a) => n + a.chance, 0);
+  assert.ok(Math.abs(taMass - tpf * h) < 1e-6,
+    `TA share should be its full proc rate x hit (${(tpf * h).toFixed(4)}), got ${taMass.toFixed(4)}`);
+
+  const mass = r.attacks.reduce((n, a) => n + a.chance, 0);
+  assert.ok(Math.abs(mass - 1) < 1e-9, `attack chances sum to ${mass}, not 1`);
 });
 
 // Shield weight is not cosmetic: Shield Boomerang adds the shield's displayed weight to

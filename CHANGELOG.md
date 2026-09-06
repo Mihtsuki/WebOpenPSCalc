@@ -5,6 +5,23 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-09-06
+
+### Fixed
+
+- **Raising CRIT no longer costs you Double Attacks.** A player noticed that enabling
+  Fury Chant (+50 CRIT) on their Super Novice dagger build *dropped* the calculated
+  DPS from 4824 to 4119, and asked whether the proc order was right. It was not, and
+  their own guess was: Double Attack "has higher priority over Critical attacks" (the
+  skill's wiki page, confirmed by a CC and by the emulator source, where the critical
+  check skips any swing already marked multi-hit). The calculator rolled crit first,
+  so every point of CRIT ate into the 70% Double Attack share. Now Double Attack keeps
+  its full proc rate and crit rolls only on the remaining swings - the same chant on
+  the same build reads as a gain instead of a ~700 DPS loss. Triple Attack got the
+  same correction one rung up: it replaces the swing before either roll, so CRIT no
+  longer eats into a Monk's Triple Attack share either (it can still crit under
+  Critical Explosion, which is the documented PS exception).
+
 ## 2026-09-05
 
 ### Fixed
