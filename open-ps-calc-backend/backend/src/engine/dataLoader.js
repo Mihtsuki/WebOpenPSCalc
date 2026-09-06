@@ -73,6 +73,18 @@ class DataLoader {
     return this.__psItemManual;
   }
 
+  // Snapshot of the live PS item API (tools.payonstories.com) — full harvest
+  // from the initial import; individual entries are refreshed by hand (with a
+  // curl of api/pc/item) when a report shows one stale. Descriptions only —
+  // scripts/stats never come from here (the API publishes no scripts; those
+  // live in the override/manual layers).
+  _loadPsItemDb() {
+    if (!this.__psItemDb) {
+      this.__psItemDb = readJsonSafe(path.join(PS_DIR, "ps_item_db.json"), {});
+    }
+    return this.__psItemDb;
+  }
+
   static _normalizeItem(item) {
     if (item == null) return null;
     const loc = item.loc || [];
@@ -784,6 +796,15 @@ class DataLoader {
     } catch {
       base = {};
     }
+    // The PS item-API scrape (ps_item_db.json) carries the server's OWN tooltip
+    // text and beats the vanilla client text: PS retunes items (Hypnotist's
+    // Staff is 18% MATK there, 25% in the vanilla text a player was shown), and
+    // the vanilla file also opens with the "Unknown Item, can be identified…"
+    // preamble for anything the old client shipped unidentified. Hand-curated
+    // layers below still win, so a description refreshed after a rework
+    // (Pill Bug Card) keeps its newer text over a stale scrape.
+    const scraped = this._loadPsItemDb()[strId];
+    if (scraped && scraped.description) base.description = scraped.description;
     for (const src of [this._loadPsItemOverrides(), this._loadPsItemManual()]) {
       const entry = src[strId] || {};
       if ("description" in entry) base.description = entry.description;

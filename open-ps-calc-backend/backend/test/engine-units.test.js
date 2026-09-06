@@ -2579,6 +2579,36 @@ test("items audited against the live PS item API", () => {
   // Witch's Pumpkin Hat carried a vanilla script for an id PS repurposed (MDEF 10 vs 4).
   assert.ok(/bMdef\s*,\s*4/.test(script(18656)), "MDEF is 4 per the item API, not 10");
   assert.ok(!/bStr|bInt/.test(script(18656)), "STR/INT are not in the PS description");
+
+  // 2026-09-06 tooltip audit (scripts checked against each item's own served
+  // description, then the live API): four scripts said less than their tooltips.
+  // Puck Card's Holy resist was missing entirely.
+  assert.ok(/bSubEle\s*,\s*Ele_Holy\s*,\s*15/.test(script(8240)), "Puck: 15% less from Holy");
+  assert.ok(/bSubRace\s*,\s*RC_Brute\s*,\s*25/.test(script(8240)), "Puck: 25% less from Brute");
+  // Living Magma's 25% Fire vulnerability was missing — incoming damage is modeled here.
+  assert.ok(/bSubEle\s*,\s*Ele_Fire\s*,\s*-25/.test(script(90006)), "Living Magma: receive 25% MORE from Fire");
+  // Rudolf Santa Hat still ran the vanilla script (LUK +1) instead of PS's MDEF ladder.
+  assert.ok(/bMdef\s*,\s*2/.test(script(5742)) && !/bLuk/.test(script(5742)), "Rudolf: MDEF 2 + refine steps, no vanilla LUK");
+  // Grove Card was still the vanilla Grape Juice drop bonus; PS made it SP recovery.
+  assert.ok(!/bAddMonsterDropItem/.test(script(4377)), "Grove: pre-rework drop script must be gone");
+});
+
+// Tooltips serve the PS item API's own text, not the vanilla client's. The scrape
+// (ps_item_db.json) sits between the vanilla descriptions and the hand-curated
+// layers: a player was shown "Matk +25%" (vanilla) for Hypnotist's Staff while both
+// the server and our script apply 18% — the correct text was on disk, unread.
+// Hand-curated descriptions still win: Pill Bug Card's manual text (10%, refreshed
+// after the Merchant rework) must beat the scrape's stale pre-rework 8%.
+test("item tooltips prefer the PS scrape over vanilla text, and the manual layer over both", () => {
+  loader.setProfile(getProfile("payon_stories"));
+  const hypno = loader.getItemDescription(1621);
+  assert.ok(hypno && /Matk \+18%/.test(hypno.description), "Hypnotist's Staff tooltip must state the 18% actually applied");
+  assert.ok(!/25%/.test(hypno.description), "the vanilla 25% text must not survive");
+  assert.ok(!/Unknown Item/.test(hypno.description), "no 'Unknown Item' identify preamble");
+  const pill = loader.getItemDescription(90014);
+  assert.ok(pill && /by <font color='#008800'>Cart Revolution<\/font> by 10%/.test(pill.description.replace(/<br\/>/g, " ")) || /10%/.test(pill.description),
+    "Pill Bug keeps the manual layer's post-rework 10% text");
+  assert.ok(!/by 8%/.test(pill.description), "the scrape's stale 8% must not win over the manual layer");
 });
 
 // ---------------------------------------------------------------------------

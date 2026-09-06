@@ -561,7 +561,10 @@
  "4375": {
   "script": "if(getrefine()>=8) { bonus2 bSubEle,Ele_Neutral,15; bonus bFlee,15; } else { bonus2 bSubEle,Ele_Neutral,10; bonus bFlee,10; }"
  },
- "4377": {},
+ "4377": {
+  "script": "bonus bSPrecovRate,30;",
+  "_note": "Script set 2026-09-06: live API says SP Recovery +30% (with Grape; Grape Juice variant under INT<30). The consumable condition is not modelable, so the flat rate stands in; the vanilla bAddMonsterDropItem script it replaces was the pre-rework effect."
+ },
  "4380": {
   "script": "bonus2 bSkillAtk,WZ_FIREPILLAR,5; bonus2 bSkillAtk,WZ_METEOR,5; bonus2 bSkillAtk,WZ_SIGHTRASHER,5; bonus2 bSkillAtk,MG_FIREWALL,5; bonus2 bSkillAtk,MG_FIREBALL,5;"
  },
@@ -792,7 +795,8 @@
   ],
   "slots": 0,
   "aegis_name": "Puck_Card",
-  "script": "bonus2 bSubRace,RC_Brute,25;"
+  "script": "bonus2 bSubEle,Ele_Holy,15; bonus2 bSubRace,RC_Brute,25;",
+  "_note": "Live API (2026-09-06): \"Receive 15% less damage from Holy Property Monsters. Receive 25% less damage from Brute monsters.\" The Holy 15% was missing here — found by the tooltip audit (description said 15%, script had no such number)."
  },
  "8241": {
   "type": "IT_CARD",
@@ -1287,7 +1291,8 @@
   ],
   "slots": 0,
   "aegis_name": "LIVING_MAGMA_Card",
-  "script": "bonus bInt,1; bonus2 bMagicAddEle,Ele_Fire,10;"
+  "script": "bonus bInt,1; bonus2 bMagicAddEle,Ele_Fire,10; bonus2 bSubEle,Ele_Fire,-25;",
+  "_note": "Live API (2026-09-06): \"Int +1. Inflict 10% more magic damage to Fire Property monsters. Receive 25% more damage from Fire Property monsters.\" The 25% vulnerability was missing — negative bSubEle carries it into the incoming direction."
  },
  "90007": {
   "type": "IT_CARD",
@@ -2714,5 +2719,9 @@
  "2136": {
   "weight": 1000,
   "_note": "Weight from the live item API description (tools.payonstories.com/api/pc/item), which states it in the in-game figure; item_db stores 10x that (Buckler db 600 = 60 in game). Found by sweeping shields carrying no weight at all after Laila reported two of them: shield weight feeds Shield Boomerang, so a missing value silently removes a term from that skill's damage."
+ },
+ "5742": {
+  "script": "bonus bMdef,2; if(getrefine()>=5) { bonus bMdef,2; } if(getrefine()>=7) { bonus bMdef,4; }",
+  "_note": "Live API (2026-09-06): \"Mdef +2. If refined to +5 adds a further +2 MDEF. If refined to +7 adds a further +4 MDEF for a total of +8.\" The vanilla script (bLuk,1) was still being applied. The Rudolf Set bonus (attack vs beasts 2%/+5%/+3% by refine, with Rudolf's Nose) is a set effect not yet in ps_item_combo_db — unmodeled, noted here."
  }
 }

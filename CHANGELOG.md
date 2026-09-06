@@ -9,6 +9,22 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Item tooltips now show Payon Stories' own text, not the vanilla client's.** A
+  player noticed Hypnotist's Staff claiming "Matk +25%" while suspecting 18% was
+  applied — and 18% is indeed what both the server and the calculator apply; only the
+  tooltip text was stale vanilla flavor (opening with "Unknown Item, can be identified
+  by using a Magnifier", no less). The calculator has carried a full snapshot of the PS
+  item database's descriptions all along without ever reading it; tooltips now serve
+  that text, with hand-curated fixes still winning where they are newer.
+
+- **The tooltip audit that followed caught four items whose bonuses said less than
+  their tooltips.** Checking every overridden item's script against its own tooltip:
+  Puck Card was missing its 15% Holy resistance (only the Brute half was applied),
+  Living Magma Card was missing its "receive 25% more damage from Fire" downside,
+  Rudolf Santa Hat was still running its vanilla script (LUK +1) instead of PS's
+  MDEF ladder, and Grove Card still carried the vanilla Grape Juice drop bonus from
+  before its SP-recovery rework. All four now match the live item database.
+
 - **Raising CRIT no longer costs you Double Attacks.** A player noticed that enabling
   Fury Chant (+50 CRIT) on their Super Novice dagger build *dropped* the calculated
   DPS from 4824 to 4119, and asked whether the proc order was right. It was not, and
