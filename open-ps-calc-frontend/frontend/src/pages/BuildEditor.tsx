@@ -707,6 +707,8 @@ const Z3_KEYS: string[] = [
   "offensive_blessing", // targetMods.offensive_blessing (Blessing cast on Undead/Demon)
   "fling", // targetMods.fling — Gunslinger coins thrown (0-5), each -3% target DEF
   "self_buffs", // targetMods.self_buffs — { SKILL_CONSTANT: level } the monster casts on itself
+  // Elemental proof potions (consumable_buffs.proof_*)
+  "proof_fire", "proof_water", "proof_earth", "proof_wind",
 ];
 const Z3_ENC: Record<string, string> = {};
 const Z3_DEC: Record<string, string> = {};
@@ -2863,6 +2865,27 @@ export default function BuildEditor() {
                 <span>Box of Drowsiness (+20 MATK)</span>
               </label>
             </div>
+            {/* Elemental proof potions — survivability only (Target-panel incoming
+                damage). +20% resist to the element, −15% against its counter on the
+                endow cycle; all four stack. */}
+            <div className="buff-section-header" style={{ marginTop: "0.8rem" }}>Proof potions (incoming damage)</div>
+            {([
+              ["proof_fire", "Fireproof Potion", "+20% Fire resist, −15% Water resist (20 min)"],
+              ["proof_water", "Coldproof Potion", "+20% Water resist, −15% Wind resist (20 min)"],
+              ["proof_earth", "Earthproof Potion", "+20% Earth resist, −15% Fire resist (20 min)"],
+              ["proof_wind", "Thunderproof Potion", "+20% Wind resist, −15% Earth resist (20 min)"],
+            ] as const).map(([key, name, tip]) => (
+              <div className="field field-checkbox" style={{ marginTop: "0.4rem" }} key={key}>
+                <label title={tip}>
+                  <input
+                    type="checkbox"
+                    checked={!!data.consumable_buffs?.[key]}
+                    onChange={(e) => updateConsumable(key, e.target.checked || undefined)}
+                  />
+                  <span>{name}</span>
+                </label>
+              </div>
+            ))}
           </Panel>
 
           <Panel eyebrow="06" title="Buffs">

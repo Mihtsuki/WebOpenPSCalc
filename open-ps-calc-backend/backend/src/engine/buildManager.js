@@ -242,6 +242,27 @@ function playerBuildToTarget(build, status, gearBonuses, weapon, loader) {
     }
   }
 
+  // Elemental proof potions (12118–12121): the item scripts carry the numbers —
+  // sc_start2(SC_RESIST_PROPERTY_X, 20min, 20, -15) — +20% resist to the element,
+  // −15% against its natural counter, following the endow cycle (Fire loses to
+  // Water, Water to Wind, Wind to Earth, Earth to Fire). PS's own item
+  // descriptions state exactly these pairs ("at the cost of increasing damage
+  // from the Water element", etc.); no wiki page exists for them. All four can
+  // be active at once — the statuses are independent, and the +20/−15 of
+  // different potions stack additively in subEle like any other resist source.
+  const PROOF_POTIONS = {
+    proof_fire:  { plus: "Ele_Fire",  minus: "Ele_Water" },
+    proof_water: { plus: "Ele_Water", minus: "Ele_Wind" },
+    proof_earth: { plus: "Ele_Earth", minus: "Ele_Fire" },
+    proof_wind:  { plus: "Ele_Wind",  minus: "Ele_Earth" },
+  };
+  const consumables = build.consumable_buffs || {};
+  for (const [key, spec] of Object.entries(PROOF_POTIONS)) {
+    if (!consumables[key]) continue;
+    subEle[spec.plus] = (subEle[spec.plus] || 0) + 20;
+    subEle[spec.minus] = (subEle[spec.minus] || 0) - 15;
+  }
+
   const profile = getProfile(build.server);
   const weaponType = weapon != null ? weapon.weapon_type : null;
   for (const [skillKey, rspec] of Object.entries(profile.passive_resists || {})) {

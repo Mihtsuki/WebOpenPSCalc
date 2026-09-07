@@ -3427,6 +3427,38 @@ test("defensive passives are offered to their jobs and reach incoming damage", (
     "Sense shaves a little off a Wind hit");
 });
 
+// Elemental proof potions (12118–12121): the item scripts are the source —
+// sc_start2(SC_RESIST_PROPERTY_X, 20min, 20, -15) — and PS's own item descriptions
+// name the counter pairs, which follow the endow cycle (Fireproof "at the cost of
+// increasing damage from the Water element", Coldproof from Wind, Earthproof from
+// Fire, Thunderproof from Earth). No wiki page exists for them; the numbers are the
+// scripts'. Requested by a player.
+test("proof potions: +20% resist to their element, -15% to the counter, and they stack", () => {
+  const { calculateIncomingPhysicalDamage } = require("../src/engine/calculators/incomingPipeline");
+  const taken = (cb, ele) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 10, base_level: 90, job_level: 50,
+      base_stats: { str: 60, agi: 40, vit: 60, int: 20, dex: 40, luk: 10 },
+      equipped: { right_hand: 1129, armor: 2314 }, consumable_buffs: cb || {},
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, createBattleConfig(), PS);
+    return calculateIncomingPhysicalDamage(1040, eff, st, gb, w, createBattleConfig(), { ele_override: ele }).avg_damage;
+  };
+  const FIRE = 3, WATER = 1, WIND = 4, EARTH = 2;
+
+  const base = taken({}, FIRE);
+  // +20% resist against its own element…
+  assert.ok(Math.abs(taken({ proof_fire: true }, FIRE) - base * 0.80) <= 1, "Fireproof must cut a Fire hit by 20%");
+  // …and −15% against the counter on the endow cycle.
+  assert.ok(Math.abs(taken({ proof_fire: true }, WATER) - taken({}, WATER) * 1.15) <= 2, "Fireproof must ADD 15% to a Water hit");
+  assert.ok(Math.abs(taken({ proof_water: true }, WIND) - taken({}, WIND) * 1.15) <= 2, "Coldproof's counter is Wind");
+  assert.ok(Math.abs(taken({ proof_earth: true }, FIRE) - taken({}, FIRE) * 1.15) <= 2, "Earthproof's counter is Fire");
+  assert.ok(Math.abs(taken({ proof_wind: true }, EARTH) - taken({}, EARTH) * 1.15) <= 2, "Thunderproof's counter is Earth");
+  // Two potions stack additively: Fireproof +20 and Earthproof −15 net +5% vs Fire.
+  assert.ok(Math.abs(taken({ proof_fire: true, proof_earth: true }, FIRE) - base * 0.95) <= 2,
+    "Fireproof + Earthproof must net a 5% cut on a Fire hit");
+});
+
 test("Run and Gun grants its PS ranged damage resistance, not just FLEE", () => {
   const { calculateIncomingPhysicalDamage } = require("../src/engine/calculators/incomingPipeline");
   // Gunslinger Release Patch Notes (Adjustment Rework): "Ranged damage resistance +30%".

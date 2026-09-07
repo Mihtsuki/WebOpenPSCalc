@@ -9,6 +9,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Elemental proof potions are in the Consumables panel.** Fireproof, Coldproof,
+  Earthproof and Thunderproof (12118–12121): each grants +20% resistance to its
+  element and −15% against the element that counters it on the endow cycle
+  (Fireproof weakens you to Water, Coldproof to Wind, Earthproof to Fire,
+  Thunderproof to Earth — exactly as the PS item descriptions state, with the
+  magnitudes from the item scripts). They affect the survivability numbers —
+  incoming damage, mob-skill hits, effective HP — and all four stack.
+
 - **The masteries panel now shows Blade Mastery.** The PS Knight rework removed both
   Sword Mastery and Two-Hand Sword Mastery; Blade Mastery replaces them — one skill,
   +4 ATK per level on One-Handed Swords, Daggers and Two-Handed Swords. The damage

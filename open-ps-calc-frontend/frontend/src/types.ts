@@ -49,6 +49,12 @@ export interface ConsumableBuffs {
   box_resentment?: boolean;  // Box of Resentment: +20 ATK
   box_drowsiness?: boolean;  // Box of Drowsiness: +20 MATK
   box_gloom?: boolean;       // Box of Gloom: casts Improve Concentration Lv1 (+3% AGI/DEX)
+  // Elemental proof potions: +20% resist to the element, −15% to its counter
+  // on the endow cycle. Incoming damage only; all four stack.
+  proof_fire?: boolean;      // Fireproof (12118): +Fire, −Water
+  proof_water?: boolean;     // Coldproof (12119): +Water, −Wind
+  proof_earth?: boolean;     // Earthproof (12120): +Earth, −Fire
+  proof_wind?: boolean;      // Thunderproof (12121): +Wind, −Earth
 }
 
 export interface SkillState {
