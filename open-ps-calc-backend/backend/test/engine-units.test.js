@@ -2444,6 +2444,31 @@ test("cards are ignored in slots they cannot compound into", () => {
   assert.equal(gb({ ...SHIELD, right_hand_card1: 4704 }).str_, 5);
 });
 
+// Cards persist through a gear swap now (player request, 2026-09-06): Unequip keeps
+// the slotted cards so the next item inherits them. Two shapes become reachable and
+// must contribute NOTHING: a card whose host slot is empty (dormant between items),
+// and a card index beyond the new host's slot count (a bigger weapon's extras after
+// swapping onto a smaller one — the UI hides those rows, the engine must not price them).
+test("kept cards are dormant on an empty host slot and beyond the host's slot count", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const config = createBattleConfig();
+  const gb = (equipped) => {
+    const b = buildFromSaveSchema({
+      job_id: 17, base_level: 99, job_level: 50,
+      base_stats: { str: 60, agi: 80, vit: 30, int: 20, dex: 60, luk: 20 },
+      equipped,
+    });
+    return resolvePlayerState(b, config, profile)[0];
+  };
+  // Hydra (4035): +20% vs DemiHuman, weapon card.
+  assert.equal(gb({ right_hand: 1201, right_hand_card1: 4035 }).add_race.RC_DemiHuman || 0, 20, "baseline: applies with a host");
+  assert.equal(gb({ right_hand: null, right_hand_card1: 4035 }).add_race.RC_DemiHuman || 0, 0, "empty host: card is dormant");
+  // Knife (1201) has 3 slots: card3 is the last real one, card4 is overflow.
+  assert.equal(gb({ right_hand: 1201, right_hand_card3: 4035 }).add_race.RC_DemiHuman || 0, 20, "last real slot applies");
+  assert.equal(gb({ right_hand: 1201, right_hand_card4: 4035 }).add_race.RC_DemiHuman || 0, 0, "beyond the host's slots: dormant");
+});
+
 // ---------------------------------------------------------------------------
 // Killing Stroke: Mirror Image bonus, and no fabricated repeat rate
 // ---------------------------------------------------------------------------

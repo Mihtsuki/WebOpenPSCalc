@@ -264,6 +264,26 @@ function compute(equipped, refineLevels = null, scriptCtx = null, forceProcs = f
     // A card in a slot it cannot compound into contributes nothing — see cardFitsSlot.
     if (slot.includes("_card") && !cardFitsSlot(equipped, slot, item)) continue;
 
+    // A card whose HOST slot is empty, or whose index exceeds the host's card
+    // slots, contributes nothing. Both shapes are reachable normally since the
+    // editor keeps slotted cards across an unequip/re-equip (player request,
+    // 2026-09-06): Unequip leaves the cards in the build so the next item
+    // inherits them, and a swap onto a smaller item hides the extra rows
+    // instead of deleting them — hidden must mean unpriced.
+    // The count is enforced only for hosts that DECLARE slots (> 0): builds
+    // have long slotted cards into 0-slot base-id variants as stand-ins for
+    // the slotted version (the jaludev importer and older shares do this), and
+    // that stays allowed — same fail-open spirit as cardFitsSlot above.
+    if (slot.includes("_card")) {
+      const hostSlot = slot.slice(0, slot.indexOf("_card"));
+      const hostId = equipped[hostSlot];
+      if (hostId == null) continue; // empty slot — the card is dormant, not equipped
+      const host = loader.getItem(hostId);
+      const idx = Number(slot.slice(slot.indexOf("_card") + "_card".length));
+      // Unknown host id falls through to the existing weaponLevel throw below.
+      if (host != null && host.slots > 0 && Number.isFinite(idx) && idx > host.slots) continue;
+    }
+
     if (item.type === "IT_ARMOR") {
       bonuses.def_ += item.def || 0;
       if (refineLevels != null && (item.refineable ?? true)) {

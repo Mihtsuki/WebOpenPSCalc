@@ -9,6 +9,15 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Swapping gear keeps the cards you had slotted.** Unequipping an item no longer
+  wipes its cards — the next item equipped in that slot inherits them, so trying a
+  different weapon doesn't mean picking the same Hydra Card all over again. While the
+  slot is empty (or after moving to an item with fewer slots) the extra cards are
+  dormant: hidden in the editor and ignored by the calculation, reappearing when an
+  item with room for them returns. The one exception is the off-hand crossing between
+  shield and weapon, where the old card can genuinely no longer fit (a Thara Frog has
+  no place in a dagger) — those are dropped. Suggested by a player.
+
 - **Unequipping an item drops you straight into its search box.** Clicking Unequip now
   focuses the slot's search input automatically, so a replacement can be typed (or picked
   from the list that opens) immediately — no extra click. Suggested by a player.

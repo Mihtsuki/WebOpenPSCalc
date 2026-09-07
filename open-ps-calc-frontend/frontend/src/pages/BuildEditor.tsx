@@ -2360,9 +2360,11 @@ export default function BuildEditor() {
                             setData((prev) => {
                               const next = structuredClone(prev) as any;
                               next.equipped[slot.key] = null;
-                              for (let i = 1; i <= 4; i++) delete next.equipped[`${slot.key}_card${i}`];
-                              // Same reason as the picker above: forge data is per-slot, so
-                              // leaving it behind makes the NEXT weapon read as forged.
+                              // Slotted cards are deliberately KEPT (player request): the
+                              // next item inherits them. While the slot is empty they are
+                              // dormant — the engine ignores cards on an empty host slot.
+                              // Forge data is per-slot though: left behind, the NEXT weapon
+                              // reads as forged.
                               if (next.forge) delete next.forge[slot.key];
                               return next;
                             });
@@ -2401,7 +2403,38 @@ export default function BuildEditor() {
                             return next;
                           });
                           api.getItem(r.id, data.server)
-                            .then((full) => setItemCache((prev) => ({ ...prev, [r.id]: full })))
+                            .then((full) => {
+                              setItemCache((prev) => ({ ...prev, [r.id]: full }));
+                              // left_hand is the one slot whose CARD universe depends on the
+                              // item (a shield takes shield cards, an off-hand weapon takes
+                              // weapon cards), so the cards kept from the previous item are
+                              // re-checked against the new host: any whose loc no longer fits
+                              // is dropped. EQP_ARMS cards fit both. A card whose loc can't be
+                              // resolved is kept — fail-open, matching the engine's
+                              // cardFitsSlot gate, which prices only truly fitting cards.
+                              if (slot.key === "left_hand") {
+                                const kept = [1, 2, 3, 4]
+                                  .map((i) => ({ key: `left_hand_card${i}`, id: data.equipped[`left_hand_card${i}`] as number | null | undefined }))
+                                  .filter((c) => c.id != null);
+                                if (kept.length === 0) return;
+                                const allowed = (full as any).type === "IT_WEAPON"
+                                  ? ["EQP_WEAPON", "EQP_ARMS"]
+                                  : ["EQP_SHIELD", "EQP_ARMS"];
+                                Promise.all(kept.map((c) => api.getItem(c.id as number, data.server).catch(() => null)))
+                                  .then((cards) => {
+                                    const drop = kept.filter((c, i) => {
+                                      const loc = (cards[i] as any)?.loc;
+                                      return Array.isArray(loc) && loc.length > 0 && !loc.some((l: string) => allowed.includes(l));
+                                    });
+                                    if (drop.length === 0) return;
+                                    setData((prev) => {
+                                      const next = { ...prev, equipped: { ...prev.equipped } };
+                                      for (const c of drop) delete (next.equipped as any)[c.key];
+                                      return next;
+                                    });
+                                  });
+                              }
+                            })
                             .catch(() => setItemCache((prev) => ({ ...prev, [r.id]: { id: r.id, name: r.label } })));
                         }}
                         fetchTooltip={fetchItemTooltip}
