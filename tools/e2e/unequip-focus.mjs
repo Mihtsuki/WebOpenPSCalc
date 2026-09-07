@@ -16,7 +16,8 @@ const state = {
 
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const page = await browser.newPage({ viewport: { width: 1300, height: 1000 } });
-await page.goto("http://localhost:5173/", { waitUntil: "networkidle" });
+const URL = process.argv[2] || "http://localhost:5173/";
+await page.goto(URL, { waitUntil: "networkidle" });
 await page.evaluate((s) => sessionStorage.setItem("opscalc.draft", JSON.stringify({ state: s, sourceParam: null })), state);
 await page.reload({ waitUntil: "networkidle" });
 await page.waitForTimeout(1600);
