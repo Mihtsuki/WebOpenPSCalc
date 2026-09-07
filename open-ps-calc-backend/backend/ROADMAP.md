@@ -337,6 +337,50 @@ incoming math already exist, so this is mostly UI plus one routing branch. Armor
 slots could follow with the same shape (Marc, Raydric) if asked; start with the shield,
 which is what was asked.
 
+### 4. Element-provenance refactor (endow / script / forge / ammo)  (open — analysis 2026-09-07)
+
+The element pipeline destroys provenance and then reconstructs it: the aggregator
+assigns every `bAtkEle` — the weapon's own, a compounded card's, AND the equipped
+ammo's — into one last-assign scalar (`script_atk_ele_rh`), `resolveWeapon` bakes
+endow > that scalar > forge > item field into `weapon.element` and discards which
+source won, and battlePipeline's element block then reverse-engineers it ("if a
+script element exists but this skill doesn't use ammo, re-read the raw item field").
+That shape has produced one shipped bug (the original Kunai leak) and four more
+confirmed live during the PR #4/#5 review, all one matrix-cell apart:
+
+- Wind endow + scriptless weapon + unrelated elemental kunai → endow lost (Neutral).
+- Endowed bare-handed punch + any elemental ammo equipped → endow lost.
+- VVS-Fire forge + unrelated kunai → forge element stripped (unequip the ammo and
+  it returns).
+- (PR #5's guard, pending fix) scripted weapon + fitting ammo → whichever script the
+  equipped-slot loop visits last wins — output depends on the build's JSON key order.
+
+The fix restores provenance instead of patching the reconstruction, in three moves:
+
+1. **Aggregator**: stop leaking ammo `bAtkEle` into the shared scalar; it already
+   lives in the `from_ammo` pool. Fold it into the weapon slot ONLY when the weapon
+   actually fires that ammo (bow+arrow, gun+bullet). `script_atk_ele_rh` then means
+   "the wielded weapon's own element" by construction — compounded-card `bAtkEle`
+   included, which closes the latent weapon-card/combo gap for free.
+2. **resolveWeapon**: unchanged — endow > own script > forge > field becomes correct
+   automatically.
+3. **battlePipeline element block**: shrinks to "if the cast skill uses hand-thrown
+   ammo, the ammo's own element (from_ammo) overrides everything, endow included
+   (battle.c:5042; in-game kunai test by Mihtsuki); otherwise weapon.element as-is."
+   DELETE: the raw-field un-bake fallback, the unenforced "all 148 bAtkEle items'
+   field agrees with their script" invariant, the weaponHasOwnScript guard, and the
+   three stacked generations of patch commentary.
+
+Sequencing: land AFTER Mihtsuki's PR #4/#5 merge (their tests are the valuable part
+and this refactor supersedes their pipeline machinery while keeping the kunai
+override concept) — doing it first would force heavy rebases on both PRs. Pin the
+full matrix in tests first: {endow, forge, own script, card script, none} x
+{uses-ammo skill, fires-ammo weapon, neither} — several cells already covered by
+their tests and ours. OPEN in-game question before pinning the bow cell: endowed bow
++ elemental arrow — the current model has the endow winning, but battle.c:5042 reads
+as if the arrow could win there exactly as it does for kunai. Ask Hsezka/Laila for a
+trade-window test.
+
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
 - **Throw Kunai works in the calculator.**
