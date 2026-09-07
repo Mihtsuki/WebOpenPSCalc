@@ -50,9 +50,20 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  // Previous query, so the effect below can tell "the user erased the text"
+  // apart from "the parent re-rendered". Callers build the `search` prop inline
+  // (e.g. itemSearch(type, loc) in BuildEditor), so its identity changes on
+  // every parent render and re-runs the effect with the query unchanged —
+  // wiping the empty-query browse list then made the dropdown vanish moments
+  // after Unequip auto-focused it (the unequip's own recalc re-renders the
+  // editor). Reported by the maintainer.
+  const prevQuery = useRef("");
+
   useEffect(() => {
+    const was = prevQuery.current;
+    prevQuery.current = query;
     if (!query.trim()) {
-      setResults([]);
+      if (was.trim()) setResults([]); // the user actually cleared the box
       return;
     }
     const handle = setTimeout(() => {

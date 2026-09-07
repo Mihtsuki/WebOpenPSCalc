@@ -31,9 +31,18 @@ const focus = await page.evaluate(() => {
   const el = document.activeElement;
   return { tag: el?.tagName, placeholder: el?.getAttribute?.("placeholder") || "" };
 });
-const listOpen = await page.locator(".search-results").first().isVisible().catch(() => false);
-console.log("focused:", JSON.stringify(focus), "| browse list open:", listOpen);
 
-const ok = focus.tag === "INPUT" && /^Search /.test(focus.placeholder);
-console.log(ok ? "PASS" : "FAIL: search input not focused after Unequip");
+// The focused input's onFocus opens the browse list — and it must SURVIVE the
+// recalculation the unequip itself triggers. The editor re-renders when that
+// result lands, which used to wipe the just-opened list (the picker's query
+// effect re-ran on the new search-prop identity and cleared its results).
+await page.waitForTimeout(2500);
+const listOpen = await page.locator(".search-results").first().isVisible().catch(() => false);
+const rows = await page.locator(".search-results .search-result-item").count();
+console.log("focused:", JSON.stringify(focus), "| browse list open:", listOpen, `(${rows} rows)`);
+
+let ok = true;
+if (!(focus.tag === "INPUT" && /^Search /.test(focus.placeholder))) { ok = false; console.error("FAIL: search input not focused after Unequip"); }
+if (!listOpen || rows === 0) { ok = false; console.error("FAIL: browse list should be open (and stay open through the recalc)"); }
+console.log(ok ? "PASS" : "see failures above");
 process.exit(ok ? 0 : 1);

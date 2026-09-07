@@ -40,6 +40,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **The browse list opened by Unequip no longer vanishes.** Unequipping focuses the
+  slot's search box and opens the browse list — but the recalculation the unequip
+  itself triggers re-rendered the editor a moment later and wiped the list. It now
+  stays open until you type, pick something, or dismiss it. Reported right after the
+  focus feature shipped.
+
 - **Item info bubbles no longer get stuck on screen.** The first hover of an item
   fetches its description; darting the cursor away while that fetch was still in
   flight could open the bubble after the fact — with nothing hovered, nothing ever
