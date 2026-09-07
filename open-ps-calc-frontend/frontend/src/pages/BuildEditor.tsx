@@ -887,6 +887,11 @@ export default function BuildEditor() {
     () => deriveWildcardMode(hydrated.build),
   );
 
+  // One-shot: the slot whose search input should grab focus because the user just
+  // clicked Unequip there — so a replacement can be typed immediately. Cleared by
+  // the picker the moment it takes the focus (see SearchPicker.onAutoFocus).
+  const [focusSearchSlot, setFocusSearchSlot] = useState<string | null>(null);
+
   const [jobs, setJobs] = useState<{ id: number; name: string }[]>([]);
   const [passiveSkills, setPassiveSkills] = useState<PassiveSkill[]>([]);
   const [plagiarism, setPlagiarism] = useState<{ jobs: number[]; skills: { name: string; display_name: string; max_level: number }[] }>({ jobs: [], skills: [] });
@@ -2361,6 +2366,7 @@ export default function BuildEditor() {
                               if (next.forge) delete next.forge[slot.key];
                               return next;
                             });
+                            setFocusSearchSlot(slot.key);
                           }}
                         >
                           Unequip
@@ -2375,6 +2381,8 @@ export default function BuildEditor() {
                     ) : (
                       <SearchPicker
                         placeholder={`Search ${slot.label.toLowerCase()}…`}
+                        autoFocus={focusSearchSlot === slot.key}
+                        onAutoFocus={() => setFocusSearchSlot(null)}
                         search={"dualWield" in slot && slot.dualWield ? leftHandSearch : itemSearch(slot.itemType, "loc" in slot ? slot.loc : undefined)}
                         onSelect={(r) => {
                           setData((prev) => {

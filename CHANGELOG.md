@@ -7,6 +7,12 @@ instead of release version. Dates are taken from actual git commit history.
 
 ## 2026-09-06
 
+### Added
+
+- **Unequipping an item drops you straight into its search box.** Clicking Unequip now
+  focuses the slot's search input automatically, so a replacement can be typed (or picked
+  from the list that opens) immediately — no extra click. Suggested by a player.
+
 ### Fixed
 
 - **Item tooltips now show Payon Stories' own text, not the vanilla client's.** A

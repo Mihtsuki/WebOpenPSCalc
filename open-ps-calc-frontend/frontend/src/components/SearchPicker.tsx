@@ -6,18 +6,36 @@ interface Props {
   search: (query: string) => Promise<SearchResult[]>;
   onSelect: (result: SearchResult) => void;
   fetchTooltip?: (id: number) => Promise<string | null>;
+  // Focus the input when the picker mounts (e.g. right after Unequip swaps the
+  // pill for this picker, so the user can type a replacement immediately). The
+  // input's own onFocus then opens the browse list. onAutoFocus fires once the
+  // focus is taken so the owner can clear its one-shot flag — without that, the
+  // flag would still be set on a LATER remount (loading a build that leaves the
+  // slot empty) and steal focus the user never asked for.
+  autoFocus?: boolean;
+  onAutoFocus?: () => void;
 }
 
-export default function SearchPicker({ placeholder, search, onSelect, fetchTooltip }: Props) {
+export default function SearchPicker({ placeholder, search, onSelect, fetchTooltip, autoFocus, onAutoFocus }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const tooltipCache = useRef<Map<number, string | null>>(new Map());
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+      onAutoFocus?.();
+    }
+    // Mount-only: focus is a one-shot handoff, not something to re-run on prop churn.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -137,6 +155,7 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
   return (
     <div className="search-combo" ref={boxRef}>
       <input
+        ref={inputRef}
         placeholder={placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
