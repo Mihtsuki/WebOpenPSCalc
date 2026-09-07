@@ -297,6 +297,11 @@ function applyOutgoingTargetMods(target: any, targetModsInput: any, build: any, 
     if (ecEle != null && !target.is_boss) {
       target.element = ecEle;
     }
+    // Turn Undead failed-cast iteration: how many casts already failed, so the
+    // remaining-HP term of the success formula works from the reduced HP. Ephemeral
+    // UI state — accepted from target_mods but never part of a saved/shared build.
+    const tuFailed = Number(targetModsInput.tu_failed_casts);
+    if (Number.isFinite(tuFailed) && tuFailed > 0) target.tu_failed_casts = Math.min(50, Math.floor(tuFailed));
     // Status debuffs
     if (targetModsInput.sleep)  sc.SC_SLEEP  = true;
     if (targetModsInput.stun)   sc.SC_STUN   = true;
@@ -435,6 +440,14 @@ router.post("/", (req: Request, res: Response) => {
     let target;
     if (targetInput && targetInput.mob_id != null) {
       target = loader.getMonster(Number(targetInput.mob_id));
+      // The engine's monster target never carried HP, which silently zeroed the
+      // remaining-HP term of Turn Undead's success formula for monster targets.
+      // Give it the db values so HP-aware mechanics have something to read.
+      const rawMob = loader.getMonsterData(Number(targetInput.mob_id));
+      if (target && rawMob && rawMob.hp > 0) {
+        (target as any).max_hp = rawMob.hp;
+        (target as any).hp = rawMob.hp;
+      }
     } else {
       target = createTarget(targetInput || {});
     }

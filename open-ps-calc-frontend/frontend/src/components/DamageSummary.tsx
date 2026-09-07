@@ -83,6 +83,9 @@ interface SingleResult {
     dps: number;
     period_ms?: number;
     success_chance?: number | null; // Turn Undead: instant-kill success chance (%)
+    tu_attempt?: number;
+    tu_hp_now?: number | null;
+    tu_max_hp?: number | null;
     dw_rh_factor?: number | null;
     dw_lh_factor?: number | null;
     dw_lh_normal?: DamageBranch | null;
@@ -106,6 +109,10 @@ interface CalcResult {
 }
 
 interface Props {
+  // Turn Undead failed-cast iteration: casts treated as already failed (0 = fresh
+  // target), and the callback to advance/reset it. Ephemeral by design.
+  tuAttempt?: number;
+  onTuAttempt?: (n: number) => void;
   calcResult: CalcResult | null;
   calculating: boolean;
   error: string;
@@ -561,7 +568,7 @@ function DualWieldStepList({ rh, lh, rhFactor, lhFactor, isCrit, psBonusPct }: {
   );
 }
 
-export default function DamageSummary({ calcResult, calculating, error, forceProcs, onToggleForceProcs }: Props) {
+export default function DamageSummary({ calcResult, calculating, error, forceProcs, onToggleForceProcs, tuAttempt = 0, onTuAttempt }: Props) {
   const [branch, setBranch] = useState<Branch>("skill");
   const [dwMode, setDwMode] = useState<DwMode>("ps");
   const [showExp, setShowExp] = useState(false);
@@ -823,9 +830,37 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
           <div className="value crit">{result.crit_chance.toFixed(1)}<span className="unit">%</span></div>
         </div>
         {isInstaKill && (
-          <div className="metric" title="Turn Undead instant-kill chance per cast: [20×SkillLv + 3×LUK + INT + BaseLv + (1−HP/MaxHP)×200] ÷ 10 %, halved if base INT < 40. On a failed roll the skill deals the shown (fail) damage instead.">
-            <div className="label">Success chance</div>
+          <div className="metric" title="Turn Undead instant-kill chance per cast: [20×SkillLv + 3×LUK + INT + BaseLv + (1−HP/MaxHP)×200] ÷ 10 %, halved if base INT < 40. On a failed roll the skill deals the shown (fail) damage instead — which lowers the target's HP and raises the NEXT cast's chance (up to +20%). Use the arrows to step through attempts; a manual Calculate, a skill change or re-opening this tab resets to attempt 1.">
+            <div className="label">
+              Success chance{result.tu_attempt && result.tu_attempt > 1 ? ` — attempt ${result.tu_attempt}` : ""}
+            </div>
             <div className="value good">{(successChance as number).toFixed(1)}<span className="unit">%</span></div>
+            {onTuAttempt && (
+              <div className="tu-attempt-row">
+                <button className="tu-btn" onClick={() => onTuAttempt(tuAttempt + 1)} title="Assume this cast fails: its damage lands, the target's HP drops, and the next cast's chance is quoted from the reduced HP">cast fails ▸</button>
+                {tuAttempt > 0 && (
+                  <button className="tu-btn" onClick={() => onTuAttempt(tuAttempt - 1)} title="Take back the last failed cast">◂ undo</button>
+                )}
+                {tuAttempt > 1 && (
+                  <button className="tu-btn" onClick={() => onTuAttempt(0)} title="Fresh target, attempt 1">reset</button>
+                )}
+              </div>
+            )}
+            {result.tu_hp_now != null && result.tu_max_hp != null && result.tu_attempt! > 1 && (() => {
+              // A miniature HP bar in the game's own colour language: green while
+              // healthy, orange once wounded, red when low — so the reason the chance
+              // is climbing is visible at a glance, not just stated in small print.
+              const pct = Math.max(0, Math.min(100, (result.tu_hp_now / result.tu_max_hp) * 100));
+              const tone = pct > 50 ? "hp-high" : pct > 25 ? "hp-mid" : "hp-low";
+              return (
+                <div className="tu-hp">
+                  <div className="tu-hp-bar"><span className={`tu-hp-fill ${tone}`} style={{ width: `${pct}%` }} /></div>
+                  <div className={`tu-hp-note ${tone}`}>
+                    target HP {result.tu_hp_now.toLocaleString()} / {result.tu_max_hp.toLocaleString()} ({pct.toFixed(0)}%)
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
         {/* The rate rides on the value line rather than its own row: a second line
@@ -999,7 +1034,7 @@ export default function DamageSummary({ calcResult, calculating, error, forcePro
       <div className="branch-toggle">
         <button
           className={`branch-skill-pill${activeBranch === "skill" && hasSkill ? " active" : ""}${!hasSkill && activeBranch === "normal" ? " active" : ""}`}
-          onClick={() => setBranch(hasSkill ? "skill" : "normal")}
+          onClick={() => { setBranch(hasSkill ? "skill" : "normal"); if (tuAttempt > 0) onTuAttempt?.(0); }}
         >
           {hasSkill ? `${selected_skill.label} Lv ${selected_skill.level}` : "Normal Attack"}
         </button>

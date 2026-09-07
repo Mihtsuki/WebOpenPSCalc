@@ -2470,6 +2470,61 @@ test("kept cards are dormant on an empty host slot and beyond the host's slot co
 });
 
 // ---------------------------------------------------------------------------
+// Turn Undead / offensive Resurrection: fail damage, PS success formula,
+// failed-cast iteration (requested by a CC), and the Boss gate
+// ---------------------------------------------------------------------------
+test("Turn Undead: fail damage, success chance, failed-cast iteration, INT halving, Boss gate", () => {
+  const profile = getProfile("payon_stories");
+  loader.setProfile(profile);
+  const cfg = createBattleConfig();
+  const mk = (int_) => buildFromSaveSchema({
+    server: "payon_stories", job_id: 8, base_level: 99, job_level: 50,
+    base_stats: { str: 1, agi: 1, vit: 1, int: int_, dex: 1, luk: 30 }, equipped: {},
+  });
+  const run = (b, skillId, lv, tgt) => {
+    const [gb, eff, weapon, status] = resolvePlayerState(b, cfg, profile);
+    return new BattlePipeline(cfg).calculate(status, weapon, createSkillInstance({ id: skillId, level: lv }), tgt, eff, gb);
+  };
+  // Neutral lv1 target so the Holy AttrFix is ×1.0 and the raw formula is visible.
+  const t0 = () => createTarget({ def_: 0, mdef_: 0, int_: 0, vit: 0, size: 1, race: 0, element: 0 });
+
+  // Priest 99/50, base INT 99 / LUK 30 → status INT 104 / LUK 37 with job bonuses.
+  // Fail damage (BaseLv + INT + 10×lv) × 3 × (1 + LUK×3/200) = 303×3×1.555 → 1413.
+  // Success [20×10 + 3×37 + 104 + 99]/10 = 51.4% at full HP; MATK must play no part.
+  const a = run(mk(99), 77, 10, t0()); // PR_TURNUNDEAD
+  assert.equal(a.normal.avg_damage, 1413, "fail damage is the fixed formula, not MATK");
+  assert.ok(Math.abs(a.success_chance - 51.4) < 1e-9, `success should be 51.4%, got ${a.success_chance}`);
+  assert.equal(a.tu_attempt, 1);
+
+  // Failed-cast iteration: 3 failed casts × 1413 off 10,000 HP leaves 5,761 (57.61%),
+  // so the remaining-HP term adds (1−0.5761)×200/10 = 8.478 points → 59.878%.
+  const t1 = t0(); t1.max_hp = 10000; t1.hp = 10000; t1.tu_failed_casts = 3;
+  const b = run(mk(99), 77, 10, t1);
+  assert.equal(b.tu_hp_now, 5761, "HP after N fails = max HP − N × fail damage");
+  assert.equal(b.tu_attempt, 4);
+  assert.ok(Math.abs(b.success_chance - 59.878) < 1e-9, `iterated success should be 59.878%, got ${b.success_chance}`);
+
+  // Base INT below 40 halves the chance — the gate reads BASE INT (30), not the
+  // job-bonused status INT (35): [200 + 111 + 35 + 99]/10 ÷ 2 = 22.25%.
+  const c = run(mk(30), 77, 10, t0());
+  assert.ok(Math.abs(c.success_chance - 22.25) < 1e-9, `low base INT should halve to 22.25%, got ${c.success_chance}`);
+
+  // Boss monsters cannot be instantly killed; only the fail damage lands.
+  const t2 = t0(); t2.is_boss = true;
+  const d = run(mk(99), 77, 10, t2);
+  assert.equal(d.success_chance, 0, "Boss: instant-kill chance must be 0");
+  assert.equal(d.normal.avg_damage, 1413, "Boss: the fail damage still lands in full");
+
+  // Offensive Resurrection is Turn Undead at the cast level (wiki Resurrection:
+  // "same effect (and chance and cast delay) as Turn Undead") — identical numbers.
+  const res = run(mk(99), 54, 4, t0()); // ALL_RESURRECTION Lv4
+  const tu4 = run(mk(99), 77, 4, t0());
+  assert.equal(res.success_chance, tu4.success_chance, "Res lv4 chance = TU lv4 chance (39.4%)");
+  assert.equal(res.normal.avg_damage, tu4.normal.avg_damage, "Res lv4 fail damage = TU lv4 fail damage");
+  assert.ok(Math.abs(res.success_chance - 39.4) < 1e-9);
+});
+
+// ---------------------------------------------------------------------------
 // Killing Stroke: Mirror Image bonus, and no fabricated repeat rate
 // ---------------------------------------------------------------------------
 test("Killing Stroke takes the Mirror Image bonus and reports no DPS", () => {

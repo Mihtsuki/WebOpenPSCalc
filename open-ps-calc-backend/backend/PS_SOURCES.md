@@ -6177,6 +6177,35 @@ Sidewinder 1/5, Snake Head Hat 5/25. The ratio is exact in all four, which only 
 as **one** effect written twice: the skill for daggers, the flat bonus for every other weapon.
 They are alternatives, not cumulative. Adding them made a Sidewinder dagger read 19%.
 
+## 2026-09-06 - Turn Undead iteration + offensive Resurrection (shipped)
+
+Decisions behind the Turn Undead branch, requested by a CC (Laila) who wanted a
+"recalculate after each failed cast" toggle:
+
+- **Success formula** (PSRO Priest/Acolyte Rework, Turn Undead section):
+  `[20*SkillLv + 3*LUK + INT + BaseLv + (1 - HP/MaxHP)*200]` over a divisor the doc
+  writes as "/1000%". Its own worked example (LUK 70, INT 120, BaseLv 99, lv10, full
+  HP -> 48.9%) only reproduces with p% = numerator/10 - so that is what ships.
+  Halved when BASE INT < 40 (base, not job-bonused). No upper cap beyond 100.
+- **Fail damage**: `(BaseLv + INT + 10*SkillLv) * 3 * (1 + LUK*3/200)` per
+  wiki Turn_Undead "Damage Done if Failed" - the standard pre-re formula, unchanged
+  by PS. Not MATK-scaled; ignores DEF and cards; Holy AttrFix still applies.
+- **Iteration**: `target_mods.tu_failed_casts = N` (route-capped at 50) prices attempt
+  N+1 - remaining HP = max HP minus N fail hits, feeding the (1-HP/MaxHP) term (worth
+  up to +20 points). Ephemeral UI state: reset on Calculate, on skill change, never
+  saved or shared.
+- **Mob HP plumbing**: the engine's monster target never carried HP at all, so the HP
+  term was silently dead for every monster - calculate.ts now copies the db HP onto
+  the target. (This is why the feature "worked" on custom targets only, before.)
+- **Boss gate**: Hercules gates the kill roll on `!(mode&MD_BOSS)`; both wiki pages say
+  only the fail damage lands on a Boss. successPct = 0, damage kept.
+- **Offensive Resurrection** (ALL_RESURRECTION lv1-4) runs through the same branch at
+  its own cast level, per wiki Resurrection: "When used on Undead property monsters
+  (excluding ones that are also Boss flagged), it has the same effect (and chance and
+  cast delay) as Turn Undead." Hercules agrees - one shared case block (~battle.c:4129).
+  OPEN: that page does not restate the fail-damage magnitude; the branch assumes full
+  delegation (same formula at the Res level). Worth confirming with Laila in game.
+
 ## 2026-09-06 - Proc priority: Triple Attack > Double Attack > Critical
 
 A player reported Fury Chant (+50 CRIT) LOWERING their SN dagger build's DPS and asked

@@ -9,6 +9,22 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Turn Undead now shows its instant-kill chance — and can walk a fight cast by
+  cast.** Requested by a CC: Turn Undead's card shows the success chance from the PS
+  rework formula (LUK/INT/BaseLv/skill level, halved below 40 base INT, 0% on Boss
+  monsters where only the fail damage lands), and a "cast fails" stepper simulates a
+  failed cast: the fail damage comes off the target's HP bar and the next attempt's
+  chance rises through the remaining-HP term (worth up to +20 points as the target
+  drops). Undo and reset steps are right there; the iteration is ephemeral and never
+  part of a saved or shared build. Monster HP is now actually plumbed into the
+  engine's target for this — it never was, so the HP term had been silently dead for
+  every monster.
+
+- **Resurrection can be priced as an attack.** On Undead monsters (Boss excluded)
+  Resurrection acts exactly as Turn Undead at its own cast level, per the wiki — the
+  calculator now offers it as a selectable skill and runs it through the same branch,
+  success chance, fail damage, HP stepper and all.
+
 - **Swapping gear keeps the cards you had slotted.** Unequipping an item no longer
   wipes its cards — the next item equipped in that slot inherits them, so trying a
   different weapon doesn't mean picking the same Hydra Card all over again. While the

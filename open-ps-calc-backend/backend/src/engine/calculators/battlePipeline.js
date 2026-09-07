@@ -848,6 +848,12 @@ class BattlePipeline {
    */
   _runTurnUndeadBranch(status, weapon, skill, target, build, opts = {}) {
     const result = createDamageResult();
+    // Offensive Resurrection runs through this same branch with its own level (1-4):
+    // wiki.payonstories.com/Resurrection - "When used on Undead property monsters
+    // (excluding ones that are also Boss flagged), it has the same effect (and chance
+    // and cast delay) as Turn Undead." Hercules agrees at the source level: the two
+    // share one case block (battle.c ~4129), formula fed by the cast skill's level.
+    const skillLabel = skill.name === "ALL_RESURRECTION" ? "Resurrection (offensive)" : "Turn Undead";
 
     const core = build.base_level + status.int_ + skill.level * 10;
     const base = core * 3;
@@ -855,7 +861,7 @@ class BattlePipeline {
 
     let pmf = { [dmg]: 1.0 };
     result.add_step({
-      name: `Turn Undead Base (Lv ${skill.level})`, value: dmg, min_value: dmg, max_value: dmg,
+      name: `${skillLabel} Base (Lv ${skill.level})`, value: dmg, min_value: dmg, max_value: dmg,
       note: `Base Lv ${build.base_level}, INT ${status.int_}, LUK ${status.luk} — MATK/ATK not used`,
       formula: "(BaseLv + INT + SkillLv*10) * 3 * (1 + LUK*3/200)",
       hercules_ref: "wiki.payonstories.com/Turn_Undead (fail damage)",
@@ -871,7 +877,7 @@ class BattlePipeline {
 
     pmf = floorAt(pmf, 1);
     const [mn, mx, av] = pmfStats(pmf);
-    result.add_step({ name: "Final Damage", value: av, min_value: mn, max_value: mx, note: "Turn Undead branch (this is the FAIL damage; on success the target is instantly killed)", formula: "", hercules_ref: "" });
+    result.add_step({ name: "Final Damage", value: av, min_value: mn, max_value: mx, note: `${skillLabel} branch (this is the FAIL damage; on success the target is instantly killed)`, formula: "", hercules_ref: "" });
 
     // PS instant-kill success chance (PSRO Priest/Acolyte Rework):
     //   p% = [20×SkillLv + 3×LUK + INT + BaseLv + (1 − HP/MaxHP)×200] / 10
@@ -880,22 +886,48 @@ class BattlePipeline {
     // confirming p% = numerator/10. Success is HALVED if BASE INT < 40, and the
     // rework removes the old upper cap (a probability is still clamped to 0–100).
     // Target assumed at full HP (HP term = 0) unless it carries current/max HP.
-    const hpFrac = (target.max_hp && target.hp != null)
+    //
+    // FAILED-CAST ITERATION (requested by a CC): each failed cast deals the fail
+    // damage above, and the remaining-HP term then raises the NEXT cast's kill
+    // chance (by up to +20%). target.tu_failed_casts = N recomputes the chance as
+    // if N casts already failed — remaining HP = max HP minus N times the fail
+    // damage. Ephemeral: the UI resets it on Calculate, on a skill change, and on
+    // tabbing back to the Turn Undead branch; it is never saved or shared.
+    const failedCasts = Math.max(0, Math.floor(target.tu_failed_casts || 0));
+    const tuMaxHp = target.max_hp || target.hp || 0;
+    let hpFrac = (target.max_hp && target.hp != null)
       ? Math.max(0, Math.min(1, target.hp / target.max_hp)) : 1.0;
+    let tuHpNow = tuMaxHp > 0 ? Math.round(tuMaxHp * hpFrac) : null;
+    if (failedCasts > 0 && tuMaxHp > 0) {
+      tuHpNow = Math.max(1, tuHpNow - failedCasts * av);
+      hpFrac = tuHpNow / tuMaxHp;
+    }
     let successPct = (20 * skill.level + 3 * status.luk + status.int_ + build.base_level + (1 - hpFrac) * 200) / 10;
     const baseIntLow = build.base_int < 40;
     if (baseIntLow) successPct /= 2;
     successPct = Math.max(0, Math.min(100, successPct));
+    // Boss monsters cannot be instantly killed - Hercules gates the kill roll on
+    // !(mode&MD_BOSS), and both wiki pages say the skill "will only deal damage
+    // through the fail calculation" on a Boss. The fail damage above still lands.
+    const bossImmune = !!target.is_boss;
+    if (bossImmune) successPct = 0;
     result.success_chance = successPct;
+    result.tu_attempt = failedCasts + 1;
+    result.tu_hp_now = tuHpNow;
+    result.tu_max_hp = tuMaxHp > 0 ? tuMaxHp : null;
+    result.tu_fail_damage = av;
     result.add_step({
       // Not a damage figure — shown as an input chip so it doesn't read as a
       // (huge, negative) step on the running damage total.
       info: true,
       name: "Instant-Kill Success Chance", value: successPct, min_value: successPct, max_value: successPct, multiplier: 1.0,
-      note: `${successPct.toFixed(1)}% — LUK ${status.luk}, INT ${status.int_}, BaseLv ${build.base_level}, SkillLv ${skill.level}` +
-        (baseIntLow ? `; base INT ${build.base_int} < 40 → halved` : "") + "; target at full HP",
+      note: (bossImmune ? "0% — Boss monsters cannot be instantly killed; only the fail damage lands" : `${successPct.toFixed(1)}% — LUK ${status.luk}, INT ${status.int_}, BaseLv ${build.base_level}, SkillLv ${skill.level}`) +
+        (baseIntLow ? `; base INT ${build.base_int} < 40 → halved` : "") +
+        (failedCasts > 0 && tuHpNow != null
+          ? `; attempt ${failedCasts + 1} — target at ${tuHpNow.toLocaleString()}/${tuMaxHp.toLocaleString()} HP after ${failedCasts} failed cast${failedCasts > 1 ? "s" : ""}`
+          : "; target at full HP"),
       formula: "[20×SkillLv + 3×LUK + INT + BaseLv + (1−HP/MaxHP)×200] / 10 %",
-      hercules_ref: "PSRO Priest/Acolyte Rework — Turn Undead", info: true,
+      hercules_ref: "PSRO Priest/Acolyte Rework — Turn Undead",
     });
 
     result.min_damage = mn;
@@ -2015,7 +2047,7 @@ class BattlePipeline {
       });
     }
 
-    if (skillName === "PR_TURNUNDEAD") {
+    if (skillName === "PR_TURNUNDEAD" || skillName === "ALL_RESURRECTION") {
       const tuResult = this._runTurnUndeadBranch(status, weapon, skill, target, build, { profile, gear_bonuses: gearBonuses });
       let castMs = 0, delayMs = 0;
       if (skillData) [castMs, delayMs] = calculateSkillTiming(skillName, skill.level, skillData, status, gearBonuses, build.support_buffs, build.server);
@@ -2024,6 +2056,9 @@ class BattlePipeline {
       return createBattleResult({
         normal: tuResult, crit: null, crit_chance: 0.0, hit_chance: 100.0,
         success_chance: tuResult.success_chance,
+        tu_attempt: tuResult.tu_attempt,
+        tu_hp_now: tuResult.tu_hp_now,
+        tu_max_hp: tuResult.tu_max_hp,
         dps: calculateDps(attacks), attacks, period_ms: tuPeriod, dps_valid: true,
       });
     }

@@ -1087,6 +1087,22 @@ export default function BuildEditor() {
 
   const [calcResult, setCalcResult] = useState<any>(null);
 
+  // Turn Undead failed-cast iteration (requested by a CC): how many casts to treat as
+  // already failed, so the success chance is quoted from the reduced HP. Deliberately
+  // EPHEMERAL — never serialized into saves or share links; reset by a manual
+  // Calculate, by changing the skill, and by tabbing back to the TU branch.
+  const [tuFailedCasts, setTuFailedCasts] = useState(0);
+  const tuRecalc = useRef(false);
+  useEffect(() => {
+    if (tuRecalc.current) { tuRecalc.current = false; onCalculate(undefined, false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tuFailedCasts]);
+  useEffect(() => { setTuFailedCasts(0); }, [skill.id]);
+  const handleTuAttempt = useCallback((n: number) => {
+    tuRecalc.current = true;
+    setTuFailedCasts(Math.max(0, n));
+  }, []);
+
   // Build-vs-build comparison: pinned snapshots of computed builds.
   const [pins, setPins] = useState<ComparePin[]>([]);
   const pinSeq = useRef(0);
@@ -1582,6 +1598,11 @@ export default function BuildEditor() {
   // user back to the compare table they clicked Load from, so the load had no visible
   // effect and got reported as a button that does nothing.
   async function onCalculate(fpOverride?: boolean, scrollToResults = true) {
+    // A MANUAL Calculate flushes the Turn Undead iteration (CC-specified reset rule);
+    // recalcs triggered by the iteration itself carry scrollToResults=false. The local
+    // variable matters: setState wouldn't reach THIS call's payload closure.
+    const tuN = scrollToResults ? 0 : tuFailedCasts;
+    if (scrollToResults && tuFailedCasts !== 0) setTuFailedCasts(0);
     const fp = fpOverride !== undefined ? fpOverride : forceProcs;
     setCalculating(true);
     setCalcError("");
@@ -1627,7 +1648,8 @@ export default function BuildEditor() {
         ? { ...sanitizedBuild, equipped: equippedOverride, flags: { ...(sanitizedBuild.flags || {}), force_procs: true }, wildcard_bonuses: wildcardBonuses }
         : { ...sanitizedBuild, equipped: equippedOverride, wildcard_bonuses: wildcardBonuses };
       const normalPayload = { build: buildWithFlags, skill: { id: 0, level: 1 }, target, target_mods: targetMods };
-      const skillPayload  = { build: buildWithFlags, skill: { id: skill.id, level: skill.level }, target, target_mods: targetMods };
+      const skillPayload  = { build: buildWithFlags, skill: { id: skill.id, level: skill.level }, target,
+        target_mods: tuN > 0 ? { ...targetMods, tu_failed_casts: tuN } : targetMods };
       // Survivability: how hard the selected monster's weapon attacks hit YOU. Monster
       // mode only. A monster's BASIC melee attack is Neutral element — NOT its property
       // (its "Element" field is defensive only; Hercules keeps attack `rhw.ele` and
@@ -2042,6 +2064,8 @@ export default function BuildEditor() {
           onLoadPin={handleLoadPin}
           onClearPins={handleClearPins}
           onOpenTip={() => setTipOpen(true)}
+          tuAttempt={tuFailedCasts}
+          onTuAttempt={handleTuAttempt}
         />
 
         <div className="editor-grid" ref={editorGridRef}>

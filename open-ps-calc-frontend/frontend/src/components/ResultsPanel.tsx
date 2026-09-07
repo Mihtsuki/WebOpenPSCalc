@@ -16,12 +16,14 @@ interface Props {
   onPin: () => void;
   onRemovePin: (id: string) => void;
   onLoadPin: (pin: ComparePin) => void;
+  tuAttempt?: number;
+  onTuAttempt?: (n: number) => void;
   onClearPins: () => void;
   onOpenTip: () => void;
 }
 
 const ResultsPanel = forwardRef<HTMLDivElement, Props>(
-  ({ open, onClose, calcResult, calculating, error, forceProcs, onToggleForceProcs, pins, onPin, onRemovePin, onLoadPin, onClearPins, onOpenTip }, ref) => {
+  ({ open, onClose, calcResult, calculating, error, forceProcs, onToggleForceProcs, pins, onPin, onRemovePin, onLoadPin, onClearPins, onOpenTip, tuAttempt, onTuAttempt }, ref) => {
     if (!open) return null;
     const live = summaryMetrics(calcResult);
     return (
@@ -45,6 +47,8 @@ const ResultsPanel = forwardRef<HTMLDivElement, Props>(
             error={error}
             forceProcs={forceProcs}
             onToggleForceProcs={onToggleForceProcs}
+            tuAttempt={tuAttempt}
+            onTuAttempt={onTuAttempt}
           />
           {calcResult?.incoming && !calculating && !error && (
             <SurvivabilityView incoming={calcResult.incoming} />

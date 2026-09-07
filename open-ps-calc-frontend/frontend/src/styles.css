@@ -1661,3 +1661,26 @@ th.cmp-col--live { border-bottom-color: var(--accent-dim); }
 
 /* "total (N x per-hit)" suffix on multi-hit totals — quieter than the total itself. */
 .dw-per-hit { font-weight: 400; font-size: 0.85em; color: var(--text-dim); }
+
+/* Turn Undead attempt stepper — lives inside the success-chance metric card. */
+.tu-attempt-row { display: flex; gap: 0.3rem; margin-top: 0.3rem; }
+.tu-btn {
+  font-size: 0.68rem; padding: 0.1rem 0.45rem; line-height: 1.4;
+  background: var(--bg-panel-raised); color: var(--text-dim);
+  border: 1px solid var(--border-soft); border-radius: 3px; cursor: pointer;
+}
+.tu-btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); }
+.tu-btn:disabled { opacity: 0.4; cursor: default; }
+.tu-hp { margin-top: 0.3rem; }
+.tu-hp-bar {
+  height: 5px; border-radius: 3px; overflow: hidden;
+  background: var(--bg-panel-raised); border: 1px solid var(--border-soft);
+}
+.tu-hp-fill { display: block; height: 100%; border-radius: 2px; transition: width 0.25s ease, background 0.25s ease; }
+.tu-hp-fill.hp-high { background: var(--good); }
+.tu-hp-fill.hp-mid  { background: #d9a05b; }
+.tu-hp-fill.hp-low  { background: var(--crit); }
+.tu-hp-note { font-size: 0.68rem; margin-top: 0.2rem; font-family: var(--mono); }
+.tu-hp-note.hp-high { color: var(--good); }
+.tu-hp-note.hp-mid  { color: #d9a05b; }
+.tu-hp-note.hp-low  { color: var(--crit); }

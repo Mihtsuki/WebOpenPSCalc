@@ -242,7 +242,10 @@ router.get("/skills", (req: Request, res: Response) => {
       // This is a pre-renewal calculator. Drop skills whose class prefix belongs to
       // a Renewal 3rd job, a mercenary/homunculus, an elemental summon, or a monster
       // (NPC_) — none exist as player skills on Payon Stories, they're just DB noise.
-      if (NON_PS_SKILL_PREFIXES.has(name.split("_")[0])) return false;
+      // ALL_RESURRECTION is the one "ALL_"-prefixed skill a PS player can genuinely
+      // select for damage (offensive use vs Undead, via the Turn Undead branch) —
+      // exempt it from the prefix cull before the cull runs.
+      if (name !== "ALL_RESURRECTION" && NON_PS_SKILL_PREFIXES.has(name.split("_")[0])) return false;
       // HT_POWER is an internal Hercules id, not a real player skill.
       if (name === "HT_POWER") return false;
       // Hunter damage traps (Land Mine, Blast Mine, Freezing Trap, Claymore Trap)
@@ -267,11 +270,17 @@ router.get("/skills", (req: Request, res: Response) => {
       // Weapon/Magic test below would drop it. Its own branch computes it.
       const isFling =
         profile.mechanic_flags.has("GS_FLING_PS_FORMULA") && name === "GS_FLING";
+      // Offensive Resurrection: typed Friend/Misc (it is a revive), but on Undead
+      // monsters the wiki delegates it wholesale - "it has the same effect (and chance
+      // and cast delay) as Turn Undead" - and the engine runs it through the Turn
+      // Undead branch. Without this it could never be selected to price that use.
+      const isOffensiveRes = name === "ALL_RESURRECTION";
       const computable =
         isTrap ||
         isBranchMisc ||
         isSphereMine ||
         isFling ||
+        isOffensiveRes ||
         Object.prototype.hasOwnProperty.call(wr, name) ||
         Object.prototype.hasOwnProperty.call(mr, name);
       // Pure support skills carry the NoDamage flag. Hide them from a *damage*
