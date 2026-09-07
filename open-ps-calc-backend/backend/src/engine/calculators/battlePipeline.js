@@ -1690,7 +1690,23 @@ class BattlePipeline {
     // the left-hand hit must stay Neutral, not borrow the right hand's element).
     let baseWeaponEle = weapon.element;
     const scriptEle = gearBonuses ? (isOffhand ? gearBonuses.script_atk_ele_lh : gearBonuses.script_atk_ele_rh) : null;
-    if (scriptEle != null && !skillUsesAmmo(skill, isRanged) && !weaponFiresAmmo(build)) {
+    const usesAmmo = skillUsesAmmo(skill, isRanged);
+    const firesAmmo = weaponFiresAmmo(build);
+    // The ammo slot's OWN element, isolated from the endow (from_ammo is a separate
+    // aggregation pool untouched by SC_PROPERTYxxx, unlike weapon.element/scriptEle).
+    const ammoOwnEle = !isOffhand && gearBonuses && gearBonuses.from_ammo ? gearBonuses.from_ammo.script_atk_ele_rh : null;
+    if (usesAmmo && !firesAmmo && ammoOwnEle != null) {
+      // Kunai/Shuriken are thrown by hand, not "fired" by a weapon type (Bow, guns —
+      // see AMMO_FIRED_BY), so pc.c's SP_ATKELE stores their bAtkEle in
+      // sd->bonus.arrow_ele instead of folding it into rhw.ele, and battle.c's
+      // `if (flag.arrow && arrow_ele) s_ele = arrow_ele;` then overwrites the attack's
+      // element with it unconditionally — endow included — once the cast skill actually
+      // uses that ammo. Confirmed in-game: a Wind endow does not save a Fire Heat Wave
+      // Kunai from hitting as Fire on Throw Kunai. (A bow's arrow instead folds into
+      // rhw.ele per pc.c, so an endow there still applies on top of it — untouched here,
+      // since firesAmmo is true for that case.)
+      baseWeaponEle = ammoOwnEle;
+    } else if (scriptEle != null && !usesAmmo && !firesAmmo) {
       const equipped = build.equipped || {};
       const handSlot = isOffhand ? "left_hand" : "right_hand";
       // If the wielded weapon grants this element ITSELF (Bazerald, Huuma Blaze

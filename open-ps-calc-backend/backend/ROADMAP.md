@@ -391,6 +391,18 @@ trade-window test.
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **Throw Kunai borrowed an active endow instead of the ammo's own element.**
+  Wind endow + Heat Wave Kunai (Fire) showed Wind, not Fire. Kunai and Shuriken
+  are thrown by hand rather than fired by a weapon type (`AMMO_FIRED_BY` has no entry for
+  either), so per `pc.c`'s `SP_ATKELE` handling their element script lands in a field
+  separate from the weapon's own (`sd->bonus.arrow_ele`, not `rhw.ele`) — and `battle.c`'s
+  `if (flag.arrow && arrow_ele) s_ele = arrow_ele;` overrides the attack's element with it
+  unconditionally, endow included, once the cast skill actually consumes that ammo. A
+  bow's own arrow instead folds straight into `rhw.ele`, where an endow still applies on
+  top of it as before — untouched, since that path already goes through `weaponFiresAmmo`.
+  An ammo with no element of its own (Balanced Kunai) still falls through to whatever the
+  weapon slot would otherwise show, endow included, since neither branch fires for it.
+
 - **Throw Kunai works in the calculator.**
   The ratio is vanilla 100% per hit (300% total because 3 hits). Confirmed by in-game tests,
   and RMS's vanilla description spells out that it's a total

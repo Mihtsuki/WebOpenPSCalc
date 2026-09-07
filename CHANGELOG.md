@@ -17,6 +17,16 @@ instead of release version. Dates are taken from actual git commit history.
   weapon's own, so an endow still wins over the weapon, and unrelated ammo (an Earth Kunai
   sitting in the ammo slot during a Huuma Shuriken throw, say) still can't leak in either.
 
+- **Throw Kunai borrowed an active endow instead of the ammo's own element.**
+  Wind endow + Heat Wave Kunai (Fire) showed Wind in the calc, but Fire in-game. Kunai and
+  Shuriken are thrown by hand rather than fired by a weapon type (Bow, guns), so their
+  element script lands in a field separate from the weapon's own and overrides the
+  attack's element unconditionally once the cast skill actually uses that ammo — endow
+  included. A bow's own arrow instead folds into the weapon's element, where an endow
+  still applies on top of it as before. An ammo with no element of its own (Balanced
+  Kunai) still falls through to whatever the weapon slot would otherwise show, endow
+  included.
+
 ## 2026-09-07
 
 ### Added

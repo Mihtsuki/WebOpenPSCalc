@@ -4125,6 +4125,42 @@ test("elemental Kunai element applies to Throw Kunai but not to a bare-handed pu
     "an Unarmed character gets nothing from an equipped arrow — it needs a bow");
 });
 
+test("Throw Kunai's own ammo element beats an active endow; a bow's arrow still yields to one", () => {
+  const cfg = createBattleConfig();
+  const target = loader.getMonster(1170); // Sohee — Water, Lv1
+  const windEndow = { support_buffs: { weapon_endow_sc: "SC_PROPERTYWIND" } };
+
+  // Kunai are thrown by hand, not "fired" by a weapon type the way an arrow is by a
+  // bow — battle.c overwrites the attack's element from the ammo unconditionally once
+  // the cast skill actually uses it, endow included. Confirmed in-game: a Wind endow
+  // does not save a Fire Heat Wave Kunai from hitting as Fire on Throw Kunai.
+  const kunaiId = loader.getSkillIdByName("NJ_KUNAI");
+  const bKunai = buildFromSaveSchema({
+    server: "payon_stories", job_id: 25, base_level: 44, job_level: 27,
+    base_stats: { str: 69, agi: 1, vit: 1, int: 1, dex: 8, luk: 1 },
+    equipped: { ammo: 13258 }, // Heat Wave Kunai — Fire element
+    mastery_levels: { NJ_TOBIDOUGU: 1 },
+    ...windEndow,
+  });
+  const [gbK, effK, wK, stK] = resolvePlayerState(bKunai, cfg, PS);
+  const kunai = new BattlePipeline(cfg).calculate(stK, wK, createSkillInstance({ id: kunaiId, level: 5 }), target, effK, gbK);
+  assert.equal(kunai.normal.steps.find((s) => s.name === "Attr Fix").note, "Fire vs Water Lv1 (50%)",
+    "the ammo's own Fire must win over the active Wind endow");
+
+  // A bow's arrow instead folds into the weapon's own element field (pc.c's SP_ATKELE,
+  // for Bow/gun weapon types), so an endow there still applies on top of it as usual.
+  const bBow = buildFromSaveSchema({
+    server: "payon_stories", job_id: 4, base_level: 99, job_level: 50,
+    base_stats: { str: 30, agi: 60, vit: 40, int: 1, dex: 90, luk: 20 },
+    equipped: { right_hand: 1701, ammo: 1752 }, // Bow + Fire Arrow
+    ...windEndow,
+  });
+  const [gbB, effB, wB, stB] = resolvePlayerState(bBow, cfg, PS);
+  const bow = new BattlePipeline(cfg).calculate(stB, wB, createSkillInstance({ id: 0, level: 1 }), target, effB, gbB);
+  assert.equal(bow.normal.steps.find((s) => s.name === "Attr Fix").note, "Wind vs Water Lv1 (175%)",
+    "a bow's own Wind endow must still beat the equipped Fire Arrow");
+});
+
 // ---------------------------------------------------------------------------
 // Throw Kunai's flat +60 mastery bonus is not gated on an equipped weapon
 // ---------------------------------------------------------------------------
