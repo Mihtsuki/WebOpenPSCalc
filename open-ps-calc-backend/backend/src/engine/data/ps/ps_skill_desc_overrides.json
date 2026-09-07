@@ -7,7 +7,8 @@
     "description": "Strikes a target with an attack whose range is equal to the caster's Shadow Jump range. Shadow Slash no longer possesses the capability to land critical strikes. However, when paired with the platinum skill - Shadow's Within, critical hits become a possibility."
   },
   "SM_TWOHANDSWORD": {
-    "name": "Blade Mastery"
+    "name": "Blade Mastery",
+    "description": "Increases damage when meleeing with a One-Handed Sword, Dagger or Two-Handed Sword class weapon (+4 ATK per level). PS Knight rework: Two-Hand Sword Mastery was renamed Blade Mastery and absorbed Sword Mastery, which left the Swordsman tree (Rogues and Super Novices keep their own Sword Mastery)."
   },
   "AM_AXEMASTERY": {
     "name": "Transmutation",

@@ -573,6 +573,11 @@ class DataLoader {
       }
       const entries = skillNames
         .filter((n) => DAMAGE_RELEVANT.has(n))
+        // PS Knight rework: the Swordsman line has ONE blade mastery — Blade
+        // Mastery (SM_TWOHAND renamed, covering 1H/2H swords and daggers) — so
+        // don't offer the removed Sword Mastery next to it. Rogue/SN trees have
+        // SM_SWORD without SM_TWOHAND and keep it.
+        .filter((n) => !(this._usePsData && n === "SM_SWORD" && skillNames.includes("SM_TWOHAND")))
         .map((n) => byName[n])
         .filter((s) => s && (ACTIVE_SKILL_TYPE_EXCEPTIONS.has(s.name) || (Array.isArray(s.skill_type) && s.skill_type.length === 0)))
         .map((s) => {
@@ -584,7 +589,13 @@ class DataLoader {
           // level (skill_level_cap_overrides, via _applySkillCap) wins over both:
           // it is the only source that knows about post-scrape reworks, and it can
           // raise a max (Smith Weapon 3 → 4) as well as lower one.
-          const psEntry = this._usePsData ? this.getPsSkill(s.name) : null;
+          // Look up the PS entry under the MASTERY key first: the rename that
+          // matters here lives there (SM_TWOHANDSWORD -> "Blade Mastery" in
+          // ps_skill_desc_overrides), while the scrape is keyed by the tree
+          // constant (SM_TWOHAND) and still carries the pre-rework name.
+          const psEntry = this._usePsData
+            ? (this.getPsSkill(MASTERY_KEY_OVERRIDE[s.name] ?? s.name) || this.getPsSkill(s.name))
+            : null;
           const capped = this._applySkillCap(s);
           const psMax = capped.max_level !== s.max_level
             ? capped.max_level
@@ -653,6 +664,13 @@ class DataLoader {
     const set = new Set(names);
     // Tree name -> the key masteryFix.js/statusCalculator.js actually look up.
     if (set.has("SM_TWOHAND")) set.add("SM_TWOHANDSWORD");
+    // PS Knight rework: Sword Mastery is REMOVED from the Swordsman tree — its
+    // points live in Blade Mastery (SM_TWOHAND, renamed), which covers 1H swords
+    // and daggers too (wiki Blade_Mastery; the rework PDF: "Removed from the
+    // skill tree. Any requirements moved to Blade Mastery."). Rogues and Super
+    // Novices keep their own Sword Mastery: their trees carry SM_SWORD without
+    // SM_TWOHAND, so this removal never touches them.
+    if (this._usePsData && set.has("SM_TWOHAND")) set.delete("SM_SWORD");
     if (this._usePsData) {
       for (const rec of this.getPsCustomSkills()) {
         if ((rec.job || []).includes(jobId)) set.add(rec.constant);
@@ -680,9 +698,17 @@ class DataLoader {
    * Returns { levels, dropped } — `dropped` lists the removed skill names.
    */
   filterMasteryLevelsForJob(jobId, masteryLevels) {
-    const levels = masteryLevels || {};
+    let levels = masteryLevels || {};
     const learnable = this._learnableSkillNames(jobId);
     if (learnable.size === 0) return { levels, dropped: [] };
+    // Migration for the PS Blade Mastery merge: a build saved before it (or from
+    // the vanilla-era panel) can carry SM_SWORD on a Swordsman-line job. Those
+    // points are Blade Mastery points now — fold them in (same 4 ATK/lv, so old
+    // shares keep their damage) rather than silently zeroing +40 ATK.
+    if (this._usePsData && levels.SM_SWORD != null && !learnable.has("SM_SWORD")
+        && learnable.has("SM_TWOHANDSWORD")) {
+      levels = { ...levels, SM_TWOHANDSWORD: Math.max(levels.SM_TWOHANDSWORD || 0, levels.SM_SWORD) };
+    }
     const out = {};
     const dropped = [];
     for (const [name, lv] of Object.entries(levels)) {

@@ -9,6 +9,15 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **The Swordsman line's masteries panel now shows Blade Mastery.** The PS Knight
+  rework merged Sword Mastery into Two-Hand Sword Mastery and renamed it Blade
+  Mastery — one skill, +4 ATK per level on One-Handed Swords, Daggers and Two-Handed
+  Swords. The damage engine had the merge all along, but the panel still offered both
+  masteries under their vanilla names. Swordsman and Knight now see the single Blade
+  Mastery; Rogues and Super Novices keep their own Sword Mastery, which the rework
+  didn't touch. Builds saved with the old Sword Mastery migrate automatically — those
+  points count as Blade Mastery, so no shared build loses damage.
+
 - **Autocast cards can now be told the skill is mastered.** Pirate Skel Card casts
   Level 10 Mammonite for a Blacksmith who has mastered Mammonite, and Rekenber
   Mercenary Card casts Level 10 Bash for anyone with mastered Bash — the engine

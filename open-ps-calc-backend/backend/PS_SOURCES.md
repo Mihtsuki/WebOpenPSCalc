@@ -6206,6 +6206,24 @@ Decisions behind the Turn Undead branch, requested by a CC (Laila) who wanted a
   OPEN: that page does not restate the fail-damage magnitude; the branch assumes full
   delegation (same formula at the Res level). Worth confirming with Laila in game.
 
+## 2026-09-07 - Blade Mastery (Knight rework) reaches the panel
+
+The Knight rework PDF (above): Sword Mastery "Removed from the skill tree. Any
+requirements moved to Blade Mastery"; "Two-Hand Sword Mastery renamed to Blade
+Mastery. Now apply to One-Hand Swords as well (4*SkillLevel)". wiki Blade_Mastery
+adds DAGGERS: "One-Handed Sword, Dagger or Two-Handed Sword", 4/lv, max 10.
+
+The engine already merged them (mastery_prefer_fallback SM_SWORD -> SM_TWOHANDSWORD,
+and Knife maps through SM_SWORD, so daggers ride the fallback) — the panel did not:
+Swordsman-line jobs were offered BOTH masteries under vanilla names. Now: one entry,
+labeled Blade Mastery (ps_skill_desc_overrides SM_TWOHANDSWORD), for any job whose
+tree carries SM_TWOHAND; SM_SWORD leaves those jobs' learnable set with a migration
+(old builds' SM_SWORD folds into SM_TWOHANDSWORD at the same level, so shares keep
+their damage). Rogues (Sword Mastery gates their sword Double Attack) and Super
+Novices keep SM_SWORD — wiki Sword_Mastery lists them, and their trees have no
+SM_TWOHAND so nothing changes for them. NB the wiki Sword_Mastery job template still
+lists "Swordman" — contradicted by the rework PDF and the maintainer; PDF wins.
+
 ## 2026-09-06 - Proc priority: Triple Attack > Double Attack > Critical
 
 A player reported Fury Chant (+50 CRIT) LOWERING their SN dagger build's DPS and asked

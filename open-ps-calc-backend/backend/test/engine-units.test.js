@@ -1588,6 +1588,59 @@ test("Crescent Scythe heals 0.1% of crit damage PER REFINE, and never counts as 
 // (MO_IRONHAND) Lv10 read 207 FLEE in the calculator against 187 in-game — exactly
 // the +2 FLEE/lv x 10 that PS's Martial Arts grants a Monk.
 // ---------------------------------------------------------------------------
+// PS Knight rework: "Two-Hand Sword Mastery renamed to Blade Mastery. Now apply to
+// One-Hand Swords as well (4*SkillLevel)" and Sword Mastery "Removed from the skill
+// tree. Any requirements moved to Blade Mastery." (rework PDF, in PS_SOURCES). The
+// wiki's Blade_Mastery page adds daggers: "One-Handed Sword, Dagger or Two-Handed
+// Sword". The ENGINE had this all along (mastery_prefer_fallback SM_SWORD ->
+// SM_TWOHANDSWORD) — but the panel still offered BOTH masteries to the Swordsman
+// line under vanilla names. Reported by the maintainer.
+test("PS Blade Mastery: one merged mastery for the Swordsman line; Rogue and SN keep Sword Mastery", () => {
+  loader.setProfile(getProfile("payon_stories"));
+  const rows = (j) => loader.getPassiveSkillsForJob(j).filter((s) => /^SM_(SWORD|TWOHAND)/.test(s.name));
+
+  // Swordsman and Knight: exactly one blade mastery, shown under the PS name.
+  for (const j of [1, 7]) {
+    const r = rows(j);
+    assert.equal(r.length, 1, `job ${j} must be offered exactly one blade mastery`);
+    assert.equal(r[0].mastery_key, "SM_TWOHANDSWORD");
+    assert.equal(r[0].description, "Blade Mastery", "the PS rename must reach the panel");
+  }
+  // Rogue and Super Novice keep their own Sword Mastery (their trees have no SM_TWOHAND).
+  for (const j of [17, 23]) {
+    const r = rows(j);
+    assert.equal(r.length, 1);
+    assert.equal(r[0].mastery_key, "SM_SWORD", `job ${j} keeps Sword Mastery`);
+  }
+
+  // Old builds carrying Sword Mastery on the Swordsman line migrate: the points fold
+  // into Blade Mastery (same 4 ATK/lv) instead of being silently zeroed.
+  assert.deepEqual(loader.filterMasteryLevelsForJob(7, { SM_SWORD: 10 }),
+    { levels: { SM_TWOHANDSWORD: 10 }, dropped: ["SM_SWORD"] });
+  assert.deepEqual(loader.filterMasteryLevelsForJob(17, { SM_SWORD: 10 }).dropped, [],
+    "a Rogue's Sword Mastery must not be migrated away");
+
+  // One Blade Mastery level reaches all three weapon classes, end to end.
+  const cfg = createBattleConfig();
+  const masteryStep = (rh, mastery) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 7, base_level: 99, job_level: 50,
+      base_stats: { str: 90, agi: 60, vit: 40, int: 1, dex: 60, luk: 1 },
+      equipped: { right_hand: rh }, mastery_levels: mastery,
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, cfg, PS);
+    const r = new BattlePipeline(cfg).calculate(st, w, createSkillInstance({ id: 0, level: 1 }),
+      createTarget({ def_: 0, vit: 0, size: 1, race: 0, element: 0 }), eff, gb);
+    const step = r.normal.steps.find((s) => /Mastery/i.test(s.name));
+    return step ? Math.round(step.max_value - (r.normal.steps[r.normal.steps.indexOf(step) - 1]?.max_value ?? 0)) : 0;
+  };
+  for (const [label, rh] of [["1H sword", 1119], ["dagger", 1201], ["2H sword", 1127]]) {
+    assert.equal(masteryStep(rh, { SM_TWOHANDSWORD: 10 }), 40, `Blade Mastery 10 must add +40 on a ${label}`);
+  }
+  // ...and a legacy SM_SWORD-10 Knight build prices identically (migration end to end).
+  assert.equal(masteryStep(1119, { SM_SWORD: 10 }), 40, "legacy Sword Mastery points still count, as Blade Mastery");
+});
+
 test("mastery levels the job cannot learn are stripped (Assassin FLEE regression)", () => {
   const cfg = createBattleConfig();
   const SHARED = {
