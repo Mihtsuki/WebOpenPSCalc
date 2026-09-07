@@ -1522,6 +1522,27 @@ test("auto-Mammonite casts Lv10 only for the Blacksmith line", () => {
   assert.equal(castLv(18, 10), 1, "Alchemist with Mammonite 10 still casts Lv1");
 });
 
+// The engine above always read getskilllv() from mastery_levels — but the masteries
+// panel is gated by getPassiveSkillsForJob's allowlist, and MC_MAMMONITE / SM_BASH
+// were not on it, so no real build could ever SET them: every Pirate Skel autocast
+// was priced at Lv1 Mammonite and every Rekenber Mercenary at Lv1 Bash, mastered or
+// not. A player asked for "the option to toggle mastery for Autocast cards" — the
+// toggle IS the panel offering these levels. This pins the panel surface itself.
+test("the masteries panel offers the skills that upgrade autocast cards", () => {
+  loader.setProfile(getProfile("payon_stories"));
+  const names = (jobId) => loader.getPassiveSkillsForJob(jobId).map((s) => s.name);
+  const entry = (jobId, n) => loader.getPassiveSkillsForJob(jobId).find((s) => s.name === n);
+
+  assert.ok(names(10).includes("MC_MAMMONITE"), "Blacksmith can set Mammonite (Pirate Skel Card)");
+  assert.equal(entry(10, "MC_MAMMONITE").max_level, 10, "…up to the mastery the card checks for");
+  assert.ok(names(1).includes("SM_BASH"), "Swordsman can set Bash (Rekenber Mercenary Card)");
+  assert.equal(entry(1, "SM_BASH").max_level, 10);
+  assert.ok(names(23).includes("SM_BASH") && names(23).includes("MC_MAMMONITE"),
+    "Super Novice learns both and can set both");
+  assert.ok(!names(2).includes("SM_BASH") && !names(2).includes("MC_MAMMONITE"),
+    "a Mage can learn neither and is offered neither");
+});
+
 test("Crescent Scythe heals 0.1% of crit damage PER REFINE, and never counts as damage", () => {
   const cfg = createBattleConfig();
   const run = (itemId, refine) => {

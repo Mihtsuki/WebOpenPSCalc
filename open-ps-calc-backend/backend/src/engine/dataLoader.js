@@ -536,6 +536,15 @@ class DataLoader {
       "BS_DAGGER", "BS_SWORD", "BS_KNUCKLE", "BS_SPEAR", "BS_AXE", "BS_MACE",
       // PS Alchemist: Pharmacy level scales Giant Pestle's flat ATK bonus.
       "AM_PHARMACY",
+      // Active skills whose MASTERY upgrades an autocast card's cast level
+      // (player request, 2026-09-07: "toggle mastery for Autocast cards").
+      // Pirate Skel Card casts Mammonite Lv10 for a Blacksmith with
+      // getskilllv(MC_MAMMONITE)==10; Rekenber Mercenary Card casts Bash Lv10
+      // with getskilllv(SM_BASH)==10. The engine read both levels all along —
+      // but this list gates the panel, so no real build could ever SET them
+      // and every autocast priced at Lv1. (A Rogue's plagiarised Bash stays
+      // out of reach: SM_BASH is not in the Rogue skill tree this panel walks.)
+      "MC_MAMMONITE", "SM_BASH",
     ]);
     // PS-custom passives (constants that exist only on Payon Stories, so they are
     // absent from the vanilla skill tree/DB) offered for the jobs that can learn them.
@@ -549,7 +558,9 @@ class DataLoader {
       // Sense is an ACTIVE skill whose PS version also grants a passive +2% resist to
       // Fire/Water/Wind/Earth (buildManager.js reads its level), so it needs a level in
       // the passive panel like the others here.
-      "WZ_ESTIMATION"]);
+      "WZ_ESTIMATION",
+      // Mastery feeds an autocast card's cast level — see DAMAGE_RELEVANT above.
+      "MC_MAMMONITE", "SM_BASH"]);
 
     try {
       const treeData = this._loadJson("tables/skill_tree.json");

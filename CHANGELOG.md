@@ -5,6 +5,18 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-09-07
+
+### Added
+
+- **Autocast cards can now be told the skill is mastered.** Pirate Skel Card casts
+  Level 10 Mammonite for a Blacksmith who has mastered Mammonite, and Rekenber
+  Mercenary Card casts Level 10 Bash for anyone with mastered Bash — the engine
+  understood both all along, but the masteries panel never offered Mammonite or Bash,
+  so every autocast was priced at Level 1 with no way to say otherwise. The panel now
+  offers both skills to the jobs that can learn them (Super Novice included); set the
+  level to 10 and the autocast branch prices the mastered cast. Requested by a player.
+
 ## 2026-09-06
 
 ### Added
