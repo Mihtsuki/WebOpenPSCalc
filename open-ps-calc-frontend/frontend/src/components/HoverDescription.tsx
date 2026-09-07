@@ -30,6 +30,11 @@ interface Props {
 export default function HoverDescription({ id, fetchDescription, title, className = "", children }: Props) {
   const [tip, setTip] = useState<{ text: string; x: number; y: number } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // True between mouseenter/focus and mouseleave/blur. The first hover of an id
+  // fetches its description; when the cursor left DURING that fetch, the late
+  // resolve used to open the bubble anyway — with nothing hovered, nothing ever
+  // closed it again (a player caught two of these stuck at once on screen).
+  const hovering = useRef(false);
 
   // Swapping the equipped item while its bubble is open would otherwise leave the
   // previous item's text on screen next to the new name.
@@ -40,6 +45,7 @@ export default function HoverDescription({ id, fetchDescription, title, classNam
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
   function show(el: HTMLElement) {
+    hovering.current = true;
     if (timer.current) clearTimeout(timer.current);
     const rect = el.getBoundingClientRect();
     // Same 180ms as SearchPicker: long enough that sweeping the cursor across a
@@ -52,12 +58,14 @@ export default function HoverDescription({ id, fetchDescription, title, classNam
       }
       fetchDescription(id).then((text) => {
         descriptionCache.set(id, text);
-        if (text) setTip({ text, x: rect.right, y: rect.top });
+        // Only open if the cursor is STILL here — see `hovering` above.
+        if (text && hovering.current) setTip({ text, x: rect.right, y: rect.top });
       }).catch(() => descriptionCache.set(id, null));
     }, 180);
   }
 
   function hide() {
+    hovering.current = false;
     if (timer.current) clearTimeout(timer.current);
     setTip(null);
   }

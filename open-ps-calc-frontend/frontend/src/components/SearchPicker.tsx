@@ -27,6 +27,11 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
   const listRef = useRef<HTMLDivElement>(null);
   const tooltipCache = useRef<Map<number, string | null>>(new Map());
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Bumped on every hover start AND every leave/select: a tooltip fetch that
+  // resolves after its generation passed must not open the bubble. Without this,
+  // leaving a row while its first-ever fetch was in flight left the tooltip stuck
+  // open with nothing hovered (reported by a player, screenshot showed two at once).
+  const hoverGen = useRef(0);
 
   useEffect(() => {
     if (autoFocus) {
@@ -87,6 +92,10 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
     setResults([]);
     setOpen(false);
     setActiveIndex(-1);
+    // Selecting removes the rows without a mouseleave ever firing on them.
+    hoverGen.current++;
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    setTooltip(null);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -133,6 +142,7 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
   function handleMouseEnter(e: React.MouseEvent<HTMLDivElement>, id: number) {
     if (!fetchTooltip) return;
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    const gen = ++hoverGen.current;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     hoverTimer.current = setTimeout(() => {
       const cached = tooltipCache.current.get(id);
@@ -141,13 +151,15 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
       } else {
         fetchTooltip(id).then((text) => {
           tooltipCache.current.set(id, text);
-          if (text) setTooltip({ text, x: rect.right, y: rect.top });
+          // Stale generation = the cursor moved on while this was in flight.
+          if (text && gen === hoverGen.current) setTooltip({ text, x: rect.right, y: rect.top });
         });
       }
     }, 180);
   }
 
   function handleMouseLeave() {
+    hoverGen.current++;
     if (hoverTimer.current) clearTimeout(hoverTimer.current);
     setTooltip(null);
   }
@@ -188,7 +200,9 @@ export default function SearchPicker({ placeholder, search, onSelect, fetchToolt
           ))}
         </div>
       )}
-      {tooltip && (
+      {/* Gated on `open` too: Escape, Tab and outside clicks unmount the rows
+          without any mouseleave, so a bubble must never outlive the list. */}
+      {open && tooltip && (
         <div
           className="search-tooltip"
           style={{ left: tooltip.x + 10, top: tooltip.y }}

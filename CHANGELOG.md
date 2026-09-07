@@ -40,6 +40,14 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Fixed
 
+- **Item info bubbles no longer get stuck on screen.** The first hover of an item
+  fetches its description; darting the cursor away while that fetch was still in
+  flight could open the bubble after the fact — with nothing hovered, nothing ever
+  closed it, and a player caught two stuck at once. Late fetches are now discarded
+  everywhere a bubble can open (equipped pills and search results alike), picking a
+  result clears its row's bubble, and closing a results list (Escape, Tab, clicking
+  elsewhere) always takes the bubble with it.
+
 - **Item tooltips now show Payon Stories' own text, not the vanilla client's.** A
   player noticed Hypnotist's Staff claiming "Matk +25%" while suspecting 18% was
   applied — and 18% is indeed what both the server and the calculator apply; only the
