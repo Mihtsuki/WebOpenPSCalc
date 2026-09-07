@@ -6213,16 +6213,19 @@ requirements moved to Blade Mastery"; "Two-Hand Sword Mastery renamed to Blade
 Mastery. Now apply to One-Hand Swords as well (4*SkillLevel)". wiki Blade_Mastery
 adds DAGGERS: "One-Handed Sword, Dagger or Two-Handed Sword", 4/lv, max 10.
 
-The engine already merged them (mastery_prefer_fallback SM_SWORD -> SM_TWOHANDSWORD,
-and Knife maps through SM_SWORD, so daggers ride the fallback) — the panel did not:
-Swordsman-line jobs were offered BOTH masteries under vanilla names. Now: one entry,
-labeled Blade Mastery (ps_skill_desc_overrides SM_TWOHANDSWORD), for any job whose
-tree carries SM_TWOHAND; SM_SWORD leaves those jobs' learnable set with a migration
-(old builds' SM_SWORD folds into SM_TWOHANDSWORD at the same level, so shares keep
-their damage). Rogues (Sword Mastery gates their sword Double Attack) and Super
-Novices keep SM_SWORD — wiki Sword_Mastery lists them, and their trees have no
-SM_TWOHAND so nothing changes for them. NB the wiki Sword_Mastery job template still
-lists "Swordman" — contradicted by the rework PDF and the maintainer; PDF wins.
+MAINTAINER CORRECTION (same day): BOTH masteries are removed — "in its place is
+blade mastery". There is no job still carrying a skill named Sword Mastery; the wiki
+Sword_Mastery page (title, job list, and the DA page's "Rogues with either Sword
+Mastery…" note) is stale nomenclature for what is now Blade Mastery.
+
+The engine already merged the mechanics (mastery_prefer_fallback SM_SWORD ->
+SM_TWOHANDSWORD, and Knife maps through SM_SWORD, so daggers ride the fallback) —
+the panel did not. Now every sword job shows ONE entry labeled Blade Mastery:
+Swordsman-line trees (carrying both constants) surface the SM_TWOHANDSWORD key and
+drop SM_SWORD from their learnable set, with migration (old builds' SM_SWORD folds
+into SM_TWOHANDSWORD at the same level, so shares keep their damage); Rogue/SN trees
+(SM_SWORD only) surface that key — it still gates the Rogue sword Double Attack —
+renamed to Blade Mastery via ps_skill_desc_overrides.
 
 ## 2026-09-06 - Proc priority: Triple Attack > Double Attack > Critical
 

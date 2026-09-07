@@ -573,10 +573,10 @@ class DataLoader {
       }
       const entries = skillNames
         .filter((n) => DAMAGE_RELEVANT.has(n))
-        // PS Knight rework: the Swordsman line has ONE blade mastery — Blade
-        // Mastery (SM_TWOHAND renamed, covering 1H/2H swords and daggers) — so
-        // don't offer the removed Sword Mastery next to it. Rogue/SN trees have
-        // SM_SWORD without SM_TWOHAND and keep it.
+        // PS Knight rework: Blade Mastery replaced both sword masteries. A tree
+        // with both constants offers only the SM_TWOHAND(SWORD)-keyed one; a
+        // Rogue/SN tree (SM_SWORD only) offers that key, also displayed as
+        // Blade Mastery via ps_skill_desc_overrides.
         .filter((n) => !(this._usePsData && n === "SM_SWORD" && skillNames.includes("SM_TWOHAND")))
         .map((n) => byName[n])
         .filter((s) => s && (ACTIVE_SKILL_TYPE_EXCEPTIONS.has(s.name) || (Array.isArray(s.skill_type) && s.skill_type.length === 0)))
@@ -664,12 +664,13 @@ class DataLoader {
     const set = new Set(names);
     // Tree name -> the key masteryFix.js/statusCalculator.js actually look up.
     if (set.has("SM_TWOHAND")) set.add("SM_TWOHANDSWORD");
-    // PS Knight rework: Sword Mastery is REMOVED from the Swordsman tree — its
-    // points live in Blade Mastery (SM_TWOHAND, renamed), which covers 1H swords
-    // and daggers too (wiki Blade_Mastery; the rework PDF: "Removed from the
-    // skill tree. Any requirements moved to Blade Mastery."). Rogues and Super
-    // Novices keep their own Sword Mastery: their trees carry SM_SWORD without
-    // SM_TWOHAND, so this removal never touches them.
+    // PS Knight rework: Sword Mastery and Two-Hand Sword Mastery are BOTH gone;
+    // Blade Mastery replaces them (1H swords, daggers and 2H swords, 4 ATK/lv —
+    // maintainer, 2026-09-07; rework PDF: "Removed from the skill tree. Any
+    // requirements moved to Blade Mastery."). For a tree carrying both constants
+    // only the SM_TWOHAND(SWORD) key survives. Rogue/SN trees carried only
+    // SM_SWORD — that key stays THEIR Blade Mastery (it also gates the Rogue
+    // sword Double Attack), renamed for display via ps_skill_desc_overrides.
     if (this._usePsData && set.has("SM_TWOHAND")) set.delete("SM_SWORD");
     if (this._usePsData) {
       for (const rec of this.getPsCustomSkills()) {

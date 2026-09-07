@@ -8,7 +8,7 @@
   },
   "SM_TWOHANDSWORD": {
     "name": "Blade Mastery",
-    "description": "Increases damage when meleeing with a One-Handed Sword, Dagger or Two-Handed Sword class weapon (+4 ATK per level). PS Knight rework: Two-Hand Sword Mastery was renamed Blade Mastery and absorbed Sword Mastery, which left the Swordsman tree (Rogues and Super Novices keep their own Sword Mastery)."
+    "description": "Increases damage when meleeing with a One-Handed Sword, Dagger or Two-Handed Sword class weapon (+4 ATK per level). PS Knight rework: Sword Mastery and Two-Hand Sword Mastery were both removed; Blade Mastery replaces them."
   },
   "AM_AXEMASTERY": {
     "name": "Transmutation",
@@ -40,5 +40,9 @@
   },
   "BS_ADRENALINE": {
     "description": "Increases ASPD for the caster and nearby party members with any melee weapon: 30%/20% with Maces and Axes, 20%/10% with other melee weapons. Duration 60/120/180/240/300 seconds — no longer extended by Hilt Binding."
+  },
+  "SM_SWORD": {
+    "name": "Blade Mastery",
+    "description": "Increases damage when meleeing with a One-Handed Sword, Dagger or Two-Handed Sword class weapon (+4 ATK per level). PS: Blade Mastery replaced Sword Mastery and Two-Hand Sword Mastery outright. For Rogues it also grants a 7% x SkillLevel chance to Double Attack with swords (requires Double Attack as well). Stored under the SM_SWORD key for jobs whose tree carried Sword Mastery."
   }
 }

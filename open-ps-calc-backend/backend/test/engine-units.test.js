@@ -1588,29 +1588,31 @@ test("Crescent Scythe heals 0.1% of crit damage PER REFINE, and never counts as 
 // (MO_IRONHAND) Lv10 read 207 FLEE in the calculator against 187 in-game — exactly
 // the +2 FLEE/lv x 10 that PS's Martial Arts grants a Monk.
 // ---------------------------------------------------------------------------
-// PS Knight rework: "Two-Hand Sword Mastery renamed to Blade Mastery. Now apply to
-// One-Hand Swords as well (4*SkillLevel)" and Sword Mastery "Removed from the skill
-// tree. Any requirements moved to Blade Mastery." (rework PDF, in PS_SOURCES). The
-// wiki's Blade_Mastery page adds daggers: "One-Handed Sword, Dagger or Two-Handed
-// Sword". The ENGINE had this all along (mastery_prefer_fallback SM_SWORD ->
-// SM_TWOHANDSWORD) — but the panel still offered BOTH masteries to the Swordsman
-// line under vanilla names. Reported by the maintainer.
-test("PS Blade Mastery: one merged mastery for the Swordsman line; Rogue and SN keep Sword Mastery", () => {
+// PS Knight rework: Sword Mastery and Two-Hand Sword Mastery are both REMOVED and
+// Blade Mastery replaces them (maintainer, 2026-09-07; rework PDF: "Removed from the
+// skill tree. Any requirements moved to Blade Mastery" / "renamed to Blade Mastery.
+// Now apply to One-Hand Swords as well (4*SkillLevel)"; wiki Blade_Mastery adds
+// daggers). The ENGINE had the merge all along (mastery_prefer_fallback SM_SWORD ->
+// SM_TWOHANDSWORD) — but the panel still offered BOTH masteries under vanilla names.
+// Every job shows Blade Mastery; the internal key differs by tree (Rogue/SN sit on
+// SM_SWORD, which also gates the Rogue sword Double Attack).
+test("PS Blade Mastery: the one blade mastery every sword job sees, under its PS name", () => {
   loader.setProfile(getProfile("payon_stories"));
   const rows = (j) => loader.getPassiveSkillsForJob(j).filter((s) => /^SM_(SWORD|TWOHAND)/.test(s.name));
 
-  // Swordsman and Knight: exactly one blade mastery, shown under the PS name.
+  // Swordsman and Knight: exactly one blade mastery, on the SM_TWOHANDSWORD key.
   for (const j of [1, 7]) {
     const r = rows(j);
     assert.equal(r.length, 1, `job ${j} must be offered exactly one blade mastery`);
     assert.equal(r[0].mastery_key, "SM_TWOHANDSWORD");
     assert.equal(r[0].description, "Blade Mastery", "the PS rename must reach the panel");
   }
-  // Rogue and Super Novice keep their own Sword Mastery (their trees have no SM_TWOHAND).
+  // Rogue and Super Novice: same skill, their tree's key — and the same PS name.
   for (const j of [17, 23]) {
     const r = rows(j);
     assert.equal(r.length, 1);
-    assert.equal(r[0].mastery_key, "SM_SWORD", `job ${j} keeps Sword Mastery`);
+    assert.equal(r[0].mastery_key, "SM_SWORD", `job ${j}'s Blade Mastery rides the SM_SWORD key`);
+    assert.equal(r[0].description, "Blade Mastery", "no vanilla 'Sword Mastery' label anywhere");
   }
 
   // Old builds carrying Sword Mastery on the Swordsman line migrate: the points fold
