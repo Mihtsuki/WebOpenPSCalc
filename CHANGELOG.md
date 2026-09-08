@@ -9,6 +9,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Armor Piercing Bullet can be found again.** The bullet (13233) always worked when
+  a build carried it — its crit bonus is even covered by tests — but its data entry
+  was created for that mechanic with only the script attached, no item type, so the
+  ammo picker's filter could never find it. It now carries its full item shape and
+  shows up in the ammo search like its sibling bullets. A sweep found no other item
+  with the same gap. One side effect is a correction: the missing type also let the
+  bullet's crit bonus apply from a Grenade Launcher, which per the wiki can only load
+  grenades — that hole is closed, so a Grenade Launcher build no longer gets crit
+  from a bullet it cannot fire.
+
 - **Elemental proof potions are in the Consumables panel.** Fireproof, Coldproof,
   Earthproof and Thunderproof (12118–12121): each grants +20% resistance to its
   element and −15% against the element that counters it on the endow cycle

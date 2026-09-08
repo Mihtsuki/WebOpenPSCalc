@@ -2892,6 +2892,15 @@ test("elemental ammo applies its element, and Destroyer has its 3-slot version",
 // isweapontype() — a ps_item_manual-layer predicate, and the ammo that needs it
 // ---------------------------------------------------------------------------
 test("Armor Piercing Bullet's crit bonus is bigger out of a Rifle", () => {
+  // The entry must also carry its item-shape fields: it was created for this crit
+  // mechanic with only a script, so the engine priced it while the ammo picker's
+  // type filter could never FIND it — reported by a player as "missing" (2026-09-07).
+  loader.setProfile(getProfile("payon_stories"));
+  const apb = loader.getItem(13233);
+  assert.equal(apb.type, "IT_AMMO", "13233 needs a type or the picker filters it out");
+  assert.equal(apb.subtype, "A_BULLET");
+  assert.deepEqual(apb.loc, ["EQP_AMMO"]);
+
   const cfg = createBattleConfig();
   const crit = (rh, ammo) => {
     const b = buildFromSaveSchema({
@@ -2920,7 +2929,12 @@ test("Armor Piercing Bullet's crit bonus is bigger out of a Rifle", () => {
   assert.equal(crit(13150, 13233), crit(13150, null), "status crit must not carry the bullet's");
   assert.equal(ammoCri(13150, 13233), 300, "Rifle gets +30 crit");
   assert.equal(ammoCri(13100, 13233), 100, "Revolver gets only +10");
-  assert.equal(ammoCri(13160, 13233), 100, "Grenade Launcher likewise");
+  // Wiki Gunslinger: "Bullets are gunslinger specific ammunition used with
+  // Revolvers, Rifles, Shotguns and Gatlings" — Grenade Launchers use grenades
+  // ONLY. This asserted +10 for years, but only because 13233 carried no subtype
+  // and ammoFitsWeapon fails open on unknowns; giving it its real A_BULLET
+  // subtype (so the picker can find it) closed that hole too.
+  assert.equal(ammoCri(13160, 13233), 0, "a Grenade Launcher cannot load bullets at all");
 
   // End to end: a Rifle auto-attack fires the bullet, so its crit rate does rise 30%.
   const critChance = (ammo) => runScenario({

@@ -2388,9 +2388,16 @@
   "script": ""
  },
  "13233": {
+  "type": "IT_AMMO",
+  "subtype": "A_BULLET",
+  "loc": [
+   "EQP_AMMO"
+  ],
+  "job": [],
+  "refineable": false,
   "aegis_name": "Armor_Piercing_Bullet",
   "script": "bonus bCritical,10; if(isweapontype(\"Rifle\")) bonus bCritical,20;",
-  "_note": "PS wiki Gunslinger#Bullets: \"+10 Crit, +20 Crit with Rifle*\", with the table's own footnote \"Both bonuses count for Rifle, making it +30 Crit while using Armor Piercing Bullets with Rifles\". Only the flat +10 was implemented, so a Rifle Gunslinger was missing 20 crit. isweapontype() is a ps_item_manual-layer predicate — see itemScriptParser.js."
+  "_note": "PS wiki Gunslinger#Bullets: \"+10 Crit, +20 Crit with Rifle*\", with the table's own footnote \"Both bonuses count for Rifle, making it +30 Crit while using Armor Piercing Bullets with Rifles\". Only the flat +10 was implemented, so a Rifle Gunslinger was missing 20 crit. isweapontype() is a ps_item_manual-layer predicate — see itemScriptParser.js. Item-shape fields (type/subtype/loc) added 2026-09-07: the entry was created for the crit-bonus engine work with only the script, so the engine priced it but the ammo picker's type filter could never FIND it. Reported by a player as 'missing'."
  },
  "13234": {
   "type": "IT_AMMO",
