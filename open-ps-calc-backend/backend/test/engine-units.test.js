@@ -1935,6 +1935,39 @@ test("Pirate Skel + Flame Beetle exempts the AUTOCAST Mammonite from Zeny Pinche
   assert.ok(manualPinched < manualFull, "the combo must not exempt a manual cast");
 });
 
+// wiki Tracking: "fixed 1+0.1*SkillLvl seconds cast time", "cannot be reduced by
+// DEX or other cast-reduction effects" — and the maintainer reported Bragi
+// shortening it in the calc. Two layers fix it: the skill DB carried
+// IgnoreStatusEffect (Hercules castnodex bit 2 — no Bragi/Suffragium/penalties)
+// all along and the engine never read the flag; and on PS the wiki's "fixed"
+// goes further (no gear cast reduction either), via PS_FIXED_CAST.
+test("Tracking's cast time is FIXED — no DEX, no gear castrate, no Bragi, no Suffragium", () => {
+  const { calculateSkillTiming } = require("../src/engine/calculators/skillTiming");
+  const skillData = { cast_time: [], after_cast_act_delay: [] };
+  const cast = (status, gb, sup) => calculateSkillTiming("GS_TRACKING", 10, skillData,
+    { dex: 1, agi: 1, ...status }, { castrate: 0, skill_castrate: {}, delayrate: 0, skill_delayrate: {}, ...gb }, sup || {}, "payon_stories")[0];
+
+  assert.equal(cast({}), 2000, "lv10 base: 1 + 0.1x10 seconds");
+  assert.equal(cast({ dex: 150 }), 2000, "DEX must not reduce it");
+  assert.equal(cast({}, { castrate: -70 }), 2000, "gear cast reduction must not either");
+  assert.equal(cast({ cast_time_reduction_pct: 50 }), 2000, "Bragi must not either");
+  assert.equal(cast({}, {}, { SC_SUFFRAGIUM: 3 }), 2000, "nor Suffragium");
+
+  // The generic flag: any skill whose DB row says IgnoreStatusEffect shrugs off
+  // Bragi/Suffragium but still takes DEX and gear reductions (castnodex bit 2).
+  const flagged = { cast_time: [3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000], cast_time_options: ["IgnoreStatusEffect"], after_cast_act_delay: [] };
+  const fcast = (status, gb) => calculateSkillTiming("XX_NOT_TRACKING", 10, flagged,
+    { dex: 1, agi: 1, ...status }, { castrate: 0, skill_castrate: {}, delayrate: 0, skill_delayrate: {}, ...gb }, {}, "payon_stories")[0];
+  assert.equal(fcast({ cast_time_reduction_pct: 50 }), fcast({}), "IgnoreStatusEffect blocks Bragi");
+  assert.ok(fcast({ dex: 120 }) < fcast({}), "…but DEX still applies without IgnoreDex");
+  assert.ok(fcast({}, { castrate: -30 }) < fcast({}), "…and gear castrate still applies");
+
+  // A skill with neither flag nor PS_FIXED_CAST membership still bends to Bragi.
+  const meteor = (crp) => calculateSkillTiming("WZ_METEOR", 10, skillData,
+    { dex: 1, agi: 1, cast_time_reduction_pct: crp }, { castrate: 0, skill_castrate: {}, delayrate: 0, skill_delayrate: {} }, {}, "payon_stories")[0];
+  assert.ok(meteor(50) < meteor(0), "Meteor Storm must still bend to Bragi");
+});
+
 test("per-skill cooldowns floor the cast interval, resist Bragi, and bend to bSkillCooldown", () => {
   const cfg = createBattleConfig();
   const PS = getProfile("payon_stories");

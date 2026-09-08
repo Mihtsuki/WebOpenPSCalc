@@ -9,6 +9,15 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **Tracking's cast time is truly fixed now.** The wiki is explicit — "fixed
+  1+0.1×SkillLvl seconds cast time … cannot be reduced by DEX or other cast-reduction
+  effects" — but the calculator was letting A Poem of Bragi (and gear cast reduction)
+  shorten it, which overstated Tracking DPS in party settings. Reported by the
+  maintainer. Two fixes: the skill database has always flagged Tracking as immune to
+  status-effect cast reduction and the engine now honors that flag generally (it was
+  never read), and on Payon Stories the cast is pinned fully fixed per the wiki, gear
+  included.
+
 - **Armor Piercing Bullet can be found again.** The bullet (13233) always worked when
   a build carried it — its crit bonus is even covered by tests — but its data entry
   was created for that mechanic with only the script attached, no item type, so the

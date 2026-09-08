@@ -15,6 +15,14 @@ const PS_CAST_TIME_OVERRIDES = {
   GS_PIERCINGSHOT: 3000,
 };
 
+// PS FIXED casts — taken exactly as written: no DEX scale, no castrate gear, no
+// Bragi / Suffragium, no cast penalties. wiki Tracking: "fixed 1+0.1*SkillLvl
+// seconds cast time", "cannot be reduced by DEX or other cast-reduction effects" —
+// and the calc applying Bragi to it was reported by the maintainer (2026-09-07).
+// Only wiki-confirmed skills belong here (Piercing Shot has no wiki page and the
+// release notes don't say "fixed", so it stays reducible until someone checks).
+const PS_FIXED_CAST = new Set(["GS_TRACKING"]);
+
 function calculateSkillTiming(skillName, skillLv, skillData, status, gearBonuses, supportBuffs, server = "standard") {
   const lvIdx = skillLv - 1;
   const profile = getProfile(server);
@@ -29,35 +37,47 @@ function calculateSkillTiming(skillName, skillLv, skillData, status, gearBonuses
 
   const castTimeOptions = skillData.cast_time_options || [];
   const ignoreDex = castTimeOptions.includes("IgnoreDex");
+  // Hercules castnodex bit 2: STATUS effects don't touch this skill's cast —
+  // Bragi, Suffragium, and status penalties alike. The skill DB carried this
+  // flag all along (GS_TRACKING has IgnoreDex + IgnoreStatusEffect) and the
+  // engine never read it, which is how Bragi ended up shortening Tracking.
+  const ignoreStatusEffect = castTimeOptions.includes("IgnoreStatusEffect");
 
   let effectiveCast;
-  if (baseCast === 0) effectiveCast = 0;
-  else if (ignoreDex) effectiveCast = baseCast;
-  else {
-    const scale = CASTRATE_DEX_SCALE - status.dex;
-    effectiveCast = Math.floor((baseCast * Math.max(0, scale)) / CASTRATE_DEX_SCALE);
-  }
+  if (server === "payon_stories" && PS_FIXED_CAST.has(skillName)) {
+    // Fixed cast: the base value IS the cast time. See PS_FIXED_CAST above.
+    effectiveCast = baseCast;
+  } else {
+    if (baseCast === 0) effectiveCast = 0;
+    else if (ignoreDex) effectiveCast = baseCast;
+    else {
+      const scale = CASTRATE_DEX_SCALE - status.dex;
+      effectiveCast = Math.floor((baseCast * Math.max(0, scale)) / CASTRATE_DEX_SCALE);
+    }
 
-  if (gearBonuses.castrate !== 0) {
-    effectiveCast = Math.floor(effectiveCast * (100 + gearBonuses.castrate) / 100);
-  }
-  const perSkillCr = gearBonuses.skill_castrate[skillName] || 0;
-  if (perSkillCr !== 0) effectiveCast = Math.floor(effectiveCast * (100 + perSkillCr) / 100);
+    if (gearBonuses.castrate !== 0) {
+      effectiveCast = Math.floor(effectiveCast * (100 + gearBonuses.castrate) / 100);
+    }
+    const perSkillCr = gearBonuses.skill_castrate[skillName] || 0;
+    if (perSkillCr !== 0) effectiveCast = Math.floor(effectiveCast * (100 + perSkillCr) / 100);
 
-  if (status.cast_time_reduction_pct && effectiveCast > 0) {
-    effectiveCast -= Math.floor(effectiveCast * status.cast_time_reduction_pct / 100);
-  }
+    if (!ignoreStatusEffect) {
+      if (status.cast_time_reduction_pct && effectiveCast > 0) {
+        effectiveCast -= Math.floor(effectiveCast * status.cast_time_reduction_pct / 100);
+      }
 
-  const sufLv = Number(supportBuffs.SC_SUFFRAGIUM || 0);
-  if (sufLv > 0 && effectiveCast > 0) {
-    effectiveCast -= Math.floor(effectiveCast * (15 * sufLv) / 100);
-  }
+      const sufLv = Number(supportBuffs.SC_SUFFRAGIUM || 0);
+      if (sufLv > 0 && effectiveCast > 0) {
+        effectiveCast -= Math.floor(effectiveCast * (15 * sufLv) / 100);
+      }
 
-  if (status.cast_time_penalty_pct && effectiveCast > 0) {
-    effectiveCast += Math.floor(effectiveCast * status.cast_time_penalty_pct / 100);
-  }
+      if (status.cast_time_penalty_pct && effectiveCast > 0) {
+        effectiveCast += Math.floor(effectiveCast * status.cast_time_penalty_pct / 100);
+      }
+    }
 
-  effectiveCast = Math.max(effectiveCast, 0);
+    effectiveCast = Math.max(effectiveCast, 0);
+  }
 
   if (profile.ps_zero_cast.has(skillName)) effectiveCast = 0;
 
