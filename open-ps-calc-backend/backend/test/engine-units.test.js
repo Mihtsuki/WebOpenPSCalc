@@ -3506,6 +3506,30 @@ test("proof potions: +20% resist to their element, -15% to the counter, and they
     "Fireproof + Earthproof must net a 5% cut on a Fire hit");
 });
 
+// Hercules floors a hit at 1 right after DEF/MDEF (battle.c:4270 magic, :6068
+// physical) and never re-floors after the element/card resists that follow — so a
+// hit ground down to 1 that then meets ANY resist mod floors to a genuine 0. The
+// calc floored at 1 at the END instead, resurrecting those zeros. Reported by the
+// maintainer: Ice Titan's Frost Diver vs enough soft MDEF plus a Marc, an Aquatic
+// Shawl, or Sense should read 0, not 1.
+test("a resist mod can take a 1-damage incoming hit to a real 0", () => {
+  const { calculateIncomingMagicDamage } = require("../src/engine/calculators/incomingPipeline");
+  const taken = (mastery, cards) => {
+    const b = buildFromSaveSchema({
+      server: "payon_stories", job_id: 9, base_level: 99, job_level: 50,
+      base_stats: { str: 1, agi: 1, vit: 60, int: 99, dex: 60, luk: 10 },
+      equipped: { armor: 2314, ...(cards || {}) }, mastery_levels: mastery || {},
+    });
+    const [gb, eff, w, st] = resolvePlayerState(b, createBattleConfig(), PS);
+    // Ice Titan (1777, INT 10): its Frost Diver's tiny MATK grinds to 1 vs this MDEF.
+    return calculateIncomingMagicDamage(1777, eff, st, gb, w, createBattleConfig(),
+      { ratio_override: 100, ele_override: 1 }).avg_damage;
+  };
+  assert.equal(taken({}), 1, "MDEF grinds it to the post-MDEF floor of 1");
+  assert.equal(taken({ WZ_ESTIMATION: 1 }), 0, "Sense's +2% water resist takes the 1 to 0");
+  assert.equal(taken({}, { armor_card1: 4105 }), 0, "so does a Marc's +5% water resist");
+});
+
 test("Run and Gun grants its PS ranged damage resistance, not just FLEE", () => {
   const { calculateIncomingPhysicalDamage } = require("../src/engine/calculators/incomingPipeline");
   // Gunslinger Release Patch Notes (Adjustment Rework): "Ranged damage resistance +30%".

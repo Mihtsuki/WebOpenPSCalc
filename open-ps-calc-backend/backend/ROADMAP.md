@@ -371,6 +371,14 @@ The fix restores provenance instead of patching the reconstruction, in three mov
    field agrees with their script" invariant, the weaponHasOwnScript guard, and the
    three stacked generations of patch commentary.
 
+Related divergence, spotted while fixing the incoming damage floor (2026-09-07):
+the incoming pipelines run AttrFix BEFORE the DEF/MDEF step, while battle.c runs
+calc_defense first (magic: :4268 -> floor 1 at :4270 -> attr_fix :4291 -> cardfix).
+Order only matters when the element multiplier isn't 100% (elemental armours,
+endowed armour) AND DEF is meaningful; the floor fix sidestepped it by placing the
+post-DEF floor faithfully without moving AttrFix. Fold the reorder into this
+refactor's test matrix rather than churning it separately.
+
 Sequencing: land AFTER Mihtsuki's PR #4/#5 merge (their tests are the valuable part
 and this refactor supersedes their pipeline machinery while keeping the kunai
 override concept) — doing it first would force heavy rebases on both PRs. Pin the

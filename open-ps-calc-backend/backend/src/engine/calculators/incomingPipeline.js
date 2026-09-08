@@ -147,11 +147,17 @@ function calculateIncomingPhysicalDamage(mobId, build, status, gearBonuses, weap
     }
   }
 
+  // Same floor placement as the magic path: pre-re floors a landed hit at 1 right
+  // after DEF ("Set to min of 1", battle.c:6068) and never re-floors after the
+  // card/resist reductions (battle.c:6131) — so the resists below may take a
+  // 1-damage hit to a genuine 0.
+  pmf = floorAt(pmf, 1);
+
   pmf = calculateIncomingPhysical(mob.race, atkEle, mob.size, isRanged, playerTarget, pmf, result);
 
   pmf = applyLexAeterna(build, pmf, result);
 
-  pmf = floorAt(pmf, 1);
+  pmf = floorAt(pmf, 0);
   const [mn, mx, av] = pmfStats(pmf);
   result.add_step({ name: "Final Damage", value: av, min_value: mn, max_value: mx, note: "Incoming physical", formula: "", hercules_ref: "" });
   result.min_damage = mn;
@@ -200,6 +206,14 @@ function calculateIncomingMagicDamage(mobId, build, status, gearBonuses, weapon,
 
   pmf = calculateMagicDefenseFix(playerTarget, createGearBonuses(), pmf, result);
 
+  // Hercules floors at 1 immediately after MDEF (battle.c:4270 `if(ad.damage<1)
+  // ad.damage=1;`) — and NEVER re-floors after the element/card resists that follow.
+  // So a hit your MDEF ground down to 1 that then meets ANY resistance mod — a Marc,
+  // an Aquatic Shawl, Sense's +2% — floors to 0 and STAYS 0. The calc used to floor
+  // at 1 at the very end instead, resurrecting those zeros. Reported by the
+  // maintainer (Ice Titan's Frost Diver vs enough soft MDEF plus any water resist).
+  pmf = floorAt(pmf, 1);
+
   const magicEleName = ELE_INT_TO_KEY[atkEle] || "Ele_Neutral";
   // Pass the CASTER so the defender's size/race/boss/ranged reductions apply — a mob's
   // magic used to be cut only by element and magic_def_rate.
@@ -208,7 +222,8 @@ function calculateIncomingMagicDamage(mobId, build, status, gearBonuses, weapon,
 
   pmf = applyLexAeterna(build, pmf, result);
 
-  pmf = floorAt(pmf, 1);
+  // Clamp negatives only — 0 is a real outcome once resists ran (see the MDEF floor).
+  pmf = floorAt(pmf, 0);
   const [mn, mx, av] = pmfStats(pmf);
   result.add_step({ name: "Final Damage", value: av, min_value: mn, max_value: mx, note: "Incoming magic", formula: "", hercules_ref: "" });
   result.min_damage = mn;

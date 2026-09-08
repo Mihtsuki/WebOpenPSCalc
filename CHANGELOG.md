@@ -9,6 +9,16 @@ instead of release version. Dates are taken from actual git commit history.
 
 ### Added
 
+- **A fully-resisted hit now reads as the miss it is in game.** Hercules floors a
+  landed hit at 1 right after DEF/MDEF and never re-floors after the resist
+  reductions that follow — so a hit your MDEF ground down to 1 that then meets any
+  resistance mod (a Marc, an Aquatic Shawl, Sense's +2%) deals a genuine 0 and the
+  client shows a miss. The calculator floored at 1 at the very end instead,
+  resurrecting those zeros: Ice Titan's Frost Diver against enough soft MDEF plus a
+  sliver of water resist showed 1 damage per cast. Reported by the maintainer. The
+  survivability view now prices it 0 and labels the line "misses (0 damage) — cannot
+  damage you."
+
 - **Tracking's cast time is truly fixed now.** The wiki is explicit — "fixed
   1+0.1×SkillLvl seconds cast time … cannot be reduced by DEX or other cast-reduction
   effects" — but the calculator was letting A Poem of Bragi (and gear cast reduction)

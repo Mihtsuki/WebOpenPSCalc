@@ -64,11 +64,15 @@ function EleLine({ ele, taken, maxHp, isBasic }: { ele: number; taken: IncomingR
           {eleName(ele)} attack{isBasic ? <span className="surv-tag"> basic</span> : <span className="surv-tag surv-tag--skill"> skill</span>}
         </span>
         <span className="surv-line-dmg">
-          {range ? `${n(min)}–${n(max)}` : n(avg)}<span className="surv-line-unit"> / hit</span>
+          {/* A hit reduced to 0 by resists registers as a MISS in game (maintainer):
+              the post-MDEF floor of 1 times any resist floors to 0, and 0 shows as miss. */}
+          {max <= 0
+            ? <>misses<span className="surv-line-unit"> (0 damage)</span></>
+            : <>{range ? `${n(min)}–${n(max)}` : n(avg)}<span className="surv-line-unit"> / hit</span></>}
         </span>
       </div>
       <div className="surv-line-metrics">
-        <span className="surv-chip"><b>{hitsToKill ?? "—"}</b> hits to down you</span>
+        <span className="surv-chip">{max <= 0 ? <>cannot damage you</> : <><b>{hitsToKill ?? "—"}</b> hits to down you</>}</span>
         {ehp != null && <span className="surv-chip">Effective HP <b>{n(ehp)}</b></span>}
         {mitigationPct != null && <span className="surv-chip surv-chip--muted">{mitigationPct}% mitigated</span>}
       </div>
@@ -104,8 +108,14 @@ function SkillDetail({ label, dmg, maxHp }: { label: string; dmg: SkillDamage; m
         </span>
         {hasNumber && r ? (
           <span className="surv-line-dmg">
-            {range ? `${n(r.min_damage)}–${n(r.max_damage)}` : n(r.avg_damage)}
-            <span className="surv-line-unit">{s.hits > 1 ? ` / cast (${s.hits} hits)` : " / hit"}</span>
+            {r.max_damage <= 0 ? (
+              <>misses<span className="surv-line-unit"> (0 damage)</span></>
+            ) : (
+              <>
+                {range ? `${n(r.min_damage)}–${n(r.max_damage)}` : n(r.avg_damage)}
+                <span className="surv-line-unit">{s.hits > 1 ? ` / cast (${s.hits} hits)` : " / hit"}</span>
+              </>
+            )}
           </span>
         ) : (
           <span className="surv-line-dmg surv-skill-hits">{notModeled ? (s.hits > 1 ? `? × ${s.hits} hits` : "?") : (s.hits > 1 ? `${s.hits} hits` : "1 hit")}</span>
