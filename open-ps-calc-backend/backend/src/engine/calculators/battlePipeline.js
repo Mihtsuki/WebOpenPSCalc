@@ -1692,24 +1692,29 @@ class BattlePipeline {
     const scriptEle = gearBonuses ? (isOffhand ? gearBonuses.script_atk_ele_lh : gearBonuses.script_atk_ele_rh) : null;
     if (scriptEle != null && !skillUsesAmmo(skill, isRanged) && !weaponFiresAmmo(build)) {
       const equipped = build.equipped || {};
-      const handId = isOffhand ? equipped.left_hand : equipped.right_hand;
-      const handItem = handId != null ? loader.getItem(handId) : null;
-      // If the wielded weapon grants this element ITSELF (Bazerald, Huuma Blaze
-      // Shuriken, ...), weapon.element is already correct as resolveWeapon computed
-      // it — endow > weapon's own script > forge > item field — endow included. Only
-      // re-derive from the raw item field when the script is NOT the weapon's own
-      // (ammo, or something else in another slot): that's the actual "must not leak"
-      // case this block exists for. Missing this let a Huuma Blaze Shuriken's Fire
-      // script win over an active Wind endow, when the endow should win.
-      // Read from all_effects' source_slot (set by the aggregator from the actual
-      // parsed script, per slot) rather than re-testing handItem.script by regex —
-      // that would also catch a bAtkEle sitting inside a conditional block that
-      // isn't currently active.
       const handSlot = isOffhand ? "left_hand" : "right_hand";
-      const weaponHasOwnScript = gearBonuses && (gearBonuses.all_effects || []).some(
+      // If the wielded weapon grants this element ITSELF (Bazerald, Huuma Blaze
+      // Shuriken, ...), an active endow still beats it (resolveWeapon's elementOverride
+      // precedence, unaffected by anything below) — but without one, weapon.element
+      // can NOT be trusted here: script_atk_ele_rh is a last-assign scalar that an
+      // ammo's own bAtkEle also writes, so a scripted weapon AND scripted ammo both
+      // equipped (Huuma Blaze Shuriken + Black Earth Kunai) lets whichever was
+      // aggregated last silently win — order-dependent on `equipped`'s own key order,
+      // confirmed live both ways by the maintainer. Read from all_effects' source_slot
+      // (set by the aggregator from the actual parsed script, per slot) to find this
+      // slot's OWN effect and use ITS element value directly, bypassing the aggregate.
+      // (gearBonuses is guaranteed truthy here — scriptEle != null already required it.)
+      const weaponScriptEffect = (gearBonuses.all_effects || []).find(
         (eff) => eff.bonus_type === "bAtkEle" && eff.source_slot === handSlot
       );
-      if (!weaponHasOwnScript) {
+      if (weaponScriptEffect) {
+        if (build.weapon_element == null) {
+          const v = ELE_STR_TO_INT[String(weaponScriptEffect.params[0])];
+          if (v != null) baseWeaponEle = v;
+        }
+      } else {
+        const handId = equipped[handSlot];
+        const handItem = handId != null ? loader.getItem(handId) : null;
         // Assumes the item's own `.element` field agrees with the bAtkEle script that
         // put us in this branch — true for all 148 items currently carrying bAtkEle,
         // but unenforced, and this codebase has shipped that exact mismatch before
