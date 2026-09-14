@@ -4805,6 +4805,16 @@ test("endow beats a weapon's own script element; unrelated ammo doesn't leak int
   assert.ok(run(13301, { equipped: { ammo: 13256 } }).startsWith("Neutral vs"),
     "an unrelated ammo's element must not leak into a skill that doesn't use it");
 
+  // A Fire endow + a plain Huuma (no script of its own) + an unrelated Black
+  // Earth Kunai riding in the ammo slot dropped the endow to Neutral. The "no
+  // own script" fallback re-derived from the raw item field unconditionally,
+  // missing the same endow-first guard its sibling branch (the "has its own
+  // script" case, tested above) already had.
+  assert.ok(run(13301, {
+    equipped: { ammo: 13256 },
+    support_buffs: { weapon_endow_sc: "SC_PROPERTYWIND" },
+  }).startsWith("Wind vs"), "an active endow must win even when the weapon has no script of its own");
+
   // Exercises run()'s own merge specifically (not calc()): a scripted weapon's
   // element must still come through when extra also carries an ammo in `equipped` —
   // confirming extra.equipped merges onto right_hand instead of replacing it

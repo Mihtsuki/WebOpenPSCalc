@@ -1761,7 +1761,12 @@ class BattlePipeline {
           const v = ELE_STR_TO_INT[String(weaponScriptEffect.params[0])];
           if (v != null) baseWeaponEle = v;
         }
-      } else {
+      } else if (build.weapon_element == null) {
+        // Same guard as above, for the same reason: without this, an active endow
+        // on a weapon with no bAtkEle script of its own (a plain Huuma Giant Wheel
+        // Shuriken, say) got silently discarded and replaced with the raw item
+        // field the instant unrelated ammo also carried a script. (e.g. with Throw
+        // Huuma Shuriken, a skill that doesn't use ammo)
         const handId = equipped[handSlot];
         const handItem = handId != null ? loader.getItem(handId) : null;
         // Assumes the item's own `.element` field agrees with the bAtkEle script that

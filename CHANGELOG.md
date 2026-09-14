@@ -5,6 +5,19 @@ follows [Keep a Changelog](https://keepachangelog.com/). This project
 deploys continuously (no version numbers), so entries are grouped by date
 instead of release version. Dates are taken from actual git commit history.
 
+## 2026-09-12
+
+### Fixed
+
+- **An active weapon endow could be silently discarded by an unrelated, unused ammo.**
+  E.g. a Fire endow on a plain Huuma Giant Wheel Shuriken (no element script of its
+  own) dropped to Neutral the moment a Black Earth Kunai was also sitting in the ammo
+  slot, even for Throw Huuma Shuriken — a skill that doesn't use ammo at all. The
+  ammo-leak fallback for a weapon with no script of its own re-derived the element from
+  the raw item field unconditionally, missing the same "don't touch it if an endow
+  already won" guard its sibling case (a weapon that *does* carry its own script)
+  already had.
+
 ## 2026-09-11
 
 ### Fixed

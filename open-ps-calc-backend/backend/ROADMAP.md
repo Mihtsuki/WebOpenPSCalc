@@ -391,6 +391,17 @@ trade-window test.
 
 ## Done this pass (not in the original suggested order, picked up ad hoc)
 
+- **An active endow was silently dropped by an unrelated, unused ammo, for a weapon
+  with no script of its own.** E.g. a Fire endow + a plain Huuma Giant Wheel Shuriken
+  (no `bAtkEle` of its own) + a Black Earth Kunai riding in the ammo slot dropped Throw
+  Huuma Shuriken (`NJ_HUUMA`, which doesn't use ammo) from Fire to Neutral.
+  `battlePipeline.js`'s element-resolution has two mirrored fallback branches — one for
+  "the wielded weapon has its own script" and one for "it doesn't" — and only the first
+  checked`build.weapon_element == null` before re-deriving from a raw field; the second
+  unconditionally overwrote `baseWeaponEle`, discarding an active endow the instant
+  `scriptEle` was non-null for any reason (i.e. any script anywhere, weapon's own or
+  not). Added the same guard to the second branch.
+
 - **Throw Kunai borrowed an active endow instead of the ammo's own element.**
   Wind endow + Heat Wave Kunai (Fire) showed Wind, not Fire. Kunai and Shuriken
   are thrown by hand rather than fired by a weapon type (`AMMO_FIRED_BY` has no entry for
